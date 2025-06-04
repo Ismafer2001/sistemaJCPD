@@ -1,0 +1,53 @@
+<div class="container mt-4">
+    <h2>{{ esEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
+
+    <form [formGroup]="form" (ngSubmit)="guardarUsuario()">
+      <div class="mb-3">
+        <label>usuario</label>
+        <input type="text" class="form-control" formControlName="user">
+      </div>
+      <div class="mb-3">
+        <label>Nombres</label>
+        <input type="text" class="form-control" formControlName="nombres">
+      </div>
+
+      <div class="mb-3">
+        <label>Apellidos</label>
+        <input type="text" class="form-control" formControlName="apellidos">
+      </div>
+
+      <div class="mb-3">
+        <label>Correo</label>
+        <input type="email" class="form-control" formControlName="correo">
+      </div>
+
+      <div class="mb-3" >
+        <label>Contraseña</label>
+        <input type="password" class="form-control" formControlName="contrasena">
+      </div>
+
+      <div class="mb-3">
+        <label>Rol</label>
+        <select class="form-select" formControlName="rol">
+          <option value="admin">Administrador</option>
+          <option value="principal">principal</option>
+          <option value="secretari@">secretaria</option>
+          <option value="suplente">suplente</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label>Cantón</label>
+        <select class="form-select" formControlName="canton_id">
+          <option *ngFor="let canton of cantones" [value]="canton.id">{{ canton.nombre }}</option>
+        </select>
+      </div>
+
+      <div class="form-check mb-3">
+        <input type="checkbox" class="form-check-input" formControlName="estado" id="estado">
+        <label class="form-check-label" for="estado">Activo</label>
+      </div>
+
+      <button type="submit" class="btn btn-success">Guardar</button>
+    </form>
+  </div>

@@ -1,0 +1,51 @@
+<div class="container-fluid p-3 ">
+  <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom ">
+      <div class="d-flex justify-content-end">
+        <a  class="btn btn-warning d-flex align-items-center " (click)="irACrear()">
+          <span class="me-2">nuevo usuario</span>
+          <span class="fs-4">+</span>
+        </a>
+      </div>
+    </div>
+
+  <!-- Tabla -->
+  <h6 class="text-secondary">Usuarios registrados</h6>
+  <div class="table-responsive">
+    <table class="table table-bordered table-sm">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Usuario</th>
+          <th>nombres</th>
+          <th>apellidos</th>
+          <th>Correo</th>
+          <th>rol</th>
+          <th>estado</th>
+          <th>Cantón</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let usuario of usuarios; index as i">
+          <td>{{ i + 1 }}</td>
+          <td>{{usuario.user}}</td>
+          <td>{{ usuario.nombres }}</td>
+          <td>{{ usuario.apellidos }}</td>
+          <td>{{ usuario.correo }}</td>
+          <td>{{ usuario.rol }}</td>
+          <td>
+            <span class="badge bg-success" *ngIf="usuario.estado">Activo</span>
+            <span class="badge bg-danger" *ngIf="!usuario.estado">Inactivo</span>
+          </td>
+          <td>{{ usuario.canton?.nombre }}</td>
+
+          <td>
+            <button class="btn btn-sm btn-primary me-2" (click)="editarUsuario(usuario)">Editar</button>
+            <button class="btn btn-sm btn-warning me-2" (click)="cambiarEstado(usuario)">Estado</button>
+            <button class="btn btn-sm btn-danger" (click)="eliminarUsuario(usuario.id)">Eliminar</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

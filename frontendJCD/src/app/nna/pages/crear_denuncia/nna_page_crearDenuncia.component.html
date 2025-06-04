@@ -1,0 +1,71 @@
+<div class="container mt-3">
+    <!-- Encabezado de paso -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h5 class="text-primary fw-bold">Denuncia trámite <span class="badge bg-secondary">0000_JCPD-enero-2025</span></h5>
+      <div>
+        <span class="badge bg-warning rounded-circle mx-1">&nbsp;</span>
+        <span class="badge bg-warning rounded-circle mx-1">&nbsp;</span>
+        <span class="badge bg-secondary rounded-circle mx-1">&nbsp;</span>
+        <span class="badge bg-secondary rounded-circle mx-1">&nbsp;</span>
+      </div>
+    </div>
+  
+    <!-- Sección denunciante -->
+    <h6 class="text-primary">Datos del denunciante <input type="checkbox" > anónimo</h6>
+    <div class="row">
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Nombre"  /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Apellidos"  /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Género" /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Edad" /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Dirección"  /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Parentesco" /></div>
+    </div>
+    <button class="btn btn-outline-primary mb-4" >Guardar denunciante</button>
+  
+    <!-- Sección NNA -->
+    <h6 class="text-primary">Datos del NNA</h6>
+    <div class="row">
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Nombre"  /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Apellidos"  /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Género" /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Edad"  /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Cédula"  /></div>
+    </div>
+    <button class="btn btn-outline-primary mb-4" >Agregar NNA</button>
+  
+    <!-- Tabla NNA -->
+    <table class="table table-bordered">
+      <thead class="table-primary"><tr><th>Nombre</th><th>Apellidos</th><th>Género</th><th>Edad</th><th>Cédula</th><th></th></tr></thead>
+      <tbody>
+        
+      </tbody>
+    </table>
+  
+    <!-- Sección denunciado -->
+    <h6 class="text-primary">Datos del denunciado</h6>
+    <div class="row">
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Nombre" /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Apellidos"  /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Género"  /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Edad"  /></div>
+      <div class="col-md-4"><input class="form-control mb-2" placeholder="Cédula"  /></div>
+    </div>
+    <button class="btn btn-outline-primary mb-4" >Agregar denunciado</button>
+  
+    <!-- Tabla denunciado -->
+    <table class="table table-bordered">
+      <thead class="table-primary"><tr><th>Nombre</th><th>Apellidos</th><th>Género</th><th>Edad</th><th>Cédula</th><th></th></tr></thead>
+      <tbody>
+        <tr *ngFor="let p of denunciadoLista; let i = index">
+          <td>{{ p.nombre }}</td><td>{{ p.apellidos }}</td><td>{{ p.genero }}</td><td>{{ p.edad }}</td><td>{{ p.cedula }}</td>
+          <td><button class="btn btn-sm btn-danger" >🗑️</button></td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <!-- Siguiente -->
+    <div class="d-flex justify-content-end mt-3">
+      <button class="btn btn-warning" >Siguiente</button>
+    </div>
+  </div>
+  
