@@ -1,53 +1,46 @@
-<div class="container mt-4">
-    <h2>{{ esEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
+<div class="p-6">
+  <h2 class="text-xl font-semibold mb-4">{{ esEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
+  <form [formGroup]="form" (ngSubmit)="guardarUsuario()" class="space-y-4">
+    <div>
+      <label class="block mb-1">Usuario</label>
+      <input type="text" formControlName="user" class="w-full border px-3 py-2 rounded" />
+    </div>
+    <div>
+      <label class="block mb-1">Nombres</label>
+      <input type="text" formControlName="nombres" class="w-full border px-3 py-2 rounded" />
+    </div>
+    <div>
+      <label class="block mb-1">Apellidos</label>
+      <input type="text" formControlName="apellidos" class="w-full border px-3 py-2 rounded" />
+    </div>
+    <div>
+      <label class="block mb-1">Correo</label>
+      <input type="email" formControlName="correo" class="w-full border px-3 py-2 rounded" />
+    </div>
+    <div>
+      <label class="block mb-1">Contraseña</label>
+      <input type="password" formControlName="contrasena" class="w-full border px-3 py-2 rounded" />
+    </div>
+    <div>
+      <label class="block mb-1">Rol</label>
+      <select formControlName="rol" class="w-full border px-3 py-2 rounded">
+        <option value="admin">Administrador</option>
+        <option value="principal">Principal</option>
+        <option value="secretari@">Secretaria</option>
+        <option value="suplente">Suplente</option>
+      </select>
+    </div>
+    <div>
+      <label class="block mb-1">Cantón</label>
+      <select formControlName="canton_id" class="w-full border px-3 py-2 rounded">
+        <option *ngFor="let canton of cantones" [value]="canton.id">{{ canton.nombre }}</option>
+      </select>
+    </div>
+    <div class="flex items-center space-x-2">
+      <input type="checkbox" formControlName="estado" id="estado" class="form-checkbox" />
+      <label for="estado">Activo</label>
+    </div>
+    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Guardar</button>
+  </form>
+</div>
 
-    <form [formGroup]="form" (ngSubmit)="guardarUsuario()">
-      <div class="mb-3">
-        <label>usuario</label>
-        <input type="text" class="form-control" formControlName="user">
-      </div>
-      <div class="mb-3">
-        <label>Nombres</label>
-        <input type="text" class="form-control" formControlName="nombres">
-      </div>
-
-      <div class="mb-3">
-        <label>Apellidos</label>
-        <input type="text" class="form-control" formControlName="apellidos">
-      </div>
-
-      <div class="mb-3">
-        <label>Correo</label>
-        <input type="email" class="form-control" formControlName="correo">
-      </div>
-
-      <div class="mb-3" >
-        <label>Contraseña</label>
-        <input type="password" class="form-control" formControlName="contrasena">
-      </div>
-
-      <div class="mb-3">
-        <label>Rol</label>
-        <select class="form-select" formControlName="rol">
-          <option value="admin">Administrador</option>
-          <option value="principal">principal</option>
-          <option value="secretari@">secretaria</option>
-          <option value="suplente">suplente</option>
-        </select>
-      </div>
-
-      <div class="mb-3">
-        <label>Cantón</label>
-        <select class="form-select" formControlName="canton_id">
-          <option *ngFor="let canton of cantones" [value]="canton.id">{{ canton.nombre }}</option>
-        </select>
-      </div>
-
-      <div class="form-check mb-3">
-        <input type="checkbox" class="form-check-input" formControlName="estado" id="estado">
-        <label class="form-check-label" for="estado">Activo</label>
-      </div>
-
-      <button type="submit" class="btn btn-success">Guardar</button>
-    </form>
-  </div>

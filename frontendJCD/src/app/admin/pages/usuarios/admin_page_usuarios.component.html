@@ -1,51 +1,49 @@
-<div class="container-fluid p-3 ">
-  <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom ">
-      <div class="d-flex justify-content-end">
-        <a  class="btn btn-warning d-flex align-items-center " (click)="irACrear()">
-          <span class="me-2">nuevo usuario</span>
-          <span class="fs-4">+</span>
-        </a>
-      </div>
-    </div>
+<div class="p-1">
+  <div class="flex justify-between items-center mb-6 border-b pb-3">
+    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded flex items-center" (click)="irACrear()">
+      <span class="mr-2">Nuevo usuario</span>
+      <span class="text-lg">+</span>
+    </button>
+  </div>
 
-  <!-- Tabla -->
-  <h6 class="text-secondary">Usuarios registrados</h6>
-  <div class="table-responsive">
-    <table class="table table-bordered table-sm">
-      <thead class="table-light">
+  <h6 class="text-gray-600 mb-4">Usuarios registrados</h6>
+  <div class="overflow-x-auto">
+    <table class="table-auto w-full border text-sm">
+      <thead class="bg-gray-100">
         <tr>
-          <th>#</th>
-          <th>Usuario</th>
-          <th>nombres</th>
-          <th>apellidos</th>
-          <th>Correo</th>
-          <th>rol</th>
-          <th>estado</th>
-          <th>Cantón</th>
-          <th>Acciones</th>
+          <th class="border px-3 py-2">#</th>
+          <th class="border px-3 py-2">Usuario</th>
+          <th class="border px-3 py-2">Nombres</th>
+          <th class="border px-3 py-2">Apellidos</th>
+          <th class="border px-3 py-2">Correo</th>
+          <th class="border px-3 py-2">Rol</th>
+          <th class="border px-3 py-2">Estado</th>
+          <th class="border px-3 py-2">Cantón</th>
+          <th class="border px-3 py-2">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let usuario of usuarios; index as i">
-          <td>{{ i + 1 }}</td>
-          <td>{{usuario.user}}</td>
-          <td>{{ usuario.nombres }}</td>
-          <td>{{ usuario.apellidos }}</td>
-          <td>{{ usuario.correo }}</td>
-          <td>{{ usuario.rol }}</td>
-          <td>
-            <span class="badge bg-success" *ngIf="usuario.estado">Activo</span>
-            <span class="badge bg-danger" *ngIf="!usuario.estado">Inactivo</span>
+        <tr *ngFor="let usuario of usuarios; index as i" class="hover:bg-gray-50">
+          <td class="border px-3 py-2">{{ i + 1 }}</td>
+          <td class="border px-3 py-2">{{ usuario.user }}</td>
+          <td class="border px-3 py-2">{{ usuario.nombres }}</td>
+          <td class="border px-3 py-2">{{ usuario.apellidos }}</td>
+          <td class="border px-3 py-2">{{ usuario.correo }}</td>
+          <td class="border px-3 py-2">{{ usuario.rol }}</td>
+          <td class="border px-3 py-2">
+            <span *ngIf="usuario.estado" class="bg-green-500 text-white px-2 py-1 rounded text-xs">Activo</span>
+            <span *ngIf="!usuario.estado" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Inactivo</span>
           </td>
-          <td>{{ usuario.canton?.nombre }}</td>
-
-          <td>
-            <button class="btn btn-sm btn-primary me-2" (click)="editarUsuario(usuario)">Editar</button>
-            <button class="btn btn-sm btn-warning me-2" (click)="cambiarEstado(usuario)">Estado</button>
-            <button class="btn btn-sm btn-danger" (click)="eliminarUsuario(usuario.id)">Eliminar</button>
+          <td class="border px-3 py-2">{{ usuario.canton?.nombre }}</td>
+          <td class="border px-3 py-2 space-x-1">
+            <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded" (click)="editarUsuario(usuario)">Editar</button>
+            <button class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-2 py-1 rounded" (click)="cambiarEstado(usuario)">Estado</button>
+            <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded" (click)="eliminarUsuario(usuario.id)">Eliminar</button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 </div>
+
+

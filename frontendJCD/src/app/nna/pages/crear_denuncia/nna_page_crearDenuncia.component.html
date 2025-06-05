@@ -1,71 +1,88 @@
-<div class="container mt-3">
-    <!-- Encabezado de paso -->
-    <div class="d-flex align-items-center justify-content-between mb-3">
-      <h5 class="text-primary fw-bold">Denuncia trámite <span class="badge bg-secondary">0000_JCPD-enero-2025</span></h5>
-      <div>
-        <span class="badge bg-warning rounded-circle mx-1">&nbsp;</span>
-        <span class="badge bg-warning rounded-circle mx-1">&nbsp;</span>
-        <span class="badge bg-secondary rounded-circle mx-1">&nbsp;</span>
-        <span class="badge bg-secondary rounded-circle mx-1">&nbsp;</span>
-      </div>
+<div class="container mx-auto mt-6 px-4">
+  <!-- Encabezado de paso -->
+  <div class="flex items-center justify-between mb-6">
+    <h5 class="text-blue-600 font-bold text-lg">Denuncia trámite <span class="bg-gray-600 text-white text-sm py-1 px-2 rounded">0000_JCPD-enero-2025</span></h5>
+    <div class="flex space-x-2">
+      <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+      <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+      <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+      <span class="w-3 h-3 rounded-full bg-gray-400"></span>
     </div>
-  
-    <!-- Sección denunciante -->
-    <h6 class="text-primary">Datos del denunciante <input type="checkbox" > anónimo</h6>
-    <div class="row">
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Nombre"  /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Apellidos"  /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Género" /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Edad" /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Dirección"  /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Parentesco" /></div>
-    </div>
-    <button class="btn btn-outline-primary mb-4" >Guardar denunciante</button>
-  
-    <!-- Sección NNA -->
-    <h6 class="text-primary">Datos del NNA</h6>
-    <div class="row">
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Nombre"  /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Apellidos"  /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Género" /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Edad"  /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Cédula"  /></div>
-    </div>
-    <button class="btn btn-outline-primary mb-4" >Agregar NNA</button>
-  
-    <!-- Tabla NNA -->
-    <table class="table table-bordered">
-      <thead class="table-primary"><tr><th>Nombre</th><th>Apellidos</th><th>Género</th><th>Edad</th><th>Cédula</th><th></th></tr></thead>
+  </div>
+
+  <!-- Sección denunciante -->
+  <h6 class="text-blue-600 font-semibold mb-2">Datos del denunciante <input type="checkbox" class="ml-2"> anónimo</h6>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <input class="form-input border rounded px-3 py-2" placeholder="Nombre" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Apellidos" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Género" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Edad" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Dirección" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Parentesco" />
+  </div>
+  <button class="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition px-4 py-2 rounded mb-6">Guardar denunciante</button>
+
+  <!-- Sección NNA -->
+  <h6 class="text-blue-600 font-semibold mb-2">Datos del NNA</h6>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <input class="form-input border rounded px-3 py-2" placeholder="Nombre" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Apellidos" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Género" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Edad" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Cédula" />
+  </div>
+  <button class="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition px-4 py-2 rounded mb-6">Agregar NNA</button>
+
+  <!-- Tabla NNA -->
+  <div class="overflow-x-auto mb-6">
+    <table class="min-w-full border text-sm">
+      <thead class="bg-blue-100">
+        <tr>
+          <th class="p-2 border">Nombre</th><th class="p-2 border">Apellidos</th><th class="p-2 border">Género</th><th class="p-2 border">Edad</th><th class="p-2 border">Cédula</th><th class="p-2 border"></th>
+        </tr>
+      </thead>
       <tbody>
-        
+        <!-- Filas se insertan aquí con *ngFor -->
       </tbody>
     </table>
-  
-    <!-- Sección denunciado -->
-    <h6 class="text-primary">Datos del denunciado</h6>
-    <div class="row">
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Nombre" /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Apellidos"  /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Género"  /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Edad"  /></div>
-      <div class="col-md-4"><input class="form-control mb-2" placeholder="Cédula"  /></div>
-    </div>
-    <button class="btn btn-outline-primary mb-4" >Agregar denunciado</button>
-  
-    <!-- Tabla denunciado -->
-    <table class="table table-bordered">
-      <thead class="table-primary"><tr><th>Nombre</th><th>Apellidos</th><th>Género</th><th>Edad</th><th>Cédula</th><th></th></tr></thead>
+  </div>
+
+  <!-- Sección denunciado -->
+  <h6 class="text-blue-600 font-semibold mb-2">Datos del denunciado</h6>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+    <input class="form-input border rounded px-3 py-2" placeholder="Nombre" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Apellidos" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Género" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Edad" />
+    <input class="form-input border rounded px-3 py-2" placeholder="Cédula" />
+  </div>
+  <button class="border border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white transition px-4 py-2 rounded mb-6">Agregar denunciado</button>
+
+  <!-- Tabla denunciado -->
+  <div class="overflow-x-auto mb-6">
+    <table class="min-w-full border text-sm">
+      <thead class="bg-blue-100">
+        <tr>
+          <th class="p-2 border">Nombre</th><th class="p-2 border">Apellidos</th><th class="p-2 border">Género</th><th class="p-2 border">Edad</th><th class="p-2 border">Cédula</th><th class="p-2 border"></th>
+        </tr>
+      </thead>
       <tbody>
         <tr *ngFor="let p of denunciadoLista; let i = index">
-          <td>{{ p.nombre }}</td><td>{{ p.apellidos }}</td><td>{{ p.genero }}</td><td>{{ p.edad }}</td><td>{{ p.cedula }}</td>
-          <td><button class="btn btn-sm btn-danger" >🗑️</button></td>
+          <td class="p-2 border">{{ p.nombre }}</td>
+          <td class="p-2 border">{{ p.apellidos }}</td>
+          <td class="p-2 border">{{ p.genero }}</td>
+          <td class="p-2 border">{{ p.edad }}</td>
+          <td class="p-2 border">{{ p.cedula }}</td>
+          <td class="p-2 border text-center">
+            <button class="bg-red-600 text-white px-2 py-1 rounded hover:bg-red-700 transition">🗑️</button>
+          </td>
         </tr>
       </tbody>
     </table>
-  
-    <!-- Siguiente -->
-    <div class="d-flex justify-content-end mt-3">
-      <button class="btn btn-warning" >Siguiente</button>
-    </div>
   </div>
-  
+
+  <!-- Botón siguiente -->
+  <div class="flex justify-end">
+    <button class="bg-yellow-400 text-black hover:bg-yellow-500 transition px-6 py-2 rounded">Siguiente</button>
+  </div>
+</div>

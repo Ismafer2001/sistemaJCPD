@@ -1,39 +1,43 @@
-<div class="container-fluid bg-white p-3">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <div class="d-flex align-items-center">
-        <a routerLink="" class="btn btn-dark me-3">←</a>
-        <a routerLink="crearDenuncia"  class="btn btn-warning d-flex align-items-center">
-          <span class="me-2">Nueva denuncia</span>
-          <span class="fs-4">+</span>
-        </a>
-      </div>
-      <div class="input-group" style="width: 250px;">
-        <input type="text" class="form-control" placeholder="Buscar...">
-        <span class="input-group-text"><i class="bi bi-search"></i></span>
+<div class="bg-white p-4">
+  <div class="flex justify-between items-center mb-4">
+    <div class="flex items-center space-x-3">
+      <a routerLink="" class="bg-gray-800 text-white px-3 py-1 rounded">&larr;</a>
+      <a routerLink="crearDenuncia" class="bg-yellow-400 text-black px-4 py-2 rounded flex items-center hover:bg-yellow-500 transition">
+        <span class="mr-2">Nueva denuncia</span>
+        <span class="text-xl">+</span>
+      </a>
+    </div>
+    <div class="w-[250px]">
+      <div class="flex border rounded overflow-hidden">
+        <input type="text" class="w-full px-3 py-2 outline-none" placeholder="Buscar...">
+        <span class="flex items-center justify-center px-3 bg-gray-200"><i class="bi bi-search"></i></span>
       </div>
     </div>
-    <div class="table-responsive">
-    <table class="table table-bordered">
-      <thead class="table-primary">
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="min-w-full table-auto border text-sm">
+      <thead class="bg-blue-100">
         <tr>
-          <th>Trámite administrativo</th>
-          <th>Nombre</th>
-          <th>Fecha</th>
-          <th>PDF denuncia</th>
-          <th>PDF evidencia</th>
-          <th></th>
+          <th class="p-2 border">Trámite administrativo</th>
+          <th class="p-2 border">Nombre</th>
+          <th class="p-2 border">Fecha</th>
+          <th class="p-2 border">PDF denuncia</th>
+          <th class="p-2 border">PDF evidencia</th>
+          <th class="p-2 border"></th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td><a href="#">xxxxxx-xxxxxxx</a></td>
-          <td>xxxxxx-xxxxxxx</td>
-          <td>xxxxxxx</td>
-          <td>xxxxxx</td>
-          <td>xxxxxx</td>
-          <td><i class="bi bi-trash text-danger"></i></td>
+          <td class="p-2 border"><a href="#" class="text-blue-600 underline">xxxxxx-xxxxxxx</a></td>
+          <td class="p-2 border">xxxxxx-xxxxxxx</td>
+          <td class="p-2 border">xxxxxxx</td>
+          <td class="p-2 border">xxxxxx</td>
+          <td class="p-2 border">xxxxxx</td>
+          <td class="p-2 border text-center text-red-600 cursor-pointer"><i class="bi bi-trash"></i></td>
         </tr>
       </tbody>
     </table>
-    </div>
   </div>
+</div>
+

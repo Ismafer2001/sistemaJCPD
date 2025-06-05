@@ -8,8 +8,8 @@ import { SidebarComponentAdmin } from "./component/sidebar/admin_sidebar.compone
   imports: [AdminLayoutHeaderComponent, AdminLayoutContentComponent, SidebarComponentAdmin]
 
 })
-export class AuthLayoutComponent{
+export class AdminLayoutComponent{
 
 
 }
-export default AuthLayoutComponent;
+export default AdminLayoutComponent;
