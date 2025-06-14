@@ -1,46 +1,45 @@
 <div class="p-6">
-  <h2 class="text-xl font-semibold mb-4">{{ esEdicion ? 'Editar Usuario' : 'Nuevo Usuario' }}</h2>
-  <form [formGroup]="form" (ngSubmit)="guardarUsuario()" class="space-y-4">
-    <div>
-      <label class="block mb-1">Usuario</label>
-      <input type="text" formControlName="user" class="w-full border px-3 py-2 rounded" />
+      <h2 class="text-xl font-semibold mb-4"> 'Crear Usuario'</h2>
+      <form [formGroup]="form" (ngSubmit)="guardar()" class="space-y-4">
+        <div>
+          <label class="block mb-1">Usuario</label>
+          <input type="text" formControlName="usuario" class="w-full border px-3 py-2 rounded" />
+        </div>
+        <div>
+          <label class="block mb-1">Nombres</label>
+          <input type="text" formControlName="nombres" class="w-full border px-3 py-2 rounded" />
+        </div>
+        <div>
+          <label class="block mb-1">Apellidos</label>
+          <input type="text" formControlName="apellidos" class="w-full border px-3 py-2 rounded" />
+        </div>
+        <div>
+          <label class="block mb-1">Correo</label>
+          <input type="email" formControlName="correo" class="w-full border px-3 py-2 rounded" />
+        </div>
+        <div>
+          <label class="block mb-1">Contraseña</label>
+          <input type="password" formControlName="contrasena" class="w-full border px-3 py-2 rounded" />
+        </div>
+        <div>
+          <label class="block mb-1">Rol</label>
+          <select formControlName="rol" class="w-full border px-3 py-2 rounded">
+            <option value="admin">Administrador</option>
+            <option value="principal">Principal</option>
+            <option value="secretari@">Secretaria</option>
+            <option value="suplente">Suplente</option>
+          </select>
+        </div>
+        <div>
+          <label class="block mb-1">Cantón</label>
+          <select formControlName="id_canton" class="w-full border px-3 py-2 rounded">
+            <option *ngFor="let canton of cantones" [value]="canton.id">{{ canton.canton }}</option>
+          </select>
+        </div>
+        <div class="flex items-center space-x-2">
+          <input type="checkbox" formControlName="isactivo" id="estado" class="form-checkbox" />
+          <label for="estado">Activo</label>
+        </div>
+        <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Guardar</button>
+      </form>
     </div>
-    <div>
-      <label class="block mb-1">Nombres</label>
-      <input type="text" formControlName="nombres" class="w-full border px-3 py-2 rounded" />
-    </div>
-    <div>
-      <label class="block mb-1">Apellidos</label>
-      <input type="text" formControlName="apellidos" class="w-full border px-3 py-2 rounded" />
-    </div>
-    <div>
-      <label class="block mb-1">Correo</label>
-      <input type="email" formControlName="correo" class="w-full border px-3 py-2 rounded" />
-    </div>
-    <div>
-      <label class="block mb-1">Contraseña</label>
-      <input type="password" formControlName="contrasena" class="w-full border px-3 py-2 rounded" />
-    </div>
-    <div>
-      <label class="block mb-1">Rol</label>
-      <select formControlName="rol" class="w-full border px-3 py-2 rounded">
-        <option value="admin">Administrador</option>
-        <option value="principal">Principal</option>
-        <option value="secretari@">Secretaria</option>
-        <option value="suplente">Suplente</option>
-      </select>
-    </div>
-    <div>
-      <label class="block mb-1">Cantón</label>
-      <select formControlName="canton_id" class="w-full border px-3 py-2 rounded">
-        <option *ngFor="let canton of cantones" [value]="canton.id">{{ canton.nombre }}</option>
-      </select>
-    </div>
-    <div class="flex items-center space-x-2">
-      <input type="checkbox" formControlName="estado" id="estado" class="form-checkbox" />
-      <label for="estado">Activo</label>
-    </div>
-    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">Guardar</button>
-  </form>
-</div>
-

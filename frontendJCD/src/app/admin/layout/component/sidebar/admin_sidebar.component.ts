@@ -11,7 +11,7 @@ import { AdminLayoutContentComponent } from "../content/admin_layout_content.com
 })
 export class SidebarComponentAdmin {
 
-constructor(
+/**constructor(
     private router: Router,
     private authService: AuthService
   ) {}
@@ -19,7 +19,7 @@ constructor(
   cerrarSesion() {
     this.authService.cerrarSesion();
     this.router.navigate(['/auth/login']);
-  }
+  }**/
 
 }
 export default SidebarComponentAdmin;

@@ -1,0 +1,92 @@
+// models/denunciado.model.ts
+import { Model, DataTypes, Optional } from 'sequelize';
+import sequelize from '../config/database';
+
+interface DenunciadoAttributes {
+  id: number;
+  cedula: string;
+  nombres: string;
+  apellidos: string;
+  edad: number;
+  sexo: string;
+  nacionalidad: string;
+  direccion: string;
+  mail: string;
+  telefono: string;
+  parentezco: string;
+  idDenuncia: number;
+}
+
+interface DenunciadoCreationAttributes extends Optional<DenunciadoAttributes, 'id'> {}
+
+export class Denunciado extends Model<DenunciadoAttributes, DenunciadoCreationAttributes> implements DenunciadoAttributes {
+  public id!: number;
+  public cedula!: string;
+  public nombres!: string;
+  public apellidos!: string;
+  public edad!: number;
+  public sexo!: string;
+  public nacionalidad!: string;
+  public direccion!: string;
+  public mail!: string;
+  public telefono!: string;
+  public parentezco!: string;
+  public idDenuncia!: number;
+}
+
+Denunciado.init({
+  id: {
+    type: DataTypes.BIGINT,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  cedula: {
+    type: DataTypes.STRING,
+    
+  },
+  nombres: {
+    type: DataTypes.STRING,
+    
+  },
+  apellidos: {
+    type: DataTypes.STRING,
+    
+  },
+  edad: {
+    type: DataTypes.INTEGER,
+    
+  },
+  sexo: {
+    type: DataTypes.STRING,
+    
+  },
+  nacionalidad: {
+    type: DataTypes.STRING,
+    
+  },
+  direccion: {
+    type: DataTypes.STRING,
+    
+  },
+  mail: {
+    type: DataTypes.STRING,
+    
+  },
+  telefono: {
+    type: DataTypes.STRING,
+    
+  },
+  parentezco: {
+    type: DataTypes.STRING,
+    
+  },
+  idDenuncia: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  }
+}, {
+  sequelize,
+  tableName: 'denunciado',
+  modelName: 'Denunciado',
+  timestamps: false,
+});

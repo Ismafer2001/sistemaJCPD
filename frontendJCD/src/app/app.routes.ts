@@ -1,19 +1,18 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@shared/guards/auth.guards';
-import { adminGuard } from '@shared/guards/isAdminauth.guards';
-import { notadminGuard } from '@shared/guards/notAdmin.guards';
+import { rolGuard } from '@shared/guards/rol.guard';
 
 export const routes: Routes = [
 
   {
     path: '',
-    canActivate: [authGuard,notadminGuard],
+    canActivate: [authGuard,rolGuard('princial')],
     loadChildren:() => import('@inicio/routes/inicio.routes')
   },
   {
 
     path: 'nna',
-    canActivate: [authGuard,notadminGuard],
+    canActivate: [authGuard,rolGuard('principal')],
     loadChildren: () => import('@nna/routes/nna.routes'),
   },
   {
@@ -24,7 +23,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
-    canActivate: [authGuard,adminGuard],
+    canActivate: [authGuard,rolGuard('admin')],
 
     loadChildren: () => import('@admin/routes/admin.routes'),
   },

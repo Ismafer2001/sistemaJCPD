@@ -1,27 +1,31 @@
-import { Model, DataTypes } from 'sequelize';
-import { sequelize } from "../config/database";
+import { Model, DataTypes, Optional } from 'sequelize';
+import sequelize from '../config/database';
 
-export class Canton extends Model {
-  public id!: Number;
-  public nombre!: string;
+export interface CantonAttributes {
+  id: number;
+  canton: string;
+}
+
+export type CantonCreationAttributes = Optional<CantonAttributes, 'id'>;
+
+export class Canton extends Model<CantonAttributes, CantonCreationAttributes>
+  implements CantonAttributes {
+  public id!: number;
+  public canton!: string;
 }
 
 Canton.init({
   id: {
-    
     type: DataTypes.INTEGER,
-    autoIncrement: true,
     primaryKey: true,
-    
   },
-  nombre: {
+  canton: {
     type: DataTypes.STRING,
     allowNull: false,
   },
 }, {
   sequelize,
+  tableName: 'canton',
   modelName: 'Canton',
-  tableName: 'cantones',
   timestamps: false,
 });
-

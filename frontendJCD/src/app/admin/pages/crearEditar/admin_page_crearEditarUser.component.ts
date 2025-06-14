@@ -1,9 +1,8 @@
-
-import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Canton,UserService } from '@admin/services/user.service';
+import { Router, RouterModule } from '@angular/router';
 
 
 @Component({
@@ -12,9 +11,43 @@ import { CommonModule } from '@angular/common';
   templateUrl: './admin_page_crearEditarUser.component.html',
 
 })
-export class Admin_page_crearEditarUserComponent implements OnInit {
+export class Admin_page_crearEditarUserComponent {
+  form!: FormGroup;
+  cantones: Canton[] = [];
 
-  form: FormGroup;
+  constructor(
+    private fb: FormBuilder,
+    private userService: UserService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.form = this.fb.group({
+      usuario: ['', Validators.required],
+      nombres: ['', Validators.required],
+      apellidos: ['', Validators.required],
+      correo: [''],
+      contrasena: ['', Validators.required],
+      rol: ['principal', Validators.required],
+      id_canton: ['', Validators.required],
+      isactivo: [true]
+    });
+
+    this.userService.obtenerCantones().subscribe(data => this.cantones = data);
+  }
+
+  guardar() {
+    if (this.form.valid) {
+      this.userService.crearUsuario(this.form.value).subscribe(() => {
+        this.router.navigate(['/admin/usuarios']); // Regresa a la tabla
+      });
+    }
+  }
+
+}
+export default Admin_page_crearEditarUserComponent;
+
+/**form: FormGroup;
   cantones: any[] = [];
   esEdicion = false;
   usuarioId: string | null = null;
@@ -76,7 +109,4 @@ export class Admin_page_crearEditarUserComponent implements OnInit {
         error => console.error('Error al crear usuario:', error)
       );
     }
-  }
-
-}
-export default Admin_page_crearEditarUserComponent;
+  }*/

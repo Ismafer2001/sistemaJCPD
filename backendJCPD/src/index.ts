@@ -1,99 +1,37 @@
-import express from 'express';
-import { sequelize } from './config/database';
-import usuariosRoutes from './routes/usuarios.routes';
-import cantonesRoutes from './routes/cantones.routes';
-import authRoutes from './routes/auth.routes';
-import { Canton } from './models/cantones.models';
-import { Usuario } from './models/usuarios.models';
-
-import bcrypt from 'bcryptjs';
+import express, { Application } from 'express';
 import cors from 'cors';
+import dotenv from 'dotenv';
+import { sequelize } from './models'; // Conecta y carga modelos
+import authRoutes from './routes/auth.routes';
+import usuarioRoutes from './routes/usuarios.routes';
+import cantonesRoutes from './routes/cantones.routes';
+import denunciasRoutes from './routes/denuncias.routes';
 
+import { seedInitialData } from './utils/seed';
 
+// Cargar variables de entorno
+dotenv.config();
 
-const app = express();
-const PORT = 3000;
+const app: Application = express();
+const PORT = process.env.PORT || 3000;
 
-app.use(cors());
+app.use(cors()); // Permite todas las conexiones
+// Middlewares
 app.use(express.json());
-app.use('/auth', authRoutes);
-app.use('/cantones', cantonesRoutes);
-app.use('/usuarios', usuariosRoutes);
 
+// Rutas
+app.use('/api/auth', authRoutes);
+app.use('/api/usuarios', usuarioRoutes);
+app.use('/api/cantones', cantonesRoutes);
+app.use('/api/denuncias', denunciasRoutes);
 
-const cantones = [
-  'Portoviejo', 'Bolívar', 'Chone', 'El Carmen', 'Flavio Alfaro', 'Jama',
-  'Jaramijó', 'Jipijapa', 'Junín', 'Manta', 'Montecristi', 'Olmedo',
-  'Paján', 'Pedernales', 'Pichincha', 'Puerto López', 'Rocafuerte',
-  'San Vicente', 'Santa Ana', 'Sucre', 'Tosagua', 'Veinticuatro de Mayo'
-];
-const adminCorreo = 'admin@example.com';
+// Verificar conexión con la base de datos y levantar el servidor
+sequelize.sync({force: true}).then(async () => {
+  
+  console.log('✅ Base de datos conectada y modelos sincronizados');
+  await seedInitialData(); // 👈 Ejecuta la carga si no hay datos
 
-sequelize.sync({ alter: true }).then(async () => {
-  console.log('Base de datos sincronizada');
-  const adminExistente = await Usuario.findOne({ where: { correo: adminCorreo } });
-
-
-  for (const nombre of cantones) {
-    await Canton.findOrCreate({ where: { nombre } });
-  }
-  if (!adminExistente) {
-  const contrasena = await bcrypt.hash('admin123', 10);
-  await Usuario.create({
-    nombres: 'Administrador',
-    apellidos: 'Principal',
-    correo: adminCorreo,
-    user:'admin',
-    contrasena,
-    rol: 'admin',
-    estado: true,
-    canton_id: 1, // Asegúrate que exista este ID
-    fecha_creacion: new Date()
-  });
-  console.log('Usuario admin creado automáticamente');
-}
-
-
-  app.listen(PORT, () => {
-    console.log(`Servidor escuchando en puerto ${PORT}`);
-  });
-}).catch(err => {
-  console.error('Error al conectar la base de datos:', err);
+  app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
+}).catch((err: any) => {
+  console.error('❌ Error al iniciar la base de datos:', err);
 });
-
-
-/**import express from 'express';
-
-const app = express();
-const PORT = 3000;
-
-app.use(express.json());
-
-app.get('/', (req, res) => {
-  res.send('🌐 Bienvenido a tu primera API con Express y TypeScript');
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-});**/
-
-/**import express from 'express';
-import { sequelize } from './config/database';
-import usuariosRoutes from './routes/usuarios.routes';
-
-const app = express();
-const PORT = 3000;
-
-app.use(express.json());
-app.use('/usuarios', usuariosRoutes);
-
-sequelize.sync({ alter: true }).then(() => {
-  console.log('Base de datos sincronizada');
-  app.listen(PORT, () => {
-    console.log(`Servidor escuchando en puerto ${PORT}`);
-  });
-}).catch(err => {
-  console.error('Error al conectar la base de datos:', err);
-});**/
-
-

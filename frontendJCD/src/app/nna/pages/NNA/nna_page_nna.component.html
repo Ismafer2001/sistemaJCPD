@@ -28,10 +28,10 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td class="p-2 border"><a href="#" class="text-blue-600 underline">xxxxxx-xxxxxxx</a></td>
-          <td class="p-2 border">xxxxxx-xxxxxxx</td>
-          <td class="p-2 border">xxxxxxx</td>
+        <tr *ngFor="let denuncia of denuncias" class="hover:bg-gray-50">
+          <td class="p-2 border"><a href="#" class="text-blue-600 underline">{{ denuncia.tramite}}</a></td>
+          <td class="p-2 border">{{denuncia.afectados?.[0]?.nombre}}</td>
+          <td class="p-2 border">{{ denuncia.fecha}}</td>
           <td class="p-2 border">xxxxxx</td>
           <td class="p-2 border">xxxxxx</td>
           <td class="p-2 border text-center text-red-600 cursor-pointer"><i class="bi bi-trash"></i></td>

@@ -8,14 +8,6 @@ import { Router } from '@angular/router';
 })
 export class SidebarComponent   {
 
- constructor(
-    private router: Router,
-    private authService: AuthService
-  ) {}
 
-  cerrarSesion() {
-    this.authService.cerrarSesion();
-    this.router.navigate(['/auth/login']);
-  }
 }
 export default SidebarComponent;

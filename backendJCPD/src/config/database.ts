@@ -1,10 +1,17 @@
-import { Sequelize } from 'sequelize';
 
-export const sequelize = new Sequelize({
-  database: 'sysjcpd', // Cambia por el nombre real de tu base de datos
-  username: 'root',        // Cambia por tu usuario de base de datos
-  password: '',     // Cambia por tu contraseña real
-  host: 'localhost',             // Cambia si usas un host distinto (como una IP externa o Docker)
-  dialect: 'mysql',              // Actualizado para usar MySQL
-  logging: false,
-});
+import { Sequelize } from 'sequelize';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const sequelize = new Sequelize(
+  process.env.DB_NAME as string,
+  process.env.DB_USER as string,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    dialect: 'mysql',
+    logging: false,
+  }
+);
+
+export default sequelize;

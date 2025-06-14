@@ -1,91 +1,79 @@
 import { Request, Response } from 'express';
-import { RequestHandler } from 'express';
 import { Usuario } from '../models/usuarios.models';
 import { Canton } from '../models/cantones.models';
 import bcrypt from 'bcryptjs';
 
 
-export const listarUsuarios = async (req: Request, res: Response) => {
-  try {
-    const usuarios = await Usuario.findAll({
-      include: [{ model: Canton, as: 'canton', attributes: ['nombre'] }]
-    });
-    res.json(usuarios);
-  } catch (error) {
-    res.status(500).json({ error: 'Error al obtener los usuarios' });
-  }
-};
-export const obtenerUsuarioPorId = async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const usuario = await Usuario.findByPk(id);
-  if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
-  res.json(usuario);
-};
-
+// Crear usuario
 export const crearUsuario = async (req: Request, res: Response) => {
   try {
-    const { nombres, apellidos,user, correo, contrasena, rol, estado, canton_id } = req.body;
+    const { usuario, contrasena, ...resto } = req.body;
 
-    const hashedPassword = await bcrypt.hash(contrasena, 10);
+    const existe = await Usuario.findOne({ where: { usuario } });
+    if (existe) { res.status(400).json({ mensaje: 'Usuario ya existe' });
+    return;
 
-    const nuevoUsuario = await Usuario.create({
-      nombres,
-      apellidos,
-      correo,
-      contrasena: hashedPassword,
-      user,
-      rol,
-      estado,
-      canton_id,
-      fecha_creacion: new Date()
-    });
+  }
 
+    const hashed = await bcrypt.hash(contrasena, 10);
+
+    const nuevoUsuario = await Usuario.create({ usuario, contrasena: hashed, ...resto });
     res.status(201).json(nuevoUsuario);
   } catch (error) {
-    res.status(500).json({ error: 'Error al crear el usuario' });
+    res.status(500).json({ mensaje: 'Error al crear usuario', error });
   }
 };
 
-export const editarUsuario = async (req: Request, res: Response) => {
+// Obtener usuarios
+export const obtenerUsuarios = async (_req: Request, res: Response) => {
+  try {
+    const usuarios = await Usuario.findAll({
+      
+      include: [{ model: Canton, as: 'canton' }]
+    });
+
+    res.json(usuarios);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+  }
+};
+
+// Actualizar usuario
+export const actualizarUsuario = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { nombres, apellidos,user, correo, rol, estado, canton_id } = req.body;
+    const datos = req.body;
 
-    const usuario = await Usuario.findByPk(id);
-    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
+    if (datos.contrasena) {
+      datos.contrasena = await bcrypt.hash(datos.contrasena, 10);
+    }
 
-    await usuario.update({ nombres, apellidos,user, correo, rol, estado, canton_id });
-    res.json(usuario);
+    await Usuario.update(datos, { where: { id } });
+    res.json({ mensaje: 'Usuario actualizado' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al actualizar el usuario' });
+    res.status(500).json({ mensaje: 'Error al actualizar usuario' });
   }
 };
 
-export const cambiarEstado = async (req: Request, res: Response) => {
+// Desactivar usuario
+export const desactivarUsuario = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { estado } = req.body;
-
-    const usuario = await Usuario.findByPk(id);
-    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
-
-    usuario.estado = estado;
-    await usuario.save();
-    res.json(usuario);
+    await Usuario.update({ isactivo: false }, { where: { id } });
+    res.json({ mensaje: 'Usuario desactivado correctamente' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al cambiar el estado del usuario' });
+    res.status(500).json({ mensaje: 'Error al desactivar usuario', error });
   }
 };
 
+// Eliminar usuario definitivamente
 export const eliminarUsuario = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const usuario = await Usuario.findByPk(id);
-    if (!usuario) return res.status(404).json({ error: 'Usuario no encontrado' });
-
-    await usuario.destroy();
-    res.json({ mensaje: 'Usuario eliminado correctamente' });
+    await Usuario.destroy({ where: { id } });
+    res.json({ mensaje: 'Usuario eliminado definitivamente' });
   } catch (error) {
-    res.status(500).json({ error: 'Error al eliminar el usuario' });
+    res.status(500).json({ mensaje: 'Error al eliminar usuario', error });
   }
 };

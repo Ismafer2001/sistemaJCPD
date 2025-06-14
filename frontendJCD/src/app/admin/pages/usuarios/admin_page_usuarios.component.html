@@ -1,6 +1,6 @@
 <div class="p-1">
   <div class="flex justify-between items-center mb-6 border-b pb-3">
-    <button class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded flex items-center" (click)="irACrear()">
+    <button routerLink="/admin/usuarios/formulario" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded flex items-center" >
       <span class="mr-2">Nuevo usuario</span>
       <span class="text-lg">+</span>
     </button>
@@ -15,7 +15,7 @@
           <th class="border px-3 py-2">Usuario</th>
           <th class="border px-3 py-2">Nombres</th>
           <th class="border px-3 py-2">Apellidos</th>
-          <th class="border px-3 py-2">Correo</th>
+
           <th class="border px-3 py-2">Rol</th>
           <th class="border px-3 py-2">Estado</th>
           <th class="border px-3 py-2">Cantón</th>
@@ -23,22 +23,27 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let usuario of usuarios; index as i" class="hover:bg-gray-50">
-          <td class="border px-3 py-2">{{ i + 1 }}</td>
-          <td class="border px-3 py-2">{{ usuario.user }}</td>
-          <td class="border px-3 py-2">{{ usuario.nombres }}</td>
-          <td class="border px-3 py-2">{{ usuario.apellidos }}</td>
-          <td class="border px-3 py-2">{{ usuario.correo }}</td>
-          <td class="border px-3 py-2">{{ usuario.rol }}</td>
+        <tr *ngFor="let user of usuarios" class="hover:bg-gray-50">
+          <td class="border px-3 py-2">{{user.id}}</td>
+          <td class="border px-3 py-2">{{user.usuario}}</td>
+          <td class="border px-3 py-2">{{user.nombres}}</td>
+          <td class="border px-3 py-2">{{user.apellidos}}</td>
+          <td class="border px-3 py-2">{{user.rol}}</td>
+          <td class="border px-3 py-2">{{user.canton?.canton}}</td>
+
           <td class="border px-3 py-2">
-            <span *ngIf="usuario.estado" class="bg-green-500 text-white px-2 py-1 rounded text-xs">Activo</span>
-            <span *ngIf="!usuario.estado" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Inactivo</span>
+            <button
+                (click)="cambiarEstado(user)"
+                class="px-2 py-1 rounded text-white"
+                [ngClass]="user.isactivo ? 'bg-green-500' : 'bg-gray-500'">
+                {{ user.isactivo ? 'Activo' : 'Deshabilitado' }}
+              </button>
           </td>
-          <td class="border px-3 py-2">{{ usuario.canton?.nombre }}</td>
+
           <td class="border px-3 py-2 space-x-1">
-            <button class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded" (click)="editarUsuario(usuario)">Editar</button>
-            <button class="bg-yellow-500 hover:bg-yellow-600 text-white text-xs px-2 py-1 rounded" (click)="cambiarEstado(usuario)">Estado</button>
-            <button class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded" (click)="eliminarUsuario(usuario.id)">Eliminar</button>
+            <button (click)="editar(user)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded" >Editar</button>
+
+            <button (click)="eliminar(user.id)" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded" >Eliminar</button>
           </td>
         </tr>
       </tbody>

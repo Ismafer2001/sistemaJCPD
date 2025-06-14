@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { UserService, Usuario } from '@admin/services/user.service';
 
 
 @Component({
@@ -12,9 +12,40 @@ import { Router } from '@angular/router';
   templateUrl: './admin_page_usuarios.component.html',
 
 })
-export class Admin_page_usuariosComponent implements OnInit {
+export class Admin_page_usuariosComponent implements OnInit  {
+  usuarios: Usuario[] = [];
 
-  usuarios: any[] = [];
+  constructor(private userService: UserService) {}
+
+  ngOnInit(): void {
+    this.cargarUsuarios();
+  }
+
+  cargarUsuarios() {
+    this.userService.obtenerUsuarios().subscribe(data => this.usuarios = data);
+  }
+
+  editar(usuario: Usuario) {
+    console.log('Editar', usuario);
+    // Aquí puedes abrir un modal o navegar a un formulario de edición
+  }
+
+  cambiarEstado(usuario: Usuario) {
+    const nuevoEstado = !usuario.isactivo;
+    this.userService.actualizarUsuario(usuario.id, { isactivo: nuevoEstado }).subscribe(() => {
+      usuario.isactivo = nuevoEstado;
+    });
+  }
+
+  eliminar(id: number) {
+    this.userService.eliminarUsuario(id).subscribe(() => this.cargarUsuarios());
+  }
+
+
+}
+export default Admin_page_usuariosComponent;
+
+/**usuarios: any[] = [];
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -60,6 +91,4 @@ export class Admin_page_usuariosComponent implements OnInit {
   }
   irACrear(): void {
   this.router.navigate(['admin/usuarios/formulario']);
-}
-}
-export default Admin_page_usuariosComponent;
+}*/

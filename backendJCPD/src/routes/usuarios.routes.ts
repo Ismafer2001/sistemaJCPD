@@ -1,14 +1,32 @@
-import { Router } from 'express';
-import * as UsuariosController from '../controllers/usuarios.controller';
-import { asyncHandler } from '../utils/syncHandler';
+import { Router, Request, Response } from 'express';
+import {
+  crearUsuario,
+  obtenerUsuarios,
+  actualizarUsuario,
+  eliminarUsuario,
+  desactivarUsuario
+ } from '../controllers/usuarios.controller';
+import { verificarToken } from '../middleware/auth.middleware';
+import { verificarRol } from '../middleware/rol.middleware';
+
+import bcrypt from 'bcryptjs';
 
 const router = Router();
+// Rutas solo para admin
+router.use(verificarToken, verificarRol(['admin']));
 
-router.get('/', asyncHandler(UsuariosController.listarUsuarios));
-router.get('/:id', asyncHandler(UsuariosController.obtenerUsuarioPorId));
-router.post('/', asyncHandler(UsuariosController.crearUsuario));
-router.put('/:id', asyncHandler(UsuariosController.editarUsuario));
-router.patch('/:id/estado', asyncHandler(UsuariosController.cambiarEstado));
-router.delete('/:id', asyncHandler(UsuariosController.eliminarUsuario));
+router.post('/', crearUsuario);                     // Crear usuario
+router.get('/', obtenerUsuarios);                   // Listar usuarios activos
+router.put('/:id', actualizarUsuario);              // Actualizar usuario
+router.put('/desactivar/:id', desactivarUsuario);   // Desactivar (soft delete)
+router.delete('/:id', eliminarUsuario); 
+
+
+
 
 export default router;
+
+
+
+
+
