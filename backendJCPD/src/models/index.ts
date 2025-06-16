@@ -5,9 +5,9 @@ import { Afectado } from './afectado.models';
 import { Denuncia } from './denuncia.models';
 import { Denunciado } from './denunciado.models';
 import { Denunciante } from './denunciante.models';
-import { Hecho } from './hechos.models';
+
 import { Vulneracion } from './vulneraciones.models';
-import { VulneracionIdentificada } from './vulIdentificadas.models';
+import { VulneracionesIdentificadas } from './vulneracionesidentificadas.models';
  
 //relacion usuario -- canton
 Usuario.belongsTo(Canton, { foreignKey: 'id_canton', as: 'canton' });
@@ -21,20 +21,30 @@ Denunciado.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });
 //relacion denunciante denuncia
 Denuncia.hasOne(Denunciante, { foreignKey: 'idDenuncia', as: 'denunciante' });
 Denunciante.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });
-//relacion hecho denuncia
-Denuncia.hasOne(Hecho, { foreignKey: 'idDenuncia', as: 'hecho' });
-Hecho.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });
-// Relación muchos a muchos hechos y vulneracion
-Hecho.belongsToMany(Vulneracion, {
-  through: VulneracionIdentificada,
-  foreignKey: 'hechoId',
-  as: 'vulneraciones'
-});
-Vulneracion.belongsToMany(Hecho, {
-  through: VulneracionIdentificada,
-  foreignKey: 'vulneracionId',
-  as: 'hechos'
+
+
+
+// Relación muchos a muchos entre Denuncia y Vulneracion
+Denuncia.belongsToMany(Vulneracion, {
+  through: VulneracionesIdentificadas,
+  foreignKey: 'denuncia_id'
 });
 
-export { sequelize, Usuario, Canton,Denuncia,Afectado,Denunciado,Denunciante,Hecho, Vulneracion, VulneracionIdentificada };
+Vulneracion.belongsToMany(Denuncia, {
+  through: VulneracionesIdentificadas,
+  foreignKey: 'vulneracion_id'
+});
+
+export {
+  sequelize,
+  Denuncia,
+  Vulneracion,
+  VulneracionesIdentificadas,
+  Denunciante,
+  Denunciado,
+  Afectado,
+
+  Usuario,
+  Canton
+};
 

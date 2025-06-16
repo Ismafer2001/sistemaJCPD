@@ -6,144 +6,73 @@
       <!-- Sección del Denunciante -->
       <div class="bg-white rounded-lg shadow-md p-6">
         <h2 class="text-xl font-semibold mb-4">Datos del Denunciante</h2>
-        <div formGroupName="denunciante" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Cédula -->
-          <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700">Cédula</label>
-            <input
-              type="text"
-              formControlName="cedula"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              [class.border-red-500]="denuncianteForm.get('cedula')?.invalid && denuncianteForm.get('cedula')?.touched"
-            >
-            <div *ngIf="denuncianteForm.get('cedula')?.invalid && denuncianteForm.get('cedula')?.touched" class="text-red-500 text-sm mt-1">
-              <span *ngIf="denuncianteForm.get('cedula')?.errors?.['required']">La cédula es requerida</span>
-              <span *ngIf="denuncianteForm.get('cedula')?.errors?.['pattern']">La cédula debe tener 10 dígitos</span>
-            </div>
-          </div>
+        <nna_creardenuncia_denunciante [formGroup]="denuncianteForm"></nna_creardenuncia_denunciante>
+      </div>
 
-          <!-- Nombres -->
-          <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700">Nombres</label>
-            <input
-              type="text"
-              formControlName="nombres"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              [class.border-red-500]="denuncianteForm.get('nombres')?.invalid && denuncianteForm.get('nombres')?.touched"
-            >
-            <div *ngIf="denuncianteForm.get('nombres')?.invalid && denuncianteForm.get('nombres')?.touched" class="text-red-500 text-sm mt-1">
-              <span *ngIf="denuncianteForm.get('nombres')?.errors?.['required']">Los nombres son requeridos</span>
-              <span *ngIf="denuncianteForm.get('nombres')?.errors?.['minlength']">Los nombres deben tener al menos 2 caracteres</span>
+      <!-- Sección de Afectados -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-800">Datos de los Afectados</h2>
+          <button
+            type="button"
+            (click)="agregarAfectado()"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Agregar Afectado
+          </button>
+        </div>
+        <div formArrayName="afectados">
+          <div *ngFor="let afectado of afectadosArray.controls; let i = index" class="mb-6 p-4 border rounded-lg">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-medium text-gray-700">Afectado {{i + 1}}</h3>
+              <button
+                *ngIf="afectadosArray.length > 1"
+                type="button"
+                (click)="eliminarAfectado(i)"
+                class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              >
+                Eliminar
+              </button>
             </div>
-          </div>
-
-          <!-- Apellidos -->
-          <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700">Apellidos</label>
-            <input
-              type="text"
-              formControlName="apellidos"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              [class.border-red-500]="denuncianteForm.get('apellidos')?.invalid && denuncianteForm.get('apellidos')?.touched"
-            >
-            <div *ngIf="denuncianteForm.get('apellidos')?.invalid && denuncianteForm.get('apellidos')?.touched" class="text-red-500 text-sm mt-1">
-              <span *ngIf="denuncianteForm.get('apellidos')?.errors?.['required']">Los apellidos son requeridos</span>
-              <span *ngIf="denuncianteForm.get('apellidos')?.errors?.['minlength']">Los apellidos deben tener al menos 2 caracteres</span>
-            </div>
-          </div>
-
-          <!-- Edad -->
-          <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700">Edad</label>
-            <input
-              type="number"
-              formControlName="edad"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              [class.border-red-500]="denuncianteForm.get('edad')?.invalid && denuncianteForm.get('edad')?.touched"
-            >
-            <div *ngIf="denuncianteForm.get('edad')?.invalid && denuncianteForm.get('edad')?.touched" class="text-red-500 text-sm mt-1">
-              <span *ngIf="denuncianteForm.get('edad')?.errors?.['required']">La edad es requerida</span>
-              <span *ngIf="denuncianteForm.get('edad')?.errors?.['min'] || denuncianteForm.get('edad')?.errors?.['max']">La edad debe estar entre 0 y 120 años</span>
-            </div>
-          </div>
-
-          <!-- Género -->
-          <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700">Género</label>
-            <select
-              formControlName="genero"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              [class.border-red-500]="denuncianteForm.get('genero')?.invalid && denuncianteForm.get('genero')?.touched"
-            >
-              <option value="">Seleccione un género</option>
-              <option value="masculino">Masculino</option>
-              <option value="femenino">Femenino</option>
-              <option value="otro">Otro</option>
-            </select>
-            <div *ngIf="denuncianteForm.get('genero')?.invalid && denuncianteForm.get('genero')?.touched" class="text-red-500 text-sm mt-1">
-              <span *ngIf="denuncianteForm.get('genero')?.errors?.['required']">El género es requerido</span>
-            </div>
-          </div>
-
-          <!-- Nacionalidad -->
-          <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700">Nacionalidad</label>
-            <input
-              type="text"
-              formControlName="nacionalidad"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              [class.border-red-500]="denuncianteForm.get('nacionalidad')?.invalid && denuncianteForm.get('nacionalidad')?.touched"
-            >
-            <div *ngIf="denuncianteForm.get('nacionalidad')?.invalid && denuncianteForm.get('nacionalidad')?.touched" class="text-red-500 text-sm mt-1">
-              <span *ngIf="denuncianteForm.get('nacionalidad')?.errors?.['required']">La nacionalidad es requerida</span>
-            </div>
-          </div>
-
-          <!-- Dirección -->
-          <div class="form-group md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700">Dirección</label>
-            <input
-              type="text"
-              formControlName="direccion"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              [class.border-red-500]="denuncianteForm.get('direccion')?.invalid && denuncianteForm.get('direccion')?.touched"
-            >
-            <div *ngIf="denuncianteForm.get('direccion')?.invalid && denuncianteForm.get('direccion')?.touched" class="text-red-500 text-sm mt-1">
-              <span *ngIf="denuncianteForm.get('direccion')?.errors?.['required']">La dirección es requerida</span>
-              <span *ngIf="denuncianteForm.get('direccion')?.errors?.['minlength']">La dirección debe tener al menos 5 caracteres</span>
-            </div>
-          </div>
-
-          <!-- Email -->
-          <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-            <input
-              type="email"
-              formControlName="mail"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              [class.border-red-500]="denuncianteForm.get('mail')?.invalid && denuncianteForm.get('mail')?.touched"
-            >
-            <div *ngIf="denuncianteForm.get('mail')?.invalid && denuncianteForm.get('mail')?.touched" class="text-red-500 text-sm mt-1">
-              <span *ngIf="denuncianteForm.get('mail')?.errors?.['required']">El correo electrónico es requerido</span>
-              <span *ngIf="denuncianteForm.get('mail')?.errors?.['email']">Ingrese un correo electrónico válido</span>
-            </div>
-          </div>
-
-          <!-- Teléfono -->
-          <div class="form-group">
-            <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-            <input
-              type="tel"
-              formControlName="telefono"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-              [class.border-red-500]="denuncianteForm.get('telefono')?.invalid && denuncianteForm.get('telefono')?.touched"
-            >
-            <div *ngIf="denuncianteForm.get('telefono')?.invalid && denuncianteForm.get('telefono')?.touched" class="text-red-500 text-sm mt-1">
-              <span *ngIf="denuncianteForm.get('telefono')?.errors?.['required']">El teléfono es requerido</span>
-              <span *ngIf="denuncianteForm.get('telefono')?.errors?.['pattern']">El teléfono debe tener 10 dígitos</span>
-            </div>
+            <nna_creardenuncia_afectado [formGroup]="asFormGroup(afectado)"></nna_creardenuncia_afectado>
           </div>
         </div>
+      </div>
+
+      <!-- Sección de Denunciados -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold text-gray-800">Datos de los Denunciados</h2>
+          <button
+            type="button"
+            (click)="agregarDenunciado()"
+            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            Agregar Denunciado
+          </button>
+        </div>
+        <div formArrayName="denunciados">
+          <div *ngFor="let denunciado of denunciadosArray.controls; let i = index" class="mb-6 p-4 border rounded-lg">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="text-lg font-medium text-gray-700">Denunciado {{i + 1}}</h3>
+              <button
+                *ngIf="denunciadosArray.length > 1"
+                type="button"
+                (click)="eliminarDenunciado(i)"
+                class="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+              >
+                Eliminar
+              </button>
+            </div>
+            <nna_creardenuncia_denunciado [formGroup]="asFormGroup(denunciado)"></nna_creardenuncia_denunciado>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sección de Hechos -->
+      <div class="mb-8">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">Hechos y Vulneraciones</h2>
+        <app-nna_creardenuncia_hechos [formGroup]="denunciaForm.get('hechos')"></app-nna_creardenuncia_hechos>
       </div>
 
       <!-- Mensajes de error y éxito -->
@@ -164,7 +93,6 @@
           type="submit"
           class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
           [disabled]="denunciaForm.invalid || loading"
-          
         >
           <span *ngIf="loading">Guardando...</span>
           <span *ngIf="!loading">Guardar</span>

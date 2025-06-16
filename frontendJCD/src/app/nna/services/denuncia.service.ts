@@ -14,11 +14,19 @@ export interface Denunciante {
   telefono: string;
 }
 
+export interface Afectado {
+  nombre: string;
+  apellido: string;
+}
+
 export interface Denuncia {
+  id: number;
   medio: string;
   tipo_denuncia: string;
   canton: string;
-  
+  fecha_creado: string;
+  estado: string;
+  afectados: Afectado[];
   denunciante: Denunciante;
 }
 
@@ -30,16 +38,20 @@ export class DenunciaService {
 
   constructor(private http: HttpClient) { }
 
-  crearDenuncia(denuncia: Denuncia): Observable<any> {
-    return this.http.post(`${this.apiUrl}/denuncias`, denuncia);
+  crearDenuncia(denuncia: Omit<Denuncia, 'id'>): Observable<{ success: boolean; message: string; data: { id: number } }> {
+    return this.http.post<{ success: boolean; message: string; data: { id: number } }>(`${this.apiUrl}/denuncias`, denuncia);
   }
 
-  obtenerDenuncia(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/denuncias/${id}`);
+  obtenerDenuncia(id: string): Observable<Denuncia> {
+    return this.http.get<Denuncia>(`${this.apiUrl}/denuncias/${id}`);
   }
 
-  actualizarDenuncia(id: string, denuncia: Denuncia): Observable<any> {
-    return this.http.put(`${this.apiUrl}/denuncias/${id}`, denuncia);
+  obtenerTodasDenuncias(): Observable<Denuncia[]> {
+    return this.http.get<Denuncia[]>(`${this.apiUrl}/denuncias`);
+  }
+
+  actualizarDenuncia(id: string, denuncia: Partial<Denuncia>): Observable<{ success: boolean; message: string }> {
+    return this.http.put<{ success: boolean; message: string }>(`${this.apiUrl}/denuncias/${id}`, denuncia);
   }
 }
 

@@ -1,27 +1,38 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormGroup,
   ReactiveFormsModule,
   FormBuilder,
-  Validators
+  Validators,
+  FormArray,
+  AbstractControl
 } from '@angular/forms';
 import { DenunciaService } from '../../services/denuncia.service';
 import { Router } from '@angular/router';
+import { Nna_creardenuncia_denuncianteComponent } from './componentes/denunciante/nna_creardenuncia_denunciante.component';
+import { Nna_creardenuncia_afectadoComponent } from './componentes/afectado/nna_creardenuncia_afectado.component';
+import { Nna_creardenuncia_denunciadoComponent } from './componentes/denunciado/nna_creardenuncia_denunciado.component';
+import { Nna_creardenuncia_hechosComponent } from './componentes/hechos/nna_creardenuncia_hechos.component';
 
 @Component({
-  selector: 'nna-page-crearDenuncia',
+  selector: 'app-nna-page-crearDenuncia',
+  templateUrl: './nna_page_crearDenuncia.component.html',
+  
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    Nna_creardenuncia_denuncianteComponent,
+    Nna_creardenuncia_afectadoComponent,
+    Nna_creardenuncia_denunciadoComponent,
+    Nna_creardenuncia_hechosComponent
   ],
-  templateUrl: './nna_page_crearDenuncia.component.html',
 })
-export class NnaPageCrearDenunciaComponent {
+export class NnaPageCrearDenunciaComponent implements OnInit {
   denunciaForm: FormGroup;
   loading = false;
-  error = '';
+  error: string | null = null;
 
   constructor(
     private fb: FormBuilder,
@@ -32,7 +43,6 @@ export class NnaPageCrearDenunciaComponent {
       medio: ['formulario'],
       tipo_denuncia: ['inicial'],
       canton: ['portovirjo'],
-      
       denunciante: this.fb.group({
         cedula: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
         nombres: ['', [Validators.required, Validators.minLength(2)]],
@@ -43,12 +53,74 @@ export class NnaPageCrearDenunciaComponent {
         direccion: ['', [Validators.required, Validators.minLength(5)]],
         mail: ['', [Validators.required, Validators.email]],
         telefono: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]]
+      }),
+      afectados: this.fb.array([]),
+      denunciados: this.fb.array([]),
+      hechos: this.fb.group({
+        descripcion_hechos: ['', [Validators.required, Validators.minLength(10)]],
+        vulneraciones: [[], [Validators.required]]
       })
     });
   }
 
+  ngOnInit() {
+    this.agregarAfectado();
+    this.agregarDenunciado();
+  }
+
   get denuncianteForm(): FormGroup {
     return this.denunciaForm.get('denunciante') as FormGroup;
+  }
+
+  get afectadosArray(): FormArray {
+    return this.denunciaForm.get('afectados') as FormArray;
+  }
+
+  get denunciadosArray(): FormArray {
+    return this.denunciaForm.get('denunciados') as FormArray;
+  }
+
+  asFormGroup(control: AbstractControl): FormGroup {
+    return control as FormGroup;
+  }
+
+  agregarAfectado(): void {
+    const afectadoForm = this.fb.group({
+      cedula: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      apellido: ['', [Validators.required, Validators.minLength(2)]],
+      sexo: ['', Validators.required],
+      nacionalidad: ['', Validators.required],
+      direccion: ['', [Validators.required, Validators.minLength(5)]],
+      mail: ['', [Validators.required, Validators.email]],
+      telefono: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]]
+    });
+    this.afectadosArray.push(afectadoForm);
+  }
+
+  eliminarAfectado(index: number): void {
+    this.afectadosArray.removeAt(index);
+  }
+
+  agregarDenunciado() {
+    const denunciadoForm = this.fb.group({
+      cedula: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      nombre: ['', [Validators.required, Validators.minLength(2)]],
+      apellido: ['', [Validators.required, Validators.minLength(2)]],
+      sexo: ['', Validators.required],
+      nacionalidad: ['', Validators.required],
+      direccion: ['', [Validators.required, Validators.minLength(5)]],
+      mail: ['', [Validators.required, Validators.email]],
+      telefono: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]]
+    });
+
+    this.denunciadosArray.push(denunciadoForm);
+  }
+
+  eliminarDenunciado(index: number) {
+    if (this.denunciadosArray.length > 1) {
+      this.denunciadosArray.removeAt(index);
+    }
   }
 
   cancelar(): void {
@@ -58,13 +130,19 @@ export class NnaPageCrearDenunciaComponent {
   onSubmit(): void {
     if (this.denunciaForm.valid) {
       this.loading = true;
-      this.error = '';
+      this.error = null;
 
       const formData = this.denunciaForm.value;
 
       // Convertir la cédula a número
       formData.denunciante.cedula = parseInt(formData.denunciante.cedula, 10);
       formData.denunciante.edad = parseInt(formData.denunciante.edad, 10);
+
+      // Convertir las cédulas de los afectados a número
+      formData.afectados = formData.afectados.map((afectado: any) => ({
+        ...afectado,
+        cedula: parseInt(afectado.cedula, 10)
+      }));
 
       console.log('Enviando datos:', formData);
 
@@ -89,6 +167,14 @@ export class NnaPageCrearDenunciaComponent {
         if (control instanceof FormGroup) {
           Object.keys(control.controls).forEach(subKey => {
             control.get(subKey)?.markAsTouched();
+          });
+        } else if (control instanceof FormArray) {
+          control.controls.forEach(group => {
+            if (group instanceof FormGroup) {
+              Object.keys(group.controls).forEach(subKey => {
+                group.get(subKey)?.markAsTouched();
+              });
+            }
           });
         } else {
           control?.markAsTouched();

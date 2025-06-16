@@ -15,6 +15,7 @@ interface DenunciaAttributes {
   pdf_evidencia?: number;
   pdf_denuncia?: number;
   usuario_creador?: number;
+  descripcion_hechos?: string;
 }
 
 export type DenunciaCreationAttributes = Optional<DenunciaAttributes, 'id'>;
@@ -33,6 +34,7 @@ export class Denuncia extends Model<DenunciaAttributes, DenunciaCreationAttribut
   public pdf_evidencia!: number;
   public pdf_denuncia!: number;
   public usuario_creador!: number;
+  public descripcion_hechos!: string;
 }
 
 Denuncia.init({
@@ -49,6 +51,7 @@ Denuncia.init({
   pdf_evidencia: { type: DataTypes.BIGINT },
   pdf_denuncia: { type: DataTypes.BIGINT },
   usuario_creador: { type: DataTypes.INTEGER },
+  descripcion_hechos: { type: DataTypes.TEXT },
 }, {
   sequelize,
   modelName: 'Denuncia',

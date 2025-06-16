@@ -15,26 +15,64 @@
     </div>
   </div>
 
-  <div class="overflow-x-auto">
+  <!-- Loading spinner -->
+  <div *ngIf="loading" class="text-center py-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="error" class="alert alert-danger" role="alert">
+    {{ error }}
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto" *ngIf="!loading && !error">
     <table class="min-w-full table-auto border text-sm">
       <thead class="bg-blue-100">
         <tr>
-          <th class="p-2 border">Trámite administrativo</th>
+          <th class="p-2 border">ID</th>
           <th class="p-2 border">Nombre</th>
           <th class="p-2 border">Fecha</th>
-          <th class="p-2 border">PDF denuncia</th>
-          <th class="p-2 border">PDF evidencia</th>
-          <th class="p-2 border"></th>
+          <th class="p-2 border">Tipo</th>
+          <th class="p-2 border">Estado</th>
+          <th class="p-2 border">Acciones</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let denuncia of denuncias" class="hover:bg-gray-50">
-          <td class="p-2 border"><a href="#" class="text-blue-600 underline">{{ denuncia.tramite}}</a></td>
-          <td class="p-2 border">{{denuncia.afectados?.[0]?.nombre}}</td>
-          <td class="p-2 border">{{ denuncia.fecha}}</td>
-          <td class="p-2 border">xxxxxx</td>
-          <td class="p-2 border">xxxxxx</td>
-          <td class="p-2 border text-center text-red-600 cursor-pointer"><i class="bi bi-trash"></i></td>
+          <td class="p-2 border">{{ denuncia.id }}</td>
+          <td class="p-2 border">
+            <ng-container *ngIf="denuncia.afectados && denuncia.afectados.length > 0">
+              {{ denuncia.afectados[0].nombre }} {{ denuncia.afectados[0].apellido }}
+            </ng-container>
+          </td>
+          <td class="p-2 border">{{ denuncia.fecha_creado | date:'dd/MM/yyyy' }}</td>
+          <td class="p-2 border">{{ denuncia.tipo_denuncia }}</td>
+          <td class="p-2 border">
+            <span [ngClass]="{
+              'px-2 py-1 rounded text-xs font-medium': true,
+              'bg-green-100 text-green-800': denuncia.estado === 'activo',
+              'bg-yellow-100 text-yellow-800': denuncia.estado === 'pendiente',
+              'bg-red-100 text-red-800': denuncia.estado === 'inactivo'
+            }">
+              {{ denuncia.estado }}
+            </span>
+          </td>
+          <td class="p-2 border">
+            <div class="flex space-x-2 justify-center">
+              <button class="text-blue-600 hover:text-blue-800" [routerLink]="['/nna/denuncia', denuncia.id]">
+                <i class="bi bi-eye"></i>
+              </button>
+              <button class="text-yellow-600 hover:text-yellow-800">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="text-red-600 hover:text-red-800">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>

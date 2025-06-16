@@ -1,7 +1,8 @@
-import { Request, Response } from 'express';
-import { Denuncia, Denunciante, Denunciado, Afectado, Hecho, Vulneracion, VulneracionIdentificada } from '../models';
+import { Request, Response, RequestHandler } from 'express';
+import { Denuncia, Denunciante, Denunciado, Afectado, Vulneracion, VulneracionesIdentificadas } from '../models';
 import { Transaction } from 'sequelize';
 import sequelize from '../config/database';
+import { Op } from 'sequelize';
 
 export const crearDenuncia = async (req: Request, res: Response): Promise<void> => {
     const t: Transaction = await sequelize.transaction();
@@ -17,14 +18,13 @@ export const crearDenuncia = async (req: Request, res: Response): Promise<void> 
             mes,
             tramite,
             usuario_creador,
+            descripcion_hechos,
             // Datos del denunciante
             denunciante,
             // Datos de los denunciados
             denunciados,
             // Datos de los afectados
             afectados,
-            // Datos del hecho
-            hecho,
             // Vulneraciones identificadas
             vulneraciones
         } = req.body;
@@ -40,7 +40,8 @@ export const crearDenuncia = async (req: Request, res: Response): Promise<void> 
             anio,
             mes,
             tramite,
-            usuario_creador
+            usuario_creador,
+            descripcion_hechos
         }, { transaction: t });
 
         // 2. Crear el denunciante
@@ -71,22 +72,14 @@ export const crearDenuncia = async (req: Request, res: Response): Promise<void> 
             ));
         }
 
-        // 5. Crear el hecho
-        if (hecho) {
-            const nuevoHecho = await Hecho.create({
-                ...hecho,
-                idDenuncia: nuevaDenuncia.id
-            }, { transaction: t });
-
-            // 6. Asociar las vulneraciones al hecho
-            if (vulneraciones && vulneraciones.length > 0) {
-                await Promise.all(vulneraciones.map((vulneracionId: number) => 
-                    VulneracionIdentificada.create({
-                        hechoId: nuevoHecho.id,
-                        vulneracionId
-                    }, { transaction: t })
-                ));
-            }
+        // 5. Asociar las vulneraciones a la denuncia
+        if (vulneraciones && vulneraciones.length > 0) {
+            await Promise.all(vulneraciones.map((vulneracionId: number) => 
+                VulneracionesIdentificadas.create({
+                    denuncia_id: nuevaDenuncia.id,
+                    vulneracion_id: vulneracionId
+                }, { transaction: t })
+            ));
         }
 
         await t.commit();
@@ -108,4 +101,142 @@ export const crearDenuncia = async (req: Request, res: Response): Promise<void> 
             error: error instanceof Error ? error.message : 'Error desconocido'
         });
     }
+};
+
+// Obtener todas las denuncias
+export const getAllDenuncias: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const denuncias = await Denuncia.findAll({
+      include: [
+        { model: Denunciante, as: 'denunciante' },
+        { model: Afectado, as: 'afectados' },
+        { model: Denunciado, as: 'denunciados' },
+        { 
+          model: Vulneracion,
+          as: 'vulneraciones'
+        }
+      ]
+    });
+    res.json(denuncias);
+  } catch (error) {
+    console.error('Error al obtener denuncias:', error);
+    res.status(500).json({ message: 'Error al obtener las denuncias' });
+  }
+};
+
+// Obtener una denuncia por ID
+export const getDenunciaById: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const denuncia = await Denuncia.findByPk(id, {
+      include: [
+        { model: Denunciante, as: 'denunciante' },
+        { model: Afectado, as: 'afectados' },
+        { model: Denunciado, as: 'denunciados' },
+        { 
+          model: Vulneracion,
+          as: 'vulneraciones'
+        }
+      ]
+    });
+
+    if (!denuncia) {
+      res.status(404).json({ message: 'Denuncia no encontrada' });
+      return;
+    }
+
+    res.json(denuncia);
+  } catch (error) {
+    console.error('Error al obtener la denuncia:', error);
+    res.status(500).json({ message: 'Error al obtener la denuncia' });
+  }
+};
+
+// Obtener denuncias por tipo
+export const getDenunciasByTipo: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { tipo } = req.params;
+    const denuncias = await Denuncia.findAll({
+      where: { tipo_denuncia: tipo },
+      include: [
+        { model: Denunciante, as: 'denunciante' },
+        { model: Afectado, as: 'afectados' },
+        { model: Denunciado, as: 'denunciados' },
+        { 
+          model: Vulneracion,
+          as: 'vulneraciones'
+        }
+      ]
+    });
+    res.json(denuncias);
+  } catch (error) {
+    console.error('Error al obtener denuncias por tipo:', error);
+    res.status(500).json({ message: 'Error al obtener las denuncias por tipo' });
+  }
+};
+
+// Obtener denuncias por fecha
+export const getDenunciasByFecha: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { fechaInicio, fechaFin } = req.query;
+    
+    if (!fechaInicio || !fechaFin) {
+      res.status(400).json({ message: 'Se requieren fechaInicio y fechaFin' });
+      return;
+    }
+
+    const denuncias = await Denuncia.findAll({
+      where: {
+        fecha_creado: {
+          [Op.between]: [new Date(fechaInicio as string), new Date(fechaFin as string)]
+        }
+      },
+      include: [
+        { model: Denunciante, as: 'denunciante' },
+        { model: Afectado, as: 'afectados' },
+        { model: Denunciado, as: 'denunciados' },
+        { 
+          model: Vulneracion,
+          as: 'vulneraciones'
+        }
+      ]
+    });
+    res.json(denuncias);
+  } catch (error) {
+    console.error('Error al obtener denuncias por fecha:', error);
+    res.status(500).json({ message: 'Error al obtener las denuncias por fecha' });
+  }
+};
+
+// Obtener estadísticas de denuncias
+export const getEstadisticasDenuncias: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const totalDenuncias = await Denuncia.count();
+    
+    const denunciasPorTipo = await Denuncia.findAll({
+      attributes: [
+        'tipo_denuncia',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'total']
+      ],
+      group: ['tipo_denuncia']
+    });
+
+    const denunciasPorMes = await Denuncia.findAll({
+      attributes: [
+        'mes',
+        [sequelize.fn('COUNT', sequelize.col('id')), 'total']
+      ],
+      group: ['mes'],
+      order: [['mes', 'ASC']]
+    });
+
+    res.json({
+      totalDenuncias,
+      denunciasPorTipo,
+      denunciasPorMes
+    });
+  } catch (error) {
+    console.error('Error al obtener estadísticas:', error);
+    res.status(500).json({ message: 'Error al obtener estadísticas de denuncias' });
+  }
 };
