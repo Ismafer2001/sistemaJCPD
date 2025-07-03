@@ -1,0 +1,305 @@
+<h1 class="text-2xl font-bold mb-6">Crear Nueva Denuncia</h1>
+
+<form [formGroup]="denunciaForm" (ngSubmit)="onSubmit()" class="space-y-6">
+  <!-- Sección de Número de Trámite -->
+  <div>
+    <h2 class="text-xl font-semibold mb-4">Número de Trámite</h2>
+    <div class="mt-1 grid grid-cols-2 max-w-md">
+      <input
+        type="text"
+        id="num_tramite"
+        formControlName="num_tramite"
+        class="min-w-0 block px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-500"
+        placeholder="Ingrese el número"
+      />
+      <span
+        class="items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500"
+      >
+        -JCPD-{{ canton }}-{{ anioActual }}
+      </span>
+    </div>
+    <div
+      *ngIf="denunciaForm.get('num_tramite')?.errors?.['required'] && denunciaForm.get('num_tramite')?.touched"
+      class="mt-1 text-sm text-red-600"
+    >
+      El número de trámite es requerido
+    </div>
+    <div
+      *ngIf="denunciaForm.get('num_tramite')?.errors?.['pattern'] && denunciaForm.get('num_tramite')?.touched"
+      class="mt-1 text-sm text-red-600"
+    >
+      Solo se permiten números
+    </div>
+  </div>
+  <!--tabs-->
+  <div class="flex border-b mb-0 gap-3">
+    <button type="button" class="rounded-t-2xl p-2"
+       [ngClass]="{
+      'bg-blue-500 text-white': currentTab === 0,
+      'bg-gray-100': currentTab !== 0
+    }"
+      (click)="cambiarTab(0)"
+      [class.active]="currentTab === 0"
+    >
+      datos generales
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab(1)"
+      [class.active]="currentTab === 1"
+    >
+      sobre los hechos
+    </button>
+  </div>
+
+  <!-- Sección del Denunciante -->
+  <div class="bg-gray-100 p-2">
+
+    <div
+      *ngIf="currentTab === 0"
+      class="bg-white rounded-lg shadow-md p-6 mb-8"
+    >
+
+      <h2 class="text-xl font-semibold mb-4">Datos del Denunciante</h2>
+      <nna_creardenuncia_denunciante
+        [formGroup]="denuncianteForm"
+      ></nna_creardenuncia_denunciante>
+
+    </div>
+
+
+    <!-- Sección de Afectados -->
+    <div *ngIf="currentTab === 0" class="mb-8 bg-white rounded-lg">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">
+        Datos de los Afectados
+      </h2>
+      <div formArrayName="afectados">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-700">Afectado</h3>
+        </div>
+        <nna_creardenuncia_afectado
+          [formArray]="afectadosArray"
+        ></nna_creardenuncia_afectado>
+        <div>{{afectadosArray.value.nombre}}</div>
+    </div>
+    </div>
+        <!-- Este div también es parte del formulario visual -->
+
+        <!-- Lista de afectados agregados -->
+
+
+    <!-- Sección de Denunciados -->
+    <div *ngIf="currentTab === 0" class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800">
+        Datos de los Denunciados
+      </h2>
+
+      <div class="" formArrayName="denunciados">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-medium text-gray-700">Denunciado</h3>
+        </div>
+        <nna_creardenuncia_denunciado
+          [formArray]="denunciadosArray"
+        ></nna_creardenuncia_denunciado>
+
+      </div>
+    </div>
+
+    <!-- Sección de Hechos -->
+    <div *ngIf="currentTab === 1" class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Hechos</h2>
+
+      <!-- Descripción de Hechos -->
+      <div class="mb-6">
+        <label
+          for="descripcion_hechos"
+          class="block text-sm font-medium text-gray-700"
+        >
+          Descripción de los Hechos
+        </label>
+        <textarea
+          id="descripcion_hechos"
+          formControlName="descripcion_hechos"
+          rows="4"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          placeholder="Describa los hechos ocurridos..."
+        ></textarea>
+        <div
+          *ngIf="denunciaForm.get('descripcion_hechos')?.errors?.['required'] && denunciaForm.get('descripcion_hechos')?.touched"
+          class="mt-1 text-sm text-red-600"
+        >
+          La descripción es requerida
+        </div>
+        <div
+          *ngIf="denunciaForm.get('descripcion_hechos')?.errors?.['minlength'] && denunciaForm.get('descripcion_hechos')?.touched"
+          class="mt-1 text-sm text-red-600"
+        >
+          La descripción debe tener al menos 10 caracteres
+        </div>
+      </div>
+
+      <!-- Lista de Vulneraciones -->
+      <app-nna_creardenuncia_vulneraciones
+        [formGroup]="vulneracionesForm"
+      ></app-nna_creardenuncia_vulneraciones>
+    </div>
+    <!-- Sección de Hechos -->
+    <div *ngIf="currentTab === 1" class="mb-8">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">solicitud</h2>
+
+      <!-- Descripción de solicitud -->
+      <div class="mb-6">
+        <label
+          for="descripcion_solicitud"
+          class="block text-sm font-medium text-gray-700"
+        >
+          Solicitud
+        </label>
+        <textarea
+          id="solicitud"
+          formControlName="solicitud"
+          rows="4"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          placeholder="Describa las solicitudes"
+        ></textarea>
+        <div
+          *ngIf="denunciaForm.get('solicitud')?.errors?.['required'] && denunciaForm.get('solicitud')?.touched"
+          class="mt-1 text-sm text-red-600"
+        >
+          La descripción es requerida
+        </div>
+        <div
+          *ngIf="denunciaForm.get('solicitud')?.errors?.['minlength'] && denunciaForm.get('solicitud')?.touched"
+          class="mt-1 text-sm text-red-600"
+        >
+          La descripción debe tener al menos 10 caracteres
+        </div>
+      </div>
+
+      <!-- Lista de Medidas -->
+      <div class="mt-6">
+        <h3 class="text-lg font-semibold text-gray-800 mb-4">
+          Medidas de Protección
+        </h3>
+        <app-crear_denuncia_medidas
+          [formGroup]="medidasForm"
+        ></app-crear_denuncia_medidas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensajes de error y éxito -->
+  <div
+    *ngIf="error"
+    class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+    role="alert"
+  >
+    <span class="block sm:inline">{{ error }}</span>
+  </div>
+
+  <!-- Botones de acción -->
+  <div class="flex justify-end space-x-4">
+    <button
+      type="button"
+      (click)="cancelar()"
+      class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+    >
+      Cancelar
+    </button>
+    <button
+      type="submit"
+      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+      [disabled]="denunciaForm.invalid || loading"
+      [title]="
+        denunciaForm.invalid ? 'Complete todos los campos requeridos' : ''
+      "
+    >
+      <span *ngIf="loading">Guardando...</span>
+      <span *ngIf="!loading">Guardar</span>
+    </button>
+  </div>
+
+  <!-- Mostrar errores de validación
+  <div
+    *ngIf="denunciaForm.invalid"
+    class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md"
+  >
+    <h3 class="text-sm font-medium text-yellow-800">
+      Por favor complete los siguientes campos:
+    </h3>
+    <ul class="mt-2 text-sm text-yellow-700 list-disc list-inside">
+      <li *ngIf="denunciaForm.get('num_tramite')?.errors?.['required']">
+        Número de trámite es requerido
+      </li>
+      <li *ngIf="denunciaForm.get('num_tramite')?.errors?.['min']">
+        El número de trámite debe ser mayor a 0
+      </li>
+      <li *ngIf="denuncianteForm.get('cedula')?.errors?.['required']">
+        Cédula del denunciante es requerida
+      </li>
+      <li *ngIf="denuncianteForm.get('cedula')?.errors?.['pattern']">
+        La cédula debe tener 10 dígitos
+      </li>
+      <li *ngIf="denuncianteForm.get('nombres')?.errors?.['required']">
+        Nombres del denunciante son requeridos
+      </li>
+      <li *ngIf="denuncianteForm.get('nombres')?.errors?.['minlength']">
+        Los nombres deben tener al menos 2 caracteres
+      </li>
+      <li *ngIf="denuncianteForm.get('apellidos')?.errors?.['required']">
+        Apellidos del denunciante son requeridos
+      </li>
+      <li *ngIf="denuncianteForm.get('apellidos')?.errors?.['minlength']">
+        Los apellidos deben tener al menos 2 caracteres
+      </li>
+      <li *ngIf="denuncianteForm.get('edad')?.errors?.['required']">
+        Edad del denunciante es requerida
+      </li>
+      <li
+        *ngIf="denuncianteForm.get('edad')?.errors?.['min'] || denuncianteForm.get('edad')?.errors?.['max']"
+      >
+        La edad debe estar entre 0 y 120 años
+      </li>
+      <li *ngIf="denuncianteForm.get('genero')?.errors?.['required']">
+        Género del denunciante es requerido
+      </li>
+      <li *ngIf="denuncianteForm.get('nacionalidad')?.errors?.['required']">
+        Nacionalidad del denunciante es requerida
+      </li>
+      <li *ngIf="denuncianteForm.get('direccion')?.errors?.['required']">
+        Dirección del denunciante es requerida
+      </li>
+      <li *ngIf="denuncianteForm.get('direccion')?.errors?.['minlength']">
+        La dirección debe tener al menos 5 caracteres
+      </li>
+      <li *ngIf="denuncianteForm.get('mail')?.errors?.['required']">
+        Correo del denunciante es requerido
+      </li>
+      <li *ngIf="denuncianteForm.get('mail')?.errors?.['email']">
+        El correo debe tener un formato válido
+      </li>
+      <li *ngIf="denuncianteForm.get('telefono')?.errors?.['required']">
+        Teléfono del denunciante es requerido
+      </li>
+      <li *ngIf="denuncianteForm.get('telefono')?.errors?.['pattern']">
+        El teléfono debe tener 10 dígitos
+      </li>
+      <li *ngIf="denunciaForm.get('descripcion_hechos')?.errors?.['required']">
+        Descripción de hechos es requerida
+      </li>
+      <li *ngIf="denunciaForm.get('descripcion_hechos')?.errors?.['minlength']">
+        La descripción debe tener al menos 10 caracteres
+      </li>
+      <li
+        *ngIf="vulneracionesForm.get('ids')?.errors?.['required'] || vulneracionesForm.get('ids')?.errors?.['minlength']"
+      >
+        Debe seleccionar al menos una vulneración
+      </li>
+      <li
+        *ngIf="medidasForm.get('ids')?.errors?.['required'] || medidasForm.get('ids')?.errors?.['minlength']"
+      >
+        Debe seleccionar al menos una medida de protección
+      </li>
+    </ul>
+  </div>-->
+</form>

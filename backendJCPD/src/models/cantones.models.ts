@@ -6,7 +6,7 @@ export interface CantonAttributes {
   canton: string;
 }
 
-export type CantonCreationAttributes = Optional<CantonAttributes, 'id'>;
+type CantonCreationAttributes = Optional<CantonAttributes, 'id'>;
 
 export class Canton extends Model<CantonAttributes, CantonCreationAttributes>
   implements CantonAttributes {

@@ -7,7 +7,9 @@ interface VulneracionAttributes {
   vulneracion: string;
 }
 
-export type VulneracionCreationAttributes = Optional<VulneracionAttributes, 'id'>;
+interface VulneracionCreationAttributes extends Optional<VulneracionAttributes, 'id'>{
+  
+}
 
 export class Vulneracion extends Model<VulneracionAttributes, VulneracionCreationAttributes> implements VulneracionAttributes {
   public id!: number;

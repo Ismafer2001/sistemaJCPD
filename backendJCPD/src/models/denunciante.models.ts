@@ -1,35 +1,44 @@
 // models/denunciante.model.ts
-import { Model, DataTypes, Optional } from 'sequelize';
+import { Model, DataTypes, Optional,HasManyAddAssociationMixin, HasManyCountAssociationsMixin,
+  HasManyCreateAssociationMixin, HasManyGetAssociationsMixin, HasManyHasAssociationMixin,
+  HasManySetAssociationsMixin, HasManyAddAssociationsMixin, HasManyHasAssociationsMixin,
+  HasManyRemoveAssociationMixin, HasManyRemoveAssociationsMixin } from 'sequelize';
 import sequelize from '../config/database';
 
 interface DenuncianteAttributes {
   id: number;
-  cedula: number;
+  cedula: string;
   nombres: string;
   apellidos: string;
   edad: number;
+  sexo: string;
   genero: string;
   nacionalidad: string;
   direccion: string;
   mail: string;
   telefono: string;
+parentezco: string;
   idDenuncia: number;
+
 }
 
 interface DenuncianteCreationAttributes extends Optional<DenuncianteAttributes, 'id'> {}
 
 export class Denunciante extends Model<DenuncianteAttributes, DenuncianteCreationAttributes>
   implements DenuncianteAttributes {
+  
   public id!: number;
-  public cedula!: number;
+  public cedula!: string;
   public nombres!: string;
   public apellidos!: string;
   public edad!: number;
+  public sexo!: string;
   public genero!: string;
   public nacionalidad!: string;
   public direccion!: string;
   public mail!: string;
   public telefono!: string;
+  public parentezco!: string;
   public idDenuncia!: number;
 }
 
@@ -40,7 +49,7 @@ Denunciante.init({
     autoIncrement: true,
   },
   cedula: {
-    type: DataTypes.BIGINT,
+    type: DataTypes.STRING,
     
   },
   nombres: {
@@ -53,6 +62,10 @@ Denunciante.init({
   },
   edad: {
     type: DataTypes.INTEGER,
+    
+  },
+  sexo: {
+    type: DataTypes.STRING,
     
   },
   genero: {
@@ -72,6 +85,10 @@ Denunciante.init({
     
   },
   telefono: {
+    type: DataTypes.STRING,
+    
+  },
+  parentezco: {
     type: DataTypes.STRING,
     
   },

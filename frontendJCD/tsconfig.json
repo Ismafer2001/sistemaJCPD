@@ -6,7 +6,7 @@
     "baseUrl": "./src",
     "paths": {
       "@inicio/*": ["app/inicio/*"],
-      "@nna/*": ["app/nna/*"],
+      "@nna/*": ["app/modulosJCPD/nna/*"],
       "@auth/*": ["app/auth/*"],
       "@admin/*": ["app/admin/*"],
       "@shared/*": ["app/shared/*"]

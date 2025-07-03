@@ -1,0 +1,210 @@
+<div [formGroup]="denunciadoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <!-- Cédula -->
+  <div>
+    <label for="cedula" class="block text-sm font-medium text-gray-700">Cédula</label>
+    <input
+      type="text"
+      id="cedula"
+      formControlName="cedula"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      placeholder="Ingrese la cédula"
+    />
+    <div *ngIf="denunciadoForm.get('cedula')?.errors?.['required'] && denunciadoForm.get('cedula')?.touched"
+         class="mt-1 text-sm text-red-600">
+      La cédula es requerida
+    </div>
+    <div *ngIf="denunciadoForm.get('cedula')?.errors?.['pattern'] && denunciadoForm.get('cedula')?.touched"
+         class="mt-1 text-sm text-red-600">
+      La cédula debe tener 10 dígitos
+    </div>
+  </div>
+
+  <!-- Nombres -->
+  <div>
+    <label for="nombres" class="block text-sm font-medium text-gray-700">Nombres</label>
+    <input
+      type="text"
+      id="nombres"
+      formControlName="nombres"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      placeholder="Ingrese los nombres"
+    />
+    <div *ngIf="denunciadoForm.get('nombres')?.errors?.['required'] && denunciadoForm.get('nombres')?.touched"
+         class="mt-1 text-sm text-red-600">
+      Los nombres son requeridos
+    </div>
+  </div>
+
+  <!-- Apellidos -->
+  <div>
+    <label for="apellidos" class="block text-sm font-medium text-gray-700">Apellidos</label>
+    <input
+      type="text"
+      id="apellidos"
+      formControlName="apellidos"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      placeholder="Ingrese los apellidos"
+    />
+    <div *ngIf="denunciadoForm.get('apellidos')?.errors?.['required'] && denunciadoForm.get('apellidos')?.touched"
+         class="mt-1 text-sm text-red-600">
+      Los apellidos son requeridos
+    </div>
+  </div>
+
+  <!-- Edad -->
+  <div>
+    <label for="edad" class="block text-sm font-medium text-gray-700">Edad</label>
+    <input
+      type="number"
+      id="edad"
+      formControlName="edad"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      placeholder="Ingrese la edad"
+    />
+    <div *ngIf="denunciadoForm.get('edad')?.errors?.['required'] && denunciadoForm.get('edad')?.touched"
+         class="mt-1 text-sm text-red-600">
+      La edad es requerida
+    </div>
+  </div>
+
+  <!-- Sexo -->
+  <div>
+    <label for="sexo" class="block text-sm font-medium text-gray-700">Sexo</label>
+    <select
+      id="sexo"
+      formControlName="sexo"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+    >
+      <option value="">Seleccione...</option>
+      <option value="Masculino">Masculino</option>
+      <option value="Femenino">Femenino</option>
+    </select>
+    <div *ngIf="denunciadoForm.get('sexo')?.errors?.['required'] && denunciadoForm.get('sexo')?.touched"
+         class="mt-1 text-sm text-red-600">
+      El sexo es requerido
+    </div>
+  </div>
+
+  <!-- Nacionalidad -->
+  <div>
+    <label for="nacionalidad" class="block text-sm font-medium text-gray-700">Nacionalidad</label>
+    <input
+      type="text"
+      id="nacionalidad"
+      formControlName="nacionalidad"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      placeholder="Ingrese la nacionalidad"
+    />
+    <div *ngIf="denunciadoForm.get('nacionalidad')?.errors?.['required'] && denunciadoForm.get('nacionalidad')?.touched"
+         class="mt-1 text-sm text-red-600">
+      La nacionalidad es requerida
+    </div>
+  </div>
+
+  <!-- Dirección -->
+  <div>
+    <label for="direccion" class="block text-sm font-medium text-gray-700">Dirección</label>
+    <input
+      type="text"
+      id="direccion"
+      formControlName="direccion"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      placeholder="Ingrese la dirección"
+    />
+    <div *ngIf="denunciadoForm.get('direccion')?.errors?.['required'] && denunciadoForm.get('direccion')?.touched"
+         class="mt-1 text-sm text-red-600">
+      La dirección es requerida
+    </div>
+  </div>
+
+  <!-- Correo -->
+  <div>
+    <label for="mail" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+    <input
+      type="email"
+      id="mail"
+      formControlName="mail"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      placeholder="Ingrese el correo"
+    />
+    <div *ngIf="denunciadoForm.get('mail')?.errors?.['required'] && denunciadoForm.get('mail')?.touched"
+         class="mt-1 text-sm text-red-600">
+      El correo es requerido
+    </div>
+    <div *ngIf="denunciadoForm.get('mail')?.errors?.['email'] && denunciadoForm.get('mail')?.touched"
+         class="mt-1 text-sm text-red-600">
+      Ingrese un correo válido
+    </div>
+  </div>
+
+  <!-- Teléfono -->
+  <div>
+    <label for="telefono" class="block text-sm font-medium text-gray-700">Teléfono</label>
+    <input
+      type="text"
+      id="telefono"
+      formControlName="telefono"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      placeholder="Ingrese el teléfono"
+    />
+    <div *ngIf="denunciadoForm.get('telefono')?.errors?.['required'] && denunciadoForm.get('telefono')?.touched"
+         class="mt-1 text-sm text-red-600">
+      El teléfono es requerido
+    </div>
+    <div *ngIf="denunciadoForm.get('telefono')?.errors?.['pattern'] && denunciadoForm.get('telefono')?.touched"
+         class="mt-1 text-sm text-red-600">
+      El teléfono debe tener 10 dígitos
+    </div>
+  </div>
+
+  <!-- Parentesco -->
+  <div>
+    <label for="parentezco" class="block text-sm font-medium text-gray-700">Parentesco</label>
+    <input
+      type="text"
+      id="parentezco"
+      formControlName="parentezco"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      placeholder="Ingrese el parentesco"
+    />
+    <div *ngIf="denunciadoForm.get('parentezco')?.errors?.['required'] && denunciadoForm.get('parentezco')?.touched"
+         class="mt-1 text-sm text-red-600">
+      El parentesco es requerido
+    </div>
+  </div>
+
+  <div class="mb-4">
+    <button type="button"
+      (click)="agregarDenunciado()"
+      class="bg-blue-500 text-white px-4 py-2 rounded"
+    >
+      Agregar Afectado
+    </button>
+  </div>
+
+  <!-- Lista de afectados agregados -->
+  <table *ngIf="formArray.controls.length > 0">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Cédula</th>
+        <th>Teléfono</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let denunciado of formArray.controls; let i = index">
+        <td>{{denunciado.value.nombres }}</td>
+        <td>{{ denunciado.value.apellidos }}</td>
+        <td>{{denunciado.value.cedula }}</td>
+        <td>{{denunciado.value.telefono }}</td>
+        <td>
+          <button type="button" (click)="eliminarDenunciado(i)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+
+</div>

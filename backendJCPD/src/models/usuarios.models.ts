@@ -15,7 +15,9 @@ export interface UsuarioAttributes {
   fecha_creacion?: Date;
 }
 
-export type UsuarioCreationAttributes = Optional<UsuarioAttributes, 'id' | 'isactivo' | 'fecha_creacion'>;
+interface UsuarioCreationAttributes extends Optional<UsuarioAttributes, 'id' | 'isactivo' | 'fecha_creacion'>{
+  
+}
 
 export class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes>
   implements UsuarioAttributes {

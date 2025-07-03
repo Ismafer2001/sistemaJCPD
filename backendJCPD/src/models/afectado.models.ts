@@ -8,6 +8,7 @@ interface AfectadoAttributes {
   nombre: string;
   apellido: string;
   sexo: string;
+  genero: string;
   nacionalidad: string;
   direccion: string;
   mail: string;
@@ -15,7 +16,9 @@ interface AfectadoAttributes {
   idDenuncia: number;
 }
 
-interface AfectadoCreationAttributes extends Optional<AfectadoAttributes, 'id'> {}
+interface AfectadoCreationAttributes extends Optional<AfectadoAttributes, 'id'> {
+  
+}
 
 export class Afectado extends Model<AfectadoAttributes, AfectadoCreationAttributes> implements AfectadoAttributes {
   public id!: number;
@@ -23,11 +26,13 @@ export class Afectado extends Model<AfectadoAttributes, AfectadoCreationAttribut
   public nombre!: string;
   public apellido!: string;
   public sexo!: string;
+  public genero!: string;
   public nacionalidad!: string;
   public direccion!: string;
   public mail!: string;
   public telefono!: string;
   public idDenuncia!: number;
+  
 }
 
 Afectado.init({
@@ -51,6 +56,9 @@ Afectado.init({
   sexo: {
     type: DataTypes.STRING,
     
+  },
+  genero:{
+    type: DataTypes.STRING,
   },
   nacionalidad: {
     type: DataTypes.STRING,

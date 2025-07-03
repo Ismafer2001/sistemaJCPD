@@ -1,0 +1,277 @@
+<div [formGroup]="afectadoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+  <!-- Cédula -->
+  <div class="form-group">
+    <label class="block text-sm font-medium text-gray-700">Cédula</label>
+    <input
+      type="text"
+      formControlName="cedula"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      [class.border-red-500]="
+        afectadoForm.get('cedula')?.invalid &&
+        afectadoForm.get('cedula')?.touched
+      "
+    />
+    <div
+      *ngIf="
+        afectadoForm.get('cedula')?.invalid &&
+        afectadoForm.get('cedula')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="afectadoForm.get('cedula')?.errors?.['required']"
+        >La cédula es requerida</span
+      >
+      <span *ngIf="afectadoForm.get('cedula')?.errors?.['pattern']"
+        >La cédula debe tener 10 dígitos</span
+      >
+    </div>
+  </div>
+
+  <!-- Nombre -->
+  <div class="form-group">
+    <label class="block text-sm font-medium text-gray-700">Nombre</label>
+    <input
+      type="text"
+      formControlName="nombre"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      [class.border-red-500]="
+        afectadoForm.get('nombre')?.invalid &&
+        afectadoForm.get('nombre')?.touched
+      "
+    />
+    <div
+      *ngIf="
+        afectadoForm.get('nombre')?.invalid &&
+        afectadoForm.get('nombre')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="afectadoForm.get('nombre')?.errors?.['required']"
+        >El nombre es requerido</span
+      >
+      <span *ngIf="afectadoForm.get('nombre')?.errors?.['minlength']"
+        >El nombre debe tener al menos 2 caracteres</span
+      >
+    </div>
+  </div>
+
+  <!-- Apellido -->
+  <div class="form-group">
+    <label class="block text-sm font-medium text-gray-700">Apellido</label>
+    <input
+      type="text"
+      formControlName="apellido"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      [class.border-red-500]="
+        afectadoForm.get('apellido')?.invalid &&
+        afectadoForm.get('apellido')?.touched
+      "
+    />
+    <div
+      *ngIf="
+        afectadoForm.get('apellido')?.invalid &&
+        afectadoForm.get('apellido')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="afectadoForm.get('apellido')?.errors?.['required']"
+        >El apellido es requerido</span
+      >
+      <span *ngIf="afectadoForm.get('apellido')?.errors?.['minlength']"
+        >El apellido debe tener al menos 2 caracteres</span
+      >
+    </div>
+  </div>
+  <!-- Edad -->
+  <div class="form-group">
+    <label class="block text-sm font-medium text-gray-700">Edad</label>
+    <input
+      type="number"
+      formControlName="edad"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      [class.border-red-500]="
+        afectadoForm.get('edad')?.invalid && afectadoForm.get('edad')?.touched
+      "
+    />
+    <div
+      *ngIf="
+        afectadoForm.get('edad')?.invalid && afectadoForm.get('edad')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="afectadoForm.get('edad')?.errors?.['required']"
+        >La edad es requerida</span
+      >
+      <span
+        *ngIf="afectadoForm.get('edad')?.errors?.['min'] || afectadoForm.get('edad')?.errors?.['max']"
+        >La edad debe estar entre 0 y 120 años</span
+      >
+    </div>
+  </div>
+
+  <!-- Sexo -->
+  <div class="form-group">
+    <label class="block text-sm font-medium text-gray-700">Sexo</label>
+    <select
+      formControlName="sexo"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      [class.border-red-500]="
+        afectadoForm.get('sexo')?.invalid && afectadoForm.get('sexo')?.touched
+      "
+    >
+      <option value="">Seleccione un sexo</option>
+      <option value="masculino">Masculino</option>
+      <option value="femenino">Femenino</option>
+    </select>
+    <div
+      *ngIf="
+        afectadoForm.get('sexo')?.invalid && afectadoForm.get('sexo')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="afectadoForm.get('sexo')?.errors?.['required']"
+        >El sexo es requerido</span
+      >
+    </div>
+  </div>
+
+  <!-- Nacionalidad -->
+  <div class="form-group">
+    <label class="block text-sm font-medium text-gray-700">Nacionalidad</label>
+    <input
+      type="text"
+      formControlName="nacionalidad"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      [class.border-red-500]="
+        afectadoForm.get('nacionalidad')?.invalid &&
+        afectadoForm.get('nacionalidad')?.touched
+      "
+    />
+    <div
+      *ngIf="
+        afectadoForm.get('nacionalidad')?.invalid &&
+        afectadoForm.get('nacionalidad')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="afectadoForm.get('nacionalidad')?.errors?.['required']"
+        >La nacionalidad es requerida</span
+      >
+    </div>
+  </div>
+
+  <!-- Dirección -->
+  <div class="form-group md:col-span-2">
+    <label class="block text-sm font-medium text-gray-700">Dirección</label>
+    <input
+      type="text"
+      formControlName="direccion"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      [class.border-red-500]="
+        afectadoForm.get('direccion')?.invalid &&
+        afectadoForm.get('direccion')?.touched
+      "
+    />
+    <div
+      *ngIf="
+        afectadoForm.get('direccion')?.invalid &&
+        afectadoForm.get('direccion')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="afectadoForm.get('direccion')?.errors?.['required']"
+        >La dirección es requerida</span
+      >
+      <span *ngIf="afectadoForm.get('direccion')?.errors?.['minlength']"
+        >La dirección debe tener al menos 5 caracteres</span
+      >
+    </div>
+  </div>
+
+  <!-- Email -->
+  <div class="form-group">
+    <label class="block text-sm font-medium text-gray-700"
+      >Correo Electrónico</label
+    >
+    <input
+      type="email"
+      formControlName="mail"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      [class.border-red-500]="
+        afectadoForm.get('mail')?.invalid && afectadoForm.get('mail')?.touched
+      "
+    />
+    <div
+      *ngIf="
+        afectadoForm.get('mail')?.invalid && afectadoForm.get('mail')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="afectadoForm.get('mail')?.errors?.['required']"
+        >El correo electrónico es requerido</span
+      >
+      <span *ngIf="afectadoForm.get('mail')?.errors?.['email']"
+        >Ingrese un correo electrónico válido</span
+      >
+    </div>
+  </div>
+
+  <!-- Teléfono -->
+  <div class="form-group">
+    <label class="block text-sm font-medium text-gray-700">Teléfono</label>
+    <input
+      type="tel"
+      formControlName="telefono"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      [class.border-red-500]="
+        afectadoForm.get('telefono')?.invalid &&
+        afectadoForm.get('telefono')?.touched
+      "
+    />
+    <div
+      *ngIf="
+        afectadoForm.get('telefono')?.invalid &&
+        afectadoForm.get('telefono')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="afectadoForm.get('telefono')?.errors?.['required']"
+        >El teléfono es requerido</span
+      >
+      <span *ngIf="afectadoForm.get('telefono')?.errors?.['pattern']"
+        >El teléfono debe tener 10 dígitos</span
+      >
+    </div>
+  </div>
+  <div class="mb-4">
+    <button type="button"
+      (click)="agregarAfectado()"
+      class="bg-blue-500 text-white px-4 py-2 rounded"
+    >
+      Agregar Afectado
+    </button>
+  </div>
+  <!-- Lista de afectados agregados -->
+  <table *ngIf="formArray.controls.length > 0">
+    <thead>
+      <tr>
+        <th>Nombre</th>
+        <th>Apellido</th>
+        <th>Cédula</th>
+        <th>Teléfono</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let afectado of formArray.controls; let i = index">
+        <td>{{ afectado.value.nombre }}</td>
+        <td>{{ afectado.value.apellido }}</td>
+        <td>{{ afectado.value.cedula }}</td>
+        <td>{{ afectado.value.telefono }}</td>
+        <td>
+          <button type="button" (click)="eliminarAfectado(i)">Eliminar</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

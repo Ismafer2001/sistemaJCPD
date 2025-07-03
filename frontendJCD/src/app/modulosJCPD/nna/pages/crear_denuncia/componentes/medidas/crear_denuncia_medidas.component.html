@@ -1,0 +1,43 @@
+<div class="space-y-6">
+  <!-- Mensaje de carga -->
+  <div *ngIf="loading" class="text-center py-4">
+    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+    <p class="mt-2 text-gray-600">Cargando medidas...</p>
+  </div>
+
+  <!-- Mensaje de error -->
+  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+    <span class="block sm:inline">{{ error }}</span>
+  </div>
+
+  <!-- Lista de medidas por artículo -->
+  <div *ngIf="!loading && !error" class="space-y-6">
+    <div *ngFor="let articulo of medidasPorArticulo" class="bg-white rounded-lg shadow-md p-6">
+      <h3 class="text-lg font-semibold text-gray-800 mb-4">{{ articulo.articulo }}</h3>
+      
+      <div class="space-y-3">
+        <div *ngFor="let medida of articulo.medidas" class="flex items-start">
+          <div class="flex items-center h-5">
+            <input
+              type="checkbox"
+              [id]="'medida-' + medida.id"
+              [checked]="isMedidaSeleccionada(medida.id)"
+              (change)="onMedidaSeleccionada(medida.id, $event)"
+              class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+            >
+          </div>
+          <div class="ml-3">
+            <label [for]="'medida-' + medida.id" class="text-sm text-gray-700">
+              {{ medida.medida }}
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mensaje cuando no hay medidas -->
+  <div *ngIf="!loading && !error && medidasPorArticulo.length === 0" class="text-center py-4">
+    <p class="text-gray-600">No hay medidas disponibles</p>
+  </div>
+</div>

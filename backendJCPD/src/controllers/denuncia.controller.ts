@@ -1,106 +1,38 @@
 import { Request, Response, RequestHandler } from 'express';
-import { Denuncia, Denunciante, Denunciado, Afectado, Vulneracion, VulneracionesIdentificadas } from '../models';
-import { Transaction } from 'sequelize';
+import { Denuncia, Denunciante, Denunciado, Afectado, Vulneracion, VulneracionesIdentificadas, medidasIdentificadas, medida } from '../models';
+
 import sequelize from '../config/database';
 import { Op } from 'sequelize';
+import { insertDenuncia, datosDenuncia } from '../services/denuncia.service';
 
 export const crearDenuncia = async (req: Request, res: Response): Promise<void> => {
-    const t: Transaction = await sequelize.transaction();
+  try {
+    // Construir el payload tipado para el servicio
+    const payload: datosDenuncia = {
+      denuncia: req.body,
+      denunciante: req.body.denunciante,
+      denunciados: req.body.denunciados,
+      afectados: req.body.afectados,
+    };
 
-    try {
-        const {
-            // Datos de la denuncia
-            medio,
-            tipo_denuncia,
-            canton,
-            num_tramite,
-            anio,
-            mes,
-            tramite,
-            usuario_creador,
-            descripcion_hechos,
-            // Datos del denunciante
-            denunciante,
-            // Datos de los denunciados
-            denunciados,
-            // Datos de los afectados
-            afectados,
-            // Vulneraciones identificadas
-            vulneraciones
-        } = req.body;
+    // Llamar al servicio que inserta la denuncia
+    const nuevaDenuncia = await insertDenuncia(payload);
 
-        // 1. Crear la denuncia
-        const nuevaDenuncia = await Denuncia.create({
-            medio,
-            tipo_denuncia,
-            fecha_creado: new Date(),
-            fecha_modificado: new Date(),
-            canton,
-            num_tramite,
-            anio,
-            mes,
-            tramite,
-            usuario_creador,
-            descripcion_hechos
-        }, { transaction: t });
-
-        // 2. Crear el denunciante
-        if (denunciante) {
-            await Denunciante.create({
-                ...denunciante,
-                idDenuncia: nuevaDenuncia.id
-            }, { transaction: t });
-        }
-
-        // 3. Crear los denunciados
-        if (denunciados && denunciados.length > 0) {
-            await Promise.all(denunciados.map((denunciado: any) => 
-                Denunciado.create({
-                    ...denunciado,
-                    idDenuncia: nuevaDenuncia.id
-                }, { transaction: t })
-            ));
-        }
-
-        // 4. Crear los afectados
-        if (afectados && afectados.length > 0) {
-            await Promise.all(afectados.map((afectado: any) => 
-                Afectado.create({
-                    ...afectado,
-                    idDenuncia: nuevaDenuncia.id
-                }, { transaction: t })
-            ));
-        }
-
-        // 5. Asociar las vulneraciones a la denuncia
-        if (vulneraciones && vulneraciones.length > 0) {
-            await Promise.all(vulneraciones.map((vulneracionId: number) => 
-                VulneracionesIdentificadas.create({
-                    denuncia_id: nuevaDenuncia.id,
-                    vulneracion_id: vulneracionId
-                }, { transaction: t })
-            ));
-        }
-
-        await t.commit();
-
-        res.status(201).json({
-            success: true,
-            message: 'Denuncia creada exitosamente',
-            data: {
-                id: nuevaDenuncia.id
-            }
-        });
-
-    } catch (error) {
-        await t.rollback();
-        console.error('Error al crear la denuncia:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Error al crear la denuncia',
-            error: error instanceof Error ? error.message : 'Error desconocido'
-        });
-    }
+    // Responder al cliente con el ID de la nueva denuncia
+    res.status(201).json({
+      success: true,
+      message: 'Denuncia creada exitosamente',
+      data: { id: nuevaDenuncia.id }
+    });
+  } catch (error) {
+    console.error('Error en crearDenuncia:', error);
+    // Manejo de errores genérico
+    res.status(500).json({
+      success: false,
+      message: 'Error al crear la denuncia',
+      error: error instanceof Error ? error.message : 'Error desconocido'
+    });
+  }
 };
 
 // Obtener todas las denuncias
@@ -114,6 +46,10 @@ export const getAllDenuncias: RequestHandler = async (req: Request, res: Respons
         { 
           model: Vulneracion,
           as: 'vulneraciones'
+        },
+        {
+          model: medida,
+          as: 'medidas'
         }
       ]
     });
@@ -136,6 +72,10 @@ export const getDenunciaById: RequestHandler = async (req: Request, res: Respons
         { 
           model: Vulneracion,
           as: 'vulneraciones'
+        },
+        {
+          model: medida,
+          as: 'medidas'
         }
       ]
     });
@@ -165,6 +105,10 @@ export const getDenunciasByTipo: RequestHandler = async (req: Request, res: Resp
         { 
           model: Vulneracion,
           as: 'vulneraciones'
+        },
+        {
+          model: medida,
+          as: 'medidas'
         }
       ]
     });
@@ -198,6 +142,10 @@ export const getDenunciasByFecha: RequestHandler = async (req: Request, res: Res
         { 
           model: Vulneracion,
           as: 'vulneraciones'
+        },
+        {
+          model: medida,
+          as: 'medidas'
         }
       ]
     });

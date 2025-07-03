@@ -9,6 +9,7 @@ interface DenunciadoAttributes {
   apellidos: string;
   edad: number;
   sexo: string;
+  genero: string;
   nacionalidad: string;
   direccion: string;
   mail: string;
@@ -26,6 +27,7 @@ export class Denunciado extends Model<DenunciadoAttributes, DenunciadoCreationAt
   public apellidos!: string;
   public edad!: number;
   public sexo!: string;
+  public genero!: string;
   public nacionalidad!: string;
   public direccion!: string;
   public mail!: string;
@@ -59,6 +61,9 @@ Denunciado.init({
   sexo: {
     type: DataTypes.STRING,
     
+  },
+  genero:{
+    type: DataTypes.STRING,
   },
   nacionalidad: {
     type: DataTypes.STRING,
