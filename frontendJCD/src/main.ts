@@ -6,7 +6,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app/app.routes';
-import { authInterceptor } from 'app/interceptors/auth.interceptor';
+import { authInterceptor } from './app/shared/interceptors/auth.interceptor';
 
 
 

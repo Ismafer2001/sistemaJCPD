@@ -5,8 +5,8 @@ import sequelize from '../config/database';
 interface AfectadoAttributes {
   id: number;
   cedula: number;
-  nombre: string;
-  apellido: string;
+  nombres: string;
+  apellidos: string;
   sexo: string;
   genero: string;
   nacionalidad: string;
@@ -23,8 +23,8 @@ interface AfectadoCreationAttributes extends Optional<AfectadoAttributes, 'id'> 
 export class Afectado extends Model<AfectadoAttributes, AfectadoCreationAttributes> implements AfectadoAttributes {
   public id!: number;
   public cedula!: number;
-  public nombre!: string;
-  public apellido!: string;
+  public nombres!: string;
+  public apellidos!: string;
   public sexo!: string;
   public genero!: string;
   public nacionalidad!: string;
@@ -45,11 +45,11 @@ Afectado.init({
     type: DataTypes.STRING,
     
   },
-  nombre: {
+  nombres: {
     type: DataTypes.STRING,
     
   },
-  apellido: {
+  apellidos: {
     type: DataTypes.STRING,
    
   },

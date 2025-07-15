@@ -1,15 +1,20 @@
 import { Component } from '@angular/core';
-import { InicioLayoutHeaderComponent } from "./components/inicio-layout-header/inicio-layout-header.component";
+
 import { RouterOutlet } from '@angular/router';
+import { headerComponent } from '@shared/header/header.component';
 
 @Component({
   selector: 'app-layout',
-  
-  imports: [InicioLayoutHeaderComponent,RouterOutlet],
+
+  imports: [headerComponent,RouterOutlet],
   templateUrl: './layout.component.html',
-  
+
 })
 export class LayoutComponent {
+  moduloActual: string = 'JUNTA CANTONAL DE PROTECCION DE DERECHOS';
+
+
+
 
 }
 export default LayoutComponent;

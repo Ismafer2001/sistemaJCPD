@@ -1,4 +1,4 @@
-import express, { Application } from 'express';
+import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
 import  sequelize  from './config/database'; // Conecta y carga modelos
@@ -12,7 +12,7 @@ import { seedInitialData } from './utils/seed';
 
 
 
-const app: Application = express();
+const app = express();
 const PORT = process.env.PORT || 3000;
 
 

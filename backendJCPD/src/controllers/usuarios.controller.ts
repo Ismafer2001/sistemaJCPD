@@ -1,41 +1,35 @@
-import { Request, Response } from 'express';
-import { Usuario } from '../models/usuarios.models';
-import { Canton } from '../models/cantones.models';
-import bcrypt from 'bcryptjs';
-
+import { Request, Response } from "express";
+import { usuarios } from "../models/usuarios.models";
+import { Canton } from "../models/cantones.models";
+import bcrypt from "bcryptjs";
+import { registrarUsuario } from "../services/user.service";
 
 // Crear usuario
-export const crearUsuario = async (req: Request, res: Response) => {
+export const registrarUsuarioCtrl = async (req: Request, res: Response) => {
   try {
-    const { usuario, contrasena, ...resto } = req.body;
-
-    const existe = await Usuario.findOne({ where: { usuario } });
-    if (existe) { res.status(400).json({ mensaje: 'Usuario ya existe' });
-    return;
-
-  }
-
-    const hashed = await bcrypt.hash(contrasena, 10);
-
-    const nuevoUsuario = await Usuario.create({ usuario, contrasena: hashed, ...resto });
+    const nuevoUsuario = await registrarUsuario(req.body);
     res.status(201).json(nuevoUsuario);
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al crear usuario', error });
+    if (error instanceof Error && error.message === "Usuario ya existe") {
+      return res.status(400).json({ mensaje: error.message });
+    }
+
+    res.status(500).json({ mensaje: "Error al crear usuario", error });
   }
 };
+
 
 // Obtener usuarios
 export const obtenerUsuarios = async (_req: Request, res: Response) => {
   try {
-    const usuarios = await Usuario.findAll({
-      
-      include: [{ model: Canton, as: 'canton' }]
+    const usuario = await usuarios.findAll({
+      include: [{ model: Canton, as: "canton" }],
     });
 
-    res.json(usuarios);
+    res.json(usuario);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ mensaje: 'Error al obtener usuarios' });
+    res.status(500).json({ mensaje: "Error al obtener usuarios" });
   }
 };
 
@@ -49,10 +43,10 @@ export const actualizarUsuario = async (req: Request, res: Response) => {
       datos.contrasena = await bcrypt.hash(datos.contrasena, 10);
     }
 
-    await Usuario.update(datos, { where: { id } });
-    res.json({ mensaje: 'Usuario actualizado' });
+    await usuarios.update(datos, { where: { id } });
+    res.json({ mensaje: "Usuario actualizado" });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al actualizar usuario' });
+    res.status(500).json({ mensaje: "Error al actualizar usuario" });
   }
 };
 
@@ -60,10 +54,10 @@ export const actualizarUsuario = async (req: Request, res: Response) => {
 export const desactivarUsuario = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await Usuario.update({ isactivo: false }, { where: { id } });
-    res.json({ mensaje: 'Usuario desactivado correctamente' });
+    await usuarios.update({ isactivo: false }, { where: { id } });
+    res.json({ mensaje: "Usuario desactivado correctamente" });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al desactivar usuario', error });
+    res.status(500).json({ mensaje: "Error al desactivar usuario", error });
   }
 };
 
@@ -71,9 +65,9 @@ export const desactivarUsuario = async (req: Request, res: Response) => {
 export const eliminarUsuario = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await Usuario.destroy({ where: { id } });
-    res.json({ mensaje: 'Usuario eliminado definitivamente' });
+    await usuarios.destroy({ where: { id } });
+    res.json({ mensaje: "Usuario eliminado definitivamente" });
   } catch (error) {
-    res.status(500).json({ mensaje: 'Error al eliminar usuario', error });
+    res.status(500).json({ mensaje: "Error al eliminar usuario", error });
   }
 };

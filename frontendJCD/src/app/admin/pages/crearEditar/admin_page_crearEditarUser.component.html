@@ -5,22 +5,47 @@
           <label class="block mb-1">Usuario</label>
           <input type="text" formControlName="usuario" class="w-full border px-3 py-2 rounded" />
         </div>
+        @if (form.get('usuario')?.errors?.['required'] && form.get('usuario')?.touched) {
+          <div class="mt-1 text-sm text-red-600">
+            El usuario es requerido
+           </div>
+        }
         <div>
           <label class="block mb-1">Nombres</label>
           <input type="text" formControlName="nombres" class="w-full border px-3 py-2 rounded" />
         </div>
+        @if (form.get('usuario')?.errors?.['required'] && form.get('usuario')?.touched) {
+          <div class="mt-1 text-sm text-red-600">
+            El usuario es requerido
+           </div>
+        }
         <div>
           <label class="block mb-1">Apellidos</label>
           <input type="text" formControlName="apellidos" class="w-full border px-3 py-2 rounded" />
         </div>
+        @if (form.get('usuario')?.errors?.['required'] && form.get('usuario')?.touched) {
+          <div class="mt-1 text-sm text-red-600">
+            El usuario es requerido
+           </div>
+        }
         <div>
           <label class="block mb-1">Correo</label>
           <input type="email" formControlName="correo" class="w-full border px-3 py-2 rounded" />
         </div>
+        @if (form.get('correo')?.errors?.['required'] && form.get('correo')?.touched) {
+          <div class="mt-1 text-sm text-red-600">
+            El correo es requerido
+           </div>
+        }
         <div>
           <label class="block mb-1">Contraseña</label>
           <input type="password" formControlName="contrasena" class="w-full border px-3 py-2 rounded" />
         </div>
+        @if (form.get('contrasena')?.errors?.['required'] && form.get('contrasena')?.touched) {
+          <div class="mt-1 text-sm text-red-600">
+            la contraseña es requerida
+           </div>
+        }
         <div>
           <label class="block mb-1">Rol</label>
           <select formControlName="rol" class="w-full border px-3 py-2 rounded">
@@ -30,12 +55,22 @@
             <option value="suplente">Suplente</option>
           </select>
         </div>
+        @if (form.get('rol')?.errors?.['required'] && form.get('rol')?.touched) {
+          <div class="mt-1 text-sm text-red-600">
+            El rol es requerido
+           </div>
+        }
         <div>
           <label class="block mb-1">Cantón</label>
           <select formControlName="id_canton" class="w-full border px-3 py-2 rounded">
             <option *ngFor="let canton of cantones" [value]="canton.id">{{ canton.canton }}</option>
           </select>
         </div>
+        @if (form.get('id_cantono')?.errors?.['required'] && form.get('canton')?.touched) {
+          <div class="mt-1 text-sm text-red-600">
+            El canton es requerido
+           </div>
+        }
         <div class="flex items-center space-x-2">
           <input type="checkbox" formControlName="isactivo" id="estado" class="form-checkbox" />
           <label for="estado">Activo</label>

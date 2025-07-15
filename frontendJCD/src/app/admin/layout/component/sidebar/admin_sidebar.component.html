@@ -1,26 +1,43 @@
-
-
-    <aside class="h-screen w-64 bg-gray-800 text-white flex flex-col p-4  ">
-      <h6 class="uppercase font-bold mb-4 text-sm">Menú</h6>
-
-      <a routerLink="/" class="mb-2 flex items-center text-white hover:text-gray-300">
+<nav class="bg-gray-700 text-white flex flex-col p-1 w-[175px]  fixed top-14 left-0  h-[calc(100vh-3rem)] z-40  overflow-auto" >
+  <h6 class="uppercase font-bold mb-4 text-sm">Menú</h6>
+  <ul class=" space-y-6 " >
+    <li>
+      <a
+        routerLink="/admin/usuarios"
+        class="mb-2 flex items-center text-white hover:text-gray-300"
+      >
         <i class="bi bi-house-door mr-2"></i>Inicio
       </a>
+    </li>
 
-      <a routerLink="/admin/usuarios" class="mb-2 flex items-center text-white hover:text-gray-300">
-        <i class="bi bi-house-door mr-2"></i>Administrar usuarios
+
+    <li>
+      <a
+        routerLink="/adultos"
+        class="mb-2 flex items-center text-white hover:text-gray-300"
+      >
+        <i class="bi bi-person-fill mr-2"></i>reportes
       </a>
-
-      <a routerLink="/mujeres" class="mb-2 flex items-center text-white hover:text-gray-300">
-        <i class="bi bi-gender-female mr-2"></i>reportes
+    </li>
+    <li>
+      <a
+        routerLink="/admin/usuarios"
+        class="mb-2 flex items-center text-white hover:text-gray-300"
+      >
+        <i class="bi bi-person-gear mr-2"></i>Administrar usuarios
       </a>
+    </li>
 
-      <div class="mt-auto pt-3 border-t border-gray-600">
-        <button  class="w-full mt-2 py-2 border border-white text-white hover:bg-white hover:text-gray-700 rounded transition">
-          <i class="bi bi-box-arrow-right mr-2"></i>Cerrar sesión
-        </button>
-      </div>
-    </aside>
+  </ul>
 
-
-
+  <div class="mt-auto">
+    
+    <div class="my-5 border-t border-gray-600">
+      <button (click)="logout()"
+        class="w-full mt-2 py-2 border border-white text-white hover:bg-white hover:text-gray-700 rounded transition"
+      >
+        <i class="bi bi-box-arrow-right mr-2"></i>Cerrar sesión
+      </button>
+    </div>
+  </div>
+</nav>

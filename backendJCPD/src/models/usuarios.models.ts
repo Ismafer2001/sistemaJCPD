@@ -1,26 +1,15 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
+import { usuarioAttributes } from '../interfaces/usuarios.interface';
 
 
-export interface UsuarioAttributes {
-  id: number;
-  usuario: string;
-  nombres: string;
-  apellidos: string;
-  correo?: string;
-  contrasena: string;
-  rol: 'admin' | 'principal' | 'secretari@' | 'suplente';
-  isactivo: boolean;
-  id_canton: number;
-  fecha_creacion?: Date;
-}
 
-interface UsuarioCreationAttributes extends Optional<UsuarioAttributes, 'id' | 'isactivo' | 'fecha_creacion'>{
+interface UsuarioCreationAttributes extends Optional<usuarioAttributes, 'id' | 'isactivo' | 'fecha_creacion'>{
   
 }
 
-export class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes>
-  implements UsuarioAttributes {
+export class usuarios extends Model<usuarioAttributes, UsuarioCreationAttributes>
+  implements usuarioAttributes {
   public id!: number;
   public usuario!: string;
   public nombres!: string;
@@ -33,7 +22,7 @@ export class Usuario extends Model<UsuarioAttributes, UsuarioCreationAttributes>
   public fecha_creacion!: Date;
 }
 
-Usuario.init({
+usuarios.init({
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
   usuario: { type: DataTypes.STRING, allowNull: false, unique: true },
   nombres: { type: DataTypes.STRING, allowNull: false },
@@ -47,7 +36,6 @@ Usuario.init({
 }, {
   sequelize,
   tableName: 'usuarios',
-  modelName: 'Usuario',
   timestamps: false,
 });
 

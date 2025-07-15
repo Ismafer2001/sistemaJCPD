@@ -13,6 +13,10 @@ export const crearDenuncia = async (req: Request, res: Response): Promise<void> 
       denunciante: req.body.denunciante,
       denunciados: req.body.denunciados,
       afectados: req.body.afectados,
+      vulneracion: req.body.vulneracion,
+      medida: req.body.medida
+      
+
     };
 
     // Llamar al servicio que inserta la denuncia
@@ -36,21 +40,14 @@ export const crearDenuncia = async (req: Request, res: Response): Promise<void> 
 };
 
 // Obtener todas las denuncias
-export const getAllDenuncias: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const getAllDenuncias = async (req: Request, res: Response) => {
   try {
     const denuncias = await Denuncia.findAll({
       include: [
         { model: Denunciante, as: 'denunciante' },
-        { model: Afectado, as: 'afectados' },
-        { model: Denunciado, as: 'denunciados' },
-        { 
-          model: Vulneracion,
-          as: 'vulneraciones'
-        },
-        {
-          model: medida,
-          as: 'medidas'
-        }
+        { model: Afectado, as: 'afectados' }
+
+        
       ]
     });
     res.json(denuncias);

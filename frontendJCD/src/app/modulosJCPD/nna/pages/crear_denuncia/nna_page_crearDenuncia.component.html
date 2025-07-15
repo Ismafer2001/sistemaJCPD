@@ -140,7 +140,8 @@
 
       <!-- Lista de Vulneraciones -->
       <app-nna_creardenuncia_vulneraciones
-        [formGroup]="vulneracionesForm"
+        [formArray]="vulneracionesForm"
+        [formAfectados]="afectadosArray"
       ></app-nna_creardenuncia_vulneraciones>
     </div>
     <!-- Sección de Hechos -->
@@ -182,7 +183,8 @@
           Medidas de Protección
         </h3>
         <app-crear_denuncia_medidas
-          [formGroup]="medidasForm"
+          [formArray]="medidasForm"
+          [formAfectados]="afectadosArray"
         ></app-crear_denuncia_medidas>
       </div>
     </div>

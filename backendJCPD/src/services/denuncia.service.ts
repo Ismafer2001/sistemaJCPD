@@ -10,17 +10,16 @@ import {
   medidasIdentificadas,
   
 } from '../models';
-interface AfectadoExtendido extends Afectado {
-  vulneraciones?: number[];
-  medidas?: number[];
-}
+
 
 
 export interface datosDenuncia {
   denuncia: Denuncia;
   denunciante?: Denunciante;
   denunciados?: Denunciado[];
-  afectados?: AfectadoExtendido[];
+  afectados?: Afectado[];
+  vulneracion?: { id_afectado: number; vulneraciones: number[] }[];
+medida?: { id_afectado: number; medidas: number[] }[];
  
 }
 
@@ -33,12 +32,12 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       denunciante,
       denunciados = [],
       afectados = [],
+      vulneracion = [],
+      medida = [],
     } = denunciajson;
 
-    // 1. Crear la denuncia principal
     const nuevaDenuncia = await Denuncia.create(denuncia, { transaction: t });
 
-    // 2. Crear denunciante
     if (denunciante) {
       await Denunciante.create(
         { ...denunciante, idDenuncia: nuevaDenuncia.id },
@@ -46,10 +45,9 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       );
     }
 
-    // 3. Crear denunciados
     if (denunciados.length) {
       await Promise.all(
-        denunciados.map((d) =>
+        denunciados.map((d:Denunciado) =>
           Denunciado.create(
             { ...d, idDenuncia: nuevaDenuncia.id },
             { transaction: t }
@@ -58,35 +56,39 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       );
     }
 
-    // 4. Crear afectados con sus vulneraciones y medidas
-    for (const afectado of afectados) {
-      const { vulneraciones = [], medidas = [], ...datosAfectado } = afectado;
+    const idMap = new Map(); // guardará id temporal vs id real
 
+    for (const [index, afectado] of afectados.entries()) {
       const nuevoAfectado = await Afectado.create(
-        { ...datosAfectado, idDenuncia: nuevaDenuncia.id },
+        { ...afectado, idDenuncia: nuevaDenuncia.id },
         { transaction: t }
       );
 
-      // Vulneraciones
-      if (vulneraciones.length) {
-        const relacionesVul = vulneraciones.map((vulId) => ({
-          afectado_id: nuevoAfectado.id,
-          vulneracion_id: vulId,
-        }));
-        await VulneracionesIdentificadas.bulkCreate(relacionesVul, {
-          transaction: t,
-        });
-      }
+      // Mapeo: posición -> id real del afectado
+      idMap.set(index + 1, nuevoAfectado.id);
+    }
 
-      // Medidas
-      if (medidas.length) {
-        const relacionesMedidas = medidas.map((medId) => ({
-          afectado_id: nuevoAfectado.id,
-          medidas_id: medId,
+    // Asociar vulneraciones por id_afectado
+    for (const v of vulneracion) {
+      const realId = idMap.get(+v.id_afectado);
+      if (realId && v.vulneraciones.length) {
+        const data = v.vulneraciones.map((id:number) => ({
+          afectado_id: realId,
+          vulneracion_id: id,
         }));
-        await medidasIdentificadas.bulkCreate(relacionesMedidas, {
-          transaction: t,
-        });
+        await VulneracionesIdentificadas.bulkCreate(data, { transaction: t });
+      }
+    }
+
+    // Asociar medidas por id_afectado
+    for (const m of medida) {
+      const realId = idMap.get(+m.id_afectado);
+      if (realId && m.medidas.length) {
+        const data = m.medidas.map((id:number) => ({
+          afectado_id: realId,
+          medidas_id: id,
+        }));
+        await medidasIdentificadas.bulkCreate(data, { transaction: t });
       }
     }
 
@@ -97,4 +99,5 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
     throw err;
   }
 }
+
 

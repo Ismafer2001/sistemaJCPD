@@ -5,33 +5,33 @@
       <span class="text-lg">+</span>
     </button>
   </div>
+  <div class="bg-white  rounded-2xl p-4 shadow-xl " >
+    <h6 class=" font-bold mb-4">Usuarios registrados</h6>
+   <div class=" overflow-x-auto shadow-md bg-white border-2 border-blue-100  rounded-2xl">
+    <table class="table-auto w-full text-sm text-left  ">
+      <thead class="bg-blue-50  ">
+        <tr class="">
+          <th class=" p-2">#</th>
+          <th class=" p-2">Usuario</th>
+          <th class=" p-2">Nombres</th>
+          <th class=" p-2">Apellidos</th>
 
-  <h6 class="text-gray-600 mb-4">Usuarios registrados</h6>
-  <div class="overflow-x-auto">
-    <table class="table-auto w-full border text-sm">
-      <thead class="bg-gray-100">
-        <tr>
-          <th class="border px-3 py-2">#</th>
-          <th class="border px-3 py-2">Usuario</th>
-          <th class="border px-3 py-2">Nombres</th>
-          <th class="border px-3 py-2">Apellidos</th>
+          <th class=" p-2">Rol</th>
+          <th class=" p-2">Cantón</th>
+          <th class=" p-2">Estado</th>
 
-          <th class="border px-3 py-2">Rol</th>
-          <th class="border px-3 py-2">Estado</th>
-          <th class="border px-3 py-2">Cantón</th>
-          <th class="border px-3 py-2">Acciones</th>
+          <th class=" p-2">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let user of usuarios" class="hover:bg-gray-50">
-          <td class="border px-3 py-2">{{user.id}}</td>
-          <td class="border px-3 py-2">{{user.usuario}}</td>
-          <td class="border px-3 py-2">{{user.nombres}}</td>
-          <td class="border px-3 py-2">{{user.apellidos}}</td>
-          <td class="border px-3 py-2">{{user.rol}}</td>
-          <td class="border px-3 py-2">{{user.canton?.canton}}</td>
-
-          <td class="border px-3 py-2">
+        <tr *ngFor="let user of usuarios" class="hover:bg-gray-50 border-t-2 border-t-blue-100">
+          <td class="  p-2">{{user.id}}</td>
+          <td class=" p-2">{{user.usuario}}</td>
+          <td class=" p-2">{{user.nombres}}</td>
+          <td class=" p-2">{{user.apellidos}}</td>
+          <td class=" p-2">{{user.rol}}</td>
+          <td class=" p-2">{{user.canton?.canton}}</td>
+            <td class=" p-2">
             <button
                 (click)="cambiarEstado(user)"
                 class="px-2 py-1 rounded text-white"
@@ -40,7 +40,12 @@
               </button>
           </td>
 
-          <td class="border px-3 py-2 space-x-1">
+
+
+
+
+
+          <td class="p-2 space-x-1">
             <button (click)="editar(user)" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded" >Editar</button>
 
             <button (click)="eliminar(user.id)" class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded" >Eliminar</button>
@@ -49,6 +54,10 @@
       </tbody>
     </table>
   </div>
+
+  </div>
+
+
 </div>
 
 

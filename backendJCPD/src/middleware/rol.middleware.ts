@@ -1,14 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 
-export const verificarRol = (rolesPermitidos: string[]) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const rol = req.usuario?.rol;
+export const soloAdmin = (req: Request, res: Response, next: NextFunction) => {
+  if (!req.user || req.user.rol !== 'admin') {
+    return res.status(403).json({ mensaje: 'Acceso denegado: solo administradores' });
+  }
 
-    if (!rol || !rolesPermitidos.includes(rol)) {
-      res.status(403).json({ mensaje: 'Acceso denegado: rol no autorizado' });
-      return;
-    }
-
-    next();
-  };
+  next(); // Es admin, puede pasar
 };

@@ -26,7 +26,7 @@ export class Admin_page_crearEditarUserComponent {
       usuario: ['', Validators.required],
       nombres: ['', Validators.required],
       apellidos: ['', Validators.required],
-      correo: [''],
+      correo: ['',Validators.required],
       contrasena: ['', Validators.required],
       rol: ['principal', Validators.required],
       id_canton: ['', Validators.required],
@@ -34,6 +34,10 @@ export class Admin_page_crearEditarUserComponent {
     });
 
     this.userService.obtenerCantones().subscribe(data => this.cantones = data);
+  }
+
+  get usercreateform():FormGroup{
+    return this.form;
   }
 
   guardar() {

@@ -1,10 +1,19 @@
 
-  <div class="flex overflow-hidden h-screen ">
+  <div class="flex h-screen ">
     <admin-layout-sidebar></admin-layout-sidebar>
-    <main class="flex-grow bg-white overflow-y-auto ">
-      <admin-layout-header></admin-layout-header>
+
+    <div class="ml-45 w-full">
+      <globla-header [moduloActual]="'ADMINISTRACIÓN'"></globla-header>
+
+      <main class="px-5 pt-18 h-[100vh] overflow-y-auto ">
+
+
       <admin-layout-content></admin-layout-content>
-    </main>
+
+      </main>
+
+    </div>
+
   </div>
 
 

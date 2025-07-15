@@ -6,7 +6,7 @@ import {
   FormBuilder,
   Validators,
   FormArray,
-  AbstractControl
+
 } from '@angular/forms';
 import { DenunciaService } from '../../services/denuncia.service';
 import { Router } from '@angular/router';
@@ -29,7 +29,7 @@ import { Crear_denuncia_medidasComponent } from './componentes/medidas/crear_den
     Nna_creardenuncia_afectadoComponent,
     Nna_creardenuncia_denunciadoComponent,
     Nna_creardenuncia_vulneracionesComponent,
-    Crear_denuncia_medidasComponent
+    Crear_denuncia_medidasComponent,
   ],
 })
 export class NnaPageCrearDenunciaComponent implements OnInit {
@@ -38,7 +38,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   currentTab = 0;  //variable para cambiar pestañas del formulario
   denunciaForm: FormGroup;
 
-  
+
   loading = false;
   error: string | null = null;
    // Variable para el cantón
@@ -105,12 +105,8 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         Validators.required,
         Validators.minLength(10)
       ]],
-      vulneraciones: this.fb.group({
-        ids: [[], [Validators.required, Validators.minLength(1)]]
-      }),
-      medidas: this.fb.group({
-        ids: [[], [Validators.required, Validators.minLength(1)]]
-      })
+      vulneraciones: this.fb.array([]),
+      medidas: this.fb.array([])
     });
 
 
@@ -147,11 +143,11 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
     return this.denunciaForm.get('denunciados') as FormArray;
   }
 
-  get vulneracionesForm(): FormGroup {
-    return this.denunciaForm.get('vulneraciones') as FormGroup;
+  get vulneracionesForm(): FormArray {
+    return this.denunciaForm.get('vulneraciones') as FormArray;
   }
-   get medidasForm(): FormGroup {
-    return this.denunciaForm.get('medidas') as FormGroup;
+   get medidasForm(): FormArray {
+    return this.denunciaForm.get('medidas') as FormArray;
   }
 
 
@@ -165,8 +161,36 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   }
 
   onSubmit(): void {
-    this.router.navigate(['/nna']);
+    if (this.denunciaForm.invalid) {
+      this.denunciaForm.markAllAsTouched();
+      this.error = 'Complete todos los campos requeridos';
+      return;
+    }
+    // Construir el código de trámite
+    const numTramite = this.denunciaForm.get('num_tramite')?.value;
+    const codigoTramite = `${numTramite}-${this.canton}-${this.anioActual}`;
 
+
+
+    // Construir el objeto final
+    const body = {
+      ...this.denunciaForm.value,
+      codigoTramite
+
+    };
+
+    this.loading = true;
+    this.denunciaService.crearDenuncia(body).subscribe({
+      next: () => {
+        this.loading = false;
+        this.router.navigate(['/nna']);
+      },
+      error: (err) => {
+        this.loading = false;
+        this.error = 'Error al guardar la denuncia';
+        console.error(err);
+      }
+    });
   }
 }
 export default NnaPageCrearDenunciaComponent;

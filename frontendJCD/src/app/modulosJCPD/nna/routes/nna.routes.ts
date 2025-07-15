@@ -23,6 +23,13 @@ export const nnaRoutes: Routes = [
           import('@nna/pages/fases/nna_page_fases.component')
 
 
+      },
+      {
+        path:'avocatoria/:id',
+        loadComponent:()=>
+          import('@nna/pages/Avocatoria/nna-page-avocatoria.component')
+
+
       }
     ],
   },

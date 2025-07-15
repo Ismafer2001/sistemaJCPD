@@ -1,5 +1,5 @@
 // utils/seed.ts
-import { Usuario } from '../models/usuarios.models';
+import { usuarios } from '../models/usuarios.models';
 import { Canton } from '../models/cantones.models';
 import { Vulneracion } from '../models/vulneraciones.models';
 import bcrypt from 'bcryptjs';
@@ -8,7 +8,7 @@ import { medida } from '../models';
 
 export async function seedInitialData() {
   
-  const usuariosExistentes = await Usuario.count();
+  const usuariosExistentes = await usuarios.count();
   if (usuariosExistentes > 0) return;
 
   const cantones = [
@@ -38,7 +38,7 @@ export async function seedInitialData() {
   await Canton.bulkCreate(cantones);
 
   const hashedPassword = await bcrypt.hash('admin123', 10);
-  await Usuario.create({
+  await usuarios.create({
     usuario: 'admin',
     nombres: 'Administrador',
     apellidos: 'Principal',

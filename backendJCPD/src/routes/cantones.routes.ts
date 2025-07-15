@@ -4,6 +4,6 @@ import { obtenerCantones } from '../controllers/cantones.controller';
 
 const router = Router();
 
-router.get('/cantones', obtenerCantones);
+router.get('', obtenerCantones);
 
 export default router;

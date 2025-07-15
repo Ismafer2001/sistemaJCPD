@@ -1,5 +1,5 @@
 
-import { Usuario } from './usuarios.models';
+import { usuarios } from './usuarios.models';
 import { Canton } from './cantones.models';
 import { Afectado } from './afectado.models';
 import { Denuncia } from './denuncia.models';
@@ -12,8 +12,8 @@ import { medidasIdentificadas } from './medidasIdentificada.models';
 import { articulo } from './articulo_medidas.models';
 
 //relacion usuario -- canton
-Usuario.belongsTo(Canton, { foreignKey: 'id_canton', as: 'canton' });
-Canton.hasMany(Usuario, { foreignKey: 'id_canton' });
+usuarios.belongsTo(Canton, { foreignKey: 'id_canton', as: 'canton' });
+Canton.hasMany(usuarios, { foreignKey: 'id_canton' });
 
 //relacion afectado denuncia
 Denuncia.hasMany(Afectado, { foreignKey: 'idDenuncia', as:'afectados'});
@@ -79,7 +79,7 @@ export {
   Afectado,
   medida,
   medidasIdentificadas,
-  Usuario,
+  usuarios,
   Canton,
   articulo
 };

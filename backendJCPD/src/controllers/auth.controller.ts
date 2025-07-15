@@ -1,54 +1,45 @@
 import { Request, Response } from 'express';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { Usuario } from '../models/usuarios.models';
-import dotenv from 'dotenv';
 
-dotenv.config();
+
+
+import { loginUsuario } from '../services/auth.service';
+import { Canton, usuarios } from '../models';
+
+
 
 export const iniciarsesion = async (req: Request, res: Response) => {
-  const { usuario, contrasena } = req.body;
-
+  
+  
   try {
-    const user = await Usuario.findOne({ where: { usuario } });
-
-    if (!user) {
-      res.status(404).json({ mensaje: 'Usuario no encontrado' });
-      return;
-    }
-
-    const passwordValido = await bcrypt.compare(contrasena, user.contrasena);
-    if (!passwordValido) {
-      res.status(401).json({ mensaje: 'Contraseña incorrecta' });
-      return;
-    }
-
-    const token = jwt.sign(
-      {
-        id: user.id,
-        usuario: user.usuario,
-        rol: user.rol,
-        canton: user.id_canton
-      },
-      process.env.JWT_SECRET as string,
-      { expiresIn: '4h' }
-    );
-
-    res.json({ token, usuario: user });
+    const responlogin = await loginUsuario(req.body);
+    
+    res.status(200).json(responlogin)
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: 'Error interno del servidor' });
   }
 };
+// Obtener usuario actual
+export const obtenerUsuarioActual = async (req: Request, res: Response) => {
+  try {
+    const usuario = await usuarios.findByPk(req.user.id, {
+      include: [
+        {
+          model: Canton,
+          as: "canton",
+          attributes: ["canton"], // solo queremos el nombre
+        },
+      ],
+    });
 
-export const obtenerPerfil = async(req: Request, res: Response) => {
-  if (!req.usuario) {
-    res.status(403).json({ mensaje: 'Token no válido o ausente' });
-    return;
+    if (!usuario) {
+      return res.status(404).json({ mensaje: "Usuario no encontrado" });
+    }
+    res.json(usuario);
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al obtener el usuario" });
   }
-
-  res.json({
-    mensaje: 'Perfil del usuario',
-    usuario: req.usuario
-  });
 };
+
+

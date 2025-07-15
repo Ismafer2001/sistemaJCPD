@@ -9,6 +9,17 @@ import { Router, RouterLink } from '@angular/router';
 })
 export class SidebarComponent   {
 
+  constructor(private authService: AuthService,private router: Router){
+
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    
+
+    this.router.navigate(['/login']);
+  }
+
 
 }
 export default SidebarComponent;

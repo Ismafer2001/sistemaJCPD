@@ -1,8 +1,5 @@
 // models/denunciante.model.ts
-import { Model, DataTypes, Optional,HasManyAddAssociationMixin, HasManyCountAssociationsMixin,
-  HasManyCreateAssociationMixin, HasManyGetAssociationsMixin, HasManyHasAssociationMixin,
-  HasManySetAssociationsMixin, HasManyAddAssociationsMixin, HasManyHasAssociationsMixin,
-  HasManyRemoveAssociationMixin, HasManyRemoveAssociationsMixin } from 'sequelize';
+import { Model, DataTypes, Optional} from 'sequelize';
 import sequelize from '../config/database';
 
 interface DenuncianteAttributes {
