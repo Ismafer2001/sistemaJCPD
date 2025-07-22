@@ -27,7 +27,7 @@ export const nnaRoutes: Routes = [
       {
         path:'avocatoria/:id',
         loadComponent:()=>
-          import('@nna/pages/Avocatoria/nna-page-avocatoria.component')
+          import('@nna/pages/crearAvocatoria/crearAvocatoria.component')
 
 
       }

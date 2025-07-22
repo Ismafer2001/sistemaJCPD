@@ -1,51 +1,71 @@
-<div class="bg-white p-4">
-  <button routerLink="/nna" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+<div class="max-w-5xl mx-auto bg-white p-6 rounded shadow space-y-6">
+
+  <!-- Encabezado: Código de Trámite -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold">Trámite administrativo: <span class="text-xl text-gray-500">#{{denuncia?.codigoTramite}}</span></h1>
+    <button routerLink="/nna" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
       Volver
     </button>
-  <div class="flex flex-col justify-between  mb-6">
-    <h1 class="text-2xl font-bold">trámite administrativo #{{denunciaId}}</h1>
-    <h1 class="text-2xl font-bold">niños: iker ejemplo</h1>
-
   </div>
+  <h1 class="text-2xl font-bold">Niño: <span class="text-xl text-gray-500">{{denuncia?.afectados}}</span></h1>
 
 
 
+  <!-- Scroll horizontal de fases -->
+  <div class="max-w-full overflow-x-auto bg-white p-4 rounded shadow border">
+    <div class="flex space-x-4">
 
-  <!-- Fases -->
-  <div *ngIf="!loading && !error" class="space-y-4">
-    <div *ngFor="let fase of fases" class="border rounded-lg p-4 hover:shadow-md transition">
-      <div class="flex justify-between items-start">
-        <div>
-          <h3 class="text-lg font-semibold">{{ fase.nombre }}</h3>
-          <p class="text-gray-600 mt-1">{{ fase.descripcion }}</p>
-          <div class="mt-2 text-sm text-gray-500">
-            <p *ngIf="fase.fecha_inicio">Inicio: {{ fase.fecha_inicio | date:'dd/MM/yyyy' }}</p>
-            <p *ngIf="fase.fecha_fin">Fin: {{ fase.fecha_fin | date:'dd/MM/yyyy' }}</p>
-          </div>
-        </div>
-        <div class="flex items-center space-x-2">
-          <span [ngClass]="{
-            'px-3 py-1 rounded-full text-sm font-medium': true,
-            'bg-yellow-100 text-yellow-800': fase.estado === 'pendiente',
-            'bg-blue-100 text-blue-800': fase.estado === 'en_proceso',
-            'bg-green-100 text-green-800': fase.estado === 'completada'
-          }">
-            {{ fase.estado | titlecase }}
-          </span>
-          <div class="flex space-x-2">
-            <button *ngIf="fase.estado === 'pendiente'"
-                    (click)="actualizarEstadoFase(fase.id, 'en_proceso')"
-                    class="text-blue-600 hover:text-blue-800">
-              <i class="bi bi-play-fill"></i>
-            </button>
-            <button *ngIf="fase.estado === 'en_proceso'"
-                    (click)="actualizarEstadoFase(fase.id, 'completada')"
-                    class="text-green-600 hover:text-green-800">
-              <i class="bi bi-check-lg"></i>
-            </button>
-          </div>
-        </div>
+     <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+      <a [routerLink]="['/nna/avocatoria', denuncia?.idDenuncia]" >
+        <h3 class="text-lg font-bold text-gray-700">avocatoria</h3>
+        <p class="text-sm text-gray-600">Pendiente</p>
+
+      </a>
+
       </div>
+
+      <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <h3 class="text-lg font-bold text-gray-700">notificaciones</h3>
+        <p class="text-sm text-gray-600">Pendiente</p>
+      </div>
+
+      <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <h3 class="text-lg font-bold text-gray-700">citaciones</h3>
+        <p class="text-sm text-gray-600">En proceso</p>
+      </div>
+
+      <!-- Continúa con las siguientes fases... -->
+        <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <h3 class="text-lg font-bold text-gray-700">audiencia de contestacion</h3>
+        <p class="text-sm text-gray-600">En proceso</p>
+      </div>
+       <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <h3 class="text-lg font-bold text-gray-700">audiencia de pruebas</h3>
+        <p class="text-sm text-gray-600">En proceso</p>
+      </div>
+       <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <h3 class="text-lg font-bold text-gray-700">resoluciones</h3>
+        <p class="text-sm text-gray-600">En proceso</p>
+      </div>
+       <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <h3 class="text-lg font-bold text-gray-700">cumplimiento de medidas</h3>
+        <p class="text-sm text-gray-600">En proceso</p>
+      </div>
+      <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <h3 class="text-lg font-bold text-gray-700">control de impugnacion</h3>
+        <p class="text-sm text-gray-600">En proceso</p>
+      </div>
+      <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <h3 class="text-lg font-bold text-gray-700">cierre de caso</h3>
+        <p class="text-sm text-gray-600">En proceso</p>
+      </div>
+
+      <!--<div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <h3 class="text-lg font-bold text-gray-700">Fase 10: Cierre del Caso</h3>
+        <p class="text-sm text-gray-600">Pendiente</p>
+      </div>-->
+
     </div>
   </div>
+
 </div>

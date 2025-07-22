@@ -8,8 +8,8 @@ import cantonesRoutes from './routes/cantones.routes';
 import denunciasRoutes from './routes/denuncias.routes';
 import vulneracionesRoutes from './routes/vulneraciones.routes'
 import medidasRoutes from './routes/medidas.routes';
+import avocaroriaRoutes from './routes/avocatoria.routes';
 import { seedInitialData } from './utils/seed';
-
 
 
 const app = express();
@@ -27,9 +27,10 @@ app.use('/api/cantones', cantonesRoutes);
 app.use('/api/denuncias', denunciasRoutes);
 app.use('/api/vulneraciones', vulneracionesRoutes);
 app.use('/api/medidas', medidasRoutes);
+app.use('/api/avocatoria', avocaroriaRoutes);
 
 // Verificar conexión con la base de datos y levantar el servidor
-sequelize.sync({alter: true}).then(async () => {
+sequelize.sync().then(async () => {
   
   console.log('✅ Base de datos conectada y modelos sincronizados');
   await seedInitialData(); // 👈 Ejecuta la carga si no hay datos

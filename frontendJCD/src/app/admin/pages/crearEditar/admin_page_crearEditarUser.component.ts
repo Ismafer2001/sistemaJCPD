@@ -14,6 +14,8 @@ import { Router, RouterModule } from '@angular/router';
 export class Admin_page_crearEditarUserComponent {
   form!: FormGroup;
   cantones: Canton[] = [];
+  error="";
+
 
   constructor(
     private fb: FormBuilder,
@@ -41,6 +43,11 @@ export class Admin_page_crearEditarUserComponent {
   }
 
   guardar() {
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      this.error = 'Complete todos los campos requeridos';
+      return;
+    }
     if (this.form.valid) {
       this.userService.crearUsuario(this.form.value).subscribe(() => {
         this.router.navigate(['/admin/usuarios']); // Regresa a la tabla

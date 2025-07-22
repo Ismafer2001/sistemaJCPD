@@ -1,9 +1,9 @@
-export interface usuarioAttributes {
+export interface RegistrarUsuarioDTOS {
   id: number;
   usuario: string;
   nombres: string;
   apellidos: string;
-  correo?: string;
+  correo: string;
   contrasena: string;
   rol: 'admin' | 'principal' | 'secretari@' | 'suplente';
   isactivo: boolean;

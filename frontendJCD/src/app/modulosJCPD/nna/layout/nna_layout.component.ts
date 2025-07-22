@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { NnaLayoutContentComponent } from "./component/content/nna-layout-content.component";
 import { SidebarComponent } from "./component/sidebar/nna_layout_sidebar_component";
-import { headerComponent } from "../../../shared/header/header.component";
+import { headerComponent } from "../../../shared/components/header/header.component";
 
 @Component({
   selector: 'nna-layout',
@@ -12,7 +12,7 @@ import { headerComponent } from "../../../shared/header/header.component";
 
 })
 export class NnaLayoutComponent {
-  
+
 
 }
 export default NnaLayoutComponent;

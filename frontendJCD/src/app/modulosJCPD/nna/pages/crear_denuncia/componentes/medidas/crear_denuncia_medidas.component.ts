@@ -81,7 +81,7 @@ export class Crear_denuncia_medidasComponent implements OnInit {
     }
     this.formArray.push(this.fb.group({
     id_afectado: [id_afectado],
-    ids_medidas: [ids_medidas]
+    medidas: [ids_medidas]
   }));
 
   this.medidasForm.reset();

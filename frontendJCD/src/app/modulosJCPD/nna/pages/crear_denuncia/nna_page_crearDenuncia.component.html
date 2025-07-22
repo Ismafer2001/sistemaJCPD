@@ -1,17 +1,24 @@
-<h1 class="text-2xl font-bold mb-6">Crear Nueva Denuncia</h1>
-
+<h1 class="text-2xl font-bold mb-4">Crear Nueva Denuncia</h1>
+<hr class="border-blue-200 border-1">
 <form [formGroup]="denunciaForm" (ngSubmit)="onSubmit()" class="space-y-6">
   <!-- Sección de Número de Trámite -->
   <div>
-    <h2 class="text-xl font-semibold mb-4">Número de Trámite</h2>
+    <h2 class="text-xl font-semibold my-4">Número de Trámite</h2>
+    <div>
+
+    </div>
     <div class="mt-1 grid grid-cols-2 max-w-md">
       <input
         type="text"
         id="num_tramite"
+        x
         formControlName="num_tramite"
         class="min-w-0 block px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-500"
         placeholder="Ingrese el número"
+         [readonly]="numTramiteDisabled"
+
       />
+
       <span
         class="items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500"
       >
@@ -32,55 +39,58 @@
     </div>
   </div>
   <!--tabs-->
-  <div class="flex border-b mb-0 gap-3">
+  <div class="flex  mb-0 gap-3 " id="tabs">
     <button type="button" class="rounded-t-2xl p-2"
        [ngClass]="{
       'bg-blue-500 text-white': currentTab === 0,
       'bg-gray-100': currentTab !== 0
     }"
       (click)="cambiarTab(0)"
-      [class.active]="currentTab === 0"
+
     >
       datos generales
     </button>
     <button type="button"
       class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
       (click)="cambiarTab(1)"
-      [class.active]="currentTab === 1"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab === 1,
+      'bg-gray-100': currentTab !== 1
+    }"
     >
       sobre los hechos
     </button>
   </div>
 
   <!-- Sección del Denunciante -->
-  <div class="bg-gray-100 p-2">
+  <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300">
 
     <div
-      *ngIf="currentTab === 0"
+    [hidden]="currentTab === 1"
       class="bg-white rounded-lg shadow-md p-6 mb-8"
     >
 
-      <h2 class="text-xl font-semibold mb-4">Datos del Denunciante</h2>
+      <h2 class="text-xl text-blue-500 font-semibold mb-4">Datos del Denunciante</h2>
       <nna_creardenuncia_denunciante
-        [formGroup]="denuncianteForm"
+      [formGroup]="denuncianteForm"
+
       ></nna_creardenuncia_denunciante>
 
     </div>
 
 
     <!-- Sección de Afectados -->
-    <div *ngIf="currentTab === 0" class="mb-8 bg-white rounded-lg">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">
+    <div [hidden]="currentTab === 1" class="mb-8 bg-white rounded-lg p-6 shadow-md ">
+      <h2 class="text-xl font-semibold text-blue-500 mb-4">
         Datos de los Afectados
       </h2>
       <div formArrayName="afectados">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-medium text-gray-700">Afectado</h3>
-        </div>
+
         <nna_creardenuncia_afectado
           [formArray]="afectadosArray"
         ></nna_creardenuncia_afectado>
-        <div>{{afectadosArray.value.nombre}}</div>
+
     </div>
     </div>
         <!-- Este div también es parte del formulario visual -->
@@ -89,15 +99,13 @@
 
 
     <!-- Sección de Denunciados -->
-    <div *ngIf="currentTab === 0" class="mb-8">
-      <h2 class="text-xl font-semibold text-gray-800">
+    <div [hidden]="currentTab === 1" class="mb-8 bg-white rounded-lg p-6 shadow-md ">
+      <h2 class="text-xl font-semibold text-blue-500">
         Datos de los Denunciados
       </h2>
 
       <div class="" formArrayName="denunciados">
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-medium text-gray-700">Denunciado</h3>
-        </div>
+
         <nna_creardenuncia_denunciado
           [formArray]="denunciadosArray"
         ></nna_creardenuncia_denunciado>
@@ -106,7 +114,7 @@
     </div>
 
     <!-- Sección de Hechos -->
-    <div *ngIf="currentTab === 1" class="mb-8">
+    <div [hidden]="currentTab === 0" class="mb-8 bg-white rounded-lg p-6 shadow-md">
       <h2 class="text-xl font-semibold text-gray-800 mb-4">Hechos</h2>
 
       <!-- Descripción de Hechos -->
@@ -124,12 +132,16 @@
           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
           placeholder="Describa los hechos ocurridos..."
         ></textarea>
-        <div
-          *ngIf="denunciaForm.get('descripcion_hechos')?.errors?.['required'] && denunciaForm.get('descripcion_hechos')?.touched"
+        @if (denunciaForm.get('descripcion_hechos')?.errors?.['required'] && denunciaForm.get('descripcion_hechos')?.touched) {
+            <div
+          
           class="mt-1 text-sm text-red-600"
         >
           La descripción es requerida
         </div>
+
+        }
+
         <div
           *ngIf="denunciaForm.get('descripcion_hechos')?.errors?.['minlength'] && denunciaForm.get('descripcion_hechos')?.touched"
           class="mt-1 text-sm text-red-600"
@@ -145,11 +157,12 @@
       ></app-nna_creardenuncia_vulneraciones>
     </div>
     <!-- Sección de Hechos -->
-    <div *ngIf="currentTab === 1" class="mb-8">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">solicitud</h2>
+    <div [hidden]="currentTab === 0" class="mb-8">
+
 
       <!-- Descripción de solicitud -->
-      <div class="mb-6">
+      <div class="mb-8 bg-white rounded-lg p-6 shadow-md">
+        <h2 class="text-xl font-semibold text-gray-800 mb-4">solicitud</h2>
         <label
           for="descripcion_solicitud"
           class="block text-sm font-medium text-gray-700"
@@ -178,7 +191,7 @@
       </div>
 
       <!-- Lista de Medidas -->
-      <div class="mt-6">
+      <div class="mb-8 bg-white rounded-lg p-6 shadow-md">
         <h3 class="text-lg font-semibold text-gray-800 mb-4">
           Medidas de Protección
         </h3>
@@ -188,6 +201,8 @@
         ></app-crear_denuncia_medidas>
       </div>
     </div>
+
+
   </div>
 
   <!-- Mensajes de error y éxito -->

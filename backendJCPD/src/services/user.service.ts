@@ -1,11 +1,11 @@
 
-import { usuarioAttributes } from "../interfaces/usuarios.interface";
+import { RegistrarUsuarioDTOS } from "../interfaces/usuarios.interface";
 import { usuarios,  } from "../models/usuarios.models";
 
 import bcrypt from "bcryptjs";
 
 //ingresar usuario
-export const registrarUsuario = async (user: usuarioAttributes) => {
+export const registrarUsuario = async (user: RegistrarUsuarioDTOS) => {
   
     
     const existe = await usuarios.findOne({ where: { usuario: user.usuario} });

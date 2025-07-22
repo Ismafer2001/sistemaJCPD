@@ -6,9 +6,20 @@
     </button>
   </div>
   <div class="bg-white  rounded-2xl p-4 shadow-xl " >
-    <h6 class=" font-bold mb-4">Usuarios registrados</h6>
+    <h6 class=" font-bold mb-4">Usuarios registrados </h6>
    <div class=" overflow-x-auto shadow-md bg-white border-2 border-blue-100  rounded-2xl">
-    <table class="table-auto w-full text-sm text-left  ">
+    <global-tabla
+     [columnas]="['id', 'usuario', 'nombres','apellidos','rol','canton']"
+  [encabezados]="['#', 'Usuario', 'Nombres','Apellidos','Rol','Cantón']"
+  [datos]="usuarios"
+  [acciones]="true"
+  [botonEstado]="true"
+  [estado]="cambiarEstado.bind(this)"
+  [eliminar]="eliminar.bind(this)"
+  [editar]="editar.bind(this)"
+    >
+  </global-tabla>
+    <!--<table class="table-auto w-full text-sm text-left  ">
       <thead class="bg-blue-50  ">
         <tr class="">
           <th class=" p-2">#</th>
@@ -52,7 +63,7 @@
           </td>
         </tr>
       </tbody>
-    </table>
+    </table> -->
   </div>
 
   </div>

@@ -4,23 +4,36 @@ import { RouterLink } from "@angular/router";
 import { DenunciaService, } from "@nna/services/denuncia.service";
 import { Denuncia } from "@nna/interfaces/denuncia.interface";
 import { HttpErrorResponse } from "@angular/common/http";
+import TablaComponent from "@shared/components/tabla/tabla.component";
 
 @Component({
   selector: 'nna-page-nna',
   standalone: true,
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, CommonModule, TablaComponent],
   templateUrl: './nna_page_nna.component.html',
 })
 export class NnaPageNnaComponent implements OnInit {
   denuncias: Denuncia[] = [];
-  loading: boolean = true;
+  denunciasActivas= 0
+  loading: boolean = false;
   error: string | null = null;
 
-  constructor(private denunciaService: DenunciaService) {}
+  constructor(private denunciaService: DenunciaService) {
+
+  }
 
   ngOnInit(): void {
     console.log('Iniciando componente...');
     this.cargarDenuncias();
+    this.totalDenunciasActivas();
+
+  }
+
+
+  totalDenunciasActivas(){
+    this.denunciaService.contarDenunciasActivas().subscribe(n=>{
+      this.denunciasActivas=n.total;
+    })
   }
 
   cargarDenuncias(): void {
@@ -29,7 +42,7 @@ export class NnaPageNnaComponent implements OnInit {
     this.error = null;
 
     this.denunciaService.obtenerTodasDenuncias().subscribe({
-      next: (data: Denuncia[]) => {
+      next: (data) => {
         console.log('Denuncias recibidas:', data);
         this.denuncias = data;
         this.loading = false;
@@ -43,6 +56,12 @@ export class NnaPageNnaComponent implements OnInit {
         console.log('Carga de denuncias completada');
       }
     });
+  }
+
+  eliminarDenuncia(denuncia:Denuncia){
+
+        this.denunciaService.eliminarDenuncia(denuncia.idDenuncia).subscribe(() => this.cargarDenuncias());
+
   }
 }
 

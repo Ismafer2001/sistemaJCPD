@@ -13,7 +13,7 @@ export const routes: Routes = [
   {
 
     path: 'nna',
-    canActivate: [authGuard,],
+    canActivate: [],
     loadChildren: () => import('@nna/routes/nna.routes'),
   },
   {

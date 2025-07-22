@@ -1,8 +1,8 @@
 export interface perfil {
-  nombres: string;
-  rol: string;
-  canton: {
-    canton: string;
-  }
+  nombres: string,
+  rol: string,
+  id_canton:number,
+  canton: string,
+
 
 }

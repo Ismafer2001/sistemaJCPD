@@ -7,6 +7,7 @@ import { AuthService } from '@auth/services/auth.service';
   selector: 'globla-header',
   imports: [],
   templateUrl: './header.component.html',
+  
 
 })
 export class headerComponent implements OnInit {
@@ -20,7 +21,7 @@ export class headerComponent implements OnInit {
     this.AuthService.getUsuarioActual().subscribe(user => {
   this.nombreUsuario = user.nombres;
   this.rolUsuario = user.rol;
-  this.cantonUsuario = user.canton.canton
+  this.cantonUsuario = user.canton
   console.log(user)
 
 

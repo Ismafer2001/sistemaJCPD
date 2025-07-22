@@ -1,13 +1,18 @@
 import bcrypt from "bcryptjs";
-import{ usuarios} from "../models/usuarios.models";
+import{ usuarios} from "../models";
 import jwt from 'jsonwebtoken';
 import { login } from "../interfaces/auth.interface";
+import { Canton } from "../models";
+
+
+
 
 export const loginUsuario = async (user: login) => {
   
-    const existe = await usuarios.findOne({ where: { usuario: user.usuario } });
-    
-    
+    const existe = await usuarios.findOne({ where: { usuario: user.usuario },
+        include: [{ model: Canton, as:'canton' ,  attributes: ['canton'] }]  });
+
+        
     
         if (!existe) {
           throw new Error("Usuario no encontrado");
@@ -24,11 +29,13 @@ export const loginUsuario = async (user: login) => {
                 nombres: existe.nombres,
                 usuario: existe.usuario,
                 rol: existe.rol,
-                canton: existe.id_canton
+                canton:existe.canton?.canton
+                
               },
               process.env.JWT_SECRET || 'secret',
               { expiresIn: '4h' }
             );
+            
 
             return token
 

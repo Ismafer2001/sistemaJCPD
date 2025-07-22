@@ -1,11 +1,10 @@
 import { Router } from 'express';
 import {
-  
   obtenerUsuarios,
   actualizarUsuario,
   eliminarUsuario,
   desactivarUsuario,
-  registrarUsuarioCtrl,
+  getRegistrarUsuario
  } from '../controllers/usuarios.controller';
 import { verificarToken } from '../middleware/auth.middleware';
 import { soloAdmin } from '../middleware/rol.middleware';
@@ -17,7 +16,7 @@ const router = Router();
 
 router.use(verificarToken, soloAdmin); 
 
-router.post('/', registrarUsuarioCtrl);                     // Crear usuario
+router.post('/', getRegistrarUsuario);                     // Crear usuario
 router.get('/', obtenerUsuarios);                   // Listar usuarios activos
 router.put('/:id', actualizarUsuario);              // Actualizar usuario
 router.put('/desactivar/:id', desactivarUsuario);   // Desactivar (soft delete)

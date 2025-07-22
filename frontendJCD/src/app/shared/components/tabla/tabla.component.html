@@ -1,0 +1,57 @@
+<table class=" table-auto w-full text-sm text-left  ">
+      <thead class="bg-blue-50  ">
+        <tr class="">
+          @for (header of encabezados; track $index) {
+            <th class=" p-2">{{header}}</th>
+          }
+          @if (botonEstado) {
+            <th class="p-2">
+              Estado
+            </th>
+          }
+          @if(acciones){
+            <th class="p-2">
+              acciones
+            </th>
+
+          }
+
+
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of datos; track $index) {
+
+          <tr (click)="RouterLink && RouterLinkparam ? navegar(item) : null" class="hover:bg-gray-50 border-t-2 border-t-blue-100" >
+            @for (col of columnas; track $index) {
+
+              <td class=" p-2">{{item[col] }}</td>
+
+            }
+            @if (botonEstado) {
+            <td class="p-2">
+              <button (click)="estado(item)"class="px-2 py-1 rounded text-white"
+                 [ngClass]="item.isactivo ? 'bg-green-500' : 'bg-gray-500'">
+                {{item.isactivo ? 'Activo' : 'Deshabilitado' }}
+              </button>
+            </td>
+          }
+          @if (acciones) {
+            <td class="p-2">
+              <button (click)="editar(item)"
+              class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                editar
+              </button>
+              <button (click)="eliminar(item)"class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
+                eliminar
+              </button>
+            </td>
+
+          }
+
+          </tr>
+
+        }
+
+      </tbody>
+    </table>

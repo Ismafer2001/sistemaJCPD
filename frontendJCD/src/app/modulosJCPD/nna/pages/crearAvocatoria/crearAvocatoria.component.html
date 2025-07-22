@@ -1,0 +1,115 @@
+<h1 class="text-2xl font-bold mb-4">Crear avocatoria</h1>
+<hr class="border-blue-200 border-1" />
+<form class="space-y-6">
+  <!--tabs
+  <div class="flex  mb-0 gap-3 " id="tabs">
+    <button type="button" class="rounded-t-2xl p-2"
+       [ngClass]="{
+      'bg-blue-500 text-white': currentTab === 0,
+      'bg-gray-100': currentTab !== 0
+    }"
+      (click)="cambiarTab(0)"
+
+    >
+      datos generales
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab(1)"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab === 1,
+      'bg-gray-100': currentTab !== 1
+    }"
+    >
+      sobre los hechos
+    </button>
+  </div>-->
+
+ 
+  <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300">
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <div class="flex items-center justify-between">
+        <h1 class="text-2xl font-bold">Trámite administrativo: <span class="text-xl text-gray-500">#{{ denunciaAvocatoria?.codigoTramite }}</span></h1>
+      </div>
+      <h1 class="text-2xl font-bold">
+        Niños:
+        <span class="text-xl text-gray-500">
+          <ng-container *ngFor="let af of denunciaAvocatoria?.afectados; let i = index">
+            {{ af.nombres }} {{ af.apellidos }} ({{ af.edad }} años)<span *ngIf="i < (denunciaAvocatoria?.afectados.length - 1)">, </span>
+          </ng-container>
+        </span>
+      </h1>
+      <p class="text-lg">
+        Junta Cantonal de Protección de derechos del cantón <span class="font-bold">{{ denunciaAvocatoria?.canton }}</span>
+      </p>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-xl text-blue-500 font-semibold mb-4">avocatoria</h2>
+      <p> 
+        En el cantón <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.canton }}</span>,
+        a los <span class="p-1 m border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'dd' }}</span> días del mes de 
+        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'MMMM':'':'es' }}</span> del año 
+        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'yyyy' }}</span>,
+        siendo las <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'HH' }}</span> horas con 
+        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'mm' }}</span>,
+        en uso de las atribuciones que le confieren 
+      </p>
+      <div>
+        <select class="border-1 my-2">
+          <option value="Art 205 del  Código de la Niñez y Adolescencia">Art 205 del  Código de la Niñez y Adolescencia</option>
+          <option value="Art 206 del  Código de la Niñez y Adolescencia">Art 206 del  Código de la Niñez y Adolescencia</option>
+        </select>
+      </div>
+      <p class="mb-4">AVOCA CONOCIMIENTO del:<span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.codigoTramite }}</span>,</p>
+      <p>
+        recibido en este organismo con fecha <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.fecha_creado | date:'dd/MM/yyyy' }}</span>.
+        por <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.denunciante?.[0]?.nombres }} {{ denunciaAvocatoria?.denunciante?.[0]?.apellidos }}</span>.
+        En contra de <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.denunciados?.[0]?.nombres }} {{ denunciaAvocatoria?.denunciados?.[0]?.apellidos }}</span>.
+        quien hace conocer los hechos
+      </p>
+      <div class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">
+        <p>{{ denunciaAvocatoria?.descripcion_hechos }}</p>
+      </div>
+      <p>Lo que se constituye una vulneración:</p>
+      <div class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">
+        <ng-container *ngFor="let af of denunciaAvocatoria?.afectados">
+          <div>
+            <span class="text-blue-700">{{ af.nombres }} {{ af.apellidos }}:</span>
+            <ng-container *ngIf="af.vulneraciones?.length > 0; else sinVulneraciones">
+              <ng-container *ngFor="let v of af.vulneraciones">
+                - {{ v.texto }}<br>
+              </ng-container>
+            </ng-container>
+            <ng-template #sinVulneraciones>
+              <span class="text-gray-500">Sin vulneraciones registradas</span>
+            </ng-template>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+      <h2 class="text-xl text-blue-500 font-semibold mb-4">resuelve</h2>
+      <textarea
+          rows="10"
+          class="p-5 bg-gray-100 block w-full border-1 rounded-md border-blue-200 shadow-sm"
+          placeholder="..."
+        > PRIMERO.-. Se le hace conocer a…………………………………………………….
+lo que estipula 
+Art            del  Código de la Niñez y Adolescencia
+Art            de la Ley de personas adultas mayores
+Art            de la Ley de prevención y erradicación de la violencia
+…………………………………………………………….………………………………………………………………………………………………………………………………………………………………………. 
+ SEGUNDO.- Se le hace conocer a ……………………………………….. lo que estipula 
+Art            del  Código de la Niñez y Adolescencia
+Art            de la Ley de personas adultas mayores
+Art            de la Ley de prevención y erradicación de la violencia
+ 
+TERCERO.-
+CUARTO.-
+        </textarea>
+    </div>
+  </div>
+</form>

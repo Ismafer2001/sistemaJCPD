@@ -1,5 +1,5 @@
 export interface Denuncia {
-  id: number;
+  idDenuncia: number;
   medio: string;
   tipo_denuncia: string;
   canton: string;

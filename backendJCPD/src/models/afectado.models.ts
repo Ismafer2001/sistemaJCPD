@@ -7,6 +7,7 @@ interface AfectadoAttributes {
   cedula: number;
   nombres: string;
   apellidos: string;
+  edad: number;
   sexo: string;
   genero: string;
   nacionalidad: string;
@@ -25,6 +26,7 @@ export class Afectado extends Model<AfectadoAttributes, AfectadoCreationAttribut
   public cedula!: number;
   public nombres!: string;
   public apellidos!: string;
+  public edad!: number;
   public sexo!: string;
   public genero!: string;
   public nacionalidad!: string;
@@ -52,6 +54,10 @@ Afectado.init({
   apellidos: {
     type: DataTypes.STRING,
    
+  },
+  edad: {
+    type: DataTypes.INTEGER,
+    
   },
   sexo: {
     type: DataTypes.STRING,

@@ -178,12 +178,28 @@
       (click)="agregarDenunciado()"
       class="bg-blue-500 text-white px-4 py-2 rounded"
     >
-      Agregar Afectado
+      Agregar Denunciado
     </button>
   </div>
 
   <!-- Lista de afectados agregados -->
-  <table *ngIf="formArray.controls.length > 0">
+<div class=" overflow-x-auto rounded-xl bg-white shadow-xl">
+  <global-tabla
+  [columnas]="['cedula','nombres','apellidos',   'edad']"
+  [encabezados]="['cedula','Nombres ', 'Apellidos', 'Edad',]"
+  [datos]="formArray.value"
+  [acciones]="true"
+  [eliminar]="eliminarDenunciado.bind(this)"
+  >
+
+
+
+
+  </global-tabla>
+
+</div>
+
+  <!--<table *ngIf="formArray.controls.length > 0">
     <thead>
       <tr>
         <th>Nombre</th>
@@ -204,7 +220,7 @@
         </td>
       </tr>
     </tbody>
-  </table>
+  </table>-->
 
 
 </div>

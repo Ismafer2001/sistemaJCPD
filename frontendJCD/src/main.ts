@@ -7,9 +7,13 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 import { routes } from './app/app.routes';
 import { authInterceptor } from './app/shared/interceptors/auth.interceptor';
+import { registerLocaleData } from '@angular/common';
+import localeEs from '@angular/common/locales/es';
 
 
+registerLocaleData(localeEs);
 
+  
 bootstrapApplication(AppComponent, {
 
   providers: [

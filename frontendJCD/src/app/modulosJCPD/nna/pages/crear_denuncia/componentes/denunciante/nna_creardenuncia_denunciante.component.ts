@@ -1,5 +1,5 @@
-import { Component, Input } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Component, input, Input } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -11,7 +11,16 @@ import { CommonModule } from '@angular/common';
 export class Nna_creardenuncia_denuncianteComponent  {
   @Input() formGroup!: FormGroup;
 
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder) {
+    this.formGroup =this.fb.group({
+      
+
+
+
+    })
+
+
+  }
 
 
 }

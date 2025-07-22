@@ -9,12 +9,13 @@ import {
 
 } from '@angular/forms';
 import { DenunciaService } from '../../services/denuncia.service';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Nna_creardenuncia_denuncianteComponent } from './componentes/denunciante/nna_creardenuncia_denunciante.component';
 import { Nna_creardenuncia_afectadoComponent } from './componentes/afectado/nna_creardenuncia_afectado.component';
 import { Nna_creardenuncia_denunciadoComponent } from './componentes/denunciado/nna_creardenuncia_denunciado.component';
 import { Nna_creardenuncia_vulneracionesComponent } from './componentes/vulneraciones/nna_creardenuncia_vulneraciones.component';
 import { Crear_denuncia_medidasComponent } from './componentes/medidas/crear_denuncia_medidas.component';
+import { AuthService } from '@auth/services/auth.service';
 //import { Generador_PDFService } from '../../../shared/services/pdf/generador_PDF.service';
 
 @Component({
@@ -30,13 +31,15 @@ import { Crear_denuncia_medidasComponent } from './componentes/medidas/crear_den
     Nna_creardenuncia_denunciadoComponent,
     Nna_creardenuncia_vulneracionesComponent,
     Crear_denuncia_medidasComponent,
+
   ],
 })
 export class NnaPageCrearDenunciaComponent implements OnInit {
 
-
+   numTramiteDisabled = true;
   currentTab = 0;  //variable para cambiar pestañas del formulario
   denunciaForm: FormGroup;
+  incrementar=false
 
 
   loading = false;
@@ -46,21 +49,25 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   canton:string ;
 
   constructor(
+    private AuthService: AuthService,
     private fb: FormBuilder,
     private denunciaService: DenunciaService,
     private router: Router,
     //private pdfService: Generador_PDFService
   ) {
     this.anioActual=new Date().getFullYear();;
-  this.canton ='PORTOVIEJO';
+    this.canton=""
+
+
     this.denunciaForm = this.fb.group({
       num_tramite: ['', [
         Validators.required,
         Validators.pattern('^[0-9]+$'),
         Validators.min(1)
       ]],
-      canton: [this.canton],
+
       anio: [this.anioActual],
+      
       denunciante: this.fb.group({
         cedula: ['', [
           Validators.required,
@@ -94,6 +101,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
           Validators.required,
           Validators.pattern('^[0-9]{10}$')
         ]]
+
       }),
       afectados: this.fb.array([]),
       denunciados: this.fb.array([]),
@@ -106,30 +114,64 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         Validators.minLength(10)
       ]],
       vulneraciones: this.fb.array([]),
-      medidas: this.fb.array([])
+      medidas: this.fb.array([]),
+      id_canton: [],
     });
+
+
 
 
 
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
 
-    this.afectadosArray.valueChanges.subscribe(val => {
-  console.log('Afectados actuales:', val);
+    this.AuthService.getUsuarioActual().subscribe(user => {
+      
+      this.denunciaForm.get('id_canton')?.setValue(user.id_canton);
+      
+      this.canton=user.canton;
+      
+
+
 });
-
-    // Suscribirse a los cambios del formulario
-    this.denunciaForm.statusChanges.subscribe(status => {
-      console.log('Estado del formulario:', {
-        status,
-        valid: this.denunciaForm.valid,
-        invalid: this.denunciaForm.invalid,
-        errors: this.denunciaForm.errors,
-        value: this.denunciaForm.value
+   this.denunciaService.obtenerNumTramite().subscribe(res => {
+    if (res.numero) {
+      // Si hay número, le sumamos 1 y lo bloqueamos
+      this.denunciaService.obtenerNumTramite(true).subscribe(res =>{
+        this.setearNumTramite(res.numero)
       });
-    });
+    } else {
+      // No hay número, usuario debe escribirlo
+      this.numTramiteDisabled = false;
+      this.denunciaForm.get('num_tramite')?.enable();
+    }
+  });
+  this.denunciaForm.valueChanges.subscribe(data =>{
+    console.log(data)
+  })
+
   }
+
+
+
+bloquearNumTramite(): void {
+  if (!this.numTramiteDisabled) {
+    this.numTramiteDisabled = true;
+    this.denunciaForm.get('num_tramite')?.disable();
+  }
+}
+private setearNumTramite(numero: number): void {
+  const numeroFormateado = this.formatearNumeroTramite(numero);
+  this.denunciaForm.get('num_tramite')?.setValue(numeroFormateado);
+  this.bloquearNumTramite();
+}
+
+private formatearNumeroTramite(numero: number, longitud: number = 4): string {
+  return numero.toString().padStart(longitud, '0');
+}
+
+
 
   get denuncianteForm(): FormGroup {
     return this.denunciaForm.get('denunciante') as FormGroup;
@@ -150,8 +192,6 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
     return this.denunciaForm.get('medidas') as FormArray;
   }
 
-
-
    cambiarTab(tab: number) {
     this.currentTab = tab;
   }
@@ -159,6 +199,9 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   cancelar(): void {
     this.router.navigate(['/nna']);
   }
+
+
+
 
   onSubmit(): void {
     if (this.denunciaForm.invalid) {
@@ -184,6 +227,8 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       next: () => {
         this.loading = false;
         this.router.navigate(['/nna']);
+
+
       },
       error: (err) => {
         this.loading = false;

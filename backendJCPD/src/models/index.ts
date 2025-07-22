@@ -15,6 +15,10 @@ import { articulo } from './articulo_medidas.models';
 usuarios.belongsTo(Canton, { foreignKey: 'id_canton', as: 'canton' });
 Canton.hasMany(usuarios, { foreignKey: 'id_canton' });
 
+//relacion denuncia  -- canton
+Denuncia.belongsTo(Canton, { foreignKey: 'id_canton' });
+Canton.hasMany(Denuncia, { foreignKey: 'id_canton' });
+
 //relacion afectado denuncia
 Denuncia.hasMany(Afectado, { foreignKey: 'idDenuncia', as:'afectados'});
 Afectado.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });

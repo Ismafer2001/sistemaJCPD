@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { registrarUsuario } from "../services/user.service";
 
 // Crear usuario
-export const registrarUsuarioCtrl = async (req: Request, res: Response) => {
+export const getRegistrarUsuario = async (req: Request, res: Response) => {
   try {
     const nuevoUsuario = await registrarUsuario(req.body);
     res.status(201).json(nuevoUsuario);
@@ -22,11 +22,15 @@ export const registrarUsuarioCtrl = async (req: Request, res: Response) => {
 // Obtener usuarios
 export const obtenerUsuarios = async (_req: Request, res: Response) => {
   try {
-    const usuario = await usuarios.findAll({
+    const allusuarios = await usuarios.findAll({
       include: [{ model: Canton, as: "canton" }],
     });
+    const usuariosMapeados = allusuarios.map(u => ({
+  ...u.dataValues,
+  canton: u.canton?.canton
+}));
 
-    res.json(usuario);
+    res.json(usuariosMapeados );
   } catch (error) {
     console.error(error);
     res.status(500).json({ mensaje: "Error al obtener usuarios" });

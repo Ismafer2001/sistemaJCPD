@@ -1,25 +1,38 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
-import { usuarioAttributes } from '../interfaces/usuarios.interface';
 
+import { Canton } from './cantones.models';
 
-
+interface usuarioAttributes {
+  id: number;
+  usuario: string;
+  nombres: string;
+  apellidos: string;
+  correo?: string;
+  contrasena: string;
+  rol: 'admin' | 'principal' | 'secretari@' | 'suplente';
+  isactivo: boolean;
+  id_canton: number;
+  fecha_creacion?: Date;
+}
 interface UsuarioCreationAttributes extends Optional<usuarioAttributes, 'id' | 'isactivo' | 'fecha_creacion'>{
   
 }
 
 export class usuarios extends Model<usuarioAttributes, UsuarioCreationAttributes>
   implements usuarioAttributes {
-  public id!: number;
-  public usuario!: string;
-  public nombres!: string;
-  public apellidos!: string;
-  public correo!: string;
-  public contrasena!: string;
-  public rol!: 'admin' | 'principal' | 'secretari@' | 'suplente';
-  public isactivo!: boolean;
-  public id_canton!: number;
-  public fecha_creacion!: Date;
+declare  id: number;
+declare  usuario: string;
+declare  nombres: string;
+declare  apellidos: string;
+declare  correo: string;
+declare  contrasena: string;
+  declare rol: 'admin' | 'principal' | 'secretari@' | 'suplente';
+declare  isactivo: boolean;
+declare  id_canton: number;
+declare  fecha_creacion?: Date;
+  declare canton?: Canton;
+  
 }
 
 usuarios.init({
@@ -27,7 +40,7 @@ usuarios.init({
   usuario: { type: DataTypes.STRING, allowNull: false, unique: true },
   nombres: { type: DataTypes.STRING, allowNull: false },
   apellidos: { type: DataTypes.STRING, allowNull: false },
-  correo: { type: DataTypes.STRING },
+  correo: { type: DataTypes.STRING,unique: true },
   contrasena: { type: DataTypes.STRING, allowNull: false },
   rol: { type: DataTypes.ENUM('admin', 'principal', 'secretari@', 'suplente'), allowNull: false },
   isactivo: { type: DataTypes.BOOLEAN, defaultValue: true },

@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import TablaComponent from '@shared/components/tabla/tabla.component';
 
 @Component({
   selector: 'nna_creardenuncia_afectado',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule,TablaComponent],
   templateUrl: './nna_creardenuncia_afectado.component.html',
 })
-export class Nna_creardenuncia_afectadoComponent implements OnInit {
+export class Nna_creardenuncia_afectadoComponent {
   @Input() formArray!: FormArray;
   afectadoForm:FormGroup;
 
@@ -31,9 +32,10 @@ export class Nna_creardenuncia_afectadoComponent implements OnInit {
 });
   }
 
-   ngOnInit() {
-    this.agregarAfectado();
-   }
+
+
+
+
    agregarAfectado(): void {
   if (this.afectadoForm.valid) {
     this.formArray.push(this.fb.group(this.afectadoForm.value));

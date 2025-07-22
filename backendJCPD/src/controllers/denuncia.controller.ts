@@ -1,9 +1,8 @@
 import { Request, Response, RequestHandler } from 'express';
 import { Denuncia, Denunciante, Denunciado, Afectado, Vulneracion, VulneracionesIdentificadas, medidasIdentificadas, medida } from '../models';
 
-import sequelize from '../config/database';
-import { Op } from 'sequelize';
-import { insertDenuncia, datosDenuncia } from '../services/denuncia.service';
+
+import { insertDenuncia, datosDenuncia,  obtenerNumTramite,  countDenuncias, eliminarDenuncia } from '../services/denuncia.service';
 
 export const crearDenuncia = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -13,8 +12,8 @@ export const crearDenuncia = async (req: Request, res: Response): Promise<void> 
       denunciante: req.body.denunciante,
       denunciados: req.body.denunciados,
       afectados: req.body.afectados,
-      vulneracion: req.body.vulneracion,
-      medida: req.body.medida
+      vulneracion: req.body.vulneraciones,
+      medida: req.body.medidas
       
 
     };
@@ -39,18 +38,45 @@ export const crearDenuncia = async (req: Request, res: Response): Promise<void> 
   }
 };
 
+export const deleteDenuncia = async (req:Request, res:Response) =>{
+  try {
+    const {id} =req.params
+    console.log(id)
+    await eliminarDenuncia(id)
+    res.json({ mensaje: "denuncia eliminado definitivamente" });
+
+    
+  } catch (error) {
+    res.status(500).json({ mensaje: "Error al eliminar denuncia", error });
+    console.log(error)
+  }
+    
+  
+}
+
 // Obtener todas las denuncias
 export const getAllDenuncias = async (req: Request, res: Response) => {
-  try {
+   try {
     const denuncias = await Denuncia.findAll({
       include: [
-        { model: Denunciante, as: 'denunciante' },
-        { model: Afectado, as: 'afectados' }
-
-        
+        {
+          model: Afectado,
+          as: 'afectados',
+          attributes: ['nombres', 'apellidos','cedula']
+        }
       ]
     });
-    res.json(denuncias);
+
+    // Transformamos la respuesta al formato deseado
+    const resultado = denuncias.map(denuncia => ({
+  codigoTramite: denuncia.codigoTramite,
+  fecha: denuncia.fecha_creado,
+  idDenuncia: denuncia.id,
+  afectados: (denuncia as any).afectados.map((a: any) => `${a.nombres} ${a.apellidos}`),
+  cedulasAfectados: (denuncia as any).afectados.map((a: any) => a.cedula)
+}));
+
+    res.json(resultado);
   } catch (error) {
     console.error('Error al obtener denuncias:', error);
     res.status(500).json({ message: 'Error al obtener las denuncias' });
@@ -58,130 +84,64 @@ export const getAllDenuncias = async (req: Request, res: Response) => {
 };
 
 // Obtener una denuncia por ID
-export const getDenunciaById: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+export const getDenunciaById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const denuncia = await Denuncia.findByPk(id, {
-      include: [
-        { model: Denunciante, as: 'denunciante' },
-        { model: Afectado, as: 'afectados' },
-        { model: Denunciado, as: 'denunciados' },
-        { 
-          model: Vulneracion,
-          as: 'vulneraciones'
-        },
+      include:  [
         {
-          model: medida,
-          as: 'medidas'
+          model: Afectado,
+          as: 'afectados',
+          attributes: ['nombres', 'apellidos','cedula']
         }
       ]
     });
+    // Transformamos la respuesta al formato deseado
+    const resultado = {
+  codigoTramite: denuncia?.codigoTramite,
+  fecha: denuncia?.fecha_creado,
+  idDenuncia: denuncia?.id,
+  afectados: (denuncia as any).afectados.map((a: any) => `${a.nombres} ${a.apellidos}`),
+  cedulasAfectados: (denuncia as any).afectados.map((a: any) => a.cedula)
+};
 
-    if (!denuncia) {
+
+    if (!resultado) {
       res.status(404).json({ message: 'Denuncia no encontrada' });
       return;
     }
 
-    res.json(denuncia);
+    res.json(resultado);
   } catch (error) {
     console.error('Error al obtener la denuncia:', error);
     res.status(500).json({ message: 'Error al obtener la denuncia' });
   }
 };
 
-// Obtener denuncias por tipo
-export const getDenunciasByTipo: RequestHandler = async (req: Request, res: Response): Promise<void> => {
+
+
+export const obtenerNumeroTramite = async (req:Request, res:Response) => {
   try {
-    const { tipo } = req.params;
-    const denuncias = await Denuncia.findAll({
-      where: { tipo_denuncia: tipo },
-      include: [
-        { model: Denunciante, as: 'denunciante' },
-        { model: Afectado, as: 'afectados' },
-        { model: Denunciado, as: 'denunciados' },
-        { 
-          model: Vulneracion,
-          as: 'vulneraciones'
-        },
-        {
-          model: medida,
-          as: 'medidas'
-        }
-      ]
+    const { incrementar } = req.query; // viene como string
+    const numero = await obtenerNumTramite({
+      incrementar: incrementar === 'true',
     });
-    res.json(denuncias);
+
+    res.json({ numero });
   } catch (error) {
-    console.error('Error al obtener denuncias por tipo:', error);
-    res.status(500).json({ message: 'Error al obtener las denuncias por tipo' });
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener número de trámite' });
   }
 };
+export const totalDenunciaActivasController =async(req:Request, res:Response) =>{
+   try {
+    // viene como string
+    const total = await countDenuncias();
 
-// Obtener denuncias por fecha
-export const getDenunciasByFecha: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const { fechaInicio, fechaFin } = req.query;
-    
-    if (!fechaInicio || !fechaFin) {
-      res.status(400).json({ message: 'Se requieren fechaInicio y fechaFin' });
-      return;
-    }
-
-    const denuncias = await Denuncia.findAll({
-      where: {
-        fecha_creado: {
-          [Op.between]: [new Date(fechaInicio as string), new Date(fechaFin as string)]
-        }
-      },
-      include: [
-        { model: Denunciante, as: 'denunciante' },
-        { model: Afectado, as: 'afectados' },
-        { model: Denunciado, as: 'denunciados' },
-        { 
-          model: Vulneracion,
-          as: 'vulneraciones'
-        },
-        {
-          model: medida,
-          as: 'medidas'
-        }
-      ]
-    });
-    res.json(denuncias);
+    res.json({ total });
   } catch (error) {
-    console.error('Error al obtener denuncias por fecha:', error);
-    res.status(500).json({ message: 'Error al obtener las denuncias por fecha' });
+    console.error(error);
+    res.status(500).json({ error: 'Error al obtener número de trámite' });
   }
-};
 
-// Obtener estadísticas de denuncias
-export const getEstadisticasDenuncias: RequestHandler = async (req: Request, res: Response): Promise<void> => {
-  try {
-    const totalDenuncias = await Denuncia.count();
-    
-    const denunciasPorTipo = await Denuncia.findAll({
-      attributes: [
-        'tipo_denuncia',
-        [sequelize.fn('COUNT', sequelize.col('id')), 'total']
-      ],
-      group: ['tipo_denuncia']
-    });
-
-    const denunciasPorMes = await Denuncia.findAll({
-      attributes: [
-        'mes',
-        [sequelize.fn('COUNT', sequelize.col('id')), 'total']
-      ],
-      group: ['mes'],
-      order: [['mes', 'ASC']]
-    });
-
-    res.json({
-      totalDenuncias,
-      denunciasPorTipo,
-      denunciasPorMes
-    });
-  } catch (error) {
-    console.error('Error al obtener estadísticas:', error);
-    res.status(500).json({ message: 'Error al obtener estadísticas de denuncias' });
-  }
-};
+}

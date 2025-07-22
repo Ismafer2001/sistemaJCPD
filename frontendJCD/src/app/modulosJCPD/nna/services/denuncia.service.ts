@@ -16,10 +16,23 @@ export class DenunciaService {
   crearDenuncia(denuncia: Omit<Denuncia, 'id'>): Observable<{ success: boolean; message: string; data: { id: number } }> {
     return this.http.post<{ success: boolean; message: string; data: { id: number } }>(`${this.apiUrl}/denuncias`, denuncia);
   }
+  eliminarDenuncia(id:number ): Observable<any>{
 
-  obtenerDenuncia(id: string): Observable<Denuncia> {
+    return this.http.delete(`${this.apiUrl}/denuncias/${id}`)
+  }
+
+  obtenerDenuncia(id: number): Observable<Denuncia> {
     return this.http.get<Denuncia>(`${this.apiUrl}/denuncias/${id}`);
   }
+
+  obtenerNumTramite(incrementar=false):Observable<{ numero: number }>{
+    return this.http.get<{ numero: number }>(`${this.apiUrl}/denuncias/num_tramite`,{params:{incrementar}
+    })
+
+  }
+   contarDenunciasActivas(): Observable<{total:number}>{
+    return this.http.get<{total: number}>(`${this.apiUrl}/denuncias/countdenunciasActivas`)
+   }
 
   obtenerTodasDenuncias(): Observable<Denuncia[]> {
     return this.http.get<Denuncia[]>(`${this.apiUrl}/denuncias`);
