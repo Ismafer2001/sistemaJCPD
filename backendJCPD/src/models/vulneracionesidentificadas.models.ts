@@ -1,12 +1,13 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
-import { Denuncia } from './denuncia.models';
+
 import { Vulneracion } from './vulneraciones.models';
+import { Afectado } from './afectado.models';
 
 interface VulneracionesIdentificadasAttributes {
   id: number;
-  afectado_id: number;
-  vulneracion_id: number;
+  idAfectado: number;
+  idVulneracion: number;
 }
 
 interface VulneracionesIdentificadasCreationAttributes extends Optional<VulneracionesIdentificadasAttributes, 'id'>{
@@ -14,21 +15,18 @@ interface VulneracionesIdentificadasCreationAttributes extends Optional<Vulnerac
 }
 
 export class VulneracionesIdentificadas extends Model<VulneracionesIdentificadasAttributes, VulneracionesIdentificadasCreationAttributes> implements VulneracionesIdentificadasAttributes {
-  public id!: number;
-  public afectado_id!: number;
-  public vulneracion_id!: number;
+  declare id: number;
+  declare idAfectado: number;
+  declare idVulneracion: number;
 }
 
 VulneracionesIdentificadas.init({
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  afectado_id: { 
+  idAfectado: { 
     type: DataTypes.INTEGER,
-    references: {
-      model: Denuncia,
-      key: 'id'
-    }
+    
   },
-  vulneracion_id: { 
+  idVulneracion: { 
     type: DataTypes.INTEGER,
     references: {
       model: Vulneracion,

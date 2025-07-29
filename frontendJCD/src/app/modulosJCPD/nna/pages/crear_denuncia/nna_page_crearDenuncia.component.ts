@@ -9,13 +9,14 @@ import {
 
 } from '@angular/forms';
 import { DenunciaService } from '../../services/denuncia.service';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { Nna_creardenuncia_denuncianteComponent } from './componentes/denunciante/nna_creardenuncia_denunciante.component';
 import { Nna_creardenuncia_afectadoComponent } from './componentes/afectado/nna_creardenuncia_afectado.component';
 import { Nna_creardenuncia_denunciadoComponent } from './componentes/denunciado/nna_creardenuncia_denunciado.component';
 import { Nna_creardenuncia_vulneracionesComponent } from './componentes/vulneraciones/nna_creardenuncia_vulneraciones.component';
 import { Crear_denuncia_medidasComponent } from './componentes/medidas/crear_denuncia_medidas.component';
 import { AuthService } from '@auth/services/auth.service';
+import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 //import { Generador_PDFService } from '../../../shared/services/pdf/generador_PDF.service';
 
 @Component({
@@ -31,6 +32,7 @@ import { AuthService } from '@auth/services/auth.service';
     Nna_creardenuncia_denunciadoComponent,
     Nna_creardenuncia_vulneracionesComponent,
     Crear_denuncia_medidasComponent,
+    CardFormComponent
 
   ],
 })
@@ -38,15 +40,15 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
    numTramiteDisabled = true;
   currentTab = 0;  //variable para cambiar pestañas del formulario
-  denunciaForm: FormGroup;
+  denunciaForm!: FormGroup;
   incrementar=false
 
 
   loading = false;
   error: string | null = null;
    // Variable para el cantón
-  anioActual: number;
-  canton:string ;
+  anioActual!: number;
+  canton!:string ;
 
   constructor(
     private AuthService: AuthService,
@@ -55,6 +57,44 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
     private router: Router,
     //private pdfService: Generador_PDFService
   ) {
+
+  }
+
+  ngOnInit(): void {
+    this.denunciaFormulario();
+
+    this.AuthService.getUsuarioActual().subscribe(user => {
+
+      this.denunciaForm.get('id_canton')?.setValue(user.id_canton);
+
+      this.canton=user.canton;
+
+
+
+});
+
+   this.denunciaService.obtenerNumTramite().subscribe(res => {
+    if (res.numero) {
+      // Si hay número, le sumamos 1 y lo bloqueamos
+      this.denunciaService.obtenerNumTramite(true).subscribe(res =>{
+        this.setearNumTramite(res.numero)
+      });
+    } else {
+      // No hay número, usuario debe escribirlo
+      this.numTramiteDisabled = false;
+      this.denunciaForm.get('num_tramite')?.enable();
+    }
+  });
+
+  this.denunciaForm.valueChanges.subscribe(data =>{
+    console.log(data)
+  })
+
+  }
+
+
+  //--------- CREACION FORMULARIO--------------------//
+  denunciaFormulario(){
     this.anioActual=new Date().getFullYear();;
     this.canton=""
 
@@ -67,7 +107,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       ]],
 
       anio: [this.anioActual],
-      
+
       denunciante: this.fb.group({
         cedula: ['', [
           Validators.required,
@@ -119,58 +159,12 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
     });
 
 
-
-
-
-  }
-
-  ngOnInit(): void {
-
-    this.AuthService.getUsuarioActual().subscribe(user => {
-      
-      this.denunciaForm.get('id_canton')?.setValue(user.id_canton);
-      
-      this.canton=user.canton;
-      
-
-
-});
-   this.denunciaService.obtenerNumTramite().subscribe(res => {
-    if (res.numero) {
-      // Si hay número, le sumamos 1 y lo bloqueamos
-      this.denunciaService.obtenerNumTramite(true).subscribe(res =>{
-        this.setearNumTramite(res.numero)
-      });
-    } else {
-      // No hay número, usuario debe escribirlo
-      this.numTramiteDisabled = false;
-      this.denunciaForm.get('num_tramite')?.enable();
-    }
-  });
-  this.denunciaForm.valueChanges.subscribe(data =>{
-    console.log(data)
-  })
-
   }
 
 
 
-bloquearNumTramite(): void {
-  if (!this.numTramiteDisabled) {
-    this.numTramiteDisabled = true;
-    this.denunciaForm.get('num_tramite')?.disable();
-  }
-}
-private setearNumTramite(numero: number): void {
-  const numeroFormateado = this.formatearNumeroTramite(numero);
-  this.denunciaForm.get('num_tramite')?.setValue(numeroFormateado);
-  this.bloquearNumTramite();
-}
 
-private formatearNumeroTramite(numero: number, longitud: number = 4): string {
-  return numero.toString().padStart(longitud, '0');
-}
-
+//----------------GETTERS FORMULARIOS-----------------//
 
 
   get denuncianteForm(): FormGroup {
@@ -192,16 +186,32 @@ private formatearNumeroTramite(numero: number, longitud: number = 4): string {
     return this.denunciaForm.get('medidas') as FormArray;
   }
 
+  //---------------------OTROS----------------------///
+
    cambiarTab(tab: number) {
     this.currentTab = tab;
   }
+  bloquearNumTramite(): void {
+  if (!this.numTramiteDisabled) {
+    this.numTramiteDisabled = true;
+    this.denunciaForm.get('num_tramite')?.disable();
+  }
+}
+private setearNumTramite(numero: number): void {
+  const numeroFormateado = this.formatearNumeroTramite(numero);
+  this.denunciaForm.get('num_tramite')?.setValue(numeroFormateado);
+  this.bloquearNumTramite();
+}
 
+private formatearNumeroTramite(numero: number, longitud: number = 4): string {
+  return numero.toString().padStart(longitud, '0');
+}
+
+
+//---------------------------CANCELAR Y SUBMIT-------------------///
   cancelar(): void {
     this.router.navigate(['/nna']);
   }
-
-
-
 
   onSubmit(): void {
     if (this.denunciaForm.invalid) {
@@ -211,7 +221,7 @@ private formatearNumeroTramite(numero: number, longitud: number = 4): string {
     }
     // Construir el código de trámite
     const numTramite = this.denunciaForm.get('num_tramite')?.value;
-    const codigoTramite = `${numTramite}-${this.canton}-${this.anioActual}`;
+    const codigoTramite = `${numTramite}-JCPD-${this.canton}-${this.anioActual}`;
 
 
 

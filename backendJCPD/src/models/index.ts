@@ -10,9 +10,14 @@ import { VulneracionesIdentificadas } from './vulneracionesidentificadas.models'
 import { medida } from './medidas_proteccion.models';
 import { medidasIdentificadas } from './medidasIdentificada.models';
 import { articulo } from './articulo_medidas.models';
+import { Avocatoria } from './avocatoria.model';
+import { MedidasEmergentes } from './medidas_emergentes.model';
+import { Notificacion } from './notificacion.model';
+
+import { Otros } from './Otros_notificados.models';
 
 //relacion usuario -- canton
-usuarios.belongsTo(Canton, { foreignKey: 'id_canton', as: 'canton' });
+usuarios.belongsTo(Canton, { foreignKey: 'id_canton' });
 Canton.hasMany(usuarios, { foreignKey: 'id_canton' });
 
 //relacion denuncia  -- canton
@@ -24,54 +29,81 @@ Denuncia.hasMany(Afectado, { foreignKey: 'idDenuncia', as:'afectados'});
 Afectado.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });
 
 //relacion denunciado denuncia
-Denuncia.hasMany(Denunciado, { foreignKey: 'idDenuncia', as: 'denunciados' });
+Denuncia.hasMany(Denunciado, { foreignKey: 'idDenuncia'});
 Denunciado.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });
 
 //relacion denunciante denuncia
-Denuncia.hasMany(Denunciante, { foreignKey: 'idDenuncia', as: 'denunciante' });
+Denuncia.hasMany(Denunciante, { foreignKey: 'idDenuncia' });
 Denunciante.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });
 
-// Relación muchos a muchos entre afectado y Vulneracion
-Afectado.belongsToMany(Vulneracion, {
-  through: VulneracionesIdentificadas,
-  as:'vulneraciones',
-  foreignKey: 'afectado_id'
-});
+// Relación uno a muchos entre afectado y Vulneracionensidentificadas
 
-Vulneracion.belongsToMany(Afectado, {
-  
-  through: VulneracionesIdentificadas,
-  as:'afectados',
-  
-  foreignKey: 'vulneracion_id'
-});
+Afectado.hasMany(VulneracionesIdentificadas,{foreignKey: 'idAfectado', as:'vulneracionesI'});
+VulneracionesIdentificadas.belongsTo(Afectado,{foreignKey:'idAfectado'})
+
+// Relación uno a muchos entre vulneracion y Vulneracionensidentificadas
+Vulneracion.hasMany(VulneracionesIdentificadas,{foreignKey: 'idVulneracion', as:'vulneracionesI'});
+VulneracionesIdentificadas.belongsTo(Vulneracion,{foreignKey:'idVulneracion'})
+
 // Relación muchos a muchos entre afectados y medidas
-Afectado.belongsToMany(medida, {
-  through: medidasIdentificadas,
-  as:'medidas',
-  foreignKey: 'afectado_id'
-});
 
-medida.belongsToMany(Afectado, {
-  
-  through: medidasIdentificadas,
-  as:'afectado',
-  
-  foreignKey: 'medidas_id'
-});
+// Relación uno a muchos entre afectado y medidasidentificadas
+Afectado.hasMany(medidasIdentificadas,{foreignKey: 'idAfectado', as:'medidasI'});
+VulneracionesIdentificadas.belongsTo(Afectado,{foreignKey:'idAfectado'})
+
+// Relación uno a muchos entre medidas y medidasidentificadas
+medida.hasMany(medidasIdentificadas,{foreignKey: 'idMedida', as:'medidasI'});
+VulneracionesIdentificadas.belongsTo(medida,{foreignKey:'idMedida'})
+
+
 
 // Relación entre medida y articulo
 medida.belongsTo(articulo, {
-  foreignKey: 'idArticulo',
-  as: 'articulos'
+  foreignKey: 'idArticulo'
 });
 
 articulo.hasMany(medida, {
-  foreignKey: 'idArticulo',
-  as: 'medidas'
+  foreignKey: 'idArticulo'
 });
 
+// Relación: Una denuncia puede tener muchas avocatorias
+Avocatoria.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
+Denuncia.hasMany(Avocatoria, { foreignKey: 'idDenuncia' });
 
+
+
+// Relación uno a muchos entre avocatoria y medidasemergentes
+Avocatoria.hasMany(MedidasEmergentes,{foreignKey: 'idAvocatoria', as:'medidasE'});
+MedidasEmergentes.belongsTo(Avocatoria,{foreignKey:'idAvocatoria'})
+
+// Relación uno a muchos entre medida y medidasemergentes
+medida.hasMany(MedidasEmergentes,{foreignKey: 'idMedida', as:'medidasE'});
+MedidasEmergentes.belongsTo(medida,{foreignKey:'idMedida'})
+
+
+
+
+// Relación uno a muchos: un afectado puede tener muchas medidas emergentes
+Afectado.hasMany(MedidasEmergentes, { foreignKey: 'idAfectado', as: 'medidasE' });
+MedidasEmergentes.belongsTo(Afectado, { foreignKey: 'idAfectado' });
+
+// Relación: Una denuncia puede tener muchas notificaciones
+Notificacion.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
+Denuncia.hasMany(Notificacion, { foreignKey: 'idDenuncia' });
+
+// Denuncia y Notificacion tienen relación muchos a muchos por Notificar
+
+
+
+// Relación uno a muchos notificacion --->otroNotificados
+Otros.belongsTo(Denuncia, {
+  foreignKey: 'idDenuncia'
+});
+
+Denuncia.hasMany(Otros, {
+  foreignKey: 'idDenuncia',
+  as:'otros'
+});
 
 
 export {
@@ -85,6 +117,11 @@ export {
   medidasIdentificadas,
   usuarios,
   Canton,
-  articulo
+  articulo,
+  Avocatoria,
+  MedidasEmergentes,
+  Notificacion,
+  
+  Otros
 };
 

@@ -22,7 +22,7 @@
       <tbody>
         @for (item of datos; track $index) {
 
-          <tr (click)="RouterLink && RouterLinkparam ? navegar(item) : null" class="hover:bg-gray-50 border-t-2 border-t-blue-100" >
+          <tr (click)="RouterLink && RouterLinkparam ? navegar(item) : tabs(item)" class="hover:bg-gray-50 border-t-2 border-t-blue-100" >
             @for (col of columnas; track $index) {
 
               <td class=" p-2">{{item[col] }}</td>

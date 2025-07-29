@@ -18,6 +18,8 @@ export class TablaComponent {
 @Input() estado:(user: any) => void = () => {};
 @Input() eliminar:(item: any) => void = () => {};
 @Input() editar:(item: any) => void = () => {};
+@Input() cambiar:(item: any) => void = () => {};
+
 @Input() RouterLink:string=""
 @Input() RouterLinkparam:string=""
 
@@ -29,6 +31,12 @@ obtenerValorAnidado(obj: any, path: string): any {
   return path.split('.').reduce((acc, prop) => acc?.[prop], obj);
 }
 
+tabs(item:any){
+  const tab = item[this.RouterLinkparam];
+  this.cambiar(tab)
+
+}
+
 navegar(item: any) {
   if (this.RouterLink && this.RouterLinkparam) {
     const param = item[this.RouterLinkparam];
@@ -36,7 +44,9 @@ navegar(item: any) {
       this.router.navigate([this.RouterLink, param]);
     }
   }
+
 }
+
 
 }
 export default TablaComponent;

@@ -24,6 +24,7 @@ export class NnaPageFasesComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
+      console.log(this.denunciaId)
       this.cargarDatosDenuncia()
 
     });

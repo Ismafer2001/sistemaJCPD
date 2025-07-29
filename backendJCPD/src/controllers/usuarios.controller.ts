@@ -3,6 +3,7 @@ import { usuarios } from "../models/usuarios.models";
 import { Canton } from "../models/cantones.models";
 import bcrypt from "bcryptjs";
 import { registrarUsuario } from "../services/user.service";
+import { handlehttp } from "../utils/error.handle";
 
 // Crear usuario
 export const getRegistrarUsuario = async (req: Request, res: Response) => {
@@ -14,7 +15,7 @@ export const getRegistrarUsuario = async (req: Request, res: Response) => {
       return res.status(400).json({ mensaje: error.message });
     }
 
-    res.status(500).json({ mensaje: "Error al crear usuario", error });
+    handlehttp(res,"error_post_registar usuario", error);
   }
 };
 
@@ -23,12 +24,13 @@ export const getRegistrarUsuario = async (req: Request, res: Response) => {
 export const obtenerUsuarios = async (_req: Request, res: Response) => {
   try {
     const allusuarios = await usuarios.findAll({
-      include: [{ model: Canton, as: "canton" }],
+      include: [{ model: Canton}],
     });
     const usuariosMapeados = allusuarios.map(u => ({
   ...u.dataValues,
-  canton: u.canton?.canton
+  canton: u.Canton?.canton
 }));
+    
 
     res.json(usuariosMapeados );
   } catch (error) {

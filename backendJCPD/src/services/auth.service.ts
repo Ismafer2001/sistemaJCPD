@@ -3,6 +3,9 @@ import{ usuarios} from "../models";
 import jwt from 'jsonwebtoken';
 import { login } from "../interfaces/auth.interface";
 import { Canton } from "../models";
+import { handlehttp } from "../utils/error.handle";
+import { generarToken } from "../utils/jwt.handle";
+import { jwtpayload } from "../interfaces/usuarios.interface";
 
 
 
@@ -10,31 +13,38 @@ import { Canton } from "../models";
 export const loginUsuario = async (user: login) => {
   
     const existe = await usuarios.findOne({ where: { usuario: user.usuario },
-        include: [{ model: Canton, as:'canton' ,  attributes: ['canton'] }]  });
+        include: [{ model: Canton ,  attributes: ['canton'] }]  });
 
         
     
         if (!existe) {
-          throw new Error("Usuario no encontrado");
+          
+          return "Usuario no encontrado"
           
         }
     
         const passwordValido = await bcrypt.compare(user.contrasena, existe.contrasena);
         if (!passwordValido) {
-          throw new Error("contraseña incorrecta");
+           return "contraseña incorrecta"
+          
         }
-        const token = jwt.sign(
+        
+
+       
+        const sing:jwtpayload = 
               {
                 id: existe.id,
                 nombres: existe.nombres,
                 usuario: existe.usuario,
                 rol: existe.rol,
-                canton:existe.canton?.canton
+                canton:existe.Canton?.canton,
+                id_canton:existe.id_canton
                 
-              },
-              process.env.JWT_SECRET || 'secret',
-              { expiresIn: '4h' }
-            );
+              }
+              
+
+        const token = generarToken(sing)
+        
             
 
             return token

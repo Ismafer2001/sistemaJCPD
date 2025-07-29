@@ -30,6 +30,20 @@ export const nnaRoutes: Routes = [
           import('@nna/pages/crearAvocatoria/crearAvocatoria.component')
 
 
+      },
+      {
+        path:'notificaciones/:id',
+        loadComponent:()=>
+          import('@nna/pages/crear-Notificaciones/crear-Notificaciones.component')
+
+
+      },
+      {
+        path:'citaciones/:id',
+        loadComponent:()=>
+          import('@nna/pages/crear-citaciones/crear-citaciones.component')
+
+
       }
     ],
   },

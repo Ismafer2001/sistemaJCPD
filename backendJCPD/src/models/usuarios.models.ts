@@ -31,7 +31,7 @@ declare  contrasena: string;
 declare  isactivo: boolean;
 declare  id_canton: number;
 declare  fecha_creacion?: Date;
-  declare canton?: Canton;
+  declare Canton?: Canton;
   
 }
 
@@ -44,7 +44,7 @@ usuarios.init({
   contrasena: { type: DataTypes.STRING, allowNull: false },
   rol: { type: DataTypes.ENUM('admin', 'principal', 'secretari@', 'suplente'), allowNull: false },
   isactivo: { type: DataTypes.BOOLEAN, defaultValue: true },
-  id_canton: { type: DataTypes.INTEGER, allowNull: false, references: { model: 'canton', key: 'id' } },
+  id_canton: { type: DataTypes.INTEGER, allowNull: false, references: { model: Canton, key: 'id' } },
   fecha_creacion: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
 }, {
   sequelize,

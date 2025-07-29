@@ -19,8 +19,9 @@ export interface datosDenuncia {
 }
 
 //funciones para obtener tramite e incrementar automaticamente
-export async function obtenerNumTramite({ incrementar = false } = {}) {
+export async function obtenerNumTramite({ incrementar = false } = {}, id_canton:number) {
   const tramite = await Denuncia.findOne({
+    where:{id_canton:id_canton},
     order: [["num_tramite", "DESC"]],
   });
 
@@ -31,10 +32,11 @@ export async function obtenerNumTramite({ incrementar = false } = {}) {
 }
 
 //funcion para contar denuncias totales activas
-export async function countDenuncias() {
+export async function countDenuncias(id_canton:number) {
   const denunciasActivas= await Denuncia.count({
     where: {
-      estado: 'activa'
+      estado: 'activa',
+      id_canton: id_canton
     }
   });
 
@@ -99,8 +101,8 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       
       if (realId && v.vulneraciones.length) {
         const data = v.vulneraciones.map((id: number) => ({
-          afectado_id: realId,
-          vulneracion_id: id,
+          idAfectado: realId,
+          idVulneracion: id,
         }));
         
         await VulneracionesIdentificadas.bulkCreate(data, { transaction: t });
@@ -112,8 +114,8 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       const realId = idMap.get(+m.id_afectado);
       if (realId && m.medidas.length) {
         const data = m.medidas.map((id: number) => ({
-          afectado_id: realId,
-          medidas_id: id,
+          idAfectado: realId,
+          idMedida: id,
         }));
         await medidasIdentificadas.bulkCreate(data, { transaction: t });
       }
@@ -139,13 +141,13 @@ try {
   for (const afectado of afectados) {
     // 2. Eliminar medidas relacionadas con el afectado
     await medidasIdentificadas.destroy({
-      where: { afectado_id: afectado.id },
+      where: { idAfectado: afectado.id },
       transaction: t,
     });
 
     // 3. Eliminar vulneraciones relacionadas con el afectado
     await VulneracionesIdentificadas.destroy({
-      where: { afectado_id: afectado.id },
+      where: {idAfectado: afectado.id },
       transaction: t,
     });
   }

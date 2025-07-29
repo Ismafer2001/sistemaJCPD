@@ -1,4 +1,32 @@
-import { Denuncia, Afectado, Denunciante, Denunciado, Vulneracion, Canton } from "../models";
+import { Model, Transaction } from "sequelize";
+import { avocatoriaDTO } from "../interfaces/avocatoria.interface";
+import { Denuncia, Afectado, Denunciante, Denunciado, Vulneracion, Canton, Avocatoria, VulneracionesIdentificadas, medida } from "../models";
+import sequelize from "../config/database";
+// Servicio para crear una avocatoria
+export async function crearAvocatoria(data:avocatoriaDTO) {
+    const existe = await Avocatoria.findOne({ where: { idDenuncia: data.idDenuncia} });
+        if (existe) {
+          throw new Error("avocatoria ya existe");
+        }
+        const t: Transaction = await sequelize.transaction(); //iniciallizams transaccion
+        try {
+            
+        } catch (error) {
+            
+        }
+
+
+  // Puedes ajustar los campos según tu modelo Avocatoria
+  
+  return  Avocatoria.create({
+    fechaCreado: data.fechaCreado,
+  horaCreado:data.horaCreado,
+  codigoTramite: data.codigoTramite,
+  disposiciones:data.disposiciones,
+  idDenuncia:data.idDenuncia,
+    
+  });
+}
 
 export async function obtenerDenunciaParaAvocatoria(id: string) {
     const denuncia = await Denuncia.findByPk(id, {
@@ -19,20 +47,28 @@ export async function obtenerDenunciaParaAvocatoria(id: string) {
                 attributes: ['nombres', 'apellidos', 'edad'],
                 include: [
                     {
-                        model: Vulneracion,
-                        as: 'vulneraciones',
-                        attributes: ['id', 'vulneracion']
+                        model: VulneracionesIdentificadas,
+                        as:'vulneracionesI',
+                        
+                        attributes: ['idAfectado', 'idVulneracion'],
+                        include:[
+                            {
+                                model: Vulneracion,
+                                attributes:['vulneracion']
+
+                            }
+                        ]
                     }
                 ]
             },
             {
                 model: Denunciante,
-                as: 'denunciante',
+                
                 attributes: ['nombres', 'apellidos']
             },
             {
                 model: Denunciado,
-                as: 'denunciados',
+                
                 attributes: ['nombres', 'apellidos']
             }
         ]
@@ -42,3 +78,5 @@ export async function obtenerDenunciaParaAvocatoria(id: string) {
     }
     return denuncia;
 }
+
+

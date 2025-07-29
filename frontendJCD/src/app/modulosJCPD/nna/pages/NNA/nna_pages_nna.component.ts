@@ -5,42 +5,44 @@ import { DenunciaService, } from "@nna/services/denuncia.service";
 import { Denuncia } from "@nna/interfaces/denuncia.interface";
 import { HttpErrorResponse } from "@angular/common/http";
 import TablaComponent from "@shared/components/tabla/tabla.component";
+import { AuthService } from "@auth/services/auth.service";
+import { CardFormComponent } from "@shared/components/card-Form/card-Form.component";
 
 @Component({
   selector: 'nna-page-nna',
   standalone: true,
-  imports: [RouterLink, CommonModule, TablaComponent],
+  imports: [RouterLink, CommonModule, TablaComponent, CardFormComponent ],
   templateUrl: './nna_page_nna.component.html',
 })
 export class NnaPageNnaComponent implements OnInit {
   denuncias: Denuncia[] = [];
   denunciasActivas= 0
+   idCAnton:number =0
   loading: boolean = false;
   error: string | null = null;
 
-  constructor(private denunciaService: DenunciaService) {
+  constructor(private denunciaService: DenunciaService, private AuthService:AuthService) {
 
   }
 
   ngOnInit(): void {
-    console.log('Iniciando componente...');
+
     this.cargarDenuncias();
     this.totalDenunciasActivas();
 
   }
 
 
-  totalDenunciasActivas(){
-    this.denunciaService.contarDenunciasActivas().subscribe(n=>{
-      this.denunciasActivas=n.total;
-    })
-  }
+
+
+
+
+  /////------------------CARGAR DATOS----------------------------///
 
   cargarDenuncias(): void {
     console.log('Cargando denuncias...');
     this.loading = true;
     this.error = null;
-
     this.denunciaService.obtenerTodasDenuncias().subscribe({
       next: (data) => {
         console.log('Denuncias recibidas:', data);
@@ -58,6 +60,14 @@ export class NnaPageNnaComponent implements OnInit {
     });
   }
 
+  //------------------------------OTROS------------------//
+
+
+   totalDenunciasActivas(){
+    this.denunciaService.contarDenunciasActivas().subscribe(n=>{
+      this.denunciasActivas=n.total;
+    })
+  }
   eliminarDenuncia(denuncia:Denuncia){
 
         this.denunciaService.eliminarDenuncia(denuncia.idDenuncia).subscribe(() => this.cargarDenuncias());

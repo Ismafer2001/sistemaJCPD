@@ -1,0 +1,111 @@
+<h1 class="text-2xl font-bold mb-4">citar</h1>
+<hr class="border-blue-200 border-1" />
+<div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300">
+   <!--tabs-->
+  <div class="flex  mb-0 gap-3 " id="tabs">
+    <button type="button" class="rounded-t-2xl p-2"
+       [ngClass]="{
+      'bg-blue-500 text-white': currentTab === '0',
+      'bg-gray-100': currentTab !== '0'
+    }"
+      (click)="cambiarTab('0')"
+
+    >
+      partes
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('1')"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab  != '0',
+
+    }"
+    >
+     citaciones
+    </button>
+
+  </div>
+
+  <app-card-Form [hidden]="currentTab!='0'? true:false" [titulo]="'citar'">
+
+
+    <global-tabla
+     [columnas]="['nombres','parte',]"
+    [encabezados]="['nombres','parte',]"
+    [datos]="involucrados"
+    [RouterLinkparam]="'nombres'"
+    [cambiar]="cambiarTab.bind(this)"
+
+    >
+
+    </global-tabla>
+
+  </app-card-Form>
+
+  <app-card-Form [hidden]="( currentTab!='0')? false:true" [titulo]="'citaciones'">
+    <p>Trámite Administrativo N° <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{citar.codigoTramite}}</span></p>
+    <p>{{citar.Canton}},{{ fechaHoraActual | date:'dd' }} de {{ fechaHoraActual | date:'MMMM':'':'es' }} del {{ fechaHoraActual | date:'yyyy' }}</p>
+    <p>Oficio N° <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">00001</span></p>
+    <p>citacion</p>
+    <p>señora</p>
+    @for (item of involucrados; track $index) {
+      @if (currentTab===item.nombres) {
+        <p><span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{item.nombres}}</span></p>
+        <p>parte {{item.parte}}</p>
+      }
+
+
+
+    }
+
+    <p>ciudad</p>
+   <p>{{citar.Canton}}</p>
+    <p>de nuestras consideraciones:</p>
+    <p>Reciban un cordial saludo de quienes conformamos la Junta de Protección del cantón  {{citar.Canton}}</p>
+    <p>Adjunto a la presente sírvase encontrar la Citación  de fecha {{ fechaHoraActual | date:'dd' }} de {{ fechaHoraActual | date:'MMMM':'':'es' }} del {{ fechaHoraActual | date:'yyyy' }}, para que asista a la Audiencia de Contestación a realizarse:</p>
+     <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Local -->
+    <div>
+      <label for="local" class="block text-sm font-medium text-gray-700">Local</label>
+      <input type="text" id="local" name="local"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+
+    <!-- Dirección -->
+    <div>
+      <label for="direccion" class="block text-sm font-medium text-gray-700">Dirección</label>
+      <input type="text" id="direccion" name="direccion"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+
+    <!-- Fecha -->
+    <div>
+      <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha</label>
+      <input type="date" id="fecha" name="fecha"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+
+    <!-- Hora -->
+    <div>
+      <label for="hora" class="block text-sm font-medium text-gray-700">Hora</label>
+      <input type="time" id="hora" name="hora"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+
+    
+  </form>
+    <p>Dispuesta dentro del trámite administrativo N° {{citar.codigoTramite}}</p>
+    <p>Sin otro particular suscribimos.  </p>
+    <p>atentamente,</p>
+    <p>MIEMBROS DE LA JUNTA CANTONAL DE PROTECCION DE DERECHOS </p>
+
+
+    <p>RECIBIDO……………………………………………………………………………...…………………</p>
+    <p>FECHA………………</p>
+
+    <p>NOTA: Se adjunta Avocatoria de Conocimiento, medidas de protección y boleta de auxilio</p>
+
+  </app-card-Form>
+</div>
+

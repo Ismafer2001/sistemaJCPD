@@ -13,4 +13,7 @@ export class AvocatoriaService {
   obtenerDenunciaParaAvocatoria(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/avocatoria/${id}`);
   }
+  getMedidasIdentificadas(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/avocatoria/medidas/${id}`);
+  }
 }

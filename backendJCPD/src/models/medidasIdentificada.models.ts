@@ -1,19 +1,20 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
-import { Denuncia } from './denuncia.models';
+
 import{medida} from './medidas_proteccion.models'
+import { Afectado } from './afectado.models';
 interface medidasIdentificasAttributes{
     id: number;
-    afectado_id: number;
-    medidas_id: number;
+    idAfectado: number;
+    idMedida: number;
 }
 interface medidasIdentificadasCreationAttributes extends Optional<medidasIdentificasAttributes,'id'>{
   
 }
 export class medidasIdentificadas extends Model<medidasIdentificasAttributes,medidasIdentificadasCreationAttributes> implements medidasIdentificasAttributes{
-    public id!: number;
-  public afectado_id!: number;
-  public medidas_id!: number;
+    declare id: number;
+  declare idAfectado: number;
+  declare idMedida: number;
 }
 medidasIdentificadas.init({
     id: { 
@@ -21,17 +22,13 @@ medidasIdentificadas.init({
         primaryKey: true, 
         autoIncrement: true 
     },
-    afectado_id: { 
+    idAfectado: { 
         type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-          model: Denuncia,
-          key: 'id'
-        }
+        
       },
-      medidas_id: { 
+      idMedida: { 
         type: DataTypes.INTEGER,
-        allowNull: false,
+        
         references: {
           model: medida,
           key: 'id'

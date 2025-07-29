@@ -1,5 +1,10 @@
   import { Model, DataTypes, Optional, } from 'sequelize';
   import sequelize from '../config/database';
+import { Afectado } from './afectado.models';
+import { Denunciante } from './denunciante.models';
+import { Denunciado } from './denunciado.models';
+import { Otros } from './Otros_notificados.models';
+import { Canton } from './cantones.models';
   
   interface DenunciaAttributes {
     id: number;
@@ -18,7 +23,7 @@
     usuario_creador?: number;
     descripcion_hechos?: string;
     solicitud?: string;
-    id_canton: string;
+    id_canton: number;
     estado: "activa"|"finalizada";
   }
   
@@ -43,9 +48,15 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     declare usuario_creador: number;
     declare descripcion_hechos: string;
     declare solicitud: string;
-    declare id_canton: string;
+    declare id_canton: number;
     declare estado: 'activa' | 'finalizada';
-    declare canton: string;
+    declare canton: Canton;
+    declare afectados?:Afectado[];
+    declare Denunciantes?: Denunciante[];
+    declare Denunciados?: Denunciado[];
+    declare otros?: Otros[];
+   
+
   }
   
   Denuncia.init({

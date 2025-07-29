@@ -7,7 +7,7 @@ export const getAllMedidas = async (req: Request, res: Response) => {
     const medidas = await medida.findAll({
       include: [{
         model: articulo,
-        as: 'articulos',
+        
         attributes: ['id', 'articulo']
       }],
       order: [
@@ -21,8 +21,8 @@ export const getAllMedidas = async (req: Request, res: Response) => {
       const articuloId = medida.idArticulo;
       if (!acc[articuloId]) {
         acc[articuloId] = {
-          id: medida.articulos.id,
-          articulo: medida.articulos.articulo,
+          id: medida.articulo.id,
+          articulo: medida.articulo.articulo,
           medidas: []
         };
       }
@@ -47,8 +47,15 @@ export const getAllMedidas = async (req: Request, res: Response) => {
   }
 };
 
+
+
+
+
+
+
+
 // Obtener medidas por ID de artículo
-export const getMedidasByArticulo = async (req: Request, res: Response) => {
+/*export const getMedidasByArticulo = async (req: Request, res: Response) => {
   try {
     const { idArticulo } = req.params;
     const medidas = await medida.findAll({
@@ -86,4 +93,7 @@ export const getMedidasByArticulo = async (req: Request, res: Response) => {
       error: error instanceof Error ? error.message : 'Error desconocido'
     });
   }
-};
+};*/
+
+// Obtener medidas identificadas por id de denuncia
+

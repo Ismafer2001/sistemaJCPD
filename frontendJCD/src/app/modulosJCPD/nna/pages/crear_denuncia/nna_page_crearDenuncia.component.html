@@ -63,21 +63,22 @@
     </button>
   </div>
 
-  <!-- Sección del Denunciante -->
+
   <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300">
+     <!-- Sección del Denunciante -->
 
-    <div
-    [hidden]="currentTab === 1"
-      class="bg-white rounded-lg shadow-md p-6 mb-8"
-    >
 
-      <h2 class="text-xl text-blue-500 font-semibold mb-4">Datos del Denunciante</h2>
+
+    <app-card-Form [titulo]="'Datos del Denunciante'" [hidden]="currentTab===1">
       <nna_creardenuncia_denunciante
       [formGroup]="denuncianteForm"
 
       ></nna_creardenuncia_denunciante>
 
-    </div>
+
+    </app-card-Form>
+
+
 
 
     <!-- Sección de Afectados -->
@@ -134,7 +135,7 @@
         ></textarea>
         @if (denunciaForm.get('descripcion_hechos')?.errors?.['required'] && denunciaForm.get('descripcion_hechos')?.touched) {
             <div
-          
+
           class="mt-1 text-sm text-red-600"
         >
           La descripción es requerida

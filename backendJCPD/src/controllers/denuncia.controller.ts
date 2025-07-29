@@ -1,5 +1,6 @@
-import { Request, Response, RequestHandler } from 'express';
+import { Request, Response } from 'express';
 import { Denuncia, Denunciante, Denunciado, Afectado, Vulneracion, VulneracionesIdentificadas, medidasIdentificadas, medida } from '../models';
+import jwt from 'jsonwebtoken';
 
 
 import { insertDenuncia, datosDenuncia,  obtenerNumTramite,  countDenuncias, eliminarDenuncia } from '../services/denuncia.service';
@@ -41,7 +42,7 @@ export const crearDenuncia = async (req: Request, res: Response): Promise<void> 
 export const deleteDenuncia = async (req:Request, res:Response) =>{
   try {
     const {id} =req.params
-    console.log(id)
+    
     await eliminarDenuncia(id)
     res.json({ mensaje: "denuncia eliminado definitivamente" });
 
@@ -57,24 +58,40 @@ export const deleteDenuncia = async (req:Request, res:Response) =>{
 // Obtener todas las denuncias
 export const getAllDenuncias = async (req: Request, res: Response) => {
    try {
+    const token:string = req.headers.authorization?.split(' ')[1] as string;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+    
+     // Extrae el ID del usuario del token decodificado.
+            const id_canton : number = Number((decoded as any).id_canton);
+            
+
+            // Si no se obtiene un ID válido, devuelve un error de autorización.
+            if (!id_canton) return res.status(401).json("Unauthorized");
+
     const denuncias = await Denuncia.findAll({
+      where: { id_canton: id_canton },
       include: [
         {
           model: Afectado,
-          as: 'afectados',
+          as:'afectados',
           attributes: ['nombres', 'apellidos','cedula']
-        }
+        },
+        
       ]
     });
+
+    
 
     // Transformamos la respuesta al formato deseado
     const resultado = denuncias.map(denuncia => ({
   codigoTramite: denuncia.codigoTramite,
   fecha: denuncia.fecha_creado,
+  id_canton: denuncia.id_canton,
   idDenuncia: denuncia.id,
-  afectados: (denuncia as any).afectados.map((a: any) => `${a.nombres} ${a.apellidos}`),
-  cedulasAfectados: (denuncia as any).afectados.map((a: any) => a.cedula)
+  Afectado: denuncia.afectados?.map((a: Afectado) => `${a.nombres} ${a.apellidos}`),
+  cedulasAfectados: denuncia.afectados?.map((a: Afectado) => a.cedula)
 }));
+
 
     res.json(resultado);
   } catch (error) {
@@ -91,7 +108,8 @@ export const getDenunciaById = async (req: Request, res: Response) => {
       include:  [
         {
           model: Afectado,
-          as: 'afectados',
+          as:'afectados',
+          
           attributes: ['nombres', 'apellidos','cedula']
         }
       ]
@@ -122,10 +140,11 @@ export const getDenunciaById = async (req: Request, res: Response) => {
 
 export const obtenerNumeroTramite = async (req:Request, res:Response) => {
   try {
+    const id_canton= req.user.id_canton
     const { incrementar } = req.query; // viene como string
     const numero = await obtenerNumTramite({
-      incrementar: incrementar === 'true',
-    });
+      incrementar: incrementar === 'true'
+    }, id_canton);
 
     res.json({ numero });
   } catch (error) {
@@ -135,8 +154,12 @@ export const obtenerNumeroTramite = async (req:Request, res:Response) => {
 };
 export const totalDenunciaActivasController =async(req:Request, res:Response) =>{
    try {
+   const id_canton = Number((req.user as any).id_canton);
+
+    
+    
     // viene como string
-    const total = await countDenuncias();
+    const total = await countDenuncias(id_canton);
 
     res.json({ total });
   } catch (error) {

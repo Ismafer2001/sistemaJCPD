@@ -10,8 +10,8 @@ type CantonCreationAttributes = Optional<CantonAttributes, 'id'>;
 
 export class Canton extends Model<CantonAttributes, CantonCreationAttributes>
   implements CantonAttributes {
-  public id!: number;
-  public canton!: string;
+  declare id: number;
+  declare canton: string;
 }
 
 Canton.init({

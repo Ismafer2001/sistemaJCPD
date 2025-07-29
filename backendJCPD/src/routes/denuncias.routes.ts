@@ -13,8 +13,8 @@ const router = Router();
 router.post('/', crearDenuncia);
 // Obtener todas las denuncias
 router.get('/', getAllDenuncias);
-router.get('/num_tramite',obtenerNumeroTramite);
-router.get('/countdenunciasActivas',totalDenunciaActivasController);
+router.get('/num_tramite',verificarToken, obtenerNumeroTramite);
+router.get('/countdenunciasActivas', verificarToken, totalDenunciaActivasController);
 router.delete('/:id', deleteDenuncia);
 
 

@@ -1,22 +1,35 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import { checkToken } from '../utils/jwt.handle';
+import { jwtpayload } from '../interfaces/usuarios.interface';
 
 
 export const verificarToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  const authHeader = req.headers.authorization;
-
-  if (authHeader != undefined && authHeader.startsWith('Bearer ')) {
+  
   try {
-    const token = authHeader.split(' ')[1];
+    const authHeader = req.headers.authorization ||"";
+    const token = authHeader.split(' ').pop();
 
-    jwt.verify(token, process.env.JWT_SECRET || 'secret');
+      
+         // Extrae el ID del usuario del token decodificado.
+ const decoded = await checkToken(`${token}`)
+
+
+ 
+
+    
+    if(!decoded){
+      res.status(401)
+      res.send('no tienes un jwt valido')
+
+    }
+    req.user = decoded ;
     
    
     next();
   } catch (err) {
-    res.status(401).json({ mensaje: 'Token inválido o expirado' });
-  }
-  }else{
+    console.log(err)
     res.status(401).json({ mensaje: 'acceso denegado' });
   }
+  
 };

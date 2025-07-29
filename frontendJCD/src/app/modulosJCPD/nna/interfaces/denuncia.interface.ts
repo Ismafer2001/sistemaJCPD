@@ -1,6 +1,7 @@
 export interface Denuncia {
   idDenuncia: number;
   medio: string;
+  id_canton:number;
   tipo_denuncia: string;
   canton: string;
   fecha_creado: string;

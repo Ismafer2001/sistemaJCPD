@@ -25,13 +25,19 @@
       </div>
 
       <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+        <a [routerLink]="['/nna/notificaciones', denuncia?.idDenuncia]" >
         <h3 class="text-lg font-bold text-gray-700">notificaciones</h3>
         <p class="text-sm text-gray-600">Pendiente</p>
+
+      </a>
       </div>
 
       <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
+         <a [routerLink]="['/nna/citaciones', denuncia?.idDenuncia]" >
         <h3 class="text-lg font-bold text-gray-700">citaciones</h3>
-        <p class="text-sm text-gray-600">En proceso</p>
+        <p class="text-sm text-gray-600">Pendiente</p>
+
+      </a>
       </div>
 
       <!-- Continúa con las siguientes fases... -->

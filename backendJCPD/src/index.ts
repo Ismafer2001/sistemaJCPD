@@ -10,10 +10,12 @@ import vulneracionesRoutes from './routes/vulneraciones.routes'
 import medidasRoutes from './routes/medidas.routes';
 import avocaroriaRoutes from './routes/avocatoria.routes';
 import { seedInitialData } from './utils/seed';
+import notificacionRoutes from './routes/notificacion.routes';
+import citacionRoutes from './routes/citaciones.routes'
 
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 
 // Middlewares
@@ -28,12 +30,15 @@ app.use('/api/denuncias', denunciasRoutes);
 app.use('/api/vulneraciones', vulneracionesRoutes);
 app.use('/api/medidas', medidasRoutes);
 app.use('/api/avocatoria', avocaroriaRoutes);
+app.use('/api/notificacion', notificacionRoutes);
+app.use('/api/citacion', citacionRoutes);
+
 
 // Verificar conexión con la base de datos y levantar el servidor
 sequelize.sync().then(async () => {
   
   console.log('✅ Base de datos conectada y modelos sincronizados');
-  await seedInitialData(); // 👈 Ejecuta la carga si no hay datos
+  await seedInitialData(); //  Ejecuta la carga si no hay datos
 
   app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
 }).catch((err: any) => {
