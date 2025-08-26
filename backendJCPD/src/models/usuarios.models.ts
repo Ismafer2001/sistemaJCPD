@@ -13,9 +13,9 @@ interface usuarioAttributes {
   rol: 'admin' | 'principal' | 'secretari@' | 'suplente';
   isactivo: boolean;
   id_canton: number;
-  fecha_creacion?: Date;
+  
 }
-interface UsuarioCreationAttributes extends Optional<usuarioAttributes, 'id' | 'isactivo' | 'fecha_creacion'>{
+interface UsuarioCreationAttributes extends Optional<usuarioAttributes, 'id' | 'isactivo' >{
   
 }
 
@@ -30,7 +30,7 @@ declare  contrasena: string;
   declare rol: 'admin' | 'principal' | 'secretari@' | 'suplente';
 declare  isactivo: boolean;
 declare  id_canton: number;
-declare  fecha_creacion?: Date;
+
   declare Canton?: Canton;
   
 }
@@ -45,11 +45,13 @@ usuarios.init({
   rol: { type: DataTypes.ENUM('admin', 'principal', 'secretari@', 'suplente'), allowNull: false },
   isactivo: { type: DataTypes.BOOLEAN, defaultValue: true },
   id_canton: { type: DataTypes.INTEGER, allowNull: false, references: { model: Canton, key: 'id' } },
-  fecha_creacion: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
+  
 }, {
   sequelize,
   tableName: 'usuarios',
-  timestamps: false,
+  timestamps: true,
+  createdAt: 'fechaCreado',
+  updatedAt: false,
 });
 
 

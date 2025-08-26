@@ -1,7 +1,8 @@
 import { Request, Response } from "express";
 import {  Denuncia, Denunciado, Denunciante,  Otros, Avocatoria } from "../models";
-import { notifiacionesDTO, personasNotificacion } from "../services/notificaciones.service";
+import { crearNotificacion, notifiacionesDTO, personasNotificacion } from "../services/notificaciones.service";
 import { handlehttp } from "../utils/error.handle";
+import { PDFnotificacion } from "../services/pdfs/notificacionpdf.service";
 
 // Controlador para crear un registro en la tabla Otros
 export const createOtro = async (req: Request, res: Response) => {
@@ -28,10 +29,10 @@ export const createOtro = async (req: Request, res: Response) => {
 if (!personas) {
   return res.status(404).json({ message: 'No se encontraron personas' });
 }
-console.log(personas)
+
 const resultado: { nombres: string }[] = [
-  ...(personas?.Denunciantes || []).map(d => ({ nombres: d.nombres || '',parte:'accionante'})),
-  ...(personas?.Denunciados || []).map(d => ({ nombres: d.nombres || '',parte:'accionado' })),
+  ...(personas?.Denunciantes || []).map(d => ({ nombres: d.nombres || '',parte:'Accionante'})),
+  ...(personas?.Denunciados || []).map(d => ({ nombres: d.nombres || '',parte:'Accionado' })),
 
   ...(personas?.otros || []).map(n => ({ nombres: n.nombres || '',parte:n.parte }))
 ].filter(p => p.nombres); // elimina los vacíos
@@ -57,7 +58,9 @@ res.json(resultado);
   const datos = await notifiacionesDTO(id);
   
   
-  console.log(datos)
+  
+  
+  
   res.json(datos)
     
   } catch (error) {
@@ -70,44 +73,20 @@ res.json(resultado);
 
  }
 
-/*export const getdenunciaParaNotificacion = async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const denuncia = await Denuncia.findByPk(id, {
-      attributes: ['codigo_tramite', 'fecha_creacion'],
-      include: [
-        {
-          model: NotificacionInvolucrado,
-          as: 'notificados',
-          attributes: ['nombres']
-        },
-        {
-          model: Avocatoria,
-          
-          attributes: ['id', 'fechaCreado']
-        }
-      ]
-    }) as any;
+ export const postNotificacion = async (req: Request, res: Response) => {
+ try {
+  const nuevaNotificacion = await crearNotificacion(req.body);
+  const pdfPath = await PDFnotificacion(nuevaNotificacion);
+  nuevaNotificacion.datosGenerales = pdfPath; // Agregás un nuevo valor a la instancia
+await nuevaNotificacion.save();
+      res.status(201).json(nuevaNotificacion);
+      
+  
+ } catch (error) {
 
-    if (!denuncia) {
-      return res.status(404).json({ message: 'No se encontró la denuncia' });
-    }
+    handlehttp(res,'error_post_notificacion',error)
+  
+ }
 
-    const resultado = {
-      codigo_tramite: denuncia.codigo_tramite,
-      fecha_creacion: denuncia.fecha_creacion,
-      avocatoria: denuncia.avocatoria ? {
-        id: denuncia.avocatoria.id,
-        fecha_avocatoria: denuncia.avocatoria.fecha_avocatoria,
-        detalle: denuncia.avocatoria.detalle
-      } : null,
-      notificados: (denuncia.notificados || []).map((n: NotificacionInvolucrado) => n.nombres)
-    };
+ }
 
-    res.json(resultado);
-  } catch (error) {
-    console.error('Error al consultar la denuncia para notificación:', error);
-    res.status(500).json({ message: 'Error al consultar la denuncia', error });
-  }
-};
-*/

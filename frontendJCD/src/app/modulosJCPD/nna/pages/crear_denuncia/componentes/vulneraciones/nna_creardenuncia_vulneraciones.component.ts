@@ -3,13 +3,15 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } fr
 import { VulneracionService, Vulneracion } from '../../../../services/vulneracion.service';
 import { CommonModule } from '@angular/common';
 import {MatCheckboxModule} from '@angular/material/checkbox';
+import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
+import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 
 
 @Component({
   selector: 'app-nna_creardenuncia_vulneraciones',
   templateUrl: './nna_creardenuncia_vulneraciones.component.html',
 
-  imports: [CommonModule, ReactiveFormsModule,MatCheckboxModule]
+  imports: [CommonModule, ReactiveFormsModule,MatCheckboxModule,ButtonSubmitComponent,TablaEditComponent]
 })
 export class Nna_creardenuncia_vulneracionesComponent implements OnInit {
     @Input() formArray!: FormArray;
@@ -34,6 +36,24 @@ export class Nna_creardenuncia_vulneracionesComponent implements OnInit {
       console.log(this.formArray.value)
     });
   }
+
+
+get mapeoAfectados() {
+  return this.formArray.value.map((item: any) => {
+    const afectado = this.formAfectados.at(item.id_afectado)?.value;
+    const vulneracionesNombres = item.vulneraciones.map((id: number) => {
+      const v = this.vulneraciones.find(v => v.id === id);
+      return v ? v.vulneracion : 'Desconocido';
+    });
+
+    return {
+      ...item,
+      id_afectado: afectado ? afectado.nombres : 'Desconocido',
+      vulneraciones: vulneracionesNombres.join('\n -')
+    };
+  });
+}
+
 
   cargarVulneraciones(): void {
     this.vulneracionService.getVulneraciones().subscribe({
@@ -93,6 +113,10 @@ export class Nna_creardenuncia_vulneracionesComponent implements OnInit {
   this.vulneracionesForm.reset();
   console.log(this.formArray.value)
 }
+eliminarRegistro(index: number) {
+  this.formArray.removeAt(index);
+}
+
 
 
 

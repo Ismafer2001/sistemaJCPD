@@ -60,7 +60,7 @@ togglePasswordVisibility() {
 
   login(): void {
 
-    console.log('Intentando iniciar sesión');
+
 
 
 
@@ -78,20 +78,16 @@ togglePasswordVisibility() {
 
 
    this.authService.login(body).subscribe({
-  next: (token) => {
+  next: () => {
 
-    localStorage.setItem('token', token);
+    const token = this.authService.getToken();
+  const decoded = jwtDecode<JwtPayload>(token!);
 
-    // Decodificar el token para obtener el rol
-    const decoded = jwtDecode<JwtPayload>(token);
-    console.log('Token decodificado:', decoded);
-
-    // Redirigir según el rol
-    if (decoded.rol === 'admin') {
-      this.router.navigate(['/admin/usuarios']);
-    } else {
-      this.router.navigate(['/']);
-    }
+  if (decoded.rol === 'admin') {
+    this.router.navigate(['/admin/usuarios']);
+  } else {
+    this.router.navigate(['/']);
+  }
   },
   error: err => {
 

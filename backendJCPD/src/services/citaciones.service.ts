@@ -1,6 +1,9 @@
 
 
+
+import sequelize from "../config/database";
 import {  Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Otros } from "../models";
+import { Citacion } from "../models/citaciones.model";
 
 
 export  async function  personasCitacion(id:string){
@@ -49,13 +52,11 @@ export async function citacionesDTO(id:string) {
   
 });
 
-const { codigoTramite, Avocatoria:avo, Canton:can } = resultado as any;
+const { codigoTramite, Canton:can } = resultado as any;
   
 
 const respuestaFormateada = {
   codigoTramite,
-
-  fechaCreado: avo?.fechaCreado || '',
   Canton: can?.canton || ''
 };
 
@@ -64,4 +65,32 @@ return respuestaFormateada
 
 
     
+}
+
+export async function crearcitacion(data:any) {
+  const t = await sequelize.transaction();
+  try {
+      await Citacion.create({
+        idDenuncia: data.idDenuncia,
+        codigoTramite: data.codigoTramite,
+        fecha: data.fecha,
+        hora: data.hora,
+        direccion: data.direccion,
+        local: data.local,
+        parte: data.parte,
+        diriguidoA: data.diriguidoA,
+        estatus: 'completada',
+        
+
+        
+
+      }, { transaction: t });
+    
+
+    await t.commit();
+    return { success: true };
+  } catch (error) {
+    await t.rollback();
+    throw error;
+  }
 }

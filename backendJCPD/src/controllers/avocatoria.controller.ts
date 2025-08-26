@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { crearAvocatoria, obtenerDenunciaParaAvocatoria } from '../services/avocatoria.service';
+import { crearAvocatoria, medidasPorAfectado, obtenerAfectados, obtenerDenunciaParaAvocatoria } from '../services/avocatoria.service';
 import { Afectado, articulo, Denuncia, medida, medidasIdentificadas } from '../models';
 import { handlehttp } from '../utils/error.handle';
 
@@ -9,7 +9,7 @@ export const getDenunciaParaAvocatoria = async (req: Request, res: Response) => 
         const denuncia: any = await obtenerDenunciaParaAvocatoria(id);
         const result = {
             id: denuncia.id,
-            fecha_creado: denuncia.fecha_creado,
+            fechaCreado: denuncia.fechaCreado,
             codigoTramite: denuncia.codigoTramite,
             canton: denuncia.Canton?.canton || null,
             descripcion_hechos: denuncia.descripcion_hechos,
@@ -38,53 +38,19 @@ export const getDenunciaParaAvocatoria = async (req: Request, res: Response) => 
     }
 };
 
-export const getMedidasIdentificadasPorDenuncia = async (req: Request, res: Response) => {
+export const getMedidasIdentificadasPorAfecado = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id);
+  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
-    // Buscar las medidas identificadas asociadas a la denuncia
-    const afectados = await Afectado.findAll({
-      include: [
-        {
-          model: medida,
-          
-          attributes: ['idarticulo', 'medidas'],
-          through: { attributes: [] },
-          include: [
-            {
-              model: articulo,
-              
-              attributes: ['articulo']
-            }
-          ]
-        }
-      ],
-      where: { idDenuncia: id },
-      attributes: []
-    });
+  const afectado = await medidasPorAfectado(id);
+ 
 
-    // Formatear el resultado
-    const resultado: any[] = [];
-    afectados.forEach((af: any) => {
-      (af.medidas || []).forEach((m: any) => {
-        resultado.push({
-          
-          articulo: m.articulos?.articulo || null,
-          medida: m.medidas || null
-        });
-      });
-    });
-
-    res.json(
-       resultado
-    );
+  res.json({
+    afectado
+  });
   } catch (error) {
-    console.error('Error al obtener medidas identificadas:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al obtener las medidas identificadas',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    handlehttp(res,'error_get_medidasafectado',error)
   }
 };
 
@@ -100,3 +66,20 @@ export const postAvocatoria = async (req: Request, res: Response) =>{
     handlehttp(res,"error_post_crearAvocatoria", error);
   }
 }
+
+export const getAfectadosAvocatoria = async (req: Request, res: Response) => {
+
+  try {
+     const id = parseInt(req.params.id);
+  console.log("ID recibido:", id); 
+  const afectados = await obtenerAfectados(id);
+  res.json(afectados);
+    
+  } catch (error) {
+    handlehttp(res,'error_get_afectadosavocatoria',error)
+    
+  }
+ 
+}
+
+

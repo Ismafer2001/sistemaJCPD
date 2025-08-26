@@ -8,6 +8,7 @@
       "@inicio/*": ["app/inicio/*"],
       "@nna/*": ["app/modulosJCPD/nna/*"],
       "@mujeres/*": ["app/modulosJCPD/Mujeres/*"],
+      "@adultos/*": ["app/modulosJCPD/adultos_mayores/*"],
       "@auth/*": ["app/auth/*"],
       "@admin/*": ["app/admin/*"],
       "@shared/*": ["app/shared/*"]

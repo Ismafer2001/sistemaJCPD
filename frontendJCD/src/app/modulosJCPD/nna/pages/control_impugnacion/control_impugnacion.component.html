@@ -1,0 +1,99 @@
+<main class="mx-auto max-w-2xl">
+      <section class="rounded-3xl bg-white p-6 sm:p-8 shadow-xl ring-1 ring-black/5">
+        <header class="mb-6 flex items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-semibold tracking-tight text-gray-900">Ficha de control de impugnación</h1>
+            <p class="mt-1 text-sm text-gray-500">Registra y da seguimiento al recurso presentado dentro del expediente.</p>
+          </div>
+          
+        </header>
+
+        <form action="#" method="post" class="space-y-6">
+          <!-- EXPEDIENTE -->
+          <div>
+            <label for="expediente" class="block text-sm font-medium text-gray-700">
+              EXPEDIENTE <span class="text-red-500">*</span>
+            </label>
+            <input
+              id="expediente"
+              name="expediente"
+              type="text"
+              placeholder="Ej.: EXP-045-2025"
+              required
+              class="mt-1 w-full rounded-2xl border border-gray-300 bg-white px-4 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            />
+          </div>
+
+          <!-- RESOLUCIÓN FUE IMPUGNADA -->
+          <div>
+            <label for="resolucion" class="block text-sm font-medium text-gray-700">
+              RESOLUCIÓN FUE IMPUGNADA <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              id="resolucion"
+              name="resolucion"
+              rows="4"
+              placeholder="Ej.: Resolución N.º 023-2025, de fecha 15/07/2025, que negó la medida de protección."
+              required
+              class="mt-1 w-full resize-y rounded-2xl border border-gray-300 bg-white px-4 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            ></textarea>
+          </div>
+
+          <!-- RESULTADO DE LA IMPUGNACIÓN -->
+          <fieldset>
+            <legend class="text-sm font-medium text-gray-700">
+              RESULTADO DE LA IMPUGNACIÓN <span class="text-red-500">*</span>
+            </legend>
+            <p class="mt-1 text-xs text-gray-500">Selecciona el desenlace del recurso presentado.</p>
+
+            <div class="mt-3 grid gap-3 sm:grid-cols-3">
+              <!-- Opción: Reposición -->
+              <label class="block">
+                <input type="radio" name="resultado" value="reposicion" class="peer sr-only" required />
+                <div class="rounded-2xl border border-gray-300 p-3 transition peer-checked:border-indigo-500 peer-checked:ring-2 peer-checked:ring-indigo-200">
+                  <span class="block text-sm font-medium text-gray-900">Reposición</span>
+                  <span class="mt-0.5 block text-xs text-gray-500">La misma autoridad revisa y corrige.</span>
+                </div>
+              </label>
+
+              <!-- Opción: Apelación -->
+              <label class="block">
+                <input type="radio" name="resultado" value="apelacion" class="peer sr-only" />
+                <div class="rounded-2xl border border-gray-300 p-3 transition peer-checked:border-indigo-500 peer-checked:ring-2 peer-checked:ring-indigo-200">
+                  <span class="block text-sm font-medium text-gray-900">Apelación</span>
+                  <span class="mt-0.5 block text-xs text-gray-500">Revisión por autoridad superior.</span>
+                </div>
+              </label>
+
+              <!-- Opción: Desistimiento -->
+              <label class="block">
+                <input type="radio" name="resultado" value="desistimiento" class="peer sr-only" />
+                <div class="rounded-2xl border border-gray-300 p-3 transition peer-checked:border-indigo-500 peer-checked:ring-2 peer-checked:ring-indigo-200">
+                  <span class="block text-sm font-medium text-gray-900">Desistimiento</span>
+                  <span class="mt-0.5 block text-xs text-gray-500">La parte retira la impugnación.</span>
+                </div>
+              </label>
+            </div>
+          </fieldset>
+
+          <!-- ACCIONES -->
+          <div class="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
+            <button
+              type="reset"
+              class="inline-flex justify-center rounded-2xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
+              Limpiar
+            </button>
+            <button
+              type="submit"
+              class="inline-flex justify-center rounded-2xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-200"
+            >
+              Guardar ficha
+            </button>
+          </div>
+        </form>
+
+
+
+      </section>
+    </main>

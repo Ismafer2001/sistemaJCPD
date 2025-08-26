@@ -12,6 +12,7 @@ import { jwtpayload } from "../interfaces/usuarios.interface";
 
 export const loginUsuario = async (user: login) => {
   
+   
     const existe = await usuarios.findOne({ where: { usuario: user.usuario },
         include: [{ model: Canton ,  attributes: ['canton'] }]  });
 

@@ -3,7 +3,7 @@ import { Request, Response } from "express";
 import {  Denuncia, Denunciado, Denunciante,  Otros, Avocatoria } from "../models";
 import { notifiacionesDTO, personasNotificacion } from "../services/notificaciones.service";
 import { handlehttp } from "../utils/error.handle";
-import { citacionesDTO, personasCitacion } from "../services/citaciones.service";
+import { citacionesDTO, crearcitacion, personasCitacion } from "../services/citaciones.service";
 
  export const getPersonasCitacion = async (req:Request, res:Response) =>{
     try {
@@ -55,4 +55,16 @@ res.json(resultado);
   
 
 
+ }
+
+ export const postCitacion = async (req: Request, res: Response) => {
+   try {
+    const nuevacitacion = await crearcitacion(req.body);
+        res.status(201).json(nuevacitacion);
+    
+   } catch (error) {
+  
+      handlehttp(res,'error_post_citacion',error)
+    
+   }
  }

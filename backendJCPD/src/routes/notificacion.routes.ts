@@ -1,5 +1,5 @@
 import { Router,  } from 'express';
-import { createOtro, getNotificacionDTO, getPersonasNotificar } from '../controllers/notificacion.controller';
+import { createOtro, getNotificacionDTO, getPersonasNotificar, postNotificacion } from '../controllers/notificacion.controller';
 
 
 const router = Router();
@@ -8,6 +8,7 @@ const router = Router();
 router.get('/:id',getPersonasNotificar);
 router.get('/notificar/:id',getNotificacionDTO);
 router.post('/',createOtro);
+router.post('/notificacion',postNotificacion);
 
 
 

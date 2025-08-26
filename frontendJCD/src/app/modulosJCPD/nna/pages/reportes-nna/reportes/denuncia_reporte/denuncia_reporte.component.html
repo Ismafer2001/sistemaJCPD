@@ -1,0 +1,104 @@
+<div class="p-6 max-w-7xl mx-auto space-y-8">
+  <!-- Título -->
+  <div>
+    <h1 class="text-3xl font-bold text-gray-800"><span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-10 text-gray-500">
+  <path fill-rule="evenodd" d="M2.25 2.25a.75.75 0 0 0 0 1.5H3v10.5a3 3 0 0 0 3 3h1.21l-1.172 3.513a.75.75 0 0 0 1.424.474l.329-.987h8.418l.33.987a.75.75 0 0 0 1.422-.474l-1.17-3.513H18a3 3 0 0 0 3-3V3.75h.75a.75.75 0 0 0 0-1.5H2.25Zm6.04 16.5.5-1.5h6.42l.5 1.5H8.29Zm7.46-12a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0v-6Zm-3 2.25a.75.75 0 0 0-1.5 0v3.75a.75.75 0 0 0 1.5 0V9Zm-3 2.25a.75.75 0 0 0-1.5 0v1.5a.75.75 0 0 0 1.5 0v-1.5Z" clip-rule="evenodd" />
+</svg></span> Reporte General de Denuncias</h1>
+    <p class="text-gray-500 mt-1">Resumen estadístico por categoría</p>
+  </div>
+
+  <!-- 🔍 Filtro por fechas -->
+   <app-filtro class=" flex flex-col md:flex-row "
+     [filtroForm]="filtroForm"
+     [filtrar]="filtrar.bind(this)">
+   </app-filtro>
+
+
+
+
+
+  <!-- 📌 Indicadores principales -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+     <div class="bg-white p-5 rounded-xl shadow border-l-4 border-blue-500">
+      <p class="text-sm text-gray-500">Total  Denuncias</p>
+      <h2 class="text-3xl font-bold text-blue-600">{{resumen?.totalDenuncias||0}}</h2>
+    </div>
+    <div class="bg-white p-5 rounded-xl shadow border-l-4 border-blue-500">
+      <p class="text-sm text-gray-500">Denuncias por Oficio</p>
+      <h2 class="text-3xl font-bold text-blue-600">{{resumen?.totalPorOficio ||0}}</h2>
+    </div>
+    <div class="bg-white p-5 rounded-xl shadow border-l-4 border-purple-500">
+      <p class="text-sm text-gray-500">Denuncias Externas</p>
+      <h2 class="text-3xl font-bold text-purple-600">{{resumen?.totalPorExterno}}</h2>
+    </div>
+    <div class="bg-white p-5 rounded-xl shadow border-l-4 border-green-500">
+      <p class="text-sm text-gray-500">Total Afectados</p>
+      <h2 class="text-3xl font-bold text-green-600">{{resumen?.totalAfectados}}</h2>
+    </div>
+
+    <!--<div class="bg-white p-5 rounded-xl shadow border-l-4 border-yellow-500">
+      <p class="text-sm text-gray-500">Con Discapacidad</p>
+      <h2 class="text-3xl font-bold text-yellow-500">20</h2>
+    </div> -->
+
+  </div>
+
+  <!--  Género y Edad -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <!-- Género -->
+    <div class="bg-white p-6 rounded-xl shadow border border-gray-100">
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">Afectados por Género</h3>
+      <div class="grid grid-cols-3 gap-4 text-center">
+        <div>
+          <p class="text-sm text-gray-500">Masculino</p>
+          <p class="text-2xl font-bold text-blue-500">{{resumen?.afectadosPorSexo.masculino}}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Femenino</p>
+          <p class="text-2xl font-bold text-pink-500">{{resumen?.afectadosPorSexo.femenino ||0}}</p>
+        </div>
+        <div>
+          <p class="text-sm text-gray-500">Otro</p>
+          <p class="text-2xl font-bold text-gray-400">0</p>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- Edad -->
+    <div class="bg-white p-6 rounded-xl shadow border border-gray-100">
+  <h3 class="text-lg font-semibold text-gray-700 mb-4 text-center">
+    Afectados por Rango de Edad
+  </h3>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+    @for (item of afectadoEdad | keyvalue:compareNone; track $index) {
+      <div class="rounded-lg border border-gray-200 px-3 py-2 bg-gray-50 hover:bg-gray-100 transition">
+        <div class="text-center">
+          <p class="text-[11px] uppercase tracking-wide text-gray-500">
+            {{ item.key }} {{ item.key === '1' ? 'año' : 'años' }}
+          </p>
+          <p class="text-xl font-semibold">{{ item.value }}</p>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+
+  </div>
+
+  <!-- 🌎 Nacionalidad -->
+  <div class="bg-white p-6 rounded-xl shadow border border-gray-100">
+    <h3 class="text-lg font-semibold text-gray-700 mb-4">Afectados por Nacionalidad</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600">
+      @for (item of afectadoNacionalidad | keyvalue:compareNone; track $index) {
+      <div class="bg-gray-50 rounded p-3 shadow-inner"><small>{{ item.key }}</small>
+        {{ mapNacionalidad(item.key) }}: <strong>{{ item.value }}</strong>
+      </div>
+    }
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,97 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- Título -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-1">📄 Reporte de Resoluciones</h1>
+    <p class="text-gray-600 mb-6">Detalle de resoluciones emitidas y medidas de protección dictadas</p>
+
+    <!-- Filtro por fechas -->
+    <div class="bg-white p-4 rounded-xl shadow flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+      <div>
+        <h2 class="text-lg font-semibold text-gray-800">📅 Filtrar por fechas</h2>
+        <p class="text-sm text-gray-500">Seleccioná un rango de fechas</p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+        <div>
+          <label class="text-sm text-gray-600">Desde</label>
+          <input type="date" class="mt-1 block w-full sm:w-44 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" />
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Hasta</label>
+          <input type="date" class="mt-1 block w-full sm:w-44 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" />
+        </div>
+        <div class="self-end">
+          <button class="w-full sm:w-auto px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition">
+            Filtrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tarjetas resumen de resoluciones -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+
+      <!-- Resoluciones Totales -->
+      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-blue-600 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-700">Resoluciones Totales</h2>
+          <p class="text-sm text-gray-500">Emitidas en el sistema</p>
+        </div>
+        <div class="text-blue-600 text-4xl font-bold">
+          94
+        </div>
+      </div>
+
+      <!-- Resoluciones por denuncia de oficio -->
+      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-indigo-500 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-700">Denuncias de Oficio</h2>
+          <p class="text-sm text-gray-500">Resoluciones relacionadas</p>
+        </div>
+        <div class="text-indigo-600 text-4xl font-bold">
+          38
+        </div>
+      </div>
+
+      <!-- Resoluciones por denuncia externa -->
+      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-rose-500 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-700">Denuncias Externas</h2>
+          <p class="text-sm text-gray-500">Resoluciones relacionadas</p>
+        </div>
+        <div class="text-rose-600 text-4xl font-bold">
+          56
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Lista de medidas de protección -->
+    <div class="bg-white p-6 rounded-xl shadow mb-8">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">🛡️ Medidas de Protección y Niños Beneficiados</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div class="bg-blue-50 p-4 rounded-lg shadow-sm flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-600">Prohibición de acercamiento</span>
+          <span class="text-blue-700 font-bold text-lg">23 niños</span>
+        </div>
+        <div class="bg-blue-50 p-4 rounded-lg shadow-sm flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-600">Medida de acogimiento institucional</span>
+          <span class="text-blue-700 font-bold text-lg">12 niños</span>
+        </div>
+        <div class="bg-blue-50 p-4 rounded-lg shadow-sm flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-600">Atención psicológica</span>
+          <span class="text-blue-700 font-bold text-lg">18 niños</span>
+        </div>
+        <div class="bg-blue-50 p-4 rounded-lg shadow-sm flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-600">Reintegración familiar</span>
+          <span class="text-blue-700 font-bold text-lg">9 niños</span>
+        </div>
+        <div class="bg-blue-50 p-4 rounded-lg shadow-sm flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-600">Supervisión del entorno</span>
+          <span class="text-blue-700 font-bold text-lg">15 niños</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

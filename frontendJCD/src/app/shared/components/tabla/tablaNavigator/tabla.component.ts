@@ -4,22 +4,16 @@ import { Router } from '@angular/router';
 
 
 @Component({
-  selector: 'global-tabla',
+  selector: 'tablaNavigator',
   imports: [CommonModule],
   templateUrl: './tabla.component.html',
 
 })
-export class TablaComponent {
+export class TablaNavigatorComponent {
   @Input() columnas:string[]=[];
 @Input() encabezados:string[]=[];
 @Input() datos:any[]=[];
-@Input() acciones:boolean=false
-@Input() botonEstado:boolean=false
-@Input() estado:(user: any) => void = () => {};
-@Input() eliminar:(item: any) => void = () => {};
-@Input() editar:(item: any) => void = () => {};
 @Input() cambiar:(item: any) => void = () => {};
-
 @Input() RouterLink:string=""
 @Input() RouterLinkparam:string=""
 
@@ -49,4 +43,4 @@ navegar(item: any) {
 
 
 }
-export default TablaComponent;
+export default TablaNavigatorComponent;

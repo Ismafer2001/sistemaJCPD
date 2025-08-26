@@ -6,14 +6,20 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class AvocatoriaService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:3000/api/avocatoria';
 
   constructor(private http: HttpClient) { }
 
   obtenerDenunciaParaAvocatoria(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/avocatoria/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
   getMedidasIdentificadas(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/avocatoria/medidas/${id}`);
+    return this.http.get<any>(`${this.apiUrl}/medidas/${id}`);
+  }
+  getAfectados(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/afectados/${id}`);
+  }
+  postAvocatoria(avocatoria: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}`, avocatoria);
   }
 }

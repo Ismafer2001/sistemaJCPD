@@ -1,0 +1,168 @@
+<div class="p-6 max-w-7xl mx-auto space-y-8">
+
+   <!-- Título -->
+  <div>
+    <h1 class="text-3xl font-bold text-gray-800"><span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-10 text-gray-500">
+  <path fill-rule="evenodd" d="M2.25 2.25a.75.75 0 0 0 0 1.5H3v10.5a3 3 0 0 0 3 3h1.21l-1.172 3.513a.75.75 0 0 0 1.424.474l.329-.987h8.418l.33.987a.75.75 0 0 0 1.422-.474l-1.17-3.513H18a3 3 0 0 0 3-3V3.75h.75a.75.75 0 0 0 0-1.5H2.25Zm6.04 16.5.5-1.5h6.42l.5 1.5H8.29Zm7.46-12a.75.75 0 0 0-1.5 0v6a.75.75 0 0 0 1.5 0v-6Zm-3 2.25a.75.75 0 0 0-1.5 0v3.75a.75.75 0 0 0 1.5 0V9Zm-3 2.25a.75.75 0 0 0-1.5 0v1.5a.75.75 0 0 0 1.5 0v-1.5Z" clip-rule="evenodd" />
+</svg></span> Reporte General de avocatorias</h1>
+    <p class="text-gray-500 mt-1">Resumen estadístico por categoría</p>
+  </div>
+    <!-- Filtro por fechas -->
+    <app-filtro class=" flex flex-col md:flex-row "
+    [filtroForm]="filtroForm"
+     [filtrar]="filtrar.bind(this)"
+    >
+
+    </app-filtro>
+
+    <!-- Tarjetas resumen -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <!-- Avocatorias -->
+      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-indigo-500 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-700">Avocatorias Realizadas</h2>
+          <p class="text-sm text-gray-500">Total en el sistema</p>
+        </div>
+        <div class="text-indigo-600 text-4xl font-bold">
+          {{reporte?.avocatoria || 0}}
+        </div>
+      </div>
+
+      <!-- Medidas de protección -->
+      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-rose-500 flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-gray-700">Medidas Emergentes</h2>
+          <p class="text-sm text-gray-500">Aplicadas en casos</p>
+        </div>
+        <div class="text-rose-600 text-4xl font-bold">
+          {{reporte?. medidasEmergentes || 0}}
+        </div>
+      </div>
+    </div>
+
+    <!-- Medidas por tipo -->
+    <div class="bg-white p-6 rounded-xl shadow mb-8">
+  <h3 class="text-xl font-semibold text-gray-700 mb-6 text-center">
+    🛡️ Medidas de Protección por Tipo
+  </h3>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- ========== CONNAN Art. 47 ========== -->
+    <section>
+      <div class="mb-2 flex items-center justify-between">
+        <h4 class="text-sm font-semibold text-gray-700">CONNAN Art. 217</h4>
+        <!-- opcional: total
+        <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Total: 00</span>
+      -->
+      </div>
+
+      <ul role="list" class="divide-y divide-gray-200 rounded-lg border border-gray-200 overflow-hidden">
+        <!-- iterá acá tus ítems del Art. 47 -->
+         @for (item of medidasConnanart217 | keyvalue; track $index) {
+          <li class="px-4 py-3 flex items-center justify-between">
+          <span class="text-sm font-medium text-gray-700 ml-1">{{ item.key }}</span>
+          <span class="text-blue-700 font-semibold">{{ item.value }}</span>
+        </li>
+
+         }
+
+      </ul>
+    </section>
+
+
+    <!-- ========== CONNAN Art. 207 ========== -->
+    <section>
+      <div class="mb-2 flex items-center justify-between">
+        <h4 class="text-sm font-semibold text-gray-700">CONNAN Art. 207</h4>
+        <!-- opcional: total
+        <span class="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">Total: 00</span>
+-->
+      </div>
+
+      <ul role="list" class="divide-y divide-gray-200 rounded-lg border border-gray-200 overflow-hidden">
+        <!-- iterá acá tus ítems del Art. 207 -->
+          @for (item of medidasCONNAart59 | keyvalue; track $index) {
+          <li class="px-4 py-3 flex items-center justify-between ml-1">
+          <span class="text-sm font-medium text-gray-700">{{ item.key }}</span>
+          <span class="text-purple-700 font-semibold">{{ item.value }}</span>
+        </li>
+
+         }
+
+      </ul>
+    </section>
+  </div>
+</div>
+
+
+
+
+
+    <!-- Vulneraciones por tipo -->
+
+ <div class="bg-white p-6 rounded-xl shadow mb-8">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">⚠️ Vulneraciones Registradas</h3>
+      <ul role="list" class="bg-white p-6 rounded-xl shadow border border-gray-100 divide-y divide-gray-200">
+        @for (item of vulneraciones| keyvalue; track $index) {
+          <li class="py-3 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="h-2.5 w-2.5 rounded-full bg-yellow-400 inline-block"></span>
+      <span class="text-sm font-medium text-gray-700">{{ item.key }}</span>
+    </div>
+    <span class="text-yellow-800 font-semibold">{{ item.value }}</span>
+  </li>
+
+        }
+
+</ul>
+
+    </div>
+
+
+
+
+
+
+
+    <!-- (Opcional) Tabla con detalle
+
+    <div class="mt-10 bg-white p-6 rounded-xl shadow">
+      <h3 class="text-xl font-semibold text-gray-700 mb-4">🗂 Detalle de Avocatorias</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-sm text-left border border-gray-200">
+          <thead class="bg-blue-50">
+            <tr>
+              <th class="p-3 border-b">#</th>
+              <th class="p-3 border-b">Fecha</th>
+              <th class="p-3 border-b">Cantón</th>
+              <th class="p-3 border-b">Código Trámite</th>
+              <th class="p-3 border-b">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="hover:bg-gray-50 border-b">
+              <td class="p-3">1</td>
+              <td class="p-3">2025-08-10</td>
+              <td class="p-3">Portoviejo</td>
+              <td class="p-3">001-JCPD-2025</td>
+              <td class="p-3">
+                <span class="px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Completada</span>
+              </td>
+            </tr>
+            <tr class="hover:bg-gray-50 border-b">
+              <td class="p-3">2</td>
+              <td class="p-3">2025-08-14</td>
+              <td class="p-3">Manta</td>
+              <td class="p-3">002-JCPD-2025</td>
+              <td class="p-3">
+                <span class="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">Pendiente</span>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>-->
+
+
+</div>

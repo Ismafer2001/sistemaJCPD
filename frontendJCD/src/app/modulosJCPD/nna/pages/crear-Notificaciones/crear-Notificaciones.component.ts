@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Route, Router} from '@angular/router';
+import { ActivatedRoute, Router,} from '@angular/router';
 import { AuthService } from '@auth/services/auth.service';
 import { NotificacionService } from '@nna/services/notificacion.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
-import TablaComponent from '@shared/components/tabla/tabla.component';
+import  TablaNavigatorComponent from '@shared/components/tabla/tablaNavigator/tabla.component';
 
 
 interface involucrados{
@@ -16,11 +16,13 @@ interface involucrados{
 interface notificacion{
   codigoTramite: string;
   Canton:string;
+  fechaCreado?: Date;
+
 }
 @Component({
   selector: 'app-crear-Notificaciones',
   templateUrl: './crear-Notificaciones.component.html',
-  imports:[CardFormComponent,TablaComponent,CommonModule,ReactiveFormsModule]
+  imports:[CardFormComponent,TablaNavigatorComponent,CommonModule,ReactiveFormsModule]
 
 })
 
@@ -28,7 +30,7 @@ interface notificacion{
 export class CrearNotificacionesComponent implements OnInit {
   currentTab='0'
   involucrados:involucrados[]=[]
-  notificar:notificacion={codigoTramite:'',Canton:''};
+  notificar:notificacion={codigoTramite:'',Canton:'', fechaCreado: new Date()};
   denunciaId =0
   nuevoNotificadoForm!:FormGroup;
   notificacionForm!:FormGroup;
@@ -36,12 +38,15 @@ export class CrearNotificacionesComponent implements OnInit {
 
 
 
+
   constructor(private notificacionServices:NotificacionService,
      private route:ActivatedRoute,
-     private AuthService:AuthService,
+     private router:Router,
+
+
 
     private fb:FormBuilder) {
-      
+
 
 
 
@@ -59,10 +64,12 @@ export class CrearNotificacionesComponent implements OnInit {
     this.loadNotificados(this.denunciaId)
 
     this.formularioNotificados()
+    this.formularioFormatoNotificacion();
+     this.nuevoNotificadoForm.get('idDenuncia')?.setValue(this.denunciaId);
 
-    this.nuevoNotificadoForm.get('idDenuncia')?.setValue(this.denunciaId);
+    this.notificacionForm.get('idDenuncia')?.setValue(this.denunciaId);
 
-    this.nuevoNotificadoForm.valueChanges.subscribe(n=>{
+    this.notificacionForm.valueChanges.subscribe(n=>{
 
       console.log(n)
 
@@ -83,11 +90,14 @@ export class CrearNotificacionesComponent implements OnInit {
 
   formularioFormatoNotificacion(){
     this.notificacionForm = this.fb.group({
-      codigoTramtite:[],
-      diriguidoA:[],
+      codigoTramite:['',Validators.required],
+      idDenuncia:[this.denunciaId],
+      diriguidoA:['', Validators.required],
       parte:[],
-      fechaCreacion:[],
+      direccion:[],
+      fecha:[this.fechaHoraActual.toISOString().split('T')[0]],
       numOficio:[],
+
 
 
 
@@ -100,28 +110,56 @@ export class CrearNotificacionesComponent implements OnInit {
 
   this.notificacionServices.getinvolucrados(id).subscribe(data=>{
     this.involucrados=data;
-    console.log(data)
+
   })
 
   }
   loadNotificados(id:number){
     this.notificacionServices.getnotificacionDTO(id).subscribe(data=>{
       this.notificar=data;
-      console.log(data)
+       this.notificacionForm.patchValue({
+          codigoTramite: this.notificar.codigoTramite,
 
-      console.log(typeof data)
+        });
+
+
     })
   }
 
 
   //-----------*-----------OTROS--------------//
-  seleccionarInvolucrado(){
+
+
+  cambiarTab(valor: string) {
+  this.currentTab = valor;
+
+  const itemSeleccionado = this.involucrados.find(i => i.nombres === valor);
+
+  if (itemSeleccionado) {
+    this.notificacionForm.patchValue({
+      diriguidoA: itemSeleccionado.nombres,
+      parte: itemSeleccionado.parte
+    });
+  }
+}
+//------------submit-----//
+submitNotificacion() {
+  const body ={
+    ...this.notificacionForm.value,
 
   }
+  this.notificacionServices.postNotificar(body).subscribe({
+    next: (res) => {
 
-  cambiarTab(tab: string) {
-    this.currentTab = tab;
-  }
+
+  window.open(res.datosGenerales, '_blank');
+
+            this.router.navigate(['/nna']);
+          }
+
+  })
+
+}
 
   onSubmit():void{
     const body={

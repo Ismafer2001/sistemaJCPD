@@ -1,100 +1,176 @@
 <h1 class="text-2xl font-bold mb-4">Crear avocatoria</h1>
 <hr class="border-blue-200 border-1" />
-<form [formGroup]="avocatoriaForm" class="space-y-6">
+<form [formGroup]="avocatoriaForm" (submit)="submitAvocatoria()" class="space-y-6">
 
-
-
-  <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300">
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
       <div class="flex items-center justify-between">
-        <h1 class="text-2xl font-bold">Trámite administrativo: <span class="text-xl text-gray-500">#{{ denunciaAvocatoria?.codigoTramite }}</span></h1>
+        <h1 class="text-2xl font-bold">
+          Trámite administrativo:
+          <span class="text-xl text-gray-500"
+            >#{{ denunciaAvocatoria?.codigoTramite }}</span
+          >
+        </h1>
       </div>
       <h1 class="text-2xl font-bold">
         Niños:
         <span class="text-xl text-gray-500">
-          <ng-container *ngFor="let af of denunciaAvocatoria?.afectados; let i = index">
-            {{ af.nombres }} {{ af.apellidos }} ({{ af.edad }} años)<span *ngIf="i < (denunciaAvocatoria?.afectados.length - 1)">, </span>
+          <ng-container
+            *ngFor="let af of denunciaAvocatoria?.afectados; let i = index"
+          >
+            {{ af.nombres }} {{ af.apellidos }} ({{ af.edad }} años)<span
+              *ngIf="i < denunciaAvocatoria?.afectados.length - 1"
+              >,
+            </span>
           </ng-container>
         </span>
       </h1>
       <p class="text-lg">
-        Junta Cantonal de Protección de derechos del cantón <span class="font-bold">{{ denunciaAvocatoria?.canton }}</span>
+        Junta Cantonal de Protección de derechos del cantón
+        <span class="font-bold">{{ denunciaAvocatoria?.canton }}</span>
       </p>
     </div>
     <!--tabs-->
-  <div class="flex  mb-0 gap-3 " id="tabs">
-    <button type="button" class="rounded-t-2xl p-2"
-       [ngClass]="{
-      'bg-blue-500 text-white': currentTab === 0,
-      'bg-gray-100': currentTab !== 0
-    }"
-      (click)="cambiarTab(0)"
+    <div class="flex mb-0 gap-3" id="tabs">
+      <a
+        [href]="'/nna/avocatoria/' + denunciaAvocatoria?.id + '#detalles'"
+        class="rounded-t-2xl p-2"
+        [ngClass]="{
+          'bg-blue-500 text-white': currentTab === 0,
+          'bg-gray-100': currentTab !== 0
+        }"
+        (click)="cambiarTab(0)"
+      >
+        Detalles
+      </a>
+      <a
+        [href]="'/nna/avocatoria/' + denunciaAvocatoria?.id + '#resoluciones'"
+        class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+        (click)="cambiarTab(1)"
+        [ngClass]="{
+          'bg-blue-500 text-white': currentTab === 1,
+          'bg-gray-100': currentTab !== 1
+        }"
+      >
+        Resoluciones
+      </a>
+      <a
+        [href]="'/nna/avocatoria/' + denunciaAvocatoria?.id + '#medidas'"
+        class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+        (click)="cambiarTab(2)"
+        [ngClass]="{
+          'bg-blue-500 text-white': currentTab === 2,
+          'bg-gray-100': currentTab !== 2
+        }"
+      >
+        Medidas
+      </a>
+      <div class="flex flex-1 m-1 justify-end space-x-4">
+          <app-button-submit
+    type="button"
+    label="Cancelar"
+    color="cancelar"
+    (clicked)="cancelar()"
+    >
+
+    </app-button-submit>
+    <app-button-submit
+    type="submit"
+    label="Guardar"
+    color="submit"
+
 
     >
-      Detalles
-    </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab(1)"
 
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab === 1,
-      'bg-gray-100': currentTab !== 1
-    }"
-    >
-      Resoluciones
-    </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab(2)"
+    </app-button-submit>
+      </div>
 
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab === 2,
-      'bg-gray-100': currentTab !== 2
-    }"
-    >
-      Medidas
-    </button>
-  </div>
-  <!--avocatoria inicial-->
 
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8" [hidden]="currentTab!=0 && (currentTab==1 || currentTab==2 )">
-      <h2 class="text-xl text-blue-500 font-semibold mb-4">avocatoria</h2>
 
-      <p>
-        En el cantón <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.canton }}</span>,
-        a los <span class="p-1 m border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'dd' }}</span> días del mes de
-        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'MMMM':'':'es' }}</span> del año
-        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'yyyy' }}</span>,
-        siendo las <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'HH' }}</span> horas con
-        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ fechaHoraActual | date:'mm' }}</span>,
-        en uso de las atribuciones que le confieren
+    </div>
+
+
+    <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
+      <!--avocatoria inicial-->
+      <app-card-Form [titulo]="'Avocatoria'" [hidden]="currentTab != 0 " id="detalles">
+        <p class="leading-relaxed">
+        En el cantón
+        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold inline-block mx-2">
+          {{ denunciaAvocatoria?.canton || '—' }}
+        </span>
+        a los
+        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold inline-block mx-2">
+          {{ fechaHoraActual ? (fechaHoraActual | date:'dd':'':'es') : '00' }}
+        </span>
+        días del mes de
+        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold inline-block mx-2">
+          {{ fechaHoraActual ? (fechaHoraActual | date:'MMMM':'':'es') : '—' }}
+        </span>
+        del año
+        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold inline-block mx-2">
+          {{ fechaHoraActual ? (fechaHoraActual | date:'yyyy':'':'es') : '----' }}
+        </span>
+        siendo las
+        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold inline-block mx-2">
+          {{ fechaHoraActual ? (fechaHoraActual | date:'HH':'':'es') : '00' }}
+        </span>
+        horas con
+        <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold inline-block mx-2">
+          {{ fechaHoraActual ? (fechaHoraActual | date:'mm':'':'es') : '00' }}
+        </span>, en uso de las atribuciones que le confieren
       </p>
       <div>
         <select class="border-1 my-2">
-          <option value="Art 205 del  Código de la Niñez y Adolescencia">Art 205 del  Código de la Niñez y Adolescencia</option>
-          <option value="Art 206 del  Código de la Niñez y Adolescencia">Art 206 del  Código de la Niñez y Adolescencia</option>
+          <option value="Art 205 del  Código de la Niñez y Adolescencia">
+            Art 205 del Código de la Niñez y Adolescencia
+          </option>
+          <option value="Art 206 del  Código de la Niñez y Adolescencia">
+            Art 206 del Código de la Niñez y Adolescencia
+          </option>
         </select>
       </div>
-      <p class="mb-4">AVOCA CONOCIMIENTO del:<span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.codigoTramite }}</span>,</p>
-      <p>
-        recibido en este organismo con fecha <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.fecha_creado | date:'dd/MM/yyyy' }}</span>.
-        por <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.denunciante?.[0]?.nombres }} {{ denunciaAvocatoria?.denunciante?.[0]?.apellidos }}</span>.
-        En contra de <span class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{ denunciaAvocatoria?.denunciados?.[0]?.nombres }} {{ denunciaAvocatoria?.denunciados?.[0]?.apellidos }}</span>.
-        quien hace conocer los hechos
+      <p class="mb-4">
+        AVOCA CONOCIMIENTO del:<span
+          class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"
+          >{{ denunciaAvocatoria?.codigoTramite }}</span
+        >,
       </p>
-      <div class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">
-        <p>{{ denunciaAvocatoria?.descripcion_hechos }}</p>
+      <p>
+        recibido en este organismo con fecha
+        <span
+          class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"
+          >{{ denunciaAvocatoria?.fechaCreado | date : "dd/MM/yyyy" }}</span
+        >. por
+        <span
+          class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"
+          >{{ denunciaAvocatoria?.denunciante?.[0]?.nombres }}
+          {{ denunciaAvocatoria?.denunciante?.[0]?.apellidos }}</span
+        >. En contra de
+        <span
+          class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"
+          >{{ denunciaAvocatoria?.denunciados?.[0]?.nombres }}
+          {{ denunciaAvocatoria?.denunciados?.[0]?.apellidos }}</span
+        >. quien hace conocer los hechos
+      </p>
+      <div
+        class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold  "
+      >
+        <p class="break-words" >{{ denunciaAvocatoria?.descripcion_hechos }}</p>
       </div>
       <p>Lo que se constituye una vulneración:</p>
-      <div class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">
+      <div
+        class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"
+      >
         <ng-container *ngFor="let af of denunciaAvocatoria?.afectados">
           <div>
-            <span class="text-blue-700">{{ af.nombres }} {{ af.apellidos }}:</span>
+            <span class="text-blue-700"
+              >{{ af.nombres }} {{ af.apellidos }}:</span
+            >
             <ng-container *ngIf="af.vulneraciones?.length > 0; else sinVulneraciones">
-              <ng-container *ngFor="let v of af.vulneraciones">
-                - {{ v.vulneracion }}<br>
-              </ng-container>
+              <div class="mt-2">
+                <ng-container *ngFor="let v of af.vulneraciones">
+                  <div class="mt-1">- {{ v.vulneracion }}</div>
+                </ng-container>
+              </div>
             </ng-container>
             <ng-template #sinVulneraciones>
               <span class="text-gray-500">Sin vulneraciones registradas</span>
@@ -103,90 +179,203 @@
         </ng-container>
       </div>
 
-    </div>
+      </app-card-Form>
 
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8" [hidden]="currentTab!=1 && (currentTab==0 || currentTab==2 )">
-      <h2 class="text-xl text-blue-500 font-semibold mb-4">resuelve</h2>
-      <textarea
-          formControlName="disposiciones"
-          rows="10"
-          class="p-5 bg-gray-100 block w-full border-1 rounded-md border-blue-200 shadow-sm"
-          placeholder="..."
-        > PRIMERO.-. Se le hace conocer a…………………………………………………….
-lo que estipula
-Art            del  Código de la Niñez y Adolescencia
-Art            de la Ley de personas adultas mayores
-Art            de la Ley de prevención y erradicación de la violencia
-…………………………………………………………….……………………………………………………………………………………………………………………………………………………………………….
- SEGUNDO.- Se le hace conocer a ……………………………………….. lo que estipula
-Art            del  Código de la Niñez y Adolescencia
-Art            de la Ley de personas adultas mayores
-Art            de la Ley de prevención y erradicación de la violencia
+      <app-card-Form [titulo]="'Resoluciones'" [hidden]="currentTab != 1 " id="resoluciones">
+        <div  >
+        <quill-editor
+      [modules]="modules"
+      formControlName="dispocisiones"
+      class="w-full  h-50"
 
-TERCERO.-
-CUARTO.-
-        </textarea>
+      >
 
-    </div>
+      </quill-editor>
 
-    <div class="bg-white rounded-lg shadow-md p-6 mb-8" [hidden]="currentTab!=2 && (currentTab==0 || currentTab==1 )">
-      <p>Así mismo se disponen las medidas de protección:</p>
+      </div>
+
+      </app-card-Form>
+
+       <!-----------------------asignar medidas---------->
+
+      <app-card-Form [titulo]="'Medidas'" [hidden]="currentTab != 2 " id="medidas">
+        <p>Así mismo se disponen las medidas de protección:</p>
       <div class="p-6 max-w-4xl mx-auto">
-  <!-- Selector de afectados -->
-  <div class="mb-6">
-    <label for="afectados" class="block text-sm font-medium text-gray-700 mb-2">Seleccionar afectado</label>
-    <select id="afectados" name="afectados" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm">
-      <option value="">-- Seleccionar --</option>
-      <option value="afectado1">Afectado 1</option>
-      <option value="afectado2">Afectado 2</option>
-      <option value="afectado3">Afectado 3</option>
-    </select>
-  </div>
 
-  <!-- Tabla de medidas -->
-  <div class="overflow-x-auto mb-8">
-    <table class="min-w-full divide-y divide-gray-200 border border-gray-300 rounded-md">
-      <thead class="bg-gray-100">
-        <tr>
-          <th scope="col" class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Medidas</th>
-          <th scope="col" class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Por periodo</th>
-          <th scope="col" class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Observaciones</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        <tr>
-          <td class="px-4 py-2 text-sm text-gray-700">Medida A</td>
-          <td class="px-4 py-2 text-sm text-gray-700">Enero - Marzo</td>
-          <td class="px-4 py-2 text-sm text-gray-700">Sin observaciones</td>
-        </tr>
-        <tr>
-          <td class="px-4 py-2 text-sm text-gray-700">Medida B</td>
-          <td class="px-4 py-2 text-sm text-gray-700">Abril - Junio</td>
-          <td class="px-4 py-2 text-sm text-gray-700">Requiere seguimiento</td>
-        </tr>
-        <!-- Agregá más filas dinámicamente si lo necesitas -->
-      </tbody>
-    </table>
-  </div>
 
-  <!-- Formulario para agregar medida -->
-  <form class="space-y-4">
-    <div>
-      <label for="periodo" class="block text-sm font-medium text-gray-700 mb-1">Por periodo</label>
-      <input type="text" id="periodo" name="periodo" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" placeholder="Ej: Julio - Septiembre" />
-    </div>
-    <div>
-      <label for="observaciones" class="block text-sm font-medium text-gray-700 mb-1">Observaciones</label>
-      <textarea id="observaciones" name="observaciones" rows="3" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2" placeholder="Escriba sus observaciones..."></textarea>
-    </div>
-    <div>
-      <button type="submit" class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">Guardar</button>
-    </div>
-  </form>
+
+
+        <!-- Formulario para agregar medida -->
+        <div [formGroup]="medidasEmergentesForm"  class="space-y-4">
+
+          <!-- Selector de afectados -->
+        <div class="mb-6">
+          <label
+            for="afectados"
+            class="block text-sm font-medium text-gray-700 mb-2"
+            >Seleccionar afectado</label
+          >
+          <select
+            (change)="medidasEmergentes($event)"
+            id="afectados"
+            formControlName="idAfectado"
+            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+          >
+            <option value=""></option>
+            @for (item of afectados; track $index) {
+            <option [value]="item.id">{{ item.nombres }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Tabla de medidas -->
+        <!-- Tabla de medidas emergentes -->
+
+           <!-- Lista de medidas por artículo -->
+        @for (articulo of medidasPorArticulo; track $index) {
+        <div class="flex-row gap-2 space-y-6">
+          <div
+            class="bg-white rounded-lg shadow-md pt-0 p-6 h-48 overflow-auto"
+          >
+            <h3
+              class="bg-white sticky top-0 text-lg font-semibold text-gray-800 mb-2 h-10"
+            >
+              {{ articulo.articulo }}
+            </h3>
+
+            <div class="space-y-3">
+              <div
+                *ngFor="let medida of articulo.medidas"
+                class="flex items-start"
+              >
+                <div class="flex items-center h-5">
+                  <input
+                    type="radio"
+
+                    [value]="medida.id"
+                    [formControlName]="'idMedida'"
+
+                    [id]="'medida-' + medida.id"
+                    class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                </div>
+                <div class="ml-3">
+                  <label
+                    [for]="'medida-' + medida.id"
+                    class="text-sm text-gray-700"
+                  >
+                    {{ medida.medida }}
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        }
+
+
+
+          <div>
+            <label
+              for="medida"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              > medida</label
+            >
+            <input
+              type="text"
+              [readonly]="true"
+              formControlName="medida"
+              id="medida"
+              name="medida"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2"
+              placeholder="medida"
+            />
+          </div>
+          <div>
+            <label
+              for="periodo"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Por periodo</label
+            >
+            <input
+              type="text"
+              formControlName="periodo"
+              id="periodo"
+              name="periodo"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2"
+              placeholder="Ej: Julio - Septiembre"
+            />
+          </div>
+          <div>
+            <label
+              for="observaciones"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Observaciones</label
+            >
+            <textarea
+              id="observaciones"
+              formControlName="observaciones"
+              name="observaciones"
+              rows="3"
+              class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-3 py-2"
+              placeholder="Escriba sus observaciones..."
+            ></textarea>
+          </div>
+          <div>
+            <button
+              type="button"
+
+              (click)="guardarDetalle()"
+              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Guardar
+            </button>
+          </div>
+        </div>
+        <div formArrayName="mediasEmergentes" class="mt-4 bg-white rounded shadow">
+  <table class="min-w-full text-sm">
+    <thead class="bg-gray-50">
+      <tr>
+        <th class="text-left px-4 py-2">ID</th>
+        <th class="text-left px-4 py-2">Medida</th>
+        <th class="text-left px-4 py-2">Periodo</th>
+        <th class="text-left px-4 py-2">Observaciones</th>
+        <th class="text-left px-4 py-2">Acciones</th>
+      </tr>
+    </thead>
+
+    <tbody>
+
+      @for (row of medidas.controls; track $index) {
+        <tr
+          [formGroupName]="$index" class="border-t">
+        <td class="px-4 py-2">{{ row.get('idMedida')?.value }}</td>
+        <td class="px-4 py-2">{{ row.get('medida')?.value }}</td>
+        <td class="px-4 py-2">{{ row.get('periodo')?.value }}</td>
+        <td class="px-4 py-2">{{ row.get('observaciones')?.value }}</td>
+        <td class="px-4 py-2 space-x-2">
+          <button type="button"
+                  class="px-3 py-1 rounded border hover:bg-gray-100">Editar</button>
+          <button type="button"
+                  class="px-3 py-1 rounded bg-red-600 text-white hover:bg-red-700">Eliminar</button>
+        </td>
+      </tr>
+
+      }
+
+
+      <tr *ngIf="medidas.length === 0">
+        <td colspan="5" class="px-4 py-6 text-center text-gray-500">
+          Sin medidas agregadas.
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </div>
+      </div>
 
-
-          <!--<global-tabla
+      <!--<global-tabla
           [columnas]="['articulo','medida',  'nombres', 'cedulasAfectados','fecha']"
           [encabezados]="['Articulo','Medida', 'Dispuesto a', 'Por el perido','observaciones']"
           [datos]="medidasIdenificadas"
@@ -195,6 +384,12 @@ CUARTO.-
 
           </global-tabla>-->
 
+      </app-card-Form>
+
+
+
+
+
 
 
 
@@ -202,5 +397,5 @@ CUARTO.-
 
     </div>
 
-  </div>
+
 </form>

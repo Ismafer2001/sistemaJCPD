@@ -4,22 +4,25 @@ import { Denuncia } from './denuncia.models';
 
 interface AvocatoriaAttributes {
   id: number;
-  fechaCreado: Date;
+  
   horaCreado: string;
   codigoTramite: string;
   disposiciones: string;
   idDenuncia: number;
+  estatus?: "pendiente"|"en_proceso"|"completada";
 }
 
 interface AvocatoriaCreationAttributes extends Optional<AvocatoriaAttributes, 'id'> {}
 
 export class Avocatoria extends Model<AvocatoriaAttributes, AvocatoriaCreationAttributes> implements AvocatoriaAttributes {
-  public id!: number;
-  public fechaCreado!: Date;
-  public horaCreado!: string;
-  public codigoTramite!: string;
-  public disposiciones!: string;
-  public idDenuncia!: number;
+  declare id: number;
+
+declare  horaCreado: string;
+declare  codigoTramite: string;
+declare  disposiciones: string;
+declare  idDenuncia: number;
+declare estatus: "pendiente"|"en_proceso"|"completada";
+
 }
 
 Avocatoria.init({
@@ -28,10 +31,7 @@ Avocatoria.init({
     autoIncrement: true,
     primaryKey: true,
   },
-  fechaCreado: {
-    type: DataTypes.DATE,
-    allowNull: false,
-  },
+  
   horaCreado: {
     type: DataTypes.TIME,
     allowNull: false,
@@ -47,15 +47,19 @@ Avocatoria.init({
   idDenuncia: {
     type: DataTypes.INTEGER,
     allowNull: false,
-    references: {
-      model: 'denuncia',
-      key: 'id',
-    },
+    
+  },
+  estatus: {
+    type: DataTypes.STRING,
+    defaultValue: "pendiente",
+    allowNull: false,
   },
 }, {
   sequelize,
   modelName: 'Avocatoria',
   tableName: 'avocatoria',
-  timestamps: false,
+  timestamps: true,
+  createdAt: 'fechaCreado',
+  updatedAt: false,
 });
 

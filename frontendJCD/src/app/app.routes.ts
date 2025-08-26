@@ -7,13 +7,13 @@ export const routes: Routes = [
 
   {
     path: '',
-    canActivate: [authGuard,],
+    canActivate: [authGuard],
     loadChildren:() => import('@inicio/routes/inicio.routes')
   },
   {
 
     path: 'nna',
-    canActivate: [],
+    canActivate: [authGuard],
     loadChildren: () => import('@nna/routes/nna.routes'),
   },
   {
@@ -21,6 +21,12 @@ export const routes: Routes = [
     path: 'mujeres',
     canActivate: [authGuard,],
     loadChildren: () => import('@mujeres/routes/mujeres.routes'),
+  },
+  {
+
+    path: 'adultos',
+    canActivate: [authGuard,],
+    loadChildren: () => import('@adultos/routes/adultosM.routes'),
   },
   {
 

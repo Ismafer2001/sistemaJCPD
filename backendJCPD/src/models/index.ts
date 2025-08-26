@@ -14,7 +14,12 @@ import { Avocatoria } from './avocatoria.model';
 import { MedidasEmergentes } from './medidas_emergentes.model';
 import { Notificacion } from './notificacion.model';
 
-import { Otros } from './Otros_notificados.models';
+import { Otros } from './Otros.models';
+import { Citacion } from './citaciones.model';
+import { AudienciaContestacion } from './audiencia_constestacion.model';
+import { ParticipantesAudienciaContestacion } from './participantes_audiencia.model';
+import { AudienciaPruebas } from './audiencia_prueba.model';
+import { ParticipantesAudienciaPruebas } from './participantes_audiencia_pruebas.model';
 
 //relacion usuario -- canton
 usuarios.belongsTo(Canton, { foreignKey: 'id_canton' });
@@ -45,15 +50,15 @@ VulneracionesIdentificadas.belongsTo(Afectado,{foreignKey:'idAfectado'})
 Vulneracion.hasMany(VulneracionesIdentificadas,{foreignKey: 'idVulneracion', as:'vulneracionesI'});
 VulneracionesIdentificadas.belongsTo(Vulneracion,{foreignKey:'idVulneracion'})
 
-// Relación muchos a muchos entre afectados y medidas
+
 
 // Relación uno a muchos entre afectado y medidasidentificadas
 Afectado.hasMany(medidasIdentificadas,{foreignKey: 'idAfectado', as:'medidasI'});
-VulneracionesIdentificadas.belongsTo(Afectado,{foreignKey:'idAfectado'})
+medidasIdentificadas.belongsTo(Afectado,{foreignKey:'idAfectado'})
 
 // Relación uno a muchos entre medidas y medidasidentificadas
 medida.hasMany(medidasIdentificadas,{foreignKey: 'idMedida', as:'medidasI'});
-VulneracionesIdentificadas.belongsTo(medida,{foreignKey:'idMedida'})
+medidasIdentificadas.belongsTo(medida,{foreignKey:'idMedida', as:'medidas' })
 
 
 
@@ -66,9 +71,9 @@ articulo.hasMany(medida, {
   foreignKey: 'idArticulo'
 });
 
-// Relación: Una denuncia puede tener muchas avocatorias
+// Relación: Una denuncia puede tener una avocatorias
 Avocatoria.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
-Denuncia.hasMany(Avocatoria, { foreignKey: 'idDenuncia' });
+Denuncia.hasOne(Avocatoria, { foreignKey: 'idDenuncia' });
 
 
 
@@ -91,7 +96,7 @@ MedidasEmergentes.belongsTo(Afectado, { foreignKey: 'idAfectado' });
 Notificacion.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
 Denuncia.hasMany(Notificacion, { foreignKey: 'idDenuncia' });
 
-// Denuncia y Notificacion tienen relación muchos a muchos por Notificar
+
 
 
 
@@ -104,6 +109,32 @@ Denuncia.hasMany(Otros, {
   foreignKey: 'idDenuncia',
   as:'otros'
 });
+
+//relacion citacion y denuncia
+Citacion.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
+Denuncia.hasMany(Citacion, { foreignKey: 'idDenuncia' });
+
+
+//relacion audiencia contestacion y denuncia
+AudienciaContestacion.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
+Denuncia.hasOne(AudienciaContestacion, { foreignKey: 'idDenuncia' as 'ac' });
+
+
+//relacion audiencia contestacion y participantes audiencia
+ParticipantesAudienciaContestacion.belongsTo(AudienciaContestacion, { foreignKey: 'idAC' as 'PAC' });
+AudienciaContestacion.hasMany(ParticipantesAudienciaContestacion, { foreignKey: 'idAC' as 'PAC' });
+
+
+//realacion audiencia pruebas y denuncia
+AudienciaPruebas.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
+Denuncia.hasOne(AudienciaPruebas, { foreignKey: 'idDenuncia' as 'ap'  });
+
+
+
+//realacion audiencia pruebas y participantes audiencia pruebas
+ParticipantesAudienciaPruebas.belongsTo(AudienciaPruebas, { foreignKey: 'idAC' as 'PAC' });
+AudienciaPruebas.hasMany(ParticipantesAudienciaPruebas, { foreignKey: 'idAC' as 'PAC' });
+
 
 
 export {
@@ -121,7 +152,10 @@ export {
   Avocatoria,
   MedidasEmergentes,
   Notificacion,
-  
+  AudienciaContestacion,
+  AudienciaPruebas,
+  ParticipantesAudienciaContestacion,
+  ParticipantesAudienciaPruebas,
   Otros
 };
 

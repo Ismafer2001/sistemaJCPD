@@ -5,12 +5,13 @@ import sequelize from '../config/database';
 interface NotificacionAttributes {
   id: number;
   codigoTramite: string;
-  fecha: Date;
+  fechaAvocatoria: Date;
   diriguidoA: string;
   parte: string;
   direccion: string;
-  datosGenerales: string;
+  datosGenerales?: string;
   idDenuncia: number;
+  estatus?: "pendiente"|"en_proceso"|"completada";
 }
 
 interface NotificacionCreationAttributes extends Optional<NotificacionAttributes, 'id'> {}
@@ -18,12 +19,13 @@ interface NotificacionCreationAttributes extends Optional<NotificacionAttributes
 export class Notificacion extends Model<NotificacionAttributes, NotificacionCreationAttributes> implements NotificacionAttributes {
   declare id: number;
   declare codigoTramite: string;
-  declare fecha: Date;
+  declare fechaAvocatoria: Date;
   declare parte: string;
   declare direccion: string;
   declare datosGenerales: string;
   declare idDenuncia: number;
   declare diriguidoA: string;
+  declare estatus: "pendiente"|"en_proceso"|"completada";
 }
 
 Notificacion.init({
@@ -36,7 +38,7 @@ Notificacion.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
-  fecha: {
+  fechaAvocatoria: {
     type: DataTypes.DATE,
     allowNull: false,
   },
@@ -50,6 +52,11 @@ Notificacion.init({
   },
   datosGenerales: {
     type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  estatus: {
+    type: DataTypes.STRING,
+    defaultValue: "pendiente",
     allowNull: false,
   },
   idDenuncia: {
@@ -69,7 +76,9 @@ Notificacion.init({
   sequelize,
   modelName: 'Notificacion',
   tableName: 'notificacion',
-  timestamps: false,
+  timestamps: true,
+  createdAt: 'fechaCreado',
+  updatedAt: false,
 });
 
 

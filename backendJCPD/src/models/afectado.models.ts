@@ -1,6 +1,7 @@
 // models/afectado.model.ts
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
+import { medidasIdentificadas } from './medidasIdentificada.models';
 
 interface AfectadoAttributes {
   id: number;
@@ -34,6 +35,8 @@ export class Afectado extends Model<AfectadoAttributes, AfectadoCreationAttribut
   public mail!: string;
   public telefono!: string;
   public idDenuncia!: number;
+  public medidasI!: medidasIdentificadas[];
+  
   
 }
 

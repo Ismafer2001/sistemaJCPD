@@ -2,6 +2,7 @@ import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import { medida } from './medidas_proteccion.models';
 import { Avocatoria } from './avocatoria.model';
+import { Afectado } from './afectado.models';
 
 
 interface MedidasEmergentesAttributes {
@@ -48,7 +49,11 @@ MedidasEmergentes.init({
   },
   idAfectado: {
     type: DataTypes.INTEGER,
-    allowNull: false
+    allowNull: false,
+    references: {
+      model: Afectado,
+      key: 'id',
+    },
   },
   observaciones: {
     type: DataTypes.TEXT,

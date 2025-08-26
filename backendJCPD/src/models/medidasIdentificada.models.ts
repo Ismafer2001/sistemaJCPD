@@ -15,6 +15,7 @@ export class medidasIdentificadas extends Model<medidasIdentificasAttributes,med
     declare id: number;
   declare idAfectado: number;
   declare idMedida: number;
+   declare medidas?: medida
 }
 medidasIdentificadas.init({
     id: { 

@@ -5,6 +5,7 @@ import { RouterLink } from '@angular/router';
   selector: 'app-home',
   imports: [RouterLink],
   templateUrl: './inicio-page-home.component.html',
+  
 
 })
 export class HomeComponent {

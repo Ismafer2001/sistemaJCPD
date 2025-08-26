@@ -6,20 +6,23 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class CitacionesService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:3000/api/citacion/';
 
 constructor(private http: HttpClient) { }
 
 getinvolucradosCitaciones(id:number): Observable<any>{
-  return this.http.get<any>(`${this.apiUrl}/citacion/${id}`)
+  return this.http.get<any>(`${this.apiUrl}${id}`)
 
 }
 
 
 getcitacioenesDTO(id:number): Observable<any>{
-  return this.http.get<any>(`${this.apiUrl}/citacion/citar/${id}`)
+  return this.http.get<any>(`${this.apiUrl}citar/${id}`)
 
 }
+postCitar(citar: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}`, citar);
+  }
 
 
 

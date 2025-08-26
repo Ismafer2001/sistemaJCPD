@@ -3,7 +3,7 @@
 import { Afectado } from './afectado.models';
 import { Denunciante } from './denunciante.models';
 import { Denunciado } from './denunciado.models';
-import { Otros } from './Otros_notificados.models';
+import { Otros } from './Otros.models';
 import { Canton } from './cantones.models';
   
   interface DenunciaAttributes {
@@ -11,9 +11,6 @@ import { Canton } from './cantones.models';
     grupoPrioritario:"nna"|"mujeres|adultos";
     medio?: "internet"|"presencial";
     tipo_denuncia?: "oficio"|"externa";
-    fecha_creado?: Date;
-    fecha_modificado?: Date;
-    
     num_tramite?: number;
     anio?: number;
     mes?: string;
@@ -25,10 +22,11 @@ import { Canton } from './cantones.models';
     solicitud?: string;
     id_canton: number;
     estado: "activa"|"finalizada";
+    estatus: "pendiente"|"en_proceso"|"completada";
   }
   
 interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
-  canton?: string;
+  
 }
   
   export class Denuncia extends Model<DenunciaAttributes, DenunciaCreationAttributes> implements DenunciaAttributes {
@@ -37,7 +35,7 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     declare grupoPrioritario:"nna"|"mujeres|adultos";
     declare medio:"internet"|"presencial";
     declare tipo_denuncia: "oficio"|"externa";
-    declare fecha_creado: Date;
+    declare fechaCreado: Date;
     declare fecha_modificado: Date;
     declare num_tramite: number;
     declare anio: number;
@@ -50,7 +48,8 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     declare solicitud: string;
     declare id_canton: number;
     declare estado: 'activa' | 'finalizada';
-    declare canton: Canton;
+    declare estatus: 'pendiente' | 'en_proceso' | 'completada';
+    declare canton?: Canton;
     declare afectados?:Afectado[];
     declare Denunciantes?: Denunciante[];
     declare Denunciados?: Denunciado[];
@@ -64,9 +63,6 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     grupoPrioritario: { type: DataTypes.STRING },
     medio: { type: DataTypes.STRING },
     tipo_denuncia: { type: DataTypes.STRING },
-    fecha_creado: { type: DataTypes.DATE },
-    fecha_modificado: { type: DataTypes.DATE },
-    
     num_tramite: { type: DataTypes.INTEGER },
     anio: { type: DataTypes.INTEGER },
     mes: { type: DataTypes.TEXT },
@@ -78,12 +74,13 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     solicitud:{ type: DataTypes.TEXT},
     id_canton:{type: DataTypes.INTEGER},
     estado:{ type: DataTypes.STRING, defaultValue:"activa"},
+    estatus:{ type: DataTypes.STRING, defaultValue:"pendiente"},
   }, {
     sequelize,
     modelName: 'Denuncia',
     tableName: 'denuncia',
     timestamps: true,
-    createdAt: 'fecha_creado',
+    createdAt: 'fechaCreado',
     updatedAt: false
       
   });

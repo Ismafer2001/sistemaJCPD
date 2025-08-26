@@ -1,0 +1,20 @@
+<h1 class="text-2xl font-bold mb-4">estadisticas/Reportes</h1>
+<hr class="border-blue-200 border-1">
+<p class="text-lg md:text-xl text-gray-600">
+      Selecciona un módulo para explorar los reportes y estadísticas detalladas.
+    </p>
+
+    <div class="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+      @for (item of opcionesDeReporte; track $index) {
+        <app-card-reporte
+          [title]="item.title"
+          [description]="item.description"
+          [icon]="item.icon"
+          [link]="item.link"
+        >
+        </app-card-reporte>
+
+      }
+
+  </div>
+  

@@ -1,0 +1,174 @@
+<h1 class="text-2xl font-bold mb-4">Audiencia de pruebas</h1>
+<hr class="border-blue-200 border-1" />
+<!--tabs-->
+  <div class="flex  mb-0 gap-3 " id="tabs">
+    <button type="button" class="rounded-t-2xl p-2"
+       [ngClass]="{
+      'bg-blue-500 text-white': currentTab === '0',
+      'bg-gray-100': currentTab !== '0'
+    }"
+      (click)="cambiarTab('0')"
+
+    >
+      inicio
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('1')"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab  != '0',
+
+    }"
+    >
+     Pruebas
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('2')"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab  != '0',
+
+    }"
+    >
+     Audiencia reservada
+    </button>
+
+
+  </div>
+  <app-card-Form [hidden]="currentTab!='0'">
+    <app-card-Form [titulo]="'inicio'" >
+      <h4 class="justify-center">ACTA DE LA AUDIENCIA  DE PRUEBA DEL CASO Nº <span class="font-bold">XXXXXXXXJCPD-x-………. </span></h4>
+      <div class="  mx-auto text-gray-800 text-justify leading-relaxed">
+
+  <p>
+    En el Cantón <span class="underline decoration-dotted decoration-gray-400">…………</span>,
+    a los <span class="underline decoration-dotted decoration-gray-400">xxxxx</span> días del mes de
+    <span class="underline decoration-dotted decoration-gray-400">xxxxx</span> del año dos mil
+    <span class="underline decoration-dotted decoration-gray-400">xxxxxx</span>,
+    a las <span class="underline decoration-dotted decoration-gray-400">…………….…</span> horas y
+    <span class="underline decoration-dotted decoration-gray-400">……………</span> minutos,
+    ante la Junta Cantonal de Protección de Derechos de
+    <span class="underline decoration-dotted decoration-gray-400">………………………..</span>,
+    integrada por los miembros principales:
+  </p>
+
+</div>
+<div class="mt-6 flex justify-between gap-6 text-center text-gray-800">
+
+  <!-- Miembro 1 -->
+  <div class="flex-1">
+    <p class="underline decoration-dotted decoration-gray-400 min-h-[1.5rem]">__________________________</p>
+    <p class="mt-1 font-semibold uppercase text-sm">Miembro-a Principal</p>
+  </div>
+
+  <!-- Miembro 2 -->
+  <div class="flex-1">
+    <p class="underline decoration-dotted decoration-gray-400 min-h-[1.5rem]">__________________________</p>
+    <p class="mt-1 font-semibold uppercase text-sm">Miembro-a Principal</p>
+  </div>
+
+  <!-- Miembro 3 -->
+  <div class="flex-1">
+    <p class="underline decoration-dotted decoration-gray-400 min-h-[1.5rem]">__________________________</p>
+    <p class="mt-1 font-semibold uppercase text-sm">Miembro-a Principal</p>
+  </div>
+
+</div>
+<p class="mt-2">se Instala la Audiencia de contestación prevista en</p>
+      <div>
+        <select class="border-1 my-2">
+          <option value="Art 205 del  Código de la Niñez y Adolescencia">Art 205 del  Código de la Niñez y Adolescencia</option>
+          <option value="Art 206 del  Código de la Niñez y Adolescencia">Art 206 del  Código de la Niñez y Adolescencia</option>
+        </select>
+      </div>
+
+
+
+    </app-card-Form>
+    <app-card-Form [titulo]="'Partcipantes'">
+       <global-tabla
+      [encabezados]="['asistio','nombres','tipo']"
+      >
+
+      </global-tabla>
+
+    </app-card-Form>
+  </app-card-Form>
+
+  <app-card-Form [hidden]="currentTab!='1'">
+
+    <app-card-Form [titulo]="'pruebas accionada'">
+     <div class=" text-gray-800 text-justify leading-relaxed">
+  <!-- Párrafo formal -->
+  <p class="mb-4">
+    En cumplimiento a lo que determina la Constitución de la República Art.
+    <span class="underline decoration-dotted decoration-gray-400">…………………</span>,
+    se recepta la intervención de la Abogada
+    <span class="underline decoration-dotted decoration-gray-400">XXXXXXXXXXX</span>
+    en representación de la parte accionada; quien manifiesta que las pruebas testimoniales son:
+  </p>
+
+  <!-- Input para escribir las pruebas -->
+  <textarea
+    type="text"
+    placeholder="Describa las pruebas testimoniales aquí..."
+    class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+  ></textarea>
+</div>
+
+
+    </app-card-Form>
+
+    <app-card-Form [titulo]="'pruebas actora'">
+     <div class=" text-gray-800 text-justify leading-relaxed">
+  <!-- Párrafo formal -->
+  <p class="mb-4">
+    En cumplimiento a lo que determina la Constitución de la República Art.
+    <span class="underline decoration-dotted decoration-gray-400">…………………</span>,
+    se recepta la intervención de la Abogada
+    <span class="underline decoration-dotted decoration-gray-400">XXXXXXXXXXX</span>
+    en representación de la parte actora; quien manifiesta que las pruebas testimoniales son:
+  </p>
+
+  <!-- Input para escribir las pruebas -->
+  <textarea
+    type="text"
+    placeholder="Describa las pruebas testimoniales aquí..."
+    class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+  ></textarea>
+</div>
+
+
+    </app-card-Form>
+
+  </app-card-Form>
+
+  <app-card-Form [hidden]="currentTab!='2'" >
+
+    <app-card-Form [titulo]="'audiencia'">
+      <div class=" text-gray-800 text-justify leading-relaxed">
+  <!-- Párrafo formal -->
+  <p class="mb-4">
+    Una vez escuchadas las versiones de las partes, y receptadas todas las pruebas;
+     se les pide que abandonen momentáneamente la sala para dar paso
+      a la audiencia reservada con el adolescente
+    <span class="underline decoration-dotted decoration-gray-400">…………………</span>,
+
+    Quién indica:
+  </p>
+
+  <!-- Input para escribir las pruebas -->
+  <textarea
+    type="text"
+    placeholder="Describa las pruebas testimoniales aquí..."
+    class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+  ></textarea>
+</div>
+
+    </app-card-Form>
+
+  </app-card-Form>
+
+

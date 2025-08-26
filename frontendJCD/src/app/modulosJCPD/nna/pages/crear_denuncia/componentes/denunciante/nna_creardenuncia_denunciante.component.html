@@ -5,12 +5,16 @@
     <input
       type="text"
       formControlName="cedula"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="formGroup.get('cedula')?.invalid && formGroup.get('cedula')?.touched"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese la cédula"
+      [ngClass]="{
+          'border-1 border-red-500': formGroup.get('cedula')?.invalid && formGroup.get('cedula')?.touched
+        }"
     >
     <div *ngIf="formGroup.get('cedula')?.invalid && formGroup.get('cedula')?.touched" class="text-red-500 text-sm mt-1">
-      <span *ngIf="formGroup.get('cedula')?.errors?.['required']">La cédula es requerida</span>
-      <span *ngIf="formGroup.get('cedula')?.errors?.['pattern']">La cédula debe tener 10 dígitos</span>
+      <span *ngIf="formGroup.get('cedula')?.errors?.['required']">La Cédula es requerida</span>
+      <span *ngIf="formGroup.get('cedula')?.errors?.['pattern']">La Cédula debe tener 10 dígitos</span>
+      <span *ngIf="formGroup.get('cedula')?.errors?.['cedulaInvalida']"> Cédula invalida </span>
     </div>
   </div>
 
@@ -20,8 +24,12 @@
     <input
       type="text"
       formControlName="nombres"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="formGroup.get('nombres')?.invalid && formGroup.get('nombres')?.touched"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese los nombres"
+      [ngClass]="{
+          'border-1 border-red-500': formGroup.get('nombres')?.invalid && formGroup.get('nombres')?.touched
+        }"
+
     >
     <div *ngIf="formGroup.get('nombres')?.invalid && formGroup.get('nombres')?.touched" class="text-red-500 text-sm mt-1">
       <span *ngIf="formGroup.get('nombres')?.errors?.['required']">Los nombres son requeridos</span>
@@ -35,8 +43,11 @@
     <input
       type="text"
       formControlName="apellidos"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="formGroup.get('apellidos')?.invalid && formGroup.get('apellidos')?.touched"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese los apellidos"
+      [ngClass]="{
+          'border-1 border-red-500': formGroup.get('apellidos')?.invalid && formGroup.get('apellidos')?.touched
+        }"
     >
     <div *ngIf="formGroup.get('apellidos')?.invalid && formGroup.get('apellidos')?.touched" class="text-red-500 text-sm mt-1">
       <span *ngIf="formGroup.get('apellidos')?.errors?.['required']">Los apellidos son requeridos</span>
@@ -50,8 +61,11 @@
     <input
       type="number"
       formControlName="edad"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="formGroup.get('edad')?.invalid && formGroup.get('edad')?.touched"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese la edad"
+      [ngClass]="{
+          'border-1 border-red-500': formGroup.get('edad')?.invalid && formGroup.get('edad')?.touched
+        }"
     >
     <div *ngIf="formGroup.get('edad')?.invalid && formGroup.get('edad')?.touched" class="text-red-500 text-sm mt-1">
       <span *ngIf="formGroup.get('edad')?.errors?.['required']">La edad es requerida</span>
@@ -64,10 +78,13 @@
     <label class="block text-sm font-medium text-gray-700">Sexo</label>
     <select
       formControlName="sexo"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="formGroup.get('sexo')?.invalid && formGroup.get('sexo')?.touched"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+
+      [ngClass]="{
+          'border-1 border-red-500': formGroup.get('sexo')?.invalid && formGroup.get('sexo')?.touched
+        }"
     >
-      <option value="">Seleccione un género</option>
+      <option value=""  disabled selected hidden >Seleccione...</option>
       <option value="masculino">Masculino</option>
       <option value="femenino">Femenino</option>
 
@@ -80,12 +97,18 @@
   <!-- Nacionalidad -->
   <div class="form-group">
     <label class="block text-sm font-medium text-gray-700">Nacionalidad</label>
-    <input
-      type="text"
-      formControlName="nacionalidad"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="formGroup.get('nacionalidad')?.invalid && formGroup.get('nacionalidad')?.touched"
-    >
+    <select formControlName="nacionalidad"
+    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none "
+      [ngClass]="{
+          ' border-1 border-red-500': formGroup.get('nacionalidad')?.invalid && formGroup.get('nacionalidad')?.touched
+        }">
+        <option value=""  disabled selected hidden >Seleccione...</option>
+      <option value="EC">Ecuatoriana</option>
+      <option value="VEN">Venezolana</option>
+      <option value="COL">Colombiana</option>
+      <option value="CUB">Cubana</option>
+      <option value="Per">Perú</option>
+    </select>
     <div *ngIf="formGroup.get('nacionalidad')?.invalid && formGroup.get('nacionalidad')?.touched" class="text-red-500 text-sm mt-1">
       <span *ngIf="formGroup.get('nacionalidad')?.errors?.['required']">La nacionalidad es requerida</span>
     </div>
@@ -97,8 +120,11 @@
     <input
       type="text"
       formControlName="direccion"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="formGroup.get('direccion')?.invalid && formGroup.get('direccion')?.touched"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese la dirección"
+      [ngClass]="{
+          'border-1 border-red-500': formGroup.get('direccion')?.invalid && formGroup.get('direccion')?.touched
+        }"
     >
     <div *ngIf="formGroup.get('direccion')?.invalid && formGroup.get('direccion')?.touched" class="text-red-500 text-sm mt-1">
       <span *ngIf="formGroup.get('direccion')?.errors?.['required']">La dirección es requerida</span>
@@ -112,8 +138,11 @@
     <input
       type="email"
       formControlName="mail"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="formGroup.get('mail')?.invalid && formGroup.get('mail')?.touched"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="example@example.com"
+      [ngClass]="{
+          'border-1 border-red-500': formGroup.get('mail')?.invalid && formGroup.get('mail')?.touched
+        }"
     >
     <div *ngIf="formGroup.get('mail')?.invalid && formGroup.get('mail')?.touched" class="text-red-500 text-sm mt-1">
       <span *ngIf="formGroup.get('mail')?.errors?.['required']">El correo electrónico es requerido</span>
@@ -127,8 +156,11 @@
     <input
       type="tel"
       formControlName="telefono"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="formGroup.get('telefono')?.invalid && formGroup.get('telefono')?.touched"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="0000000000"
+      [ngClass]="{
+          'border-1 border-red-500': formGroup.get('telefono')?.invalid && formGroup.get('telefono')?.touched
+        }"
     >
     <div *ngIf="formGroup.get('telefono')?.invalid && formGroup.get('telefono')?.touched" class="text-red-500 text-sm mt-1">
       <span *ngIf="formGroup.get('telefono')?.errors?.['required']">El teléfono es requerido</span>

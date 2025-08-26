@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Denuncia } from '@nna/interfaces/denuncia.interface';
@@ -25,14 +25,27 @@ export class DenunciaService {
     return this.http.get<Denuncia>(`${this.apiUrl}/denuncias/${id}`);
   }
 
-  obtenerNumTramite(incrementar=false):Observable<{ numero: number }>{
-    return this.http.get<{ numero: number }>(`${this.apiUrl}/denuncias/num_tramite`,{params:{incrementar}
-    })
+ obtenerNumTramite(grupoPrioritario: string, incrementar: boolean = false): Observable<{ numero: number }> {
+  return this.http.get<{ numero: number }>(
+    `${this.apiUrl}/denuncias/num_tramite`,
+    {
+      params: {
+        grupoPrioritario,
+        incrementar: incrementar.toString()
+      }
+    }
+  );
+}
 
-  }
-   contarDenunciasActivas(): Observable<{total:number}>{
-    return this.http.get<{total: number}>(`${this.apiUrl}/denuncias/countdenunciasActivas`)
-   }
+   contarDenunciasActivas(grupoPrioritario: string): Observable<{ total: number }> {
+  const params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
+
+  return this.http.get<{ total: number }>(
+    `${this.apiUrl}/denuncias/countdenunciasActivas`,
+    { params }
+  );
+}
+
 
   obtenerTodasDenuncias(): Observable<Denuncia[]> {
     return this.http.get<Denuncia[]>(`${this.apiUrl}/denuncias`);

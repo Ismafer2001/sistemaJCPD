@@ -12,6 +12,10 @@ import avocaroriaRoutes from './routes/avocatoria.routes';
 import { seedInitialData } from './utils/seed';
 import notificacionRoutes from './routes/notificacion.routes';
 import citacionRoutes from './routes/citaciones.routes'
+import reportedenunciasRoutes from './routes/estadisticas/denunciaReporte.routes'
+import pdfRoutes from './routes/pdf.routes'; 
+import estatusRoutes from './routes/estatus.routes'; 
+import path from 'path';
 
 
 const app = express();
@@ -32,11 +36,15 @@ app.use('/api/medidas', medidasRoutes);
 app.use('/api/avocatoria', avocaroriaRoutes);
 app.use('/api/notificacion', notificacionRoutes);
 app.use('/api/citacion', citacionRoutes);
+app.use('/api/reportes', reportedenunciasRoutes);
+app.use('/api/pdf', pdfRoutes); // Ruta para generar PDF de denuncias
+app.use('/api/estatus', estatusRoutes)
+app.use('/pdf', express.static(path.join(__dirname, '../public/pdf')));
 
 
 // Verificar conexión con la base de datos y levantar el servidor
 sequelize.sync().then(async () => {
-  
+
   console.log('✅ Base de datos conectada y modelos sincronizados');
   await seedInitialData(); //  Ejecuta la carga si no hay datos
 

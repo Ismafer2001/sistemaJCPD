@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 
 
 import { insertDenuncia, datosDenuncia,  obtenerNumTramite,  countDenuncias, eliminarDenuncia } from '../services/denuncia.service';
+import { generateProteccionFormPDF } from '../services/pdfs/denunciapdf.service.ts.service';
 
 export const crearDenuncia = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -85,7 +86,7 @@ export const getAllDenuncias = async (req: Request, res: Response) => {
     // Transformamos la respuesta al formato deseado
     const resultado = denuncias.map(denuncia => ({
   codigoTramite: denuncia.codigoTramite,
-  fecha: denuncia.fecha_creado,
+  fecha: denuncia.fechaCreado,
   id_canton: denuncia.id_canton,
   idDenuncia: denuncia.id,
   Afectado: denuncia.afectados?.map((a: Afectado) => `${a.nombres} ${a.apellidos}`),
@@ -117,7 +118,7 @@ export const getDenunciaById = async (req: Request, res: Response) => {
     // Transformamos la respuesta al formato deseado
     const resultado = {
   codigoTramite: denuncia?.codigoTramite,
-  fecha: denuncia?.fecha_creado,
+  fecha: denuncia?.fechaCreado,
   idDenuncia: denuncia?.id,
   afectados: (denuncia as any).afectados.map((a: any) => `${a.nombres} ${a.apellidos}`),
   cedulasAfectados: (denuncia as any).afectados.map((a: any) => a.cedula)
@@ -141,10 +142,16 @@ export const getDenunciaById = async (req: Request, res: Response) => {
 export const obtenerNumeroTramite = async (req:Request, res:Response) => {
   try {
     const id_canton= req.user.id_canton
-    const { incrementar } = req.query; // viene como string
+    const { incrementar } = req.query;// viene como string
+    const grupoPrioritario = req.query.grupoPrioritario;
+    
+     if (typeof grupoPrioritario !== 'string') {
+  return res.status(400).json({ error: 'grupoPrioritario debe ser un string' });
+}
+
     const numero = await obtenerNumTramite({
       incrementar: incrementar === 'true'
-    }, id_canton);
+    }, id_canton,grupoPrioritario);
 
     res.json({ numero });
   } catch (error) {
@@ -152,14 +159,19 @@ export const obtenerNumeroTramite = async (req:Request, res:Response) => {
     res.status(500).json({ error: 'Error al obtener número de trámite' });
   }
 };
-export const totalDenunciaActivasController =async(req:Request, res:Response) =>{
+export const getTotalDenunciaActivasController =async(req:Request, res:Response) =>{
    try {
    const id_canton = Number((req.user as any).id_canton);
+  const grupoPrioritario = req.query.grupoPrioritario;
+   
+   if (typeof grupoPrioritario !== 'string') {
+  return res.status(400).json({ error: 'grupoPrioritario debe ser un string' });
+}
 
     
     
     // viene como string
-    const total = await countDenuncias(id_canton);
+    const total = await countDenuncias(id_canton,grupoPrioritario);
 
     res.json({ total });
   } catch (error) {
@@ -168,3 +180,8 @@ export const totalDenunciaActivasController =async(req:Request, res:Response) =>
   }
 
 }
+
+//----------controldor pdf--------------------//
+export const getProteccionFormPDF = (req: Request, res: Response) => {
+  generateProteccionFormPDF(res);
+};

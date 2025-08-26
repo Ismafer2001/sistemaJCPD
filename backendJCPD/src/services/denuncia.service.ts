@@ -7,6 +7,7 @@ import {
   Afectado,
   VulneracionesIdentificadas,
   medidasIdentificadas,
+  Canton,
 } from "../models";
 
 export interface datosDenuncia {
@@ -19,9 +20,9 @@ export interface datosDenuncia {
 }
 
 //funciones para obtener tramite e incrementar automaticamente
-export async function obtenerNumTramite({ incrementar = false } = {}, id_canton:number) {
+export async function obtenerNumTramite({ incrementar = false } = {}, id_canton:number,grupoPrioritario:string) {
   const tramite = await Denuncia.findOne({
-    where:{id_canton:id_canton},
+    where:{id_canton:id_canton,grupoPrioritario:grupoPrioritario},
     order: [["num_tramite", "DESC"]],
   });
 
@@ -32,11 +33,13 @@ export async function obtenerNumTramite({ incrementar = false } = {}, id_canton:
 }
 
 //funcion para contar denuncias totales activas
-export async function countDenuncias(id_canton:number) {
+export async function countDenuncias(id_canton:number, grupoPrioritario:string) {
   const denunciasActivas= await Denuncia.count({
     where: {
       estado: 'activa',
-      id_canton: id_canton
+      id_canton: id_canton,
+      grupoPrioritario: grupoPrioritario
+
     }
   });
 
@@ -58,13 +61,39 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       medida = [],
     } = denunciajson;
 
-    const nuevaDenuncia = await Denuncia.create(denuncia, { transaction: t });//agremamos la denuncia a la base de datos
+
+  
+
+    const tramite = await Denuncia.findOne({
+    where:{id_canton:denuncia.id_canton,grupoPrioritario:denuncia.grupoPrioritario},
+    order: [["codigoTramite", "DESC"]],
+  });
+
+   if (!tramite){
+     denuncia.num_tramite = denuncia.num_tramite ?? 1;
+   } else {
+     denuncia.num_tramite = tramite.num_tramite + 1;
+   }
+
+   // Obtener el nombre del cantón asociado y usarlo en el código de trámite
+  const cantonRecord = await Canton.findByPk(denuncia.id_canton);
+  const cantonName = cantonRecord ? cantonRecord.canton : `${denuncia.id_canton}`;
+  const currentYear = new Date().getFullYear();
+  denuncia.codigoTramite = `${denuncia.num_tramite}-JCPD-${cantonName}-${currentYear}-NIÑOS`;
+
+   console.log(denuncia.num_tramite);
+
+
+
+    //
+
+    const nuevaDenuncia = await Denuncia.create({...denuncia, estatus:'completada', codigoTramite: denuncia.codigoTramite}, { transaction: t });//agremamos la denuncia a la base de datos
 
     // si revicimos datos del denunciante lo agregamos denunciantes a la base de datos 
     if (denunciante) {
       await Denunciante.create(
         //se crea la denunci acon todos los campos enviados desde el body
-        { ...denunciante, idDenuncia: nuevaDenuncia.id },
+        { ...denunciante, idDenuncia: nuevaDenuncia.id,  },
         { transaction: t }
       );
     }

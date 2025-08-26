@@ -4,12 +4,13 @@ import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { UserService, Usuario } from '@admin/services/user.service';
-import { TablaComponent } from '@shared/components/tabla/tabla.component';
+
+import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 
 
 @Component({
   selector: 'app-admin_page_usuarios',
-  imports: [CommonModule, RouterModule, FormsModule, TablaComponent],
+  imports: [CommonModule, RouterModule, FormsModule, TablaEditComponent],
   templateUrl: './admin_page_usuarios.component.html',
 
 })

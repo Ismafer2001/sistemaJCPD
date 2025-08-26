@@ -1,11 +1,14 @@
 import { Router } from 'express';
-import { getDenunciaParaAvocatoria } from '../controllers/avocatoria.controller';
-import { getMedidasIdentificadasPorDenuncia } from '../controllers/avocatoria.controller';
+import { getAfectadosAvocatoria, getDenunciaParaAvocatoria, postAvocatoria } from '../controllers/avocatoria.controller';
+import { getMedidasIdentificadasPorAfecado } from '../controllers/avocatoria.controller';
 
 const router = Router();
 
 // GET /api/avocaroria/:id
 router.get('/:id', getDenunciaParaAvocatoria);
-//router.get('/medidas/:id',getMedidasIdentificadasPorDenuncia)
+
+router.get('/afectados/:id', getAfectadosAvocatoria);
+router.get('/medidas/:id',getMedidasIdentificadasPorAfecado)
+router.post('', postAvocatoria);
 
 export default router;

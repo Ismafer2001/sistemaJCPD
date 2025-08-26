@@ -1,75 +1,42 @@
-<div class="max-w-5xl mx-auto bg-white p-6 rounded shadow space-y-6">
+<div class=" mx-auto bg-white p-6 rounded shadow space-y-6 w-full ">
 
   <!-- Encabezado: Código de Trámite -->
   <div class="flex items-center justify-between">
     <h1 class="text-2xl font-bold">Trámite administrativo: <span class="text-xl text-gray-500">#{{denuncia?.codigoTramite}}</span></h1>
-    <button routerLink="/nna" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
-      Volver
-    </button>
+
+    <app-button-submit
+      label="volver"
+      color="cancelar"
+      [routerLink]="['/nna']"
+    >
+
+    </app-button-submit>
+    
   </div>
   <h1 class="text-2xl font-bold">Niño: <span class="text-xl text-gray-500">{{denuncia?.afectados}}</span></h1>
 
 
 
   <!-- Scroll horizontal de fases -->
-  <div class="max-w-full overflow-x-auto bg-white p-4 rounded shadow border">
+  <div class=" overflow-x-auto scroll-smooth bg-white p-4 rounded shadow border w-full">
     <div class="flex space-x-4">
+      @for (item of tarjetasAvocatoria; track $index) {
+        <app-fases-card
+        [titulo]="item.titulo"
+        [estatus]="item.estatus"
+        [idDenuncia]="item.idDenuncia"
+        [link]="item.link"
+        [linkDetalles]="item.linkDetalles"
+        >
 
-     <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-      <a [routerLink]="['/nna/avocatoria', denuncia?.idDenuncia]" >
-        <h3 class="text-lg font-bold text-gray-700">avocatoria</h3>
-        <p class="text-sm text-gray-600">Pendiente</p>
+      </app-fases-card>
 
-      </a>
+      }
 
-      </div>
 
-      <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-        <a [routerLink]="['/nna/notificaciones', denuncia?.idDenuncia]" >
-        <h3 class="text-lg font-bold text-gray-700">notificaciones</h3>
-        <p class="text-sm text-gray-600">Pendiente</p>
 
-      </a>
-      </div>
 
-      <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-         <a [routerLink]="['/nna/citaciones', denuncia?.idDenuncia]" >
-        <h3 class="text-lg font-bold text-gray-700">citaciones</h3>
-        <p class="text-sm text-gray-600">Pendiente</p>
 
-      </a>
-      </div>
-
-      <!-- Continúa con las siguientes fases... -->
-        <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-        <h3 class="text-lg font-bold text-gray-700">audiencia de contestacion</h3>
-        <p class="text-sm text-gray-600">En proceso</p>
-      </div>
-       <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-        <h3 class="text-lg font-bold text-gray-700">audiencia de pruebas</h3>
-        <p class="text-sm text-gray-600">En proceso</p>
-      </div>
-       <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-        <h3 class="text-lg font-bold text-gray-700">resoluciones</h3>
-        <p class="text-sm text-gray-600">En proceso</p>
-      </div>
-       <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-        <h3 class="text-lg font-bold text-gray-700">cumplimiento de medidas</h3>
-        <p class="text-sm text-gray-600">En proceso</p>
-      </div>
-      <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-        <h3 class="text-lg font-bold text-gray-700">control de impugnacion</h3>
-        <p class="text-sm text-gray-600">En proceso</p>
-      </div>
-      <div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-        <h3 class="text-lg font-bold text-gray-700">cierre de caso</h3>
-        <p class="text-sm text-gray-600">En proceso</p>
-      </div>
-
-      <!--<div class="bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm min-w-[220px]">
-        <h3 class="text-lg font-bold text-gray-700">Fase 10: Cierre del Caso</h3>
-        <p class="text-sm text-gray-600">Pendiente</p>
-      </div>-->
 
     </div>
   </div>

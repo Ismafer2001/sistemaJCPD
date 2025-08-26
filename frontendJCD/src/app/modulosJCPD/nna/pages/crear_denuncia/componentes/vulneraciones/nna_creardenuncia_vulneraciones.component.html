@@ -1,17 +1,18 @@
-<div class="p-6 bg-white rounded-lg shadow-md">
+
   <!-- Lista de Vulneraciones -->
   <div [formGroup]="vulneracionesForm" class="mt-4">
     <h3 class="text-lg font-medium text-gray-900 mb-4">
       Seleccione las Vulneraciones
     </h3>
     <div class="mb-4">
-      <button
+      <app-button-submit
         type="button"
-        (click)="agregarVulneraciones()"
-        class="bg-blue-500 text-white px-4 py-2 rounded"
+        label="Agregar Vulneraciones"
+        color="afirmar"
+        (clicked)="agregarVulneraciones()"
       >
-        Agregar Vulneraciones
-      </button>
+      </app-button-submit>
+
     </div>
     <!--selector de afectados-->
     <div class="">
@@ -30,10 +31,7 @@
       </select>
     </div>
     <!--seleccionar vulneraciones-->
-
-
-
-    <div class="h-48 overflow-y-auto mt-4">
+    <div class="h-48 overflow-y-auto my-4  rounded-xl p-1 ring-1 ring-blue-200">
       <fieldset class="space-y-2">
         <div
           *ngFor="let v of vulneraciones"
@@ -57,6 +55,20 @@
       </fieldset>
     </div>
 
+    <div class=" overflow-x-auto rounded-xl bg-white shadow-xl md:col-span-2">
+      <app-tablaEdit
+      [encabezados]="['afectado','vulneraciones',]"
+      [columnas]="['id_afectado', 'vulneraciones']"
+      [datos]="mapeoAfectados"
+      [acciones]="true"
+      [eliminar]="eliminarRegistro.bind(this)"
+    >
+
+    </app-tablaEdit>
+
+    </div>
+
+
     <!--mensajes de error inicio-->
     <div
       *ngIf="vulneracionesForm.get('vulneraciones')?.errors?.['required'] && vulneracionesForm.get('vulneraciones')?.touched"
@@ -66,4 +78,4 @@
     </div>
     <!--mensajes de erro fin-->
   </div>
-</div>
+

@@ -1,0 +1,28 @@
+<table class=" table-auto  w-full text-sm text-left  ">
+      <thead class="bg-blue-50  ">
+        <tr class="">
+          @for (header of encabezados; track $index) {
+            <th class=" p-2">{{header}}</th>
+          }
+
+
+
+        </tr>
+      </thead>
+      <tbody class="">
+        @for (item of datos; track $index) {
+
+          <tr (click)="RouterLink && RouterLinkparam ? navegar(item) : tabs(item)" class="hover:bg-gray-50 border-t-2 border-t-blue-100  " >
+            @for (col of columnas; track $index) {
+
+              <td class=" overflow-hidden  truncate p-2">{{item[col] }}</td>
+
+            }
+            
+
+          </tr>
+
+        }
+
+      </tbody>
+    </table>

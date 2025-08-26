@@ -4,14 +4,15 @@ import { RouterLink } from "@angular/router";
 import { DenunciaService, } from "@nna/services/denuncia.service";
 import { Denuncia } from "@nna/interfaces/denuncia.interface";
 import { HttpErrorResponse } from "@angular/common/http";
-import TablaComponent from "@shared/components/tabla/tabla.component";
+import TablaNavigatorComponent from "@shared/components/tabla/tablaNavigator/tabla.component";
 import { AuthService } from "@auth/services/auth.service";
 import { CardFormComponent } from "@shared/components/card-Form/card-Form.component";
+import ButtonSubmitComponent from "@shared/components/button-submit/button-submit.component";
 
 @Component({
   selector: 'nna-page-nna',
   standalone: true,
-  imports: [RouterLink, CommonModule, TablaComponent, CardFormComponent ],
+  imports: [ CommonModule, TablaNavigatorComponent, CardFormComponent, ButtonSubmitComponent,RouterLink ],
   templateUrl: './nna_page_nna.component.html',
 })
 export class NnaPageNnaComponent implements OnInit {
@@ -64,7 +65,7 @@ export class NnaPageNnaComponent implements OnInit {
 
 
    totalDenunciasActivas(){
-    this.denunciaService.contarDenunciasActivas().subscribe(n=>{
+    this.denunciaService.contarDenunciasActivas('nna').subscribe(n=>{
       this.denunciasActivas=n.total;
     })
   }

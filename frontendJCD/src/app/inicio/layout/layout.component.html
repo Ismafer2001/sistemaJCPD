@@ -1,9 +1,12 @@
-<div class="flex flex-col min-h-screen ">
-  <globla-header [moduloActual]=moduloActual></globla-header>
-  <div class=" flex flex-grow bg-white">
-    <main class="flex-grow ">
-      <router-outlet></router-outlet>
-    </main>
+<div class="flex flex-col min-h-screen bg-white">
+  <globla-header [moduloActual]="moduloActual"></globla-header>
 
-  </div>
+  <!-- Contenido principal -->
+  <main class="flex-grow pt-5">
+  <router-outlet></router-outlet>
+</main>
+
+
+
 </div>
+

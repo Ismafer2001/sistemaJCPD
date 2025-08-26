@@ -1,4 +1,4 @@
-<div [formGroup]="denunciadoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div [formGroup]="denunciadoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 ">
   <!-- Cédula -->
   <div>
     <label for="cedula" class="block text-sm font-medium text-gray-700">Cédula</label>
@@ -6,8 +6,11 @@
       type="text"
       id="cedula"
       formControlName="cedula"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
       placeholder="Ingrese la cédula"
+      [ngClass]="{
+          'border-1 border-red-500': denunciadoForm.get('cedula')?.invalid && denunciadoForm.get('cedula')?.touched
+        }"
     />
     <div *ngIf="denunciadoForm.get('cedula')?.errors?.['required'] && denunciadoForm.get('cedula')?.touched"
          class="mt-1 text-sm text-red-600">
@@ -17,6 +20,7 @@
          class="mt-1 text-sm text-red-600">
       La cédula debe tener 10 dígitos
     </div>
+    <span *ngIf="denunciadoForm.get('cedula')?.errors?.['cedulaInvalida']"> Cédula invalida </span>
   </div>
 
   <!-- Nombres -->
@@ -26,8 +30,11 @@
       type="text"
       id="nombres"
       formControlName="nombres"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
       placeholder="Ingrese los nombres"
+      [ngClass]="{
+          'border-1 border-red-500': denunciadoForm.get('nombres')?.invalid && denunciadoForm.get('nombres')?.touched
+        }"
     />
     <div *ngIf="denunciadoForm.get('nombres')?.errors?.['required'] && denunciadoForm.get('nombres')?.touched"
          class="mt-1 text-sm text-red-600">
@@ -42,8 +49,11 @@
       type="text"
       id="apellidos"
       formControlName="apellidos"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500  focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
       placeholder="Ingrese los apellidos"
+      [ngClass]="{
+          'border-1 border-red-500': denunciadoForm.get('apellidos')?.invalid && denunciadoForm.get('apellidos')?.touched
+        }"
     />
     <div *ngIf="denunciadoForm.get('apellidos')?.errors?.['required'] && denunciadoForm.get('apellidos')?.touched"
          class="mt-1 text-sm text-red-600">
@@ -58,8 +68,12 @@
       type="number"
       id="edad"
       formControlName="edad"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      class="mt-1 block w-full rounded-md  border-gray-300 shadow-sm  focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
       placeholder="Ingrese la edad"
+
+      [ngClass]="{
+          'border-1 border-red-500': denunciadoForm.get('edad')?.invalid && denunciadoForm.get('edad')?.touched
+        }"
     />
     <div *ngIf="denunciadoForm.get('edad')?.errors?.['required'] && denunciadoForm.get('edad')?.touched"
          class="mt-1 text-sm text-red-600">
@@ -71,11 +85,16 @@
   <div>
     <label for="sexo" class="block text-sm font-medium text-gray-700">Sexo</label>
     <select
+
+
       id="sexo"
       formControlName="sexo"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none  "
+      [ngClass]="{
+           'border-1 border-red-500': denunciadoForm.get('sexo')?.invalid && denunciadoForm.get('sexo')?.touched
+        }"
     >
-      <option value="">Seleccione...</option>
+      <option value="" value="" disabled selected hidden >Seleccione...</option>
       <option value="Masculino">Masculino</option>
       <option value="Femenino">Femenino</option>
     </select>
@@ -88,13 +107,18 @@
   <!-- Nacionalidad -->
   <div>
     <label for="nacionalidad" class="block text-sm font-medium text-gray-700">Nacionalidad</label>
-    <input
-      type="text"
-      id="nacionalidad"
-      formControlName="nacionalidad"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      placeholder="Ingrese la nacionalidad"
-    />
+   <select formControlName="nacionalidad"
+    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none "
+      [ngClass]="{
+          ' border-1 border-red-500': denunciadoForm.get('nacionalidad')?.invalid && denunciadoForm.get('nacionalidad')?.touched
+        }">
+        <option value=""  disabled selected hidden >Seleccione...</option>
+      <option value="EC">Ecuatoriana</option>
+      <option value="VEN">Venezolana</option>
+      <option value="COL">Colombiana</option>
+      <option value="CUB">Cubana</option>
+      <option value="Per">Perú</option>
+    </select>
     <div *ngIf="denunciadoForm.get('nacionalidad')?.errors?.['required'] && denunciadoForm.get('nacionalidad')?.touched"
          class="mt-1 text-sm text-red-600">
       La nacionalidad es requerida
@@ -108,8 +132,11 @@
       type="text"
       id="direccion"
       formControlName="direccion"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
       placeholder="Ingrese la dirección"
+      [ngClass]="{
+          ' border-1 border-red-500': denunciadoForm.get('direccion')?.invalid && denunciadoForm.get('direccion')?.touched
+        }"
     />
     <div *ngIf="denunciadoForm.get('direccion')?.errors?.['required'] && denunciadoForm.get('direccion')?.touched"
          class="mt-1 text-sm text-red-600">
@@ -124,8 +151,11 @@
       type="email"
       id="mail"
       formControlName="mail"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      placeholder="Ingrese el correo"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="example@example.com"
+      [ngClass]="{
+          'border-1 border-red-500': denunciadoForm.get('mail')?.invalid && denunciadoForm.get('mail')?.touched
+        }"
     />
     <div *ngIf="denunciadoForm.get('mail')?.errors?.['required'] && denunciadoForm.get('mail')?.touched"
          class="mt-1 text-sm text-red-600">
@@ -144,8 +174,11 @@
       type="text"
       id="telefono"
       formControlName="telefono"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      placeholder="Ingrese el teléfono"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="0000000000"
+      [ngClass]="{
+          'border-1 border-red-500': denunciadoForm.get('telefono')?.invalid && denunciadoForm.get('telefono')?.touched
+        }"
     />
     <div *ngIf="denunciadoForm.get('telefono')?.errors?.['required'] && denunciadoForm.get('telefono')?.touched"
          class="mt-1 text-sm text-red-600">
@@ -164,8 +197,11 @@
       type="text"
       id="parentezco"
       formControlName="parentezco"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
       placeholder="Ingrese el parentesco"
+      [ngClass]="{
+          'border-1 border-red-500': denunciadoForm.get('parentezco')?.invalid && denunciadoForm.get('parentezco')?.touched
+        }"
     />
     <div *ngIf="denunciadoForm.get('parentezco')?.errors?.['required'] && denunciadoForm.get('parentezco')?.touched"
          class="mt-1 text-sm text-red-600">
@@ -174,16 +210,22 @@
   </div>
 
   <div class="mb-4">
-    <button type="button"
-      (click)="agregarDenunciado()"
-      class="bg-blue-500 text-white px-4 py-2 rounded"
+    <app-button-submit
+      type="button"
+      label="Agregar Denunciado"
+      color="afirmar"
+      (clicked)="agregarDenunciado()"
     >
-      Agregar Denunciado
-    </button>
+
+    </app-button-submit>
+
+
+
+    
   </div>
 
   <!-- Lista de afectados agregados -->
-<div class=" overflow-x-auto rounded-xl bg-white shadow-xl">
+<div class=" overflow-x-auto rounded-xl bg-white shadow-xl md:col-span-2">
   <global-tabla
   [columnas]="['cedula','nombres','apellidos',   'edad']"
   [encabezados]="['cedula','Nombres ', 'Apellidos', 'Edad',]"

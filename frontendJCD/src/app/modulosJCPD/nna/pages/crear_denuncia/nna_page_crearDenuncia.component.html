@@ -4,16 +4,14 @@
   <!-- Sección de Número de Trámite -->
   <div>
     <h2 class="text-xl font-semibold my-4">Número de Trámite</h2>
-    <div>
 
-    </div>
     <div class="mt-1 grid grid-cols-2 max-w-md">
       <input
         type="text"
         id="num_tramite"
         x
         formControlName="num_tramite"
-        class="min-w-0 block px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:border-blue-500"
+        class="min-w-0 block px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
         placeholder="Ingrese el número"
          [readonly]="numTramiteDisabled"
 
@@ -22,7 +20,7 @@
       <span
         class="items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500"
       >
-        -JCPD-{{ canton }}-{{ anioActual }}
+        -JCPD-{{ canton }}-{{ anioActual }}-NIÑOS
       </span>
     </div>
     <div
@@ -38,54 +36,145 @@
       Solo se permiten números
     </div>
   </div>
-  <!--tabs-->
+  <div class="flex flex-col md:flex-row md:items-end md:space-x-6 space-y-6 md:space-y-0">
+
+
+  <!-------------------- Tipo de Denuncia (Checkboxes) --------------------->
+  <div class="flex-1">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de denuncia</label>
+    <div class="space-y-2">
+
+      <label class="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="checkbox"
+          class="h-5 w-5 text-yellow-500 border-gray-300 rounded focus:ring-yellow-400"
+          [checked]="denunciaForm.get('tipo_denuncia')?.value === 'oficio'"
+          (change)="seleccionarTipo('oficio')"
+        />
+        <span>Por oficio</span>
+      </label>
+
+      <label class="flex items-center space-x-2 cursor-pointer">
+        <input
+          type="checkbox"
+          class="h-5 w-5 text-yellow-500 border-gray-300 rounded focus:ring-yellow-400"
+          [checked]="denunciaForm.get('tipo_denuncia')?.value === 'externa'"
+          (change)="seleccionarTipo('externa')"
+        />
+        <span>Externa</span>
+      </label>
+
+    </div>
+  </div>
+
+  <!--------------------- Canal de Ingreso -------------->
+  <div class="flex-1">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Canal de ingreso</label>
+    <select
+    formControlName="medio"
+
+      class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+    >
+      <option value="" disabled selected>Seleccioná una opción</option>
+      <option value="presencial">Presencial</option>
+      <option value="whatsapp">WhatsApp</option>
+      <option value="parte_policial">Parte policial</option>
+      <option value="otro">Otro</option>
+    </select>
+  </div>
+
+
+</div>
+
+  <!-----------------------tabs----------------------->
   <div class="flex  mb-0 gap-3 " id="tabs">
-    <button type="button" class="rounded-t-2xl p-2"
+    <a href="/nna/crearDenuncia#datosGenerales" class="rounded-t-2xl p-2"
+
        [ngClass]="{
-      'bg-blue-500 text-white': currentTab === 0,
+
+  'bg-blue-500 text-white': currentTab === 0 ,
       'bg-gray-100': currentTab !== 0
     }"
+
+
       (click)="cambiarTab(0)"
 
     >
       datos generales
-    </button>
-    <button type="button"
+    </a>
+
+    <a href="/nna/crearDenuncia#hechos"
       class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
       (click)="cambiarTab(1)"
 
       [ngClass]="{
+        'bg-red-500 text-white': denunciaForm.get('descripcion_hechos')?.invalid && denunciaForm.get('descripcion_hechos')?.touched,
       'bg-blue-500 text-white': currentTab === 1,
       'bg-gray-100': currentTab !== 1
     }"
     >
       sobre los hechos
-    </button>
+    </a>
+    <div class="flex flex-1 m-1 justify-end space-x-4">
+      <div
+    *ngIf="error"
+    class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
+    role="alert"
+  >
+    <span class="block sm:inline">{{ error }}</span>
+  </div>
+
+    <app-button-submit
+    type="button"
+    label="Cancelar"
+    color="cancelar"
+    (clicked)="cancelar()"
+    >
+
+    </app-button-submit>
+    <app-button-submit
+    type="submit"
+    label="Guardar"
+    color="submit"
+
+
+    >
+
+    </app-button-submit>
+
+    <!--<button
+      type="submit"
+      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+      [disabled]="denunciaForm.invalid || loading"
+      [title]="
+        denunciaForm.invalid ? 'Complete todos los campos requeridos' : ''
+      "
+    >
+      <span *ngIf="loading">Guardando...</span>
+      <span *ngIf="!loading">Guardar</span>
+    </button>-->
+  </div>
+
   </div>
 
 
-  <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300">
-     <!-- Sección del Denunciante -->
 
 
+  <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
+     <!--------------- Sección del Denunciante------------- -->
 
-    <app-card-Form [titulo]="'Datos del Denunciante'" [hidden]="currentTab===1">
+
+    <app-card-Form [titulo]="'Datos del Denunciante'" [hidden]="currentTab !== 0" id="datosGenerales">
       <nna_creardenuncia_denunciante
       [formGroup]="denuncianteForm"
-
       ></nna_creardenuncia_denunciante>
-
 
     </app-card-Form>
 
 
-
-
     <!-- Sección de Afectados -->
-    <div [hidden]="currentTab === 1" class="mb-8 bg-white rounded-lg p-6 shadow-md ">
-      <h2 class="text-xl font-semibold text-blue-500 mb-4">
-        Datos de los Afectados
-      </h2>
+
+      <app-card-Form [titulo]="'Datos de los Afectados'" [hidden]="currentTab !== 0">
       <div formArrayName="afectados">
 
         <nna_creardenuncia_afectado
@@ -93,32 +182,27 @@
         ></nna_creardenuncia_afectado>
 
     </div>
-    </div>
-        <!-- Este div también es parte del formulario visual -->
 
-        <!-- Lista de afectados agregados -->
+      </app-card-Form>
 
+    <!------------------------- Sección de Denunciados------------------ -->
 
-    <!-- Sección de Denunciados -->
-    <div [hidden]="currentTab === 1" class="mb-8 bg-white rounded-lg p-6 shadow-md ">
-      <h2 class="text-xl font-semibold text-blue-500">
-        Datos de los Denunciados
-      </h2>
-
-      <div class="" formArrayName="denunciados">
+      <app-card-Form [titulo]="'Datos de los Denunciados'" [hidden]="currentTab !== 0">
+        <div class="" formArrayName="denunciados">
 
         <nna_creardenuncia_denunciado
           [formArray]="denunciadosArray"
         ></nna_creardenuncia_denunciado>
 
       </div>
-    </div>
 
-    <!-- Sección de Hechos -->
-    <div [hidden]="currentTab === 0" class="mb-8 bg-white rounded-lg p-6 shadow-md">
-      <h2 class="text-xl font-semibold text-gray-800 mb-4">Hechos</h2>
+      </app-card-Form>
 
-      <!-- Descripción de Hechos -->
+
+    <!--------------- Sección de Hechos --------------------->
+
+      <app-card-Form [titulo]="'Hechos'" [hidden]="currentTab !== 1" id="hechos">
+         <!-- Descripción de Hechos -->
       <div class="mb-6">
         <label
           for="descripcion_hechos"
@@ -130,7 +214,10 @@
           id="descripcion_hechos"
           formControlName="descripcion_hechos"
           rows="4"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          class="mt-1 block w-full rounded-md   border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+          [ngClass]="{
+            'border-1 border-red-500': denunciaForm.get('descripcion_hechos')?.invalid && denunciaForm.get('descripcion_hechos')?.touched
+          }"
           placeholder="Describa los hechos ocurridos..."
         ></textarea>
         @if (denunciaForm.get('descripcion_hechos')?.errors?.['required'] && denunciaForm.get('descripcion_hechos')?.touched) {
@@ -151,19 +238,27 @@
         </div>
       </div>
 
-      <!-- Lista de Vulneraciones -->
+
+
+      </app-card-Form>
+
+      <app-card-Form [titulo]="'Vulneraciones'" [hidden]="currentTab !== 1">
+         <!-- Lista de Vulneraciones -->
       <app-nna_creardenuncia_vulneraciones
         [formArray]="vulneracionesForm"
         [formAfectados]="afectadosArray"
       ></app-nna_creardenuncia_vulneraciones>
-    </div>
-    <!-- Sección de Hechos -->
-    <div [hidden]="currentTab === 0" class="mb-8">
 
 
-      <!-- Descripción de solicitud -->
-      <div class="mb-8 bg-white rounded-lg p-6 shadow-md">
-        <h2 class="text-xl font-semibold text-gray-800 mb-4">solicitud</h2>
+      </app-card-Form>
+
+
+
+    <!-- solicitud -->
+
+       <!-- Descripción de solicitud -->
+
+      <app-card-Form [titulo]="'Solicitud'" [hidden]="currentTab !== 1">
         <label
           for="descripcion_solicitud"
           class="block text-sm font-medium text-gray-700"
@@ -174,7 +269,10 @@
           id="solicitud"
           formControlName="solicitud"
           rows="4"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          class="mt-1 block w-full rounded-md  border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+          [ngClass]="{
+            'border-1 border-red-500': denunciaForm.get('solicitud')?.invalid && denunciaForm.get('solicitud')?.touched
+          }"
           placeholder="Describa las solicitudes"
         ></textarea>
         <div
@@ -189,53 +287,30 @@
         >
           La descripción debe tener al menos 10 caracteres
         </div>
-      </div>
 
-      <!-- Lista de Medidas -->
-      <div class="mb-8 bg-white rounded-lg p-6 shadow-md">
-        <h3 class="text-lg font-semibold text-gray-800 mb-4">
-          Medidas de Protección
-        </h3>
+      </app-card-Form>
+ <!--  ----------------------Lista de Medidas --------------->
+      <app-card-Form [titulo]="'Medidas de Protección'" [hidden]="currentTab !== 1">
+        @if (medidasForm.invalid) {
+          <div class="mt-1 text-sm text-red-600">
+            agregue minimo un afectado
+          </div>
+        }
         <app-crear_denuncia_medidas
           [formArray]="medidasForm"
           [formAfectados]="afectadosArray"
         ></app-crear_denuncia_medidas>
-      </div>
-    </div>
 
+
+      </app-card-Form>
 
   </div>
 
   <!-- Mensajes de error y éxito -->
-  <div
-    *ngIf="error"
-    class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-    role="alert"
-  >
-    <span class="block sm:inline">{{ error }}</span>
-  </div>
+
 
   <!-- Botones de acción -->
-  <div class="flex justify-end space-x-4">
-    <button
-      type="button"
-      (click)="cancelar()"
-      class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
-    >
-      Cancelar
-    </button>
-    <button
-      type="submit"
-      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-      [disabled]="denunciaForm.invalid || loading"
-      [title]="
-        denunciaForm.invalid ? 'Complete todos los campos requeridos' : ''
-      "
-    >
-      <span *ngIf="loading">Guardando...</span>
-      <span *ngIf="!loading">Guardar</span>
-    </button>
-  </div>
+
 
   <!-- Mostrar errores de validación
   <div

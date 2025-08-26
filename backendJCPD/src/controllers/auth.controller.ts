@@ -9,19 +9,19 @@ import { handlehttp } from '../utils/error.handle';
 
 export const postloginUsuario = async (req: Request, res: Response) => {
   try {
-    const responlogin = await loginUsuario(req.body);
-     if(responlogin=="Usuario no encontrado"){
-      res.status(401).json(responlogin)
+    const token = await loginUsuario(req.body);
+     if(token=="Usuario no encontrado"){
+      res.status(401).json(token)
       
     }
 
-    if(responlogin=="contraseña incorrecta"){
-      res.status(401).json(responlogin)
+    if(token=="contraseña incorrecta"){
+      res.status(401).json(token)
       
     }
     
     
-    res.status(200).json(responlogin)
+    res.status(200).json({token})
     
   } catch (error) {
     handlehttp(res,"Error_post_login",error)

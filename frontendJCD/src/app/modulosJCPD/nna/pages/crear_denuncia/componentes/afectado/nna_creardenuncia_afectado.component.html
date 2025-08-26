@@ -5,11 +5,12 @@
     <input
       type="text"
       formControlName="cedula"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="
-        afectadoForm.get('cedula')?.invalid &&
-        afectadoForm.get('cedula')?.touched
-      "
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese la cédula"
+
+      [ngClass]="{
+          ' border-1 border-red-500': afectadoForm.get('cedula')?.invalid &&afectadoForm.get('cedula')?.touched
+        }"
     />
     <div
       *ngIf="
@@ -24,6 +25,7 @@
       <span *ngIf="afectadoForm.get('cedula')?.errors?.['pattern']"
         >La cédula debe tener 10 dígitos</span
       >
+      <span *ngIf="afectadoForm.get('cedula')?.errors?.['cedulaInvalida']"> Cédula invalida </span>
     </div>
   </div>
 
@@ -33,11 +35,11 @@
     <input
       type="text"
       formControlName="nombres"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="
-        afectadoForm.get('nombres')?.invalid &&
-        afectadoForm.get('nombres')?.touched
-      "
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese el nombre"
+      [ngClass]="{
+          ' border-1 border-red-500': afectadoForm.get('nombres')?.invalid && afectadoForm.get('nombres')?.touched
+        }"
     />
     <div
       *ngIf="
@@ -61,11 +63,11 @@
     <input
       type="text"
       formControlName="apellidos"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="
-        afectadoForm.get('apellidos')?.invalid &&
-        afectadoForm.get('apellidos')?.touched
-      "
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese el apellido"
+      [ngClass]="{
+          ' border-1 border-red-500': afectadoForm.get('apellidos')?.invalid && afectadoForm.get('apellidos')?.touched
+        }"
     />
     <div
       *ngIf="
@@ -88,10 +90,11 @@
     <input
       type="number"
       formControlName="edad"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="
-        afectadoForm.get('edad')?.invalid && afectadoForm.get('edad')?.touched
-      "
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese la edad"
+      [ngClass]="{
+          ' border-1 border-red-500': afectadoForm.get('edad')?.invalid && afectadoForm.get('edad')?.touched
+        }"
     />
     <div
       *ngIf="
@@ -114,10 +117,13 @@
     <label class="block text-sm font-medium text-gray-700">Sexo</label>
     <select
       formControlName="sexo"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none "
+      [ngClass]="{
+          ' border-1 border-red-500': afectadoForm.get('sexo')?.invalid && afectadoForm.get('sexo')?.touched
+        }"
 
     >
-      <option value="">Seleccione un sexo</option>
+      <option value=""  disabled selected hidden >Seleccione...</option>
       <option value="masculino">Masculino</option>
       <option value="femenino">Femenino</option>
     </select>
@@ -136,15 +142,19 @@
   <!-- Nacionalidad -->
   <div class="form-group">
     <label class="block text-sm font-medium text-gray-700">Nacionalidad</label>
-    <input
-      type="text"
-      formControlName="nacionalidad"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="
-        afectadoForm.get('nacionalidad')?.invalid &&
-        afectadoForm.get('nacionalidad')?.touched
-      "
-    />
+    <select formControlName="nacionalidad"
+    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none "
+      [ngClass]="{
+          ' border-1 border-red-500': afectadoForm.get('nacionalidad')?.invalid && afectadoForm.get('nacionalidad')?.touched
+        }">
+        <option value=""  disabled selected hidden >Seleccione...</option>
+      <option value="EC">Ecuatoriana</option>
+      <option value="VEN">Venezolana</option>
+      <option value="COL">Colombiana</option>
+      <option value="CUB">Cubana</option>
+      <option value="Per">Perú</option>
+    </select>
+
     <div
       *ngIf="
         afectadoForm.get('nacionalidad')?.invalid &&
@@ -164,11 +174,11 @@
     <input
       type="text"
       formControlName="direccion"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="
-        afectadoForm.get('direccion')?.invalid &&
-        afectadoForm.get('direccion')?.touched
-      "
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese la dirección"
+      [ngClass]="{
+          ' border-1 border-red-500': afectadoForm.get('direccion')?.invalid && afectadoForm.get('direccion')?.touched
+        }"
     />
     <div
       *ngIf="
@@ -194,10 +204,11 @@
     <input
       type="email"
       formControlName="mail"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="
-        afectadoForm.get('mail')?.invalid && afectadoForm.get('mail')?.touched
-      "
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="example@example.com"
+      [ngClass]="{
+          ' border-1 border-red-500': afectadoForm.get('mail')?.invalid && afectadoForm.get('mail')?.touched
+        }"
     />
     <div
       *ngIf="
@@ -220,11 +231,11 @@
     <input
       type="tel"
       formControlName="telefono"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      [class.border-red-500]="
-        afectadoForm.get('telefono')?.invalid &&
-        afectadoForm.get('telefono')?.touched
-      "
+      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+      placeholder="Ingrese el teléfono"
+      [ngClass]="{
+          ' border-1 border-red-500': afectadoForm.get('telefono')?.invalid && afectadoForm.get('telefono')?.touched
+        }"
     />
     <div
       *ngIf="
@@ -242,53 +253,31 @@
     </div>
   </div>
   <div class="mb-4">
-    <button type="button"
-      (click)="agregarAfectado()"
-      class="bg-blue-500 text-white px-4 py-2 rounded"
+    <app-button-submit
+      type="button"
+      label="Agregar Afectado"
+      color="afirmar"
+      (clicked)="agregarAfectado()"
     >
-      Agregar Afectado
-    </button>
+
+    </app-button-submit>
+
+
   </div>
-  <div class=" overflow-x-auto rounded-xl bg-white shadow-xl">
-  <global-tabla
-  [columnas]="['cedula','nombres','apellidos',   'edad']"
+  <div class=" overflow-x-auto rounded-xl bg-white shadow-xl md:col-span-2">
+    <app-tablaEdit
+    [columnas]="['cedula','nombres','apellidos',   'edad']"
   [encabezados]="['cedula','Nombres ', 'Apellidos', 'Edad',]"
   [datos]="formArray.value"
   [acciones]="true"
   [eliminar]="eliminarAfectado.bind(this)"
-
-  >
-
+    >
 
 
+    </app-tablaEdit>
 
-  </global-tabla>
 
 </div>
-  <!-- Lista de afectados agregados -->
-   <!--<div class="  rounded-xl shadow-xs ">
-    <table class="w-full" *ngIf="formArray.controls.length > 0">
-    <thead class="bg-blue-50 text-xs ">
-      <tr>
-        <th>Nombre</th>
-        <th>Apellido</th>
-        <th>Cédula</th>
-        <th>Teléfono</th>
-        <th>Acciones</th>
-      </tr>
-    </thead>
-    <tbody class="text-xs">
-      <tr *ngFor="let afectado of formArray.controls; let i = index">
-        <td>{{ afectado.value.nombres }}</td>
-        <td>{{ afectado.value.apellidos }}</td>
-        <td>{{ afectado.value.cedula }}</td>
-        <td>{{ afectado.value.telefono }}</td>
-        <td>
-          <button type="button" (click)="eliminarAfectado(i)">Eliminar</button>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-   </div>-->
+
 
 </div>

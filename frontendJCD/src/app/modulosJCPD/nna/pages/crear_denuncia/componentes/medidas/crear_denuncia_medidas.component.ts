@@ -1,19 +1,21 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MedidasService, ArticuloMedidas } from '../../../../services/medidas.service';
+import { MedidasService, ArticuloMedidas, Medida } from '../../../../services/medidas.service';
 import { CommonModule } from '@angular/common';
+import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
+import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 
 @Component({
   selector: 'app-crear_denuncia_medidas',
-  imports:[CommonModule, ReactiveFormsModule],
+  imports:[CommonModule, ReactiveFormsModule, ButtonSubmitComponent, TablaEditComponent],
   templateUrl: './crear_denuncia_medidas.component.html',
 
 })
 export class Crear_denuncia_medidasComponent implements OnInit {
   @Input() formArray!: FormArray;
   @Input() formAfectados!:FormArray; // Assuming this is used for some other purpose
-  medidasPorArticulo: ArticuloMedidas[] = [];
   medidasForm: FormGroup;
+  medidasPorArticulo: ArticuloMedidas[] = [];
   loading = false;
   error: string | null = null;
 
@@ -34,12 +36,59 @@ export class Crear_denuncia_medidasComponent implements OnInit {
     });
   }
 
+  get mapeoAfectados() {
+    return this.formArray.value.map((item: any) => {
+      // Resolve afectado: item.id_afectado may be an index or an id; try index first
+      let afectadoValue: any = null;
+      if (this.formAfectados && this.formAfectados.length) {
+        const idx = Number(item.id_afectado);
+        if (!isNaN(idx) && this.formAfectados.at(idx)) {
+          afectadoValue = this.formAfectados.at(idx)?.value;
+        } else {
+          // fallback: find control whose value.id matches item.id_afectado
+          afectadoValue = this.formAfectados.controls.find((ctrl: any) => {
+            const v = ctrl.value;
+            return v && (v.id === item.id_afectado || String(v.id) === String(item.id_afectado));
+          })?.value;
+        }
+      }
+
+      const medidasNombres: string[] = [];
+
+      // The saved array might be under `ids_medidas` or `medidas` depending on implementation
+      const ids = Array.isArray(item.ids_medidas) ? item.ids_medidas : (Array.isArray(item.medidas) ? item.medidas : []);
+
+      if (Array.isArray(ids)) {
+        ids.forEach((medidaId: number) => {
+          // Search each articulo for the medida with matching id
+          for (const articulo of this.medidasPorArticulo) {
+            if (Array.isArray(articulo.medidas)) {
+              const m = articulo.medidas.find((mm: Medida) => mm.id === medidaId || String(mm.id) === String(medidaId));
+              if (m) {
+                medidasNombres.push(m.medida);
+                break; // found in this articulo, continue with next id
+              }
+            }
+          }
+        });
+      }
+
+      return {
+        ...item,
+        id_afectado: afectadoValue ? afectadoValue.nombres : 'Desconocido',
+        medidasPorArticulo: medidasNombres.join('\n - ')
+      };
+    });
+}
+
+
   cargarMedidas() {
     this.loading = true;
     this.medidasService.getAllMedidas().subscribe({
       next: (response) => {
         if (response.success) {
           this.medidasPorArticulo = response.data;
+          console.log('Medidas cargadas:', this.medidasPorArticulo);
         } else {
           this.error = 'Error al cargar las medidas';
         }
@@ -71,6 +120,10 @@ export class Crear_denuncia_medidasComponent implements OnInit {
     const value = control?.value;
     return Array.isArray(value) && value.includes(medidaId);
   }
+
+
+
+
   agregarMedida() {
     const id_afectado = this.medidasForm.get('id_afectado')?.value;
   const ids_medidas = this.medidasForm.get('ids_medidas')?.value;
@@ -86,6 +139,9 @@ export class Crear_denuncia_medidasComponent implements OnInit {
 
   this.medidasForm.reset();
   }
+  eliminarRegistro(index: number) {
+  this.formArray.removeAt(index);
+}
 
 
 

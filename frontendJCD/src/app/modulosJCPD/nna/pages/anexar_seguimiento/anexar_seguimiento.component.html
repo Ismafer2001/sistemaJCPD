@@ -1,0 +1,42 @@
+<div class="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md mt-10">
+  <h2 class="text-2xl font-bold text-gray-800 mb-4">Anexar Informe de Cumplimiento</h2>
+
+  <!-- Upload de archivo -->
+  <div class="mb-4">
+    <label class="block text-gray-700 font-semibold mb-2">Informe PDF o Imagen</label>
+    <input
+      type="file"
+      accept=".pdf,.png,.jpg,.jpeg"
+      class="block w-full text-sm text-gray-600
+             file:mr-4 file:py-2 file:px-4
+             file:rounded-full file:border-0
+             file:text-sm file:font-semibold
+             file:bg-blue-50 file:text-blue-700
+             hover:file:bg-blue-100"
+    />
+  </div>
+
+  <!-- Radio: Cumple / No cumple -->
+  <div class="mb-6">
+    <label class="block text-gray-700 font-semibold mb-2">¿Cumple con las medidas?</label>
+    <div class="flex gap-6">
+      <label class="inline-flex items-center">
+        <input type="radio" name="cumplimiento" value="cumple" class="text-blue-600 focus:ring-blue-500" />
+        <span class="ml-2 text-gray-700">Cumple</span>
+      </label>
+      <label class="inline-flex items-center">
+        <input type="radio" name="cumplimiento" value="no_cumple" class="text-red-600 focus:ring-red-500" />
+        <span class="ml-2 text-gray-700">No cumple</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Botón -->
+  <div class="text-right">
+    <button
+      class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors"
+    >
+      Guardar Informe
+    </button>
+  </div>
+</div>

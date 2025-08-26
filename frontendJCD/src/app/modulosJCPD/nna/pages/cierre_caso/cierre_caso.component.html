@@ -1,0 +1,156 @@
+<h1 class="text-2xl font-bold mb-4">cierre de caso</h1>
+<hr class="border-blue-200 border-1" />
+
+<div class="flex  mb-0 gap-3 " id="tabs">
+    <button type="button" class="rounded-t-2xl p-2"
+       [ngClass]="{
+      'bg-blue-500 text-white': currentTab === '0',
+      'bg-gray-100': currentTab !== '0'
+    }"
+      (click)="cambiarTab('0')"
+
+    >
+      Informes prensentados
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('1')"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab  != '0',
+
+    }"
+    >
+     informes citados
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('2')"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab  != '0',
+
+    }"
+    >
+     Disposiciones
+    </button>
+  </div>
+
+  <app-card-Form [hidden]="currentTab!='0'">
+    <p class="font-bold">caso <span class="underline decoration-dotted decoration-gray-400">…………</span>,</p>
+
+    <app-card-Form [titulo]="'informes presentados'" >
+
+
+  <!-- Texto editable como formulario -->
+  <p class="text-gray-800">
+    De los informes presentados
+    <input type="text" placeholder="Nombre del informe o documento"
+      class="border-b border-gray-400 w-64 focus:outline-none focus:border-blue-500 mx-1" />
+    por
+    <input type="text" placeholder="Nombre del técnico o institución"
+      class="border-b border-gray-400 w-72 focus:outline-none focus:border-blue-500 mx-1" />,
+    con fecha
+    <input type="date"
+      class="border-b border-gray-400 focus:outline-none focus:border-blue-500 mx-1" />,
+    en donde manifiestan que: “se ha venido realizando visitas de seguimiento al
+    <input type="text" placeholder="Lugar o persona"
+      class="border-b border-gray-400 w-56 focus:outline-none focus:border-blue-500 mx-1" />
+    de manera imprevista donde se verifica que
+    <input type="text" placeholder="Nombre del evaluado"
+      class="border-b border-gray-400 w-56 focus:outline-none focus:border-blue-500 mx-1" />
+    está cumpliendo las medidas de protección dictadas por la JCPD-
+    <input type="text" placeholder="Código o referencia"
+      class="border-b border-gray-400 w-32 focus:outline-none focus:border-blue-500 mx-1" />”
+  </p>
+
+  <!-- Botón añadir -->
+  <div class="text-right">
+    <button
+      class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors"
+    >
+      Añadir Informe
+    </button>
+  </div>
+
+
+    </app-card-Form>
+
+  </app-card-Form>
+  <app-card-Form [hidden]="currentTab!='1'">
+
+     <app-card-Form [titulo]="'Informes citados'" >
+
+  <p class="text-gray-800">
+    De los informes citados y revisando el expediente, la Junta considera que: las disposiciones número
+    <input
+      type="text"
+      placeholder="N° de disposiciones"
+      class="border-b border-gray-400 w-64 focus:outline-none focus:border-blue-500 mx-1"
+    />
+    de la Resolución
+    <input
+      type="text"
+      placeholder="Código o referencia de la resolución"
+      class="border-b border-gray-400 w-72 focus:outline-none focus:border-blue-500 mx-1"
+    />
+    han sido cumplidos
+    <input
+      type="text"
+      placeholder="Detalle del cumplimiento"
+      class="border-b border-gray-400 w-full focus:outline-none focus:border-blue-500 mt-2"
+    />
+    , que el/la afectada
+    <input
+      type="text"
+      placeholder="Nombre de la persona afectada"
+      class="border-b border-gray-400 w-64 focus:outline-none focus:border-blue-500 mx-1"
+    />
+    ha superado la situación de vulneración/riesgo
+    <input
+      type="text"
+      placeholder="Explicación o conclusión"
+      class="border-b border-gray-400 w-full focus:outline-none focus:border-blue-500 mt-2"
+    />
+  </p>
+
+  <!-- Botón añadir -->
+  <div class="text-right">
+    <button
+      class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors"
+    >
+      Añadir Revisión
+    </button>
+  </div>
+
+
+
+     </app-card-Form>
+
+
+
+  </app-card-Form>
+
+  <app-card-Form [hidden]="currentTab!='2'">
+
+     <app-card-Form [titulo]="'Disposiciones'" >
+
+  <p class="text-gray-800 font-semibold">Por lo que la Junta, <span class="underline">DISPONE:</span></p>
+
+  <textarea
+    rows="6"
+    placeholder="Escribe aquí las disposiciones..."
+    class="bg-gray-100 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
+  >1).- Revocar todas las Medidas de Protección desde la Avocatoria de Conocimiento hasta la presente fecha por considerarse cumplidas; y se ordena el archivo provisional del expediente.
+
+3).- La Junta se reserva el derecho de reabrir el caso, si se presentara nuevos hechos en relación al mismo.</textarea>
+
+
+
+     </app-card-Form>
+
+
+
+  </app-card-Form>
+
+

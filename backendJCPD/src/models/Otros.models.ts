@@ -6,6 +6,7 @@ interface OtrosAttributes {
   id: number;
   nombres: string;
   parte: string;
+tipoParticipante?: string;
   
   idDenuncia: number;
   
@@ -17,6 +18,7 @@ export class Otros extends Model<OtrosAttributes, OtrosCreationAttributes> imple
   declare id: number;
   declare nombres: string;
   declare parte: string;
+  declare tipoParticipante: string;
   
   declare idDenuncia: number;
   
@@ -33,6 +35,10 @@ Otros.init({
     
   },
   parte: {
+    type: DataTypes.STRING,
+    
+  },
+   tipoParticipante: {
     type: DataTypes.STRING,
     
   },

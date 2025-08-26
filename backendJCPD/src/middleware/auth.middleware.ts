@@ -5,7 +5,7 @@ import { jwtpayload } from '../interfaces/usuarios.interface';
 
 
 export const verificarToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  
+  console.log('verificando token');
   try {
     const authHeader = req.headers.authorization ||"";
     const token = authHeader.split(' ').pop();
