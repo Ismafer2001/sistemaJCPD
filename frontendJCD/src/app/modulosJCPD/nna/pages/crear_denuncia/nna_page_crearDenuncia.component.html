@@ -1,5 +1,15 @@
-<h1 class="text-2xl font-bold mb-4">Crear Nueva Denuncia</h1>
-<hr class="border-blue-200 border-1">
+<div class="   pl-2 py-2  mb-1 " id="tituloDenuncia">
+
+
+  <h1 class="text-2xl font-bold flex items-center gap-2 ">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-9 text-yellow-500">
+  <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875ZM12.75 12a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V18a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V12Z" clip-rule="evenodd" />
+  <path d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
+</svg>Crear Nueva Denuncia</h1>
+
+</div>
+
+<hr class="border-yellow-300 border-1">
 <form [formGroup]="denunciaForm" (ngSubmit)="onSubmit()" class="space-y-6">
   <!-- Sección de Número de Trámite -->
   <div>
@@ -75,7 +85,7 @@
 
       class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
     >
-      <option value="" disabled selected>Seleccioná una opción</option>
+      <option value="" disabled selected hidden>Seleccioná una opción</option>
       <option value="presencial">Presencial</option>
       <option value="whatsapp">WhatsApp</option>
       <option value="parte_policial">Parte policial</option>
@@ -115,14 +125,26 @@
     >
       sobre los hechos
     </a>
+
+    @if (currentTab===2) {
+      <a
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab(2)"
+
+
+      [ngClass]="{
+
+      'bg-blue-500 text-white': currentTab === 2,
+      'bg-gray-100': currentTab !== 2
+    }"
+    >
+      pdf
+    </a>
+
+    }
+
     <div class="flex flex-1 m-1 justify-end space-x-4">
-      <div
-    *ngIf="error"
-    class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative"
-    role="alert"
-  >
-    <span class="block sm:inline">{{ error }}</span>
-  </div>
+
 
     <app-button-submit
     type="button"
@@ -132,15 +154,40 @@
     >
 
     </app-button-submit>
+     <app-button-submit
+    type="button"
+    label="Editar"
+    color="afirmar"
+    (clicked)="updateDenuncia(idDenuncia)"
+    [disabled]="editarDisabled"
+
+    >
+
+    </app-button-submit>
     <app-button-submit
     type="submit"
     label="Guardar"
     color="submit"
 
+    [disabled]="guardarDisabled"
+
 
     >
 
     </app-button-submit>
+
+    <app-button-submit
+    type="button"
+    label="GenerarPDF"
+    color="submit"
+    (click)="generarPdf()"
+    [disabled]="pdfDisabled"
+
+    >
+
+    </app-button-submit>
+
+
 
     <!--<button
       type="submit"
@@ -176,6 +223,15 @@
 
       <app-card-Form [titulo]="'Datos de los Afectados'" [hidden]="currentTab !== 0">
       <div formArrayName="afectados">
+        @if (denunciaForm.get('afectados')?.errors?.['required'] && denunciaForm.get('afectados')?.touched) {
+            <div
+
+          class="mt-1 text-sm text-red-600"
+        >
+          al menos un afectado es requerido
+        </div>
+
+        }
 
         <nna_creardenuncia_afectado
           [formArray]="afectadosArray"
@@ -187,8 +243,17 @@
 
     <!------------------------- Sección de Denunciados------------------ -->
 
-      <app-card-Form [titulo]="'Datos de los Denunciados'" [hidden]="currentTab !== 0">
-        <div class="" formArrayName="denunciados">
+      <app-card-Form [titulo]="'Datos de los Denunciados'" [hidden]="currentTab !== 0" >
+        <div class="" formArrayName="denunciados" >
+          @if (denunciaForm.get('denunciados')?.errors?.['required'] && denunciaForm.get('denunciados')?.touched) {
+            <div
+
+          class="mt-1 text-sm text-red-600"
+        >
+          al menos un denunciado es requerido
+        </div>
+
+        }
 
         <nna_creardenuncia_denunciado
           [formArray]="denunciadosArray"
@@ -243,6 +308,16 @@
       </app-card-Form>
 
       <app-card-Form [titulo]="'Vulneraciones'" [hidden]="currentTab !== 1">
+
+        @if (denunciaForm.get('vulneraciones')?.errors?.['required'] && denunciaForm.get('vulneraciones')?.touched) {
+            <div
+
+          class="mt-1 text-sm text-red-600"
+        >
+          al menos una vulneración es requerida
+        </div>
+
+        }
          <!-- Lista de Vulneraciones -->
       <app-nna_creardenuncia_vulneraciones
         [formArray]="vulneracionesForm"
@@ -291,10 +366,14 @@
       </app-card-Form>
  <!--  ----------------------Lista de Medidas --------------->
       <app-card-Form [titulo]="'Medidas de Protección'" [hidden]="currentTab !== 1">
-        @if (medidasForm.invalid) {
-          <div class="mt-1 text-sm text-red-600">
-            agregue minimo un afectado
-          </div>
+       @if (denunciaForm.get('vulneraciones')?.errors?.['required'] && denunciaForm.get('vulneraciones')?.touched) {
+            <div
+
+          class="mt-1 text-sm text-red-600"
+        >
+          al menos una medida es requerida
+        </div>
+
         }
         <app-crear_denuncia_medidas
           [formArray]="medidasForm"
@@ -303,96 +382,13 @@
 
 
       </app-card-Form>
+      @if (pdfSrc) {
+        <div class="pdf-container" [hidden]="currentTab !== 2">
+          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+        </div>
+      }
 
   </div>
 
-  <!-- Mensajes de error y éxito -->
 
-
-  <!-- Botones de acción -->
-
-
-  <!-- Mostrar errores de validación
-  <div
-    *ngIf="denunciaForm.invalid"
-    class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md"
-  >
-    <h3 class="text-sm font-medium text-yellow-800">
-      Por favor complete los siguientes campos:
-    </h3>
-    <ul class="mt-2 text-sm text-yellow-700 list-disc list-inside">
-      <li *ngIf="denunciaForm.get('num_tramite')?.errors?.['required']">
-        Número de trámite es requerido
-      </li>
-      <li *ngIf="denunciaForm.get('num_tramite')?.errors?.['min']">
-        El número de trámite debe ser mayor a 0
-      </li>
-      <li *ngIf="denuncianteForm.get('cedula')?.errors?.['required']">
-        Cédula del denunciante es requerida
-      </li>
-      <li *ngIf="denuncianteForm.get('cedula')?.errors?.['pattern']">
-        La cédula debe tener 10 dígitos
-      </li>
-      <li *ngIf="denuncianteForm.get('nombres')?.errors?.['required']">
-        Nombres del denunciante son requeridos
-      </li>
-      <li *ngIf="denuncianteForm.get('nombres')?.errors?.['minlength']">
-        Los nombres deben tener al menos 2 caracteres
-      </li>
-      <li *ngIf="denuncianteForm.get('apellidos')?.errors?.['required']">
-        Apellidos del denunciante son requeridos
-      </li>
-      <li *ngIf="denuncianteForm.get('apellidos')?.errors?.['minlength']">
-        Los apellidos deben tener al menos 2 caracteres
-      </li>
-      <li *ngIf="denuncianteForm.get('edad')?.errors?.['required']">
-        Edad del denunciante es requerida
-      </li>
-      <li
-        *ngIf="denuncianteForm.get('edad')?.errors?.['min'] || denuncianteForm.get('edad')?.errors?.['max']"
-      >
-        La edad debe estar entre 0 y 120 años
-      </li>
-      <li *ngIf="denuncianteForm.get('genero')?.errors?.['required']">
-        Género del denunciante es requerido
-      </li>
-      <li *ngIf="denuncianteForm.get('nacionalidad')?.errors?.['required']">
-        Nacionalidad del denunciante es requerida
-      </li>
-      <li *ngIf="denuncianteForm.get('direccion')?.errors?.['required']">
-        Dirección del denunciante es requerida
-      </li>
-      <li *ngIf="denuncianteForm.get('direccion')?.errors?.['minlength']">
-        La dirección debe tener al menos 5 caracteres
-      </li>
-      <li *ngIf="denuncianteForm.get('mail')?.errors?.['required']">
-        Correo del denunciante es requerido
-      </li>
-      <li *ngIf="denuncianteForm.get('mail')?.errors?.['email']">
-        El correo debe tener un formato válido
-      </li>
-      <li *ngIf="denuncianteForm.get('telefono')?.errors?.['required']">
-        Teléfono del denunciante es requerido
-      </li>
-      <li *ngIf="denuncianteForm.get('telefono')?.errors?.['pattern']">
-        El teléfono debe tener 10 dígitos
-      </li>
-      <li *ngIf="denunciaForm.get('descripcion_hechos')?.errors?.['required']">
-        Descripción de hechos es requerida
-      </li>
-      <li *ngIf="denunciaForm.get('descripcion_hechos')?.errors?.['minlength']">
-        La descripción debe tener al menos 10 caracteres
-      </li>
-      <li
-        *ngIf="vulneracionesForm.get('ids')?.errors?.['required'] || vulneracionesForm.get('ids')?.errors?.['minlength']"
-      >
-        Debe seleccionar al menos una vulneración
-      </li>
-      <li
-        *ngIf="medidasForm.get('ids')?.errors?.['required'] || medidasForm.get('ids')?.errors?.['minlength']"
-      >
-        Debe seleccionar al menos una medida de protección
-      </li>
-    </ul>
-  </div>-->
 </form>

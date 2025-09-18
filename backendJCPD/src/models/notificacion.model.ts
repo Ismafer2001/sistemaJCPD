@@ -11,6 +11,7 @@ interface NotificacionAttributes {
   direccion: string;
   datosGenerales?: string;
   idDenuncia: number;
+  idUsuario: number;
   estatus?: "pendiente"|"en_proceso"|"completada";
 }
 
@@ -26,6 +27,7 @@ export class Notificacion extends Model<NotificacionAttributes, NotificacionCrea
   declare idDenuncia: number;
   declare diriguidoA: string;
   declare estatus: "pendiente"|"en_proceso"|"completada";
+  declare idUsuario: number;
 }
 
 Notificacion.init({
@@ -71,7 +73,12 @@ Notificacion.init({
   diriguidoA: {
     type: DataTypes.STRING,
     allowNull: false,
-  }
+  },
+  idUsuario: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+   
+  },
 }, {
   sequelize,
   modelName: 'Notificacion',

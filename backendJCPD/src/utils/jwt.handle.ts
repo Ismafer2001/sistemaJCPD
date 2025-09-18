@@ -1,11 +1,11 @@
 import { sign,verify } from "jsonwebtoken";
-import { jwtpayload } from "../interfaces/usuarios.interface"
+import { jwtpayload } from "../interfaces/auth.interface"
 
 const JWT_SECRET = process.env.JWT_SECRET || "token.0101001"
 
 const generarToken = async(payload:jwtpayload)=>{
     const jwt = sign(payload,JWT_SECRET,{
-        expiresIn:"4h"
+        expiresIn:"12h"
 
     });
     

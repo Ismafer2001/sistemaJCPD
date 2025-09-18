@@ -31,7 +31,7 @@ export class ButtonSubmitComponent  {
       case 'afirmar':
         return 'px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2';
       case 'cancelar':
-        return 'px-4 py-2 bg-gray-400 text-white rounded-md hover:bg-gray-500 disabled:opacity-50 flex items-center gap-2';
+        return 'px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:opacity-50 flex items-center gap-2';
       case 'error':
         return 'bg-yellow-500 hover:bg-yellow-600 text-white';
 

@@ -16,6 +16,8 @@ import reportedenunciasRoutes from './routes/estadisticas/denunciaReporte.routes
 import pdfRoutes from './routes/pdf.routes'; 
 import estatusRoutes from './routes/estatus.routes'; 
 import path from 'path';
+import audienciaContestacionRoutes from './routes/audienciaContestacion.routes';
+import uploadRoutes from './routes/upload.routes';
 
 
 const app = express();
@@ -24,6 +26,7 @@ const PORT = process.env.PORT || 3001;
 
 // Middlewares
 app.use(cors()); // Permite todas las conexiones
+app.use('/api/upload', uploadRoutes);
 app.use(express.json());
 
 // Rutas
@@ -39,6 +42,8 @@ app.use('/api/citacion', citacionRoutes);
 app.use('/api/reportes', reportedenunciasRoutes);
 app.use('/api/pdf', pdfRoutes); // Ruta para generar PDF de denuncias
 app.use('/api/estatus', estatusRoutes)
+app.use('/api/audiencia-contestacion', audienciaContestacionRoutes);
+
 app.use('/pdf', express.static(path.join(__dirname, '../public/pdf')));
 
 

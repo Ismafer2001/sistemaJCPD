@@ -10,6 +10,7 @@ interface CitacionAttributes {
   hora: string;
   direccion: string;
   diriguidoA: string;
+  idUsuario: number;
   parte: string;
   idDenuncia: number;
   estatus: "pendiente"|"en_proceso"|"completada";
@@ -32,8 +33,7 @@ export class Citacion
   declare diriguidoA: string;
   declare parte: string;
   declare estatus: "pendiente"|"en_proceso"|"completada";
-
-  
+  declare idUsuario: number;
   declare idDenuncia: number;
 }
 
@@ -87,6 +87,10 @@ Citacion.init(
 
     diriguidoA: {
       type: DataTypes.STRING,
+      allowNull: false,
+    },
+    idUsuario: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
   },

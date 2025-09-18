@@ -9,6 +9,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 import { validarCedulaEcuador } from '@shared/validators/cedula.validators';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'nna_creardenuncia_afectado',
@@ -65,9 +66,19 @@ this.nacionalidadesFiltradas = this.afectadoForm.get('nacionalidad')!.valueChang
    agregarAfectado(): void {
   if (this.afectadoForm.valid) {
     this.formArray.push(this.fb.group(this.afectadoForm.value));
+    toast.success(' Afectado agregado correctamente', {
+          duration: 4000,
+          
+          // delete: true,
+        });
     this.afectadoForm.reset(); // limpio el form para el siguiente
   } else {
-    this.afectadoForm.markAllAsTouched(); // para que muestre errores
+    this.afectadoForm.markAllAsTouched();
+    toast.error(' Afectado no agregado', {
+              duration: 3000,
+              description: 'Por Favor, Completa Todos los Campos Requeridos',
+              // delete: true,
+            }); // para que muestre errores
   }
 }
 eliminarAfectado(index: number): void {

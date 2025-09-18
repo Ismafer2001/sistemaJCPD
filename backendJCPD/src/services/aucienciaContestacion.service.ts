@@ -1,0 +1,260 @@
+import { Afectado } from "../models/afectado.models";
+import { Citacion } from "../models/citaciones.model";
+import sequelize from "../config/database";
+import { Op } from "sequelize";
+import { AudienciaContestacion } from "../models/audiencia_constestacion.model";
+import { ParticipantesAudienciaContestacion } from "../models/participantes_audiencia.model";
+import { Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Otros } from "../models";
+
+interface ParticipanteData {
+	nombres: string;
+	cedula: string;
+	tipo_involucrado: string;
+	asistio?: boolean;
+	justifico?: boolean;
+	manifiesta?: string;
+}
+
+interface AudienciaContestacionData {
+	idDenuncia: number;
+	codigoTramite: string;
+	fecha: Date;
+	hora: Date;
+	instalacionAudiencia: string;
+	dirigue: string;
+	indica: string;
+	manifiesta: string;
+	pdf_audiencia_contestacion: number;
+	participantes: ParticipanteData[];
+}
+//--- SERVICIOS PARA AUDIENCIA DE CONTESTACION ---//
+//crear audiencia de contestacion
+export async function crearAudienciaContestacion(data: AudienciaContestacionData) {
+	const t = await sequelize.transaction();
+	try {
+		const audiencia = await AudienciaContestacion.create({
+			idDenuncia: data.idDenuncia,
+			codigoTramite: data.codigoTramite,
+			fecha: data.fecha,
+			hora: data.hora,
+			instalacionAudiencia: data.instalacionAudiencia,
+			dirigue: data.dirigue,
+			indica: data.indica,
+			manifiesta: data.manifiesta,
+			pdf_audiencia_contestacion: data.pdf_audiencia_contestacion
+		}, { transaction: t });
+
+		if (Array.isArray(data.participantes)) {
+			for (const participante of data.participantes) {
+				await ParticipantesAudienciaContestacion.create({
+					idAC: audiencia.id,
+					nombres: participante.nombres,
+					cedula: participante.cedula,
+					tipo_involucrado: participante.tipo_involucrado,
+					asistio: participante.asistio ?? false,
+					justifico: participante.justifico ?? false,
+					manifiesta: participante.manifiesta ?? ''
+				}, { transaction: t });
+			}
+		}
+
+		await t.commit();
+		return { success: true, audienciaId: audiencia.id };
+	} catch (error) {
+		await t.rollback();
+		throw error;
+	}
+}
+
+//obtener datos para la audiencia de contestacion
+export async function AudiencaContestacionDTO(id:string) {
+  const existeAvocatoria = await Avocatoria.findOne({ where: { idDenuncia: id } });
+
+  if(!existeAvocatoria) {
+	const error = new Error("No existe una avocatoria para esta denuncia");
+	error.name = "NoExisteAvocatoria";
+	throw error;
+  }
+   const resultado = await Denuncia.findByPk(id, {
+  attributes: ['codigoTramite'],
+  include: [{
+	model: Avocatoria,
+	attributes: ['fechaCreado']
+
+  },
+  {
+	model: Canton,
+	attributes:['canton']
+
+  }
+], 
+  
+});
+
+
+const { codigoTramite, Avocatorium:avo, Canton:can } = resultado as any;
+  
+
+const respuestaFormateada = {
+  codigoTramite,
+
+  fechaCreado: avo?.fechaCreado || '',
+  Canton: can?.canton || ''
+};
+
+return respuestaFormateada
+
+
+
+	
+}
+
+//----------------SERVICIO PARA PARTICIPANTES----------------------//
+
+// Obtener los nombres de los afectados y el campo diriguidoA de citaciones para una denuncia
+export async function getAfectadosYDirigidoA(idDenuncia: number) {
+		const existeCitacion = await Citacion.findOne({ where: { idDenuncia } });
+		if (!existeCitacion) {
+			const error = new Error("No existe una citación para esta denuncia");
+			error.name = "NoExisteCitacion";
+			throw error;
+		}
+
+		// Traer todas las citaciones asociadas a la denuncia
+		const citados = await Citacion.findAll({
+			where: {
+				idDenuncia,
+				parte: { [Op.not]: 'institucion' }
+			},
+			attributes: ["diriguidoA", "parte", "idUsuario"]
+		});
+		
+
+		// Preparar ids por tipo
+		const idsDenunciante = citados.filter(c => c.parte === 'Accionante').map(c => c.idUsuario);
+		const idsDenunciado = citados.filter(c => c.parte === 'Accionado').map(c => c.idUsuario);
+		const idsOtros = citados.filter(c => c.parte !== 'institucion' ).map(c => c.idUsuario);
+
+		
+
+		// Batch fetch personas solo por tipo
+		const [denunciantes, denunciados, otros, afectados, otrosAudiencia] = await Promise.all([
+			idsDenunciante.length > 0
+				? Denunciante.findAll({ where: { id: idsDenunciante, idDenuncia:idDenuncia }, attributes: ["id", "nombres", "apellidos", "cedula"] })
+				: [],
+			idsDenunciado.length > 0
+				? Denunciado.findAll({ where: { id: idsDenunciado, idDenuncia:idDenuncia }, attributes: ["id", "nombres", "apellidos", "cedula"] })
+				: [],
+			idsOtros.length > 0
+				? Otros.findAll({ where: { id: idsOtros, idDenuncia:idDenuncia }, attributes: ["id", "nombres", "apellidos", "cedula", "tipoParticipante"] })
+				: [],
+			Afectado.findAll({ where: { idDenuncia:idDenuncia }, attributes: ["nombres", "apellidos", "cedula"] }),
+			Otros.findAll({ where: { idDenuncia:idDenuncia, fase: 'audienciaContestacion' }, attributes: ["nombres", "apellidos", "cedula", "tipoParticipante"] })
+		]);
+		
+
+		const mapDenunciante = new Map(denunciantes.map(d => [d.id, d]));
+		const mapDenunciado = new Map(denunciados.map(d => [d.id, d]));
+		const mapOtros = new Map(otros.map(o => [o.id, o]));
+
+		const resultado = [];
+		// Agregar todos los afectados aparte
+		for (const a of afectados) {
+			resultado.push({
+				nombres: a.nombres,
+				apellidos: a.apellidos,
+				cedula: a.cedula,
+				tipoParticipante: 'Afectado'
+			});
+		}
+
+		for (const citado of citados) {
+			let persona = null;
+			let tipo = '';
+			if (citado.parte === 'Accionante' && mapDenunciante.has(citado.idUsuario)) {
+				persona = mapDenunciante.get(citado.idUsuario);
+				tipo = 'Denunciante';
+			} else if (citado.parte === 'Accionado' && mapDenunciado.has(citado.idUsuario)) {
+				persona = mapDenunciado.get(citado.idUsuario);
+				tipo = 'Denunciado';
+			} else if (mapOtros.has(citado.idUsuario)) {
+				persona = mapOtros.get(citado.idUsuario);
+				tipo = persona?.tipoParticipante || 'Otro';
+			}
+			if (persona) {
+				resultado.push({
+					nombres: persona.nombres,
+					apellidos: persona.apellidos,
+					cedula: persona.cedula,
+					tipoParticipante: tipo
+				});
+			}
+		}
+		for (const o of otrosAudiencia) {
+			resultado.push({
+				nombres: o.nombres,
+				apellidos: o.apellidos,
+				cedula: o.cedula,
+				tipoParticipante: o.tipoParticipante || 'Otro'
+			});
+		}
+
+		
+
+		return resultado;
+
+
+
+
+	
+}
+//servicio para obtener los representantes institucionales
+export async function ObtenerRepresentantesInstitucionales(idDenuncia: number) {
+	const representantes = await Otros.findAll({
+		where: {
+			idDenuncia,
+			tipoParticipante: "Representante"
+		},
+		attributes: ["nombres", "apellidos", "cedula", "tipoParticipante"]
+	});
+	return representantes.map(r => ({
+		nombres: [r.nombres, r.apellidos].filter(Boolean).join(' ').trim(),
+		cedula: r.cedula,
+		tipoParticipante: r.tipoParticipante
+	}));
+	
+}
+
+
+
+//servicio para  agregar mas participantes
+export async function AgregarOtrosParticipantes(data: any) {
+	// params: { nombres, apellidos, cedula, tipoParticipante, idDenuncia }
+  const { nombres, apellidos, cedula, tipoParticipante, idDenuncia } = data;
+  
+  const nuevoParticipante = await Otros.create({
+    nombres,
+    apellidos,
+    cedula,
+    tipoParticipante,
+    idDenuncia,
+	fase: 'audienciaContestacion'
+  });
+  return nuevoParticipante;
+}
+//servicio para  agregar representantes institucionales
+export async function AgregarRepresentantesInstitucionales(data: any) {
+	// params: { nombres, apellidos, cedula, tipoParticipante, idDenuncia }
+  const { nombres, apellidos, cedula, idDenuncia } = data;
+
+  const nuevoRepresentante = await Otros.create({
+    nombres,
+    apellidos,
+    cedula,
+    tipoParticipante:"Representante",
+    idDenuncia,
+    fase: 'audienciaContestacion'
+  });
+  return nuevoRepresentante;
+}
+

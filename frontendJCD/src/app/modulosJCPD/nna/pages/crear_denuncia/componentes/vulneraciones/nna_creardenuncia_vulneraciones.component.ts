@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import {MatCheckboxModule} from '@angular/material/checkbox';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
+import { toast } from 'ngx-sonner';
 
 
 @Component({
@@ -101,6 +102,11 @@ get mapeoAfectados() {
   if (!id_afectado || !Array.isArray(vulneraciones)) {
     console.warn('Formulario incompleto');
     this.vulneracionesForm.markAllAsTouched();
+    toast.error('vulneraciones no agregadas', {
+              duration: 3000,
+              description: 'Por Favor, Completa Todos los Campos Requeridos',
+              // delete: true,
+            });
     return;
   }
 
@@ -108,6 +114,11 @@ get mapeoAfectados() {
     id_afectado: [id_afectado],
     vulneraciones: [vulneraciones]
   }));
+  toast.success('Vulneraciones agregadas', {
+          duration: 3000,
+          description: 'Las vulneraciones se han agregado correctamente',
+          // delete: true,
+        });
 
 
   this.vulneracionesForm.reset();

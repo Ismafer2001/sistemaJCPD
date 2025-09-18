@@ -1,6 +1,13 @@
 /* You can add global styles to this file, and also import other style files */
 @import "tailwindcss";
- 
+
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari y Opera */
+}
 
 
 

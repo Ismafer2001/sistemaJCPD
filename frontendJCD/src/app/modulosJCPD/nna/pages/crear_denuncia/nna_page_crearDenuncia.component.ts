@@ -18,6 +18,8 @@ import { AuthService } from '@auth/services/auth.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import { validarCedulaEcuador } from '@shared/validators/cedula.validators';
 import {ButtonSubmitComponent} from '@shared/components/button-submit/button-submit.component';
+import { toast } from 'ngx-sonner';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 //import { Generador_PDFService } from '../../../shared/services/pdf/generador_PDF.service';
 
 @Component({
@@ -47,12 +49,18 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   // Variable para el cantón
   anioActual!: number;
   canton!: string;
+  pdfSrc: SafeResourceUrl | null = null;
+  idDenuncia!: number;
+  pdfDisabled: boolean = true;
+  guardarDisabled: boolean = false;
+  editarDisabled: boolean = true;
 
   constructor(
     private AuthService: AuthService,
     private fb: FormBuilder,
     private denunciaService: DenunciaService,
-    private router: Router
+    private router: Router,
+    private sanitizer: DomSanitizer
   ) //private pdfService: Generador_PDFService
   {}
 
@@ -78,6 +86,10 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
     this.denunciaForm.valueChanges.subscribe((data) => {
       console.log(data);
+      // Si el formulario cambia después de guardar, deshabilita PDF y edición
+      if (!this.guardarDisabled) return; // Solo si ya se guardó
+      this.pdfDisabled = true;
+      this.editarDisabled = false;
     });
   }
 
@@ -179,10 +191,37 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
     this.router.navigate(['/nna']);
   }
 
+  updateDenuncia(id: number) {
+    this.idDenuncia = id;
+     const body = {
+      ...this.denunciaForm.value,
+      status: 'completada',
+    };
+    this.denunciaService.actualizarDenuncia(this.idDenuncia, body).subscribe({
+      next: () => {
+        toast.success('Denuncia Actualizada con Éxito', {
+          duration: 3000,
+        });
+        this.pdfDisabled = false;
+        this.editarDisabled = true;
+      },
+      error: (err) => {
+        toast.error('Error al Actualizar la Denuncia', {
+          duration: 3000,
+        });
+      },
+    });
+  }
+
   onSubmit(): void {
     if (this.denunciaForm.invalid) {
       this.denunciaForm.markAllAsTouched();
-      this.error = 'Complete todos los campos requeridos';
+
+      toast.error(' Campos Incompletos', {
+          duration: 3000,
+          description: 'Por Favor, Completa Todos los Campos Requeridos',
+          // delete: true,
+        });
       return;
     }
     // Construir el código de trámite
@@ -197,10 +236,18 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
     };
 
     this.loading = true;
+
+    // Primero crear la denuncia en backend y usar la respuesta para generar/descargar PDF
     this.denunciaService.crearDenuncia(body).subscribe({
-      next: () => {
+      next: (body) => {
         this.loading = false;
-        this.router.navigate(['/nna']);
+        this.idDenuncia = body.data.id;
+        toast.success('Denuncia Guardada con Éxito', {
+          duration: 3000,
+        });
+        this.pdfDisabled = false;
+        this.guardarDisabled = true;
+
       },
       error: (err) => {
         this.loading = false;
@@ -208,6 +255,15 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         console.error(err);
       },
     });
+
+  }
+  generarPdf(){
+
+    this.denunciaService.crearpdfBlob(this.idDenuncia).subscribe((res: Blob) => {
+      const url = URL.createObjectURL(res);
+      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    });
+    this.cambiarTab(2);
   }
 }
 export default NnaPageCrearDenunciaComponent;

@@ -1,136 +1,240 @@
-// src/services/pdf/proteccionFormPdf.service.ts
-import PDFDocument from 'pdfkit';
 import { Response } from 'express';
 
-export const generateProteccionFormPDF = (res: Response) => {
-  const doc = new PDFDocument({ margin: 50 });
+import pdfMake from 'pdfmake/build/pdfmake';
+import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import { getDenunciaCompleta } from '../denuncia.service';
 
-  // Headers para que se descargue
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', 'attachment; filename=formulario_proteccion.pdf');
+// Asegurar vfs para pdfMake
+// @ts-ignore
+(pdfMake as any).vfs = (pdfFonts as any).vfs;
 
-  doc.pipe(res);
+/**
+ * Genera un PDF de denuncia usando pdfmake a partir de los datos en `data`.
+ * Escribe el pdf directamente en `res` como attachment.
+ */
 
-  // ✅ Aquí empieza el contenido del PDF
-  doc.fontSize(12).text(
-    'SEÑORES MIEMBROS PRINCIPALES DE LA JUNTA CANTONAL DE PROTECCIÓN DE DERECHOS',
-    { align: 'center' }
-  );
+export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promise<void> {
+	try { 
 
-  doc.moveDown();
-  doc.fontSize(11).text('1. DATOS DEL O LA DENUNCIANTE', { underline: true });
+		const pdfData = await getDenunciaCompleta(idDenuncia);
 
-  const fields = [
-    'NOMBRES', 'APELLIDOS', 'EDAD', 'SEXO', 'GENERO',
-    'NACIONALIDAD', 'PUEBLO/NACIONALIDAD', 'DIRECCION', 'MAIL', 'TELEFONO'
-  ];
+		const now = new Date();
+		// Bloques de denunciante
+		const denunciante = pdfData.denunciantes && pdfData.denunciantes.length ? pdfData.denunciantes[0] : {};
+		const denuncianteBlock = {
+			table: {
+				widths: ['30%', '70%'],
+				body: [
+					[{ text: 'Nombres', bold: true, fontSize: 12 },{ text: `${denunciante?.nombres  || ''}`, fontSize: 12 }],
+					[{ text: 'Apellidos', bold: true, fontSize: 12 },{ text: `${denunciante?.apellidos || ''}`, fontSize: 12 }],
+					[{ text: 'Edad', bold: true, fontSize: 12 },{ text: `${denunciante?.edad || ''}`, fontSize: 12 }],
+					[{ text: 'Sexo', bold: true, fontSize: 12 },{ text: `${denunciante?.sexo || ''}`, fontSize: 12 }],
+					[{ text: 'Dirección', bold: true, fontSize: 12 },{ text: `${denunciante?.direccion || ''}`, fontSize: 12 }],
+					[{ text: 'Teléfono / Mail', bold: true, fontSize: 12 },{ text: `${denunciante?.telefono || ''} / ${denunciante?.mail || ''}`, fontSize: 12 }]
+				]
+			},
+			margin: [0, 4, 0, 8]
+		};
 
-  let y = doc.y + 10;
-  const startX = 50;
-  const fieldWidth = 250;
-  const valueWidth = 300;
-  const rowHeight = 25;
+		// Bloques de afectados
+		const afectadosArray = Array.isArray(pdfData.afectados) ? pdfData.afectados : [];
+		const afectadosBlocks: any[] = [];
+		if (afectadosArray.length) {
+			for (let i = 0; i < afectadosArray.length; i++) {
+				const a = afectadosArray[i];
+				afectadosBlocks.push({ text: `Afectado ${i + 1}`, style: 'subLabel', margin: [0, 6, 0, 2] });
+				afectadosBlocks.push({
+					table: {
+						widths: ['30%', '70%'],
+						body: [
+							[{ text: 'Nombres', bold: true, fontSize: 12 }, { text: a?.nombres || '', fontSize: 12 }],
+							[{ text: 'Apellidos', bold: true, fontSize: 12 }, { text: a?.apellidos || '', fontSize: 12 }],
+							[{ text: 'Edad', bold: true, fontSize: 12 }, { text: a?.edad || '', fontSize: 12 }],
+							[{ text: 'Sexo', bold: true, fontSize: 12 }, { text: a?.sexo || '', fontSize: 12 }],
+							[{ text: 'Cédula', bold: true, fontSize: 12 }, { text: a?.cedula || '', fontSize: 12 }]
+						]
+					},
+					margin: [0, 4, 0, 8]
+				});
+			}
+		} else {
+			afectadosBlocks.push({ text: '(No especificado)', margin: [0, 4, 0, 8] });
+		}
 
-  fields.forEach((field) => {
-    doc.rect(startX, y, fieldWidth, rowHeight).stroke();
-    doc.text(field, startX + 5, y + 8);
+		// Bloques de denunciados
+		const denunciadosArray = Array.isArray(pdfData.denunciados) ? pdfData.denunciados : [];
+		const denunciadosBlocks: any[] = [];
+		if (denunciadosArray.length) {
+			for (let i = 0; i < denunciadosArray.length; i++) {
+				const d = denunciadosArray[i];
+				denunciadosBlocks.push({ text: `Denunciado ${i + 1}`, style: 'subLabel', margin: [0, 6, 0, 2] });
+				denunciadosBlocks.push({
+					table: {
+						widths: ['30%', '70%'],
+						body: [
+							[{ text: 'Nombres', bold: true, fontSize: 12 }, { text: d?.nombres || '', fontSize: 12 }],
+							[{ text: 'Apellidos', bold: true, fontSize: 12 }, { text: d?.apellidos || '', fontSize: 12 }],
+							[{ text: 'Edad', bold: true, fontSize: 12 }, { text: d?.edad || '', fontSize: 12 }],
+							[{ text: 'Sexo', bold: true, fontSize: 12 }, { text: d?.sexo || '', fontSize: 12 }],
+							[{ text: 'Dirección', bold: true, fontSize: 12 }, { text: d?.direccion || '', fontSize: 12 }]
+						]
+					},
+					margin: [0, 4, 0, 8]
+				});
+			}
+		} else {
+			denunciadosBlocks.push({ text: '(No especificado)', margin: [0, 4, 0, 8] });
+		}
 
-    doc.rect(startX + fieldWidth, y, valueWidth, rowHeight).stroke();
-    y += rowHeight;
-  });
-
-  // Sección 2
-  doc.moveDown().moveDown();
-  doc.fontSize(11).text('2. DATOS DE PERSONAS (20) EN SITUACION DE VULNERACION O RIESGO:', { underline: true });
-
-  y = doc.y + 10;
-  fields.forEach((field) => {
-    doc.rect(startX, y, fieldWidth, rowHeight).stroke();
-    doc.text(field, startX + 5, y + 8);
-
-    doc.rect(startX + fieldWidth, y, valueWidth, rowHeight).stroke();
-    y += rowHeight;
-  });
-  // Sección 6 - Datos del denunciado(a)
-doc.addPage(); // Opcional: nueva página si querés separar visualmente
-
-doc.moveDown().moveDown();
-doc.fontSize(11).text('6. DATOS DEL O LA DENUNCIADO (A):', { underline: true });
-
-y = doc.y + 10;
-
-const denunciadoFields = [
-  'NOMBRES', 'APELLIDOS', 'EDAD', 'SEXO', 'GENERO',
-  'NACIONALIDAD', 'PUEBLO/NACIONALIDAD', 'DIRECCION', 'MAIL', 'TELEFONO','PARENTEZCO'
-];
-
-// Mismos tamaños que antes
-denunciadoFields.forEach((field) => {
-  doc.rect(startX, y, fieldWidth, rowHeight).stroke();
-  doc.text(field, startX + 5, y + 8);
-
-  doc.rect(startX + fieldWidth, y, valueWidth, rowHeight).stroke();
-  y += rowHeight;
-});
-
-
-
-y += rowHeight;
-doc.moveDown().moveDown();
-doc.fontSize(11).text('7. SOBRE EL HECHO:', { underline: true });
-
-y = doc.y + 10;
-doc.rect(startX, y, fieldWidth, rowHeight * 2).stroke();
-doc.text('DESCRIPCION DE LOS HECHOS', startX + 5, y + 8);
-
-doc.rect(startX + fieldWidth, y, valueWidth, rowHeight * 2).stroke();
-doc.text('(TABLAS DE VULNERACIONES POR SUJETO DE DERECHOS CON OPCIONES DE ESCOGITAMIENTO)', startX + fieldWidth + 5, y + 8, {
-  width: valueWidth - 10
-});
-
-y += rowHeight * 2;
-
-doc.rect(startX, y, fieldWidth, rowHeight).stroke();
-doc.text('CORRESPONDE A VULNERACION DEL', startX + 5, y + 8);
-
-doc.rect(startX + fieldWidth, y, valueWidth, rowHeight).stroke();
-
-// Sección 8 - Medidas de protección
-doc.moveDown().moveDown();
-doc.fontSize(11).text('8. MEDIDAS DE PROTECCION:', { underline: true });
-
-y = doc.y + 10;
-doc.rect(startX, y, fieldWidth, rowHeight * 2).stroke();
-doc.text('SOLICITUD', startX + 5, y + 8);
-
-doc.rect(startX + fieldWidth, y, valueWidth, rowHeight * 2).stroke();
-doc.text('(TABLAS DE MEDIDAS DE PROTECCION POR SUJETO DE DERECHOS CON OPCIONES DE ESCOGITAMIENTO)', startX + fieldWidth + 5, y + 8, {
-  width: valueWidth - 10
-});
-
-y += rowHeight * 2;
-
-// Frase final
-doc.moveDown();
-doc.fontSize(12).text('Es Justicia, etc.', { align: 'left' });
-
-doc.moveDown().moveDown();
-
-// Línea para firma
-const firmaY = doc.y;
-doc.moveTo(startX, firmaY).lineTo(startX + 300, firmaY).stroke();
-
-doc.text(
-  'Firma del denunciante (en caso que el denunciante lo haga por cualquier otro medio digital, la JCPD deberá sentar una razón en la denuncia y continúa el trámite)',
-  startX,
-  firmaY + 10,
-  { width: 500 }
-);
-
-doc.moveDown();
-doc.text('C.C.', { align: 'left' });
+		// Bloque sobre los hechos
+		const sobreHechosBlock = [
+			{ text: 'Sobre el hecho', style: 'section' },
+			{ text: pdfData?.denuncia?.descripcion_hechos || '(Sin descripción proporcionada)', margin: [0, 0, 0, 10] }
+		];
 
 
-  // ✅ Finaliza y cierra
-  doc.end();
-};
+		// Vulneraciones por afectado
+		const vulneracionesBlocks: any[] = [];
+		if (Array.isArray(pdfData.vulneracion) && pdfData.vulneracion.length) {
+			for (const v of pdfData.vulneracion) {
+				vulneracionesBlocks.push({ text: `Vulneraciones de ${v.nombre} (ID: ${v.id})`, style: 'subLabel', margin: [0, 6, 0, 2] });
+				const tableBody: any[] = [];
+				// Encabezado
+				tableBody.push([
+					{ text: 'N°', bold: true, fillColor: '#eeeeee' },
+					{ text: 'Vulneración', bold: true, fillColor: '#eeeeee' }
+				]);
+				// Filas de datos
+				if (Array.isArray(v.vulneracion) && v.vulneracion.length) {
+					let num = 1;
+					for (const desc of v.vulneracion) {
+						tableBody.push([
+							{ text: String(num), fontSize: 11 },
+							{ text: String(desc), fontSize: 11 }
+						]);
+						num++;
+					}
+				} else {
+					tableBody.push([
+						{ text: '-', fontSize: 11 },
+						{ text: '(No especificado)', fontSize: 11 }
+					]);
+				}
+				vulneracionesBlocks.push({
+					table: {
+						widths: ['10%', '90%'],
+						body: tableBody
+					},
+					margin: [0, 4, 0, 8]
+				});
+			}
+		} else {
+			vulneracionesBlocks.push({ text: '(No hay vulneraciones registradas)', margin: [0, 4, 0, 8] });
+		}
+
+		// Solicitud
+		const solicitudBlock = [
+			{ text: 'Solicitud', style: 'section' },
+			{ text: pdfData?.denuncia?.solicitud || '(Sin solicitud proporcionada)', margin: [0, 0, 0, 10] }
+		];
+
+		// Medidas por afectado
+		const medidasBlocks: any[] = [];
+		if (Array.isArray(pdfData.medida) && pdfData.medida.length) {
+			for (const m of pdfData.medida) {
+				medidasBlocks.push({ text: `Medidas de protección de ${m.nombre} (ID: ${m.id})`, style: 'subLabel', margin: [0, 6, 0, 2] });
+				const tableBody: any[] = [];
+				// Encabezado
+				tableBody.push([
+					{ text: 'N°', bold: true, fillColor: '#eeeeee' },
+					{ text: 'Medida de protección', bold: true, fillColor: '#eeeeee' }
+				]);
+				// Filas de datos
+				if (Array.isArray(m.medida) && m.medida.length) {
+					let num = 1;
+					for (const desc of m.medida) {
+						tableBody.push([
+							{ text: String(num), fontSize: 11 },
+							{ text: String(desc), fontSize: 11 }
+						]);
+						num++;
+					}
+				} else {
+					tableBody.push([
+						{ text: '-', fontSize: 11 },
+						{ text: '(No especificado)', fontSize: 11 }
+					]);
+				}
+				medidasBlocks.push({
+					table: {
+						widths: ['10%', '90%'],
+						body: tableBody
+					},
+					margin: [0, 4, 0, 8]
+				});
+			}
+		} else {
+			medidasBlocks.push({ text: '(No hay medidas registradas)', margin: [0, 4, 0, 8] });
+		}
+
+		// Firma del denunciante
+		const firmaBlock = [
+			{ text: '\n\nFirma del denunciante:', margin: [0, 20, 0, 0] },
+			{ text: `Nombres y apellidos: ${denunciante?.nombres || ''} ${denunciante?.apellidos || ''}`, margin: [0, 2, 0, 0] },
+			{ text: `Cédula: ${denunciante?.cedula || ''}`, margin: [0, 2, 0, 0] }
+		];
+
+		const docDefinition: any = {
+			info: {
+				title: 'Denuncia',
+				author: 'JCPD',
+				creationDate: now
+			},
+			content: [
+				{ text: 'FORMULARIO DE DENUNCIA', style: 'title', alignment: 'center' },
+				{ text: '\n' },
+				{ text: '1. DATOS DEL/LA DENUNCIANTE', style: 'section' },
+				denuncianteBlock,
+				{ text: '\n2. AFECTADOS (PERSONAS EN SITUACION DE VULNERACION O RIESGO)', style: 'section' },
+				...afectadosBlocks,
+				{ text: '\n3. DATOS DEL/LA DENUNCIADO(A)', style: 'section' },
+				...denunciadosBlocks,
+				{ text: '\n4. SOBRE EL HECHO', style: 'section' },
+				...sobreHechosBlock,
+				{ text: '\n5. VULNERACIONES POR AFECTADO', style: 'section' },
+				...vulneracionesBlocks,
+				{ text: '\n6. SOLICITUD', style: 'section' },
+				...solicitudBlock,
+				{ text: '\n7. MEDIDAS DE PROTECCIÓN POR AFECTADO', style: 'section' },
+				...medidasBlocks,
+				...firmaBlock
+			],
+			styles: {
+				title: { fontSize: 16, bold: true },
+				section: { fontSize: 12, bold: true, margin: [0, 8, 0, 4] },
+				subLabel: { fontSize: 11, italics: true }
+			},
+			defaultStyle: { fontSize: 10 }
+		};
+
+		// Crear el pdf y enviar buffer
+		// @ts-ignore
+		const pdfDocGenerator = (pdfMake as any).createPdf(docDefinition);
+
+		pdfDocGenerator.getBuffer((buffer: Uint8Array) => {
+			if (!res.headersSent) {
+				res.setHeader('Content-Type', 'application/pdf');
+				res.setHeader('Content-Disposition', 'attachment; filename=denuncia.pdf');
+			}
+			res.send(Buffer.from(buffer));
+		});
+	} catch (error: any) {
+		console.error('Error generating PDF (pdfmake):', error);
+		if (!res.headersSent) res.status(500).json({ ok: false, message: 'Error generating PDF', error: error?.message || error });
+	}
+}
+
+
+
+
+

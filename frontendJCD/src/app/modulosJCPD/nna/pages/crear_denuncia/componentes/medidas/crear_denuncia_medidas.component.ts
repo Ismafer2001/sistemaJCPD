@@ -4,6 +4,7 @@ import { MedidasService, ArticuloMedidas, Medida } from '../../../../services/me
 import { CommonModule } from '@angular/common';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-crear_denuncia_medidas',
@@ -130,12 +131,22 @@ export class Crear_denuncia_medidasComponent implements OnInit {
     if (!id_afectado || !Array.isArray(ids_medidas)) {
       console.warn('Formulario incompleto');
     this.medidasForm.markAllAsTouched();
+    toast.error('Medidas no agregadas', {
+              duration: 3000,
+              description: 'Por Favor, Completa Todos los Campos Requeridos',
+              // delete: true,
+            });
     return;
     }
     this.formArray.push(this.fb.group({
     id_afectado: [id_afectado],
     medidas: [ids_medidas]
   }));
+  toast.success('Medidas agregadas', {
+          duration: 3000,
+          description: 'Las medidas se han agregado correctamente',
+          // delete: true,
+        });
 
   this.medidasForm.reset();
   }

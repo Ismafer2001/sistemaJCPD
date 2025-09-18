@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+
 import { UserService, Usuario } from '@admin/services/user.service';
 
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';

@@ -2,13 +2,15 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { FormArray, FormBuilder,  FormGroup,  ReactiveFormsModule, Validators} from '@angular/forms';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
-import TablaComponent from '@shared/components/tabla/tablaNavigator/tabla.component';
+
 import { validarCedulaEcuador } from '@shared/validators/cedula.validators';
+import { TablaEditComponent } from "../../../../../../shared/components/tabla/tablaEdit/tablaEdit.component";
+import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'nna_creardenuncia_denunciado',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule,TablaComponent,ButtonSubmitComponent],
+  imports: [CommonModule, ReactiveFormsModule,  ButtonSubmitComponent, TablaEditComponent],
   templateUrl: './nna_creardenuncia_denunciado.component.html',
 })
 export class Nna_creardenuncia_denunciadoComponent {
@@ -38,9 +40,19 @@ export class Nna_creardenuncia_denunciadoComponent {
   agregarDenunciado(): void {
     if (this.denunciadoForm.valid) {
       this.formArray.push(this.fb.group(this.denunciadoForm.value));
+      toast.success('Denunciado agregado correctamente', {
+          duration: 4000,
+          
+          // delete: true,
+        });
       this.denunciadoForm.reset(); // limpio el form para el siguiente
     } else {
-      this.denunciadoForm.markAllAsTouched(); // para que muestre errores
+      this.denunciadoForm.markAllAsTouched();
+      toast.error('Denunciado no agregado', {
+                duration: 3000,
+                description: 'Por Favor, Completa Todos los Campos Requeridos',
+                // delete: true,
+              }); // para que muestre errores
     }
   }
   eliminarDenunciado(index: number): void {

@@ -1,29 +1,37 @@
 import { Router } from 'express';
 import {
-  obtenerUsuarios,
-  actualizarUsuario,
-  eliminarUsuario,
-  desactivarUsuario,
-  getRegistrarUsuario
+  
+  postRegistrarUsuario,
+  getObtenerUsuarios,
+  deleteUsuario,
+  putUsuario,
+  putEstadoUsuario,
  } from '../controllers/usuarios.controller';
+import { obtenerActivosPorCantonPrincipal } from '../controllers/usuarios.controller';
 import { verificarToken } from '../middleware/auth.middleware';
 import { soloAdmin } from '../middleware/rol.middleware';
+import { cambiarEstadoUsuario } from '../services/user.service';
 
 
 
 
 const router = Router();
-
+router.get('/activos',verificarToken, obtenerActivosPorCantonPrincipal);
+//----------rutas solo admin-------------//
 router.use(verificarToken, soloAdmin); 
 
-router.post('/', getRegistrarUsuario);                     // Crear usuario
-router.get('/', obtenerUsuarios);                   // Listar usuarios activos
-router.put('/:id', actualizarUsuario);              // Actualizar usuario
-router.put('/desactivar/:id', desactivarUsuario);   // Desactivar (soft delete)
-router.delete('/:id', eliminarUsuario); 
+//----------RUTAS GET ----------//
+router.get('/', getObtenerUsuarios); // Listar usuarios activos
 
+//----------RUTAS POST ----------//
+router.post('/', postRegistrarUsuario); // Crear usuario
 
+//----------RUTAS PUT ----------//
+router.put('/:id', putUsuario);              // Actualizar usuario
+router.put('/desactivar/:id', putEstadoUsuario);   // Desactivar (soft delete)
 
+//----------RUTAS DELETE ----------//
+router.delete('/:id', deleteUsuario); //eliminar usuario
 
 export default router;
 

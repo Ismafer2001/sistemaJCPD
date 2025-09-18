@@ -20,7 +20,7 @@
          class="mt-1 text-sm text-red-600">
       La cédula debe tener 10 dígitos
     </div>
-    <span *ngIf="denunciadoForm.get('cedula')?.errors?.['cedulaInvalida']"> Cédula invalida </span>
+    <span *ngIf="denunciadoForm.get('cedula')?.errors?.['cedulaInvalida']"  class="mt-1 text-sm text-red-600"> Cédula invalida </span>
   </div>
 
   <!-- Nombres -->
@@ -221,12 +221,12 @@
 
 
 
-    
+
   </div>
 
   <!-- Lista de afectados agregados -->
 <div class=" overflow-x-auto rounded-xl bg-white shadow-xl md:col-span-2">
-  <global-tabla
+  <app-tablaEdit
   [columnas]="['cedula','nombres','apellidos',   'edad']"
   [encabezados]="['cedula','Nombres ', 'Apellidos', 'Edad',]"
   [datos]="formArray.value"
@@ -237,7 +237,7 @@
 
 
 
-  </global-tabla>
+  </app-tablaEdit>
 
 </div>
 

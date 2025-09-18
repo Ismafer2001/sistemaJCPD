@@ -1,141 +1,150 @@
-
-import { usuarios } from './usuarios.models';
-import { Canton } from './cantones.models';
-import { Afectado } from './afectado.models';
-import { Denuncia } from './denuncia.models';
-import { Denunciado } from './denunciado.models';
-import { Denunciante } from './denunciante.models';
-import { Vulneracion } from './vulneraciones.models';
-import { VulneracionesIdentificadas } from './vulneracionesidentificadas.models';
-import { medida } from './medidas_proteccion.models';
-import { medidasIdentificadas } from './medidasIdentificada.models';
-import { articulo } from './articulo_medidas.models';
-import { Avocatoria } from './avocatoria.model';
-import { MedidasEmergentes } from './medidas_emergentes.model';
-import { Notificacion } from './notificacion.model';
-
-import { Otros } from './Otros.models';
-import { Citacion } from './citaciones.model';
-import { AudienciaContestacion } from './audiencia_constestacion.model';
-import { ParticipantesAudienciaContestacion } from './participantes_audiencia.model';
-import { AudienciaPruebas } from './audiencia_prueba.model';
-import { ParticipantesAudienciaPruebas } from './participantes_audiencia_pruebas.model';
+import { usuarios } from "./usuarios.models";
+import { Canton } from "./cantones.models";
+import { Afectado } from "./afectado.models";
+import { Denuncia } from "./denuncia.models";
+import { Denunciado } from "./denunciado.models";
+import { Denunciante } from "./denunciante.models";
+import { Vulneracion } from "./vulneraciones.models";
+import { VulneracionesIdentificadas } from "./vulneracionesidentificadas.models";
+import { medida } from "./medidas_proteccion.models";
+import { medidasIdentificadas } from "./medidasIdentificada.models";
+import { articulo } from "./articulo_medidas.models";
+import { Avocatoria } from "./avocatoria.model";
+import { MedidasEmergentes } from "./medidas_emergentes.model";
+import { Notificacion } from "./notificacion.model";
+import { Otros } from "./Otros.models";
+import { Citacion } from "./citaciones.model";
+import { AudienciaContestacion } from "./audiencia_constestacion.model";
+import { ParticipantesAudienciaContestacion } from "./participantes_audiencia.model";
+import { AudienciaPruebas } from "./audiencia_prueba.model";
+import { ParticipantesAudienciaPruebas } from "./participantes_audiencia_pruebas.model";
 
 //relacion usuario -- canton
-usuarios.belongsTo(Canton, { foreignKey: 'id_canton' });
-Canton.hasMany(usuarios, { foreignKey: 'id_canton' });
+usuarios.belongsTo(Canton, { foreignKey: "id_canton" });
+Canton.hasMany(usuarios, { foreignKey: "id_canton" });
 
 //relacion denuncia  -- canton
-Denuncia.belongsTo(Canton, { foreignKey: 'id_canton' });
-Canton.hasMany(Denuncia, { foreignKey: 'id_canton' });
+Denuncia.belongsTo(Canton, { foreignKey: "id_canton", as: "canton" });
+Canton.hasMany(Denuncia, { foreignKey: "id_canton" });
 
 //relacion afectado denuncia
-Denuncia.hasMany(Afectado, { foreignKey: 'idDenuncia', as:'afectados'});
-Afectado.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });
+Denuncia.hasMany(Afectado, { foreignKey: "idDenuncia", as: "afectados" });
+Afectado.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
 
 //relacion denunciado denuncia
-Denuncia.hasMany(Denunciado, { foreignKey: 'idDenuncia'});
-Denunciado.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });
+Denuncia.hasMany(Denunciado, { foreignKey: "idDenuncia" });
+Denunciado.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
 
 //relacion denunciante denuncia
-Denuncia.hasMany(Denunciante, { foreignKey: 'idDenuncia' });
-Denunciante.belongsTo(Denuncia, { foreignKey: 'idDenuncia' });
+Denuncia.hasMany(Denunciante, { foreignKey: "idDenuncia" });
+Denunciante.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
 
 // Relación uno a muchos entre afectado y Vulneracionensidentificadas
 
-Afectado.hasMany(VulneracionesIdentificadas,{foreignKey: 'idAfectado', as:'vulneracionesI'});
-VulneracionesIdentificadas.belongsTo(Afectado,{foreignKey:'idAfectado'})
+Afectado.hasMany(VulneracionesIdentificadas, {
+  foreignKey: "idAfectado",
+  as: "vulneracionesI",
+});
+VulneracionesIdentificadas.belongsTo(Afectado, { foreignKey: "idAfectado" });
 
 // Relación uno a muchos entre vulneracion y Vulneracionensidentificadas
-Vulneracion.hasMany(VulneracionesIdentificadas,{foreignKey: 'idVulneracion', as:'vulneracionesI'});
-VulneracionesIdentificadas.belongsTo(Vulneracion,{foreignKey:'idVulneracion'})
-
-
+Vulneracion.hasMany(VulneracionesIdentificadas, {
+  foreignKey: "idVulneracion",
+  as: "vulneracionesI",
+});
+VulneracionesIdentificadas.belongsTo(Vulneracion, {
+  foreignKey: "idVulneracion",
+});
 
 // Relación uno a muchos entre afectado y medidasidentificadas
-Afectado.hasMany(medidasIdentificadas,{foreignKey: 'idAfectado', as:'medidasI'});
-medidasIdentificadas.belongsTo(Afectado,{foreignKey:'idAfectado'})
+Afectado.hasMany(medidasIdentificadas, {
+  foreignKey: "idAfectado",
+  as: "medidasI",
+});
+medidasIdentificadas.belongsTo(Afectado, { foreignKey: "idAfectado" });
 
 // Relación uno a muchos entre medidas y medidasidentificadas
-medida.hasMany(medidasIdentificadas,{foreignKey: 'idMedida', as:'medidasI'});
-medidasIdentificadas.belongsTo(medida,{foreignKey:'idMedida', as:'medidas' })
-
-
+medida.hasMany(medidasIdentificadas, {
+  foreignKey: "idMedida",
+  as: "medidasI",
+});
+medidasIdentificadas.belongsTo(medida, {
+  foreignKey: "idMedida",
+  as: "medidas",
+});
 
 // Relación entre medida y articulo
 medida.belongsTo(articulo, {
-  foreignKey: 'idArticulo'
+  foreignKey: "idArticulo",
 });
 
 articulo.hasMany(medida, {
-  foreignKey: 'idArticulo'
+  foreignKey: "idArticulo",
 });
 
 // Relación: Una denuncia puede tener una avocatorias
-Avocatoria.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
-Denuncia.hasOne(Avocatoria, { foreignKey: 'idDenuncia' });
-
-
+Avocatoria.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "denunciaAvocatoria" });
+Denuncia.hasOne(Avocatoria, { foreignKey: "idDenuncia" });
 
 // Relación uno a muchos entre avocatoria y medidasemergentes
-Avocatoria.hasMany(MedidasEmergentes,{foreignKey: 'idAvocatoria', as:'medidasE'});
-MedidasEmergentes.belongsTo(Avocatoria,{foreignKey:'idAvocatoria'})
+Avocatoria.hasMany(MedidasEmergentes, {
+  foreignKey: "idAvocatoria",
+  as: "medidasE",
+});
+MedidasEmergentes.belongsTo(Avocatoria, { foreignKey: "idAvocatoria" });
 
 // Relación uno a muchos entre medida y medidasemergentes
-medida.hasMany(MedidasEmergentes,{foreignKey: 'idMedida', as:'medidasE'});
-MedidasEmergentes.belongsTo(medida,{foreignKey:'idMedida'})
-
-
-
+medida.hasMany(MedidasEmergentes, { foreignKey: "idMedida", as: "medidasE" });
+MedidasEmergentes.belongsTo(medida, { foreignKey: "idMedida" });
 
 // Relación uno a muchos: un afectado puede tener muchas medidas emergentes
-Afectado.hasMany(MedidasEmergentes, { foreignKey: 'idAfectado', as: 'medidasE' });
-MedidasEmergentes.belongsTo(Afectado, { foreignKey: 'idAfectado' });
+Afectado.hasMany(MedidasEmergentes, {
+  foreignKey: "idAfectado",
+  as: "medidasE",
+});
+MedidasEmergentes.belongsTo(Afectado, { foreignKey: "idAfectado" });
 
 // Relación: Una denuncia puede tener muchas notificaciones
-Notificacion.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
-Denuncia.hasMany(Notificacion, { foreignKey: 'idDenuncia' });
-
-
-
-
+Notificacion.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
+Denuncia.hasMany(Notificacion, { foreignKey: "idDenuncia" });
 
 // Relación uno a muchos notificacion --->otroNotificados
 Otros.belongsTo(Denuncia, {
-  foreignKey: 'idDenuncia'
+  foreignKey: "idDenuncia",
 });
 
 Denuncia.hasMany(Otros, {
-  foreignKey: 'idDenuncia',
-  as:'otros'
+  foreignKey: "idDenuncia",
+  as: "otros",
 });
 
 //relacion citacion y denuncia
-Citacion.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
-Denuncia.hasMany(Citacion, { foreignKey: 'idDenuncia' });
-
+Citacion.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
+Denuncia.hasMany(Citacion, { foreignKey: "idDenuncia" });
 
 //relacion audiencia contestacion y denuncia
-AudienciaContestacion.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
-Denuncia.hasOne(AudienciaContestacion, { foreignKey: 'idDenuncia' as 'ac' });
-
+AudienciaContestacion.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
+Denuncia.hasOne(AudienciaContestacion, { foreignKey: "idDenuncia", as: "ac" });
 
 //relacion audiencia contestacion y participantes audiencia
-ParticipantesAudienciaContestacion.belongsTo(AudienciaContestacion, { foreignKey: 'idAC' as 'PAC' });
-AudienciaContestacion.hasMany(ParticipantesAudienciaContestacion, { foreignKey: 'idAC' as 'PAC' });
-
+ParticipantesAudienciaContestacion.belongsTo(AudienciaContestacion, {
+  foreignKey: "idAC", as: "PAC",
+});
+AudienciaContestacion.hasMany(ParticipantesAudienciaContestacion, {
+  foreignKey: "idAC", as: "PAC",
+});
 
 //realacion audiencia pruebas y denuncia
-AudienciaPruebas.belongsTo(Denuncia, { foreignKey: 'idDenuncia'});
-Denuncia.hasOne(AudienciaPruebas, { foreignKey: 'idDenuncia' as 'ap'  });
-
-
+AudienciaPruebas.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
+Denuncia.hasOne(AudienciaPruebas, { foreignKey: "idDenuncia", as:"ap" });
 
 //realacion audiencia pruebas y participantes audiencia pruebas
-ParticipantesAudienciaPruebas.belongsTo(AudienciaPruebas, { foreignKey: 'idAC' as 'PAC' });
-AudienciaPruebas.hasMany(ParticipantesAudienciaPruebas, { foreignKey: 'idAC' as 'PAC' });
-
-
+ParticipantesAudienciaPruebas.belongsTo(AudienciaPruebas, {
+  foreignKey: "idAC", as: "PAC",
+});
+AudienciaPruebas.hasMany(ParticipantesAudienciaPruebas, {
+  foreignKey: "idAC", as: "PAC",
+});
 
 export {
   Denuncia,
@@ -156,6 +165,5 @@ export {
   AudienciaPruebas,
   ParticipantesAudienciaContestacion,
   ParticipantesAudienciaPruebas,
-  Otros
+  Otros,
 };
-

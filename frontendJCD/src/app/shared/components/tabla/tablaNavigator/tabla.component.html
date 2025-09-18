@@ -12,13 +12,13 @@
       <tbody class="">
         @for (item of datos; track $index) {
 
-          <tr (click)="RouterLink && RouterLinkparam ? navegar(item) : tabs(item)" class="hover:bg-gray-50 border-t-2 border-t-blue-100  " >
+          <tr (click)="RouterLink && RouterLinkparam ? navegar(item) : tabs(item)" class="hover:bg-gray-50 cursor-pointer border-t-2 border-t-blue-100  " >
             @for (col of columnas; track $index) {
 
               <td class=" overflow-hidden  truncate p-2">{{item[col] }}</td>
 
             }
-            
+
 
           </tr>
 

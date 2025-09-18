@@ -3,6 +3,9 @@ import { AbstractControl, ValidationErrors } from '@angular/forms';
 export function validarCedulaEcuador(control: AbstractControl): ValidationErrors | null {
   const cedula = control.value;
 
+  // Permitir explícitamente '0000000000' como válido
+  if (cedula === '0000000000') return null;
+
   if (!cedula || !/^\d{10}$/.test(cedula)) return { invalidFormat: true };
 
   const digitos = cedula.split('').map(Number);

@@ -5,9 +5,11 @@ import sequelize from '../config/database';
 interface OtrosAttributes {
   id: number;
   nombres: string;
-  parte: string;
-tipoParticipante?: string;
-  
+   apellidos?: string;
+  parte?: string;
+  cedula?: string;
+  tipoParticipante?: string;
+  fase: string;
   idDenuncia: number;
   
 }
@@ -19,9 +21,11 @@ export class Otros extends Model<OtrosAttributes, OtrosCreationAttributes> imple
   declare nombres: string;
   declare parte: string;
   declare tipoParticipante: string;
-  
+  declare apellidos: string;
+  declare cedula: string;
   declare idDenuncia: number;
-  
+  declare fase: string;
+
 }
 
 Otros.init({
@@ -31,6 +35,14 @@ Otros.init({
     primaryKey: true,
   },
   nombres: {
+    type: DataTypes.STRING,
+    
+  },
+   apellidos: {
+    type: DataTypes.STRING,
+    
+  },
+   cedula: {
     type: DataTypes.STRING,
     
   },
@@ -48,7 +60,11 @@ Otros.init({
     allowNull: false,
     
   },
-   
+  fase: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+
 }, {
   sequelize,
   modelName: 'otros',

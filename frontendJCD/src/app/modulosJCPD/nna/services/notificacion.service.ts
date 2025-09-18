@@ -27,6 +27,13 @@ postNotificar(notificar: any): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/notificacion`, notificar);
   }
 
+  crearpdfBlob(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/crearpdf/${id}`, { responseType: 'blob' });
+  }
+  actualizarNotificacion(id: number, notificacion: Partial<any>): Observable<{ success: boolean; message: string }> {
+      return this.http.put<any>(`${this.apiUrl}/${id}`, notificacion);
+    }
+
 
 
 

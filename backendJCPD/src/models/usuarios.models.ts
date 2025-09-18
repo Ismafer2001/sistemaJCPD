@@ -31,7 +31,7 @@ declare  contrasena: string;
 declare  isactivo: boolean;
 declare  id_canton: number;
 
-  declare Canton?: Canton;
+  declare Canton: Canton;
   
 }
 

@@ -1,10 +1,25 @@
 
   <!-- Lista de Vulneraciones -->
   <div [formGroup]="vulneracionesForm" class="mt-4">
-    <h3 class="text-lg font-medium text-gray-900 mb-4">
-      Seleccione las Vulneraciones
-    </h3>
-    <div class="mb-4">
+
+
+    <div class="grid grid-cols-3 gap-2">
+      <!--selector de afectados-->
+    <div class="" >
+      <label class="block text-sm font-medium text-gray-700">afectados</label>
+      <select
+        formControlName="id_afectado"
+        class="mt-1 block w-full rounded-md  border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+      >
+        <option value=""  disabled selected hidden >Seleccione afectado</option>
+        @for(afectado of formAfectados.controls; track afectado; let i = $index)
+        {
+
+        <option [value]="i">{{ afectado.value.nombres }}</option>
+
+        }
+      </select>
+      <div class="mt-4">
       <app-button-submit
         type="button"
         label="Agregar Vulneraciones"
@@ -14,24 +29,9 @@
       </app-button-submit>
 
     </div>
-    <!--selector de afectados-->
-    <div class="">
-      <label class="block text-sm font-medium text-gray-700">afectados</label>
-      <select
-        formControlName="id_afectado"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-      >
-        <option value="">Seleccione afectado</option>
-        @for(afectado of formAfectados.controls; track afectado; let i = $index)
-        {
-
-        <option [value]="i">{{ afectado.value.nombres }}</option>
-
-        }
-      </select>
     </div>
     <!--seleccionar vulneraciones-->
-    <div class="h-48 overflow-y-auto my-4  rounded-xl p-1 ring-1 ring-blue-200">
+    <div class=" col-span-2 h-48 overflow-y-auto scrollbar-hide my-4  rounded-xl p-1 ring-1 ring-blue-200">
       <fieldset class="space-y-2">
         <div
           *ngFor="let v of vulneraciones"
@@ -54,6 +54,9 @@
         </div>
       </fieldset>
     </div>
+
+    </div>
+
 
     <div class=" overflow-x-auto rounded-xl bg-white shadow-xl md:col-span-2">
       <app-tablaEdit

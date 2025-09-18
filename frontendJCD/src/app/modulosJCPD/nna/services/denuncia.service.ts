@@ -47,12 +47,34 @@ export class DenunciaService {
 }
 
 
-  obtenerTodasDenuncias(): Observable<Denuncia[]> {
-    return this.http.get<Denuncia[]>(`${this.apiUrl}/denuncias`);
+
+  /**
+   * Obtiene denuncias con paginación desde el backend.
+   * Asume que el endpoint responde con un objeto { data: Denuncia[], total: number, page: number, limit: number }
+   */
+  obtenerDenunciasPaginadas( grupoPrioritario: string, page: number = 1, limit: number = 10): Observable<{ data: Denuncia[]; total: number; page: number; limit: number }> {
+    let params = new HttpParams()
+
+      .set('grupoPrioritario', grupoPrioritario)
+      .set('page', String(page))
+      .set('limit', String(limit));
+
+    return this.http.get<{ data: Denuncia[]; total: number; page: number; limit: number }>(`${this.apiUrl}/denuncias`, { params });
   }
 
-  actualizarDenuncia(id: string, denuncia: Partial<Denuncia>): Observable<{ success: boolean; message: string }> {
+
+
+  actualizarDenuncia(id: number, denuncia: Partial<Denuncia>): Observable<{ success: boolean; message: string }> {
     return this.http.put<{ success: boolean; message: string }>(`${this.apiUrl}/denuncias/${id}`, denuncia);
+  }
+
+
+
+  /**
+   * Request PDF generation and return binary Blob (useful to trigger download)
+   */
+  crearpdfBlob(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/denuncias/crearpdf/${id}`, { responseType: 'blob' });
   }
 }
 

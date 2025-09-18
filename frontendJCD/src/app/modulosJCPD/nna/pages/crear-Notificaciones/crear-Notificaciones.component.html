@@ -1,9 +1,19 @@
-<h1 class="text-2xl font-bold mb-4">Notificar</h1>
-<hr class="border-blue-200 border-1" />
-<div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300">
+<div class="pl-2 py-2 mb-1">
+  <h1 class="text-2xl font-bold flex items-center gap-2">
+
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-9 text-yellow-500">
+  <path fill-rule="evenodd" d="M5.25 9a6.75 6.75 0 0 1 13.5 0v.75c0 2.123.8 4.057 2.118 5.52a.75.75 0 0 1-.297 1.206c-1.544.57-3.16.99-4.831 1.243a3.75 3.75 0 1 1-7.48 0 24.585 24.585 0 0 1-4.831-1.244.75.75 0 0 1-.298-1.205A8.217 8.217 0 0 0 5.25 9.75V9Zm4.502 8.9a2.25 2.25 0 1 0 4.496 0 25.057 25.057 0 0 1-4.496 0Z" clip-rule="evenodd" />
+</svg>
+
+    Notificar
+  </h1>
+</div>
+
+<hr class="border-yellow-300 border-1" />
+
    <!--tabs-->
 
-  <div class="flex  mb-0 gap-3 " id="tabs">
+  <div class="flex mt-5 mb-0 gap-3 " id="tabs">
     <button type="button" class="rounded-t-2xl p-2"
        [ngClass]="{
       'bg-blue-500 text-white': currentTab === '0',
@@ -26,17 +36,95 @@
     >
      notificaciones
     </button>
+    @if (currentTab==='2') {
+      <a
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('2')"
+
+
+      [ngClass]="{
+
+      'bg-blue-500 text-white': currentTab === '2',
+      'bg-gray-100': currentTab !== '2'
+    }"
+    >
+      pdf
+    </a>
+
+    }
+    <div class="flex flex-1 m-1 justify-end space-x-4" [hidden]="currentTab=='0'? true:false">
+
+
+    <app-button-submit
+    type="button"
+    label="Cancelar"
+    color="cancelar"
+
+    >
+
+    </app-button-submit>
+    <app-button-submit
+    type="button"
+    label="Editar"
+    color="afirmar"
+    (clicked)="updateNotificacion()"
+     [disabled]="editarDisabled"
+
+
+    >
+
+    </app-button-submit>
+
+    <app-button-submit
+    type="button"
+    label="Guardar"
+    color="submit"
+    (click)="submitNotificacion()"
+    [disabled]="guardarDisabled"
+
+
+    >
+
+    </app-button-submit>
+    <app-button-submit
+    type="button"
+    label="GenerarPDF"
+    color="submit"
+    [disabled]="pdfDisabled"
+    (clicked)="generarPdf()"
+    >
+    </app-button-submit>
+
+
+
+  </div>
+  <div class="flex flex-1 m-1 justify-end space-x-4" [hidden]="currentTab!='0'? true:false">
+
+
+    <app-button-submit
+    type="button"
+    label="Volver"
+    color="cancelar"
+    (click)="volver()"
+
+    >
+
+    </app-button-submit>
+
+
 
   </div>
 
+  </div>
 
-  <app-card-Form [hidden]="currentTab!='0'? true:false" [titulo]="'Involucrados'">
+  <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
+  <app-card-Form [hidden]="currentTab!='0'" [titulo]="'Involucrados'">
 
 
 
     <tablaNavigator
-    [columnas]="['nombres','parte',]"
-    [encabezados]="['nombres','parte',]"
+    [columnas]="['nombres','parte','estado']"
+    [encabezados]="['Nombres','Parte','Estado']"
     [datos]="involucrados"
     [RouterLinkparam]="'nombres'"
     [cambiar]="cambiarTab.bind(this)"
@@ -44,31 +132,51 @@
     >
 
     </tablaNavigator>
-    <app-card-Form [titulo]="'crear'">
-      <form [formGroup]="nuevoNotificadoForm" (ngSubmit)=" onSubmit()" class="mt-8 flex">
+    <app-card-Form [titulo]="'Agregar Notificado'">
+      <form [formGroup]="nuevoNotificadoForm" (ngSubmit)="onSubmit()" class="mt-8 flex flex-wrap gap-4 items-end">
+        <label class="block text-sm font-medium text-gray-700">Tipo</label>
+  <select [(ngModel)]="tipoNotificado" name="tipoNotificado" [ngModelOptions]="{standalone: true}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+          <option value="">Seleccione</option>
+          <option value="persona">Persona</option>
+          <option value="institucion">Institución</option>
+        </select>
 
-      <label class="block text-sm font-medium text-gray-700">Nombre</label>
-    <input
-      type="text"
-      formControlName="nombres"
+        <!-- Si es persona -->
+        <ng-container *ngIf="tipoNotificado === 'persona'">
+          <label class="block text-sm font-medium text-gray-700">Nombres</label>
+          <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
 
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+          <label class="block text-sm font-medium text-gray-700">Apellidos</label>
+          <input type="text" formControlName="apellidos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+          <label class="block text-sm font-medium text-gray-700">Cédula</label>
+          <input type="text" formControlName="cedula" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+          <label class="block text-sm font-medium text-gray-700">Parte</label>
+          <select formControlName="parte" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+            <option value="">seleccione</option>
+            <option value="Accionado">Accionado</option>
+            <option value="Accionante">Accionante</option>
+          </select>
+        </ng-container>
+
+        <!-- Si es institucion -->
+        <ng-container *ngIf="tipoNotificado === 'institucion'">
+          <label class="block text-sm font-medium text-gray-700">Nombre de la institución</label>
+          <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        </ng-container>
+
+         <app-button-submit
+      type="submit"
+      label="Agregar"
+      color="afirmar"
 
     >
-      <label class="block text-sm font-medium text-gray-700">Parte</label>
-    <select
-    formControlName="parte"
 
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+    </app-button-submit>
 
-    >
-      <option value="">seleccione</option>
-      <option value="Accionado">Accionado</option>
-      <option value="Accionante">Accionante</option>
 
-    </select>
-      <button type="submit" class="p-2 rounded-2xl bg-amber-200">notificar</button>
-    </form>
+      </form>
 
 
     </app-card-Form>
@@ -78,19 +186,28 @@
 
   </app-card-Form>
 
-  <app-card-Form [hidden]="( currentTab!='0')? false:true" [titulo]="'Notificar'"  >
+  <app-card-Form [hidden]="( currentTab!=currentTab || currentTab=='0'||currentTab=='2')" [titulo]="'Notificar'"  >
     <form [formGroup]="notificacionForm" >
       <p>Trámite Administrativo N° <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{notificar.codigoTramite}}</span></p>
     <p>{{notificar.Canton}},{{ fechaHoraActual | date:'dd' }} de {{ fechaHoraActual | date:'MMMM':'':'es' }} del {{ fechaHoraActual | date:'yyyy' }}</p>
     <p>Oficio N° <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">00001</span></p>
     <p>Notificacion</p>
-    <p class="mb-2">señora</p>
-
     @for (item of involucrados; track $index) {
-      @if (currentTab===item.nombres) {
+
+
+
+      @if (currentTab===item.nombres && item.parte !== 'institucion' ) {
+        <p class="mb-2">señora</p>
         <p><span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"> {{item.nombres}} </span></p>
         <p class="my-2">parte <span class="font-bold"> {{item.parte}}</span> </p>
+
+      }@else{
+         @if (currentTab===item.nombres && item.parte === 'institucion') {
+          <p><span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"> {{item.nombres}} </span></p>
+        }
+
       }
+
 
 
 
@@ -111,16 +228,13 @@
     <input class="border-2 rounded-2xl" type="text" formControlName="direccion" placeholder="Ingrese la dirección">
     <p>NOTA: Se adjunta Avocatoria de Conocimiento, medidas de protección y boleta de auxilio</p>
 
-    <div class="flex justify-end mt-6">
-    <button
-      type="submit"
-      class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700"
-      (click)="submitNotificacion()"
-    >
-      Enviar al backend
-    </button>
-  </div>
+
     </form>
 
   </app-card-Form>
+  @if (pdfSrc) {
+        <div class="pdf-container" [hidden]="currentTab !== '2'">
+          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+        </div>
+      }
 </div>
