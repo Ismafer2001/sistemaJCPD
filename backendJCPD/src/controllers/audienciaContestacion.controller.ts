@@ -1,6 +1,9 @@
+import { actualizarAudienciaContestacion } from '../services/aucienciaContestacion.service';
+import { crearAudienciaContestacion, obtenerAudienciaContestacionCompleta } from '../services/aucienciaContestacion.service';
 import { Request, Response } from 'express';
 import { AgregarOtrosParticipantes, AgregarRepresentantesInstitucionales, AudiencaContestacionDTO, getAfectadosYDirigidoA, ObtenerRepresentantesInstitucionales } from '../services/aucienciaContestacion.service';
 import { handlehttp } from '../utils/error.handle';
+import { crearPdfAudienciaContestacionNNA } from '../services/pdfs/audienciaContestacionpdf.service';
 
 
 //-------------METODOS GET------------------//
@@ -18,19 +21,7 @@ export const getAfectadosYDirigidoAController = async (req: Request, res: Respon
     res.status(500).json({ error: 'Error al obtener datos', details: error });
   }
 };
-//get represntantes
-export const getRepresentantesInstitucionalesController = async (req: Request, res: Response) => {
-  try {
-    const idDenuncia = Number(req.params.idDenuncia);
-    if (isNaN(idDenuncia)) {
-      return res.status(400).json({ error: 'idDenuncia inválido' });
-    }
-    const resultado = await ObtenerRepresentantesInstitucionales(idDenuncia);
-    res.json(resultado);
-  } catch (error) {
-    handlehttp(res,'Error al obtener representantes institucionales' , error);
-  }
-};
+
 //get datos para audiencia
 export const getDatosAudienciaController = async (req: Request, res: Response) => {
   try {
@@ -40,6 +31,16 @@ export const getDatosAudienciaController = async (req: Request, res: Response) =
     res.json(resultado);
   } catch (error) {
     handlehttp(res,'Error al obtener datos para la audiencia' , error);
+  }
+};
+// Controlador para obtener todos los datos relacionados con la audiencia de contestación
+export const getAudienciaContestacionCompleta = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const datos = await obtenerAudienciaContestacionCompleta(Number(id));
+    res.json(datos);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener audiencia de contestación', error });
   }
 };
 
@@ -53,12 +54,36 @@ export const postaniadirParticipante = async (req: Request, res: Response) => {
     handlehttp(res,'Error al añadir participante' , error);
   }
 }
-//post representantes
-export const postaniadirRepresentante = async (req: Request, res: Response) => {
+
+// Controlador para crear audiencia de contestación
+export const postAudienciaContestacion = async (req: Request, res: Response) => {
   try {
-    const nuevoRepresentante = await AgregarRepresentantesInstitucionales(req.body);
-    res.status(201).json(nuevoRepresentante);
+    const result = await crearAudienciaContestacion(req.body);
+    res.status(201).json(result);
   } catch (error) {
-    handlehttp(res,'Error al añadir representante' , error);
+    handlehttp(res, 'error_post_crear_audiencia_contestacion', error);
   }
-}
+};
+
+//--------------------METODOS PUT--------------------//
+
+export const putAudienciaContestacion = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const result = await actualizarAudienciaContestacion(Number(id), req.body);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al actualizar audiencia de contestación', error });
+  }
+};
+
+//----------------pdfs--------------------//
+export const getAudienciaContestacionPdf = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    await crearPdfAudienciaContestacionNNA(res, Number(id));
+   
+  } catch (error) {
+    handlehttp(res, 'get_error_pdf_audiencia', error);
+  }
+};

@@ -13,7 +13,10 @@ import { Canton } from './cantones.models';
  indica: string;
  manifiesta: string;
  pdf_audiencia_contestacion: number;
+ seRatifica: String;
+  afectadoManifiesta?: string;
  idDenuncia: number;
+ estatus?: "pendiente"|"en_proceso"|"completada";
   }
   
 interface AudienciaContestacionCreationAttributes extends Optional<AudienciaContestacionAttributes, 'id'>{
@@ -30,9 +33,11 @@ interface AudienciaContestacionCreationAttributes extends Optional<AudienciaCont
     declare dirigue: string;
     declare indica: string;
     declare manifiesta: string;
-
+    declare seRatifica: string;
+     declare afectadoManifiesta?: string;
     declare pdf_audiencia_contestacion: number;
     declare idDenuncia: number;
+    declare  estatus: "pendiente"|"en_proceso"|"completada";
 
 
   }
@@ -40,17 +45,21 @@ interface AudienciaContestacionCreationAttributes extends Optional<AudienciaCont
   AudienciaContestacion.init({
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     codigoTramite: { type: DataTypes.STRING,unique:true  },
-    
-    
+    seRatifica: { type: DataTypes.STRING, defaultValue: false },
     fecha: { type: DataTypes.DATE },
     hora: { type: DataTypes.TIME },
     instalacionAudiencia: { type: DataTypes.STRING },
     pdf_audiencia_contestacion: { type: DataTypes.BIGINT },
-    dirigue: { type: DataTypes.INTEGER },
+    dirigue: { type: DataTypes.STRING },
     indica: { type: DataTypes.TEXT },
-    
-    manifiesta:{type: DataTypes.INTEGER},
+    afectadoManifiesta: { type: DataTypes.TEXT },
+    manifiesta:{type: DataTypes.TEXT},
     idDenuncia:{type: DataTypes.INTEGER},
+     estatus: {
+    type: DataTypes.STRING,
+    defaultValue: "pendiente",
+    allowNull: false,
+  },
     
   }, {
     sequelize,

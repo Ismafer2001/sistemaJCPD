@@ -16,10 +16,18 @@ import { toast } from 'ngx-sonner';
 @Component({
   selector: 'app-crearAvocatoria',
   templateUrl: './crearAvocatoria.component.html',
-  imports: [CommonModule, ReactiveFormsModule, QuillModule,CardFormComponent,ButtonSubmitComponent,TablaEditComponent],
+  imports: [CommonModule,
+     ReactiveFormsModule,
+      QuillModule,
+      CardFormComponent,
+      ButtonSubmitComponent,
+      TablaEditComponent],
 })
 export class CrearAvocatoriaComponent implements OnInit {
-
+  //variables formulario//----------
+    avocatoriaForm!: FormGroup;
+  medidasEmergentesForm!: FormGroup;
+  //------------------------------------
   denunciaAvocatoria: any = null;
   medidasPorArticulo: ArticuloMedidas[] = [];
   afectados: any[] = [{id: 0, nombres: ''}];
@@ -30,14 +38,15 @@ export class CrearAvocatoriaComponent implements OnInit {
   denunciaId: number = 0;
   currentTab = 0;
   fechaHoraActual: Date = new Date();
-  avocatoriaForm!: FormGroup;
-  medidasEmergentesForm!: FormGroup;
    pdfSrc: SafeResourceUrl | null = null;
+//variables para controlar los botones//
   pdfDisabled: boolean = true;
   guardarDisabled: boolean = false;
   editarDisabled: boolean = true;
   idAvocatoria!: number;
-
+  //------------------------------------
+  //
+//quillModule//
   modules = {
   toolbar: [
     // Estilo de texto
@@ -132,7 +141,7 @@ CUARTO.-`,
 
       ],
       articulo: ['', Validators.required],
-      mediasEmergentes: this.fb.array([Validators.required]),
+      mediasEmergentes: this.fb.array([], Validators.required),
 
     })
 
@@ -190,10 +199,6 @@ seleccionarMEdida() {
     });
 
 }
-
-
-
-
 
   //--------------carga de datos---------//
 
@@ -278,13 +283,7 @@ seleccionarMEdida() {
       }
     });
   }
-
-
-  //-------otrso----//
-
-
-
-
+  //-------otrso----/
   medidasEmergentes(event: Event) {
     const target = event.target as HTMLSelectElement;
   const afectadoId = parseInt(target.value, 10);
@@ -298,8 +297,6 @@ seleccionarMEdida() {
    cambiarTab(tab: number) {
     this.currentTab = tab;
   }
-
-
   //-------guardar formualrio---------------//
   // Verifica si ya existe la medida para el mismo afectado (clave compuesta)
   isAgregada(idMedida: number, idAfectado: number): boolean {
@@ -475,8 +472,9 @@ submitAvocatoria() {
   }
   const body ={
     ...this.avocatoriaForm.value,
-   
+
   }
+
   this.avocatoriaService.postAvocatoria(body).subscribe({
     next: (body) => {
       this.idAvocatoria = body.id;

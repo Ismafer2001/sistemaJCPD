@@ -10,7 +10,7 @@ import { Router } from '@angular/router';
   imports: [CommonModule]
 })
 export class TablaEditComponent  {
-  @Input() mostrarAsistio: boolean = false;
+
   @Input() columnas: string[] = [];
   @Input() encabezados: string[] = [];
   @Input() datos: any[] = [];
@@ -21,16 +21,12 @@ export class TablaEditComponent  {
   @Input() eliminar: (item: any) => void = () => {};
   @Input() editar: (item: any) => void = () => {};
 
-  @Output() asistioChange = new EventEmitter<{item: any, index: number, value: boolean}>();
+
 
 
   constructor(private router: Router) {}
 
-  // Maneja el cambio del checkbox de asistencia de forma segura
-  onCheckboxChange(event: Event, item: any, index: number) {
-    const checked = (event.target as HTMLInputElement).checked;
-    this.asistioChange.emit({ item, index, value: checked });
-  }
+
 
   obtenerValorAnidado(obj: any, path: string): any {
     if (!obj || !path) return null;

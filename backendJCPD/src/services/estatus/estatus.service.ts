@@ -1,4 +1,4 @@
-import { Avocatoria, Denuncia, Notificacion } from "../../models";
+import { AudienciaContestacion, AudienciaPruebas, Avocatoria, Denuncia, Notificacion } from "../../models";
 import { Citacion } from "../../models/citaciones.model";
 
 
@@ -20,6 +20,18 @@ export async function estatus(id:string) {
                 model: Notificacion,
                 attributes: ['estatus'],
                 limit: 1, 
+            },
+            {
+                model: AudienciaContestacion,
+                attributes: ['estatus'],
+                as:"ac" ,
+                
+            },
+            {
+                model:AudienciaPruebas,
+                attributes: ['estatus'],
+                as:"ap" ,
+                
             }
         ]
 
@@ -30,10 +42,13 @@ export async function estatus(id:string) {
   // Desestructurar los estatus
   const respuestaFormateada = {
     denuncia: estadoPlano.estatus || '',
-    Avocatoria: estadoPlano.Avocatorium?.estatus || '',
-    Citacions: estadoPlano.Citacions?.[0]?.estatus || '',
-    Notificacions: estadoPlano.Notificacions?.[0]?.estatus || ''
+    avocatoria: estadoPlano.Avocatorium?.estatus || '',
+    citacion: estadoPlano.Citacions?.[0]?.estatus || '',
+    notificacion: estadoPlano.Notificacions?.[0]?.estatus || '',
+    audienciaC: estadoPlano.ac?.estatus || '',
+    audienciaP: estadoPlano.ap?.estatus || '',
   };
+  console.log(respuestaFormateada);
     return respuestaFormateada;
 
 

@@ -162,8 +162,6 @@ export async function getDenunciaCompleta(idDenuncia: number) {
 }
 
 
-
-
 //-----------------------sercvicios denuncia nna-----------------------//
 //servicio para insertar denuncia completa
 export async function insertDenuncia(denunciajson: datosDenuncia) {
@@ -270,8 +268,6 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
     throw err;
   }
 }
-
-
 
 
 export async function eliminarDenuncia(id:string) {

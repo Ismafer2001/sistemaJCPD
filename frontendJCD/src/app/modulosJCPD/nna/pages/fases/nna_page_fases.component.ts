@@ -24,9 +24,11 @@ export class NnaPageFasesComponent implements OnInit {
 
   loading: boolean = true;
   error: string | null = null;
-  avocatorium:string =''
+  avocatoria:string =''
   notificacion: string = '';
   cita: string = '';
+  audienciaC: string = '';
+  audienciaP: string = '';
   denunciastatus:string ='';
  tarjetasAvocatoria: any[] = [];
 
@@ -43,9 +45,16 @@ ngOnInit() {
     }).subscribe(({ denuncia, estatus }) => {
       this.denuncia = denuncia;
       this.denunciastatus = estatus.denuncia;
-      this.avocatorium = estatus.Avocatoria;
-      this.notificacion = estatus.Notificacions;
-      this.cita = estatus.Citacions;
+      this.avocatoria = estatus.avocatoria;
+      this.notificacion = estatus.notificacion;
+      this.cita = estatus.citacion;
+      this.audienciaC = estatus.audienciaC;
+      this.audienciaP = estatus.audienciaP;
+
+      console.log('Denuncia:', this.denuncia
+        ,'  Estatus:', estatus
+      )
+      console.log('avocatoria:', this.avocatoria);
 
 
 
@@ -68,7 +77,7 @@ ngOnInit() {
   },
   {
     titulo: 'Avocatoria',
-    estatus: this.avocatorium,
+    estatus: this.avocatoria,
     idDenuncia: this.denuncia?.idDenuncia,
     link: '/nna/avocatoria',
     linkDetalles: '/nna/detalle-vocatoria'
@@ -90,7 +99,7 @@ ngOnInit() {
   },
   {
     titulo: 'Audiencia de Contestacion',
-    estatus: 'pendiente',
+    estatus: this.audienciaC,
     idDenuncia: this.denuncia?.idDenuncia,
     link: '/nna/audienciaDeContestacion',
     linkDetalles: '/nna/detalle-audiencia-constestacion'
@@ -98,7 +107,7 @@ ngOnInit() {
   ,
   {
     titulo: 'Audiencia de Pruebas',
-    estatus: 'pendiente',
+    estatus: this.audienciaP,
     idDenuncia: this.denuncia?.idDenuncia,
     link: '/nna/audienciaDePruebas',
     linkDetalles: '/nna/detalle-audiencia-pruebas'

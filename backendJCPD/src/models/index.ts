@@ -18,6 +18,9 @@ import { AudienciaContestacion } from "./audiencia_constestacion.model";
 import { ParticipantesAudienciaContestacion } from "./participantes_audiencia.model";
 import { AudienciaPruebas } from "./audiencia_prueba.model";
 import { ParticipantesAudienciaPruebas } from "./participantes_audiencia_pruebas.model";
+import { Resoluciones } from "./resoluciones.models";
+import { MedidasDefinitivas } from "./medidasDefinitivas.models";
+import { Testimonio } from "./testimonios.models";
 
 //relacion usuario -- canton
 usuarios.belongsTo(Canton, { foreignKey: "id_canton" });
@@ -53,7 +56,7 @@ Vulneracion.hasMany(VulneracionesIdentificadas, {
   as: "vulneracionesI",
 });
 VulneracionesIdentificadas.belongsTo(Vulneracion, {
-  foreignKey: "idVulneracion",
+  foreignKey: "idVulneracion", as: "vulneracion",
 });
 
 // Relación uno a muchos entre afectado y medidasidentificadas
@@ -95,7 +98,7 @@ MedidasEmergentes.belongsTo(Avocatoria, { foreignKey: "idAvocatoria" });
 
 // Relación uno a muchos entre medida y medidasemergentes
 medida.hasMany(MedidasEmergentes, { foreignKey: "idMedida", as: "medidasE" });
-MedidasEmergentes.belongsTo(medida, { foreignKey: "idMedida" });
+MedidasEmergentes.belongsTo(medida, { foreignKey: "idMedida", as: "Med" });
 
 // Relación uno a muchos: un afectado puede tener muchas medidas emergentes
 Afectado.hasMany(MedidasEmergentes, {
@@ -140,11 +143,39 @@ Denuncia.hasOne(AudienciaPruebas, { foreignKey: "idDenuncia", as:"ap" });
 
 //realacion audiencia pruebas y participantes audiencia pruebas
 ParticipantesAudienciaPruebas.belongsTo(AudienciaPruebas, {
-  foreignKey: "idAC", as: "PAC",
+  foreignKey: "idAP", as: "PAC",
 });
 AudienciaPruebas.hasMany(ParticipantesAudienciaPruebas, {
-  foreignKey: "idAC", as: "PAC",
+  foreignKey: "idAP", as: "PAC",
 });
+// Relación uno a muchos entre resoluciones y medidasdefinitivas
+AudienciaPruebas.hasMany(MedidasDefinitivas, {
+  foreignKey: "idAP",
+  as: "medidasD",
+});
+MedidasDefinitivas.belongsTo(AudienciaPruebas, { foreignKey: "idAP" });
+
+// Relación uno a muchos entre medida y medidasdefinitivas
+medida.hasMany(MedidasDefinitivas, { foreignKey: "idMedida", as: "medidasD" });
+MedidasDefinitivas.belongsTo(medida, { foreignKey: "idMedida" });
+
+// Relación uno a muchos: un afectado puede tener muchas medidas definitivas
+Afectado.hasMany(MedidasDefinitivas, {
+  foreignKey: "idAfectado",
+  as: "medidasD",
+});
+MedidasDefinitivas.belongsTo(Afectado, { foreignKey: "idAfectado" });
+ 
+Testimonio.belongsTo(ParticipantesAudienciaPruebas, {
+  foreignKey: "idAP", as: "TAP",
+});
+ParticipantesAudienciaPruebas.hasMany(Testimonio, {
+  foreignKey: "idAP", as: "TAP",
+});
+
+Resoluciones.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
+Denuncia.hasMany(Resoluciones, { foreignKey: "idDenuncia", as: "resoluciones" });
+
 
 export {
   Denuncia,
@@ -165,5 +196,9 @@ export {
   AudienciaPruebas,
   ParticipantesAudienciaContestacion,
   ParticipantesAudienciaPruebas,
+  Resoluciones,
+  Citacion,
+  MedidasDefinitivas,
   Otros,
+  Testimonio,
 };

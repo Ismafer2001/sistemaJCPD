@@ -9,8 +9,10 @@ import { Canton } from './cantones.models';
  fecha: Date;
  hora: Date;
  instalacionAudiencia: string;
- pdf_audiencia_pruebas: number;
+ pdf_audiencia_pruebas: string;
  idDenuncia: number;
+ afectadoManifiesta?: string;
+  estatus?: "pendiente"|"en_proceso"|"completada";
   }
   
 interface AudienciaPruebasCreationAttributes extends Optional<AudienciaPruebasAttributes, 'id'>{
@@ -24,10 +26,11 @@ interface AudienciaPruebasCreationAttributes extends Optional<AudienciaPruebasAt
     declare fecha: Date;
     declare hora: Date;
     declare instalacionAudiencia: string;
-    
-
-    declare pdf_audiencia_pruebas: number;
+    declare pdf_audiencia_pruebas: string;
     declare idDenuncia: number;
+    declare afectadoManifiesta?: string;
+    declare  estatus: "pendiente"|"en_proceso"|"completada";
+     
 
 
   }
@@ -35,14 +38,17 @@ interface AudienciaPruebasCreationAttributes extends Optional<AudienciaPruebasAt
   AudienciaPruebas.init({
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     codigoTramite: { type: DataTypes.STRING,unique:true  },
-    
-    
     fecha: { type: DataTypes.DATE },
     hora: { type: DataTypes.TIME },
     instalacionAudiencia: { type: DataTypes.STRING },
-    pdf_audiencia_pruebas: { type: DataTypes.BIGINT },
-    
+    pdf_audiencia_pruebas: { type: DataTypes.STRING },
+    afectadoManifiesta: { type: DataTypes.STRING },
     idDenuncia:{type: DataTypes.INTEGER},
+     estatus: {
+    type: DataTypes.STRING,
+    defaultValue: "pendiente",
+    allowNull: false,
+  },
     
   }, {
     sequelize,

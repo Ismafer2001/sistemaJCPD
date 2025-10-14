@@ -66,6 +66,7 @@ export const nnaRoutes: Routes = [
 
 
       },
+      
       {
         path:'resoluciones/:id',
         loadComponent:()=>

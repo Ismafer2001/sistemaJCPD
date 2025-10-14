@@ -1,13 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
-import TablaComponent from '@shared/components/tabla/tablaNavigator/tabla.component';
-
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
+import { FormBuilder,
+   FormGroup,
+    Validators,
+     ReactiveFormsModule,
+      FormArray } from '@angular/forms';
 import { AudienciaContestacionService } from '../../services/audienciaContestacion.service';
 import { UserService } from '@admin/services/user.service';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { toast } from 'ngx-sonner';
+import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
+import { TablaParticipantesComponent } from './tablaParticipantes/tablaParticipantes.component';
 
 interface involucrados{
   nombres: string,
@@ -18,46 +24,33 @@ interface involucrados{
 @Component({
   selector: 'app-crear_audiencia',
   templateUrl: './crear_audiencia_contestacion.component.html',
-  imports: [CommonModule, CardFormComponent, TablaEditComponent, ReactiveFormsModule]
+  imports: [CommonModule,
+     CardFormComponent,
+      TablaEditComponent,
+      ReactiveFormsModule,
+      ButtonSubmitComponent,
+      TablaParticipantesComponent]
 
 
 })
 export class Crear_audienciaComponent implements OnInit {
-  // Getter para la tabla de manifestaciones (nombre completo y manifiesta)
-  get manifestacionesTabla() {
-    return this.participantesArray.getRawValue()
-      .filter((p: any) => p.manifiesta && p.manifiesta.trim() !== '')
-      .map((p: any) => ({
-        nombreCompleto: (p.nombres || '') + ' ' + (p.apellidos || ''),
-        manifiesta: p.manifiesta || ''
-      }));
-  }
+
+
+
   // Formulario para agregar manifestación a un participante
   formManifestacion!: FormGroup;
-
-  // Maneja el cambio del checkbox de asistencia en la tabla
-  onAsistioChange(event: {item: any, index: number, value: boolean}) {
-    // Actualiza el FormArray de participantes
-    const formArray = this.participantesArray;
-    if (formArray && formArray.at(event.index)) {
-      formArray.at(event.index).get('asistio')?.setValue(event.value);
-      // También actualiza el array de participantes para reflejar el cambio en la tabla
-      if (this.participantes[event.index]) {
-        this.participantes[event.index].asistio = event.value;
-      }
-    }
-  }
-
-
   currentTab: string = '0';
   denunciaId = 0;
   audienciaForm!: FormGroup;
   participantesForm!: FormGroup;
-
   participantes: involucrados[] = [];
-
   datosAudiencia: any;
   miembrosPrincipales: any[] = [];
+  pdfSrc: SafeResourceUrl | null = null;
+  pdfDisabled: boolean = true;
+  guardarDisabled: boolean = false;
+  editarDisabled: boolean = true;
+  idAudienciaC!: number;
 
 
   constructor(
@@ -65,7 +58,8 @@ export class Crear_audienciaComponent implements OnInit {
     private route: ActivatedRoute,
     private fb: FormBuilder,
     private audienciaContestacionService: AudienciaContestacionService,
-    private UserService:UserService
+    private UserService:UserService,
+    private sanitizer: DomSanitizer
   ) {
     // Inicializar formManifestacion aquí para evitar error de acceso a 'fb' antes de tiempo
     this.formManifestacion = this.fb.group({
@@ -92,6 +86,10 @@ export class Crear_audienciaComponent implements OnInit {
 
     this.audienciaForm.valueChanges.subscribe(value => {
       console.log('Audiencia Form Value Changes:', value);
+      // Si el formulario cambia después de guardar, deshabilita PDF y edición
+      if (!this.guardarDisabled) return; // Solo si ya se guardó
+      this.pdfDisabled = true;
+      this.editarDisabled = false;
     });
     this.participantesForm.valueChanges.subscribe(value => {
       console.log('Participantes Form Value Changes:', value);
@@ -99,19 +97,74 @@ export class Crear_audienciaComponent implements OnInit {
 
   }
 
-  //-------------Formularios----------------------//
+
+
+  // Maneja el cambio del checkbox de asistencia en la tabla
+  onAsistioChange(event: {item: any, index: number, value: boolean}) {
+    // Actualiza el FormArray de participantes
+    const formArray = this.participantesArray;
+    if (formArray && formArray.at(event.index)) {
+      formArray.at(event.index).get('asistio')?.setValue(event.value);
+      // También actualiza el array de participantes para reflejar el cambio en la tabla
+      if (this.participantes[event.index]) {
+        this.participantes[event.index].asistio = event.value;
+      }
+    }
+  }
+
+//-------------Formularios----------------------//
   formularioAudienciaContestacion() {
     this.audienciaForm = this.fb.group({
+      idDenuncia: [this.denunciaId || 0],
       codigoTramite: [''],
       Hora: [''],
       fecha: [''],
       intalacionAudiencia: [''],
       dirigue: [''],
-      indica: [''],
+      seIndica: [''],
       manifiesta: [''],
-      idDenuncia: [this.denunciaId || 0],
+
+      ratificaInforme: [false],
+
+      afectadoManifiesta: [''],
+
       participantes: this.fb.array([])
     });
+  }
+
+  formularioParticipantes() {
+    this.participantesForm = this.fb.group({
+      nombres: ['', Validators.required],
+      apellidos: ['', Validators.required],
+      cedula: ['', Validators.required],
+      tipoParticipante: ['', Validators.required],
+      asistio: [false, Validators.required],
+      manifiesta: ['', Validators.required],
+      idDenuncia: [this.denunciaId]
+    });
+  }
+  //-------------------------------------------//
+
+    // Devuelve los participantes que no son afectados (para el select de manifestaciones)
+  get participantesNoAfectados() {
+    return this.participantesArray.controls
+      .map((ctrl, idx) => ({ ...ctrl.value, idx }))
+      .filter(p => p.tipoParticipante !== 'Afectado');
+  }
+
+  get participantesAfectados() {
+    return this.participantesArray.controls
+      .map((ctrl, idx) => ({ ...ctrl.value, idx }))
+      .filter(p => p.tipoParticipante === 'Afectado');
+  }
+    // Getter para la tabla de manifestaciones (nombre completo y manifiesta)
+  get manifestacionesTabla() {
+    return this.participantesArray.getRawValue()
+      .filter((p: any) => p.manifiesta && p.manifiesta.trim() !== '')
+      .map((p: any) => ({
+        nombreCompleto: (p.nombres || '') + ' ' + (p.apellidos || ''),
+        manifiesta: p.manifiesta || ''
+      }));
   }
 
   // Método para agregar la manifestación al participante seleccionado
@@ -128,17 +181,7 @@ export class Crear_audienciaComponent implements OnInit {
   }
 
 
-  formularioParticipantes() {
-    this.participantesForm = this.fb.group({
-      nombres: ['', Validators.required],
-      apellidos: ['', Validators.required],
-      cedula: ['', Validators.required],
-      tipoParticipante: ['', Validators.required],
-      asistio: [false, Validators.required],
-      manifiesta: ['', Validators.required],
-      idDenuncia: [this.denunciaId]
-    });
-  }
+
 
   //------GETTER FORMULARIOS//
 get participantesArray(): FormArray {
@@ -170,14 +213,12 @@ get participantesArray(): FormArray {
             idDenuncia: [p.idDenuncia || this.denunciaId]
           }));
         });
+
       }
       // Si quieres seguir guardando en this.participantes para otros usos:
       this.participantes = data;
     });
-
   }
-
-
 
   cargarDatosAudiencia() {
     if (!this.denunciaId) return;
@@ -186,6 +227,10 @@ get participantesArray(): FormArray {
       console.log('Datos de audiencia cargados', data);
       this.audienciaForm.patchValue({
         codigoTramite: this.datosAudiencia.codigoTramite,
+        Hora: this.datosAudiencia.horaCitacion,
+        fecha: this.datosAudiencia.fechaCitacion ? new Date(this.datosAudiencia.fechaCitacion).toISOString().substring(0, 10) : '',
+
+
         // ...otros campos si es necesario
       });
 
@@ -205,8 +250,73 @@ get participantesArray(): FormArray {
     this.currentTab = tab;
   }
 
-  //------------SUBMIT PARTICIPANTES---///
+  //---------cancelar-------------------//
+cancelar(): void {
+    this.router.navigate(['/nna/fases/'+ this.datosAudiencia?.id]);
+  }
 
+   //--editar
+    updateAudiencia() {
+    const body ={
+      ...this.audienciaForm.value,
+
+
+    }
+    this.audienciaContestacionService.actualizarAudienciaContestacion(this.idAudienciaC, body).subscribe({
+      next: () => {
+        toast.success('Audiencia Actualizada con Éxito', {
+          duration: 3000,
+        });
+        this.pdfDisabled = false;
+          this.editarDisabled = true;
+
+      },
+      error: (err) => {
+        toast.error('Error al actualizar la audiencia', {
+          duration: 3000,
+        });
+      }
+
+    })
+
+  }
+
+  //------------GUARDAR AUDIENCIA CONTESTACION---///
+  submitAudienciaContestacion() {
+  if (this.audienciaForm.invalid) {
+    this.audienciaForm.markAllAsTouched();
+    toast.error('Formulario inválido', {
+      duration: 3000,
+      description: 'Por Favor, Completa Todos los Campos Requeridos'
+    });
+    return;
+  }
+  const body ={
+    ...this.audienciaForm.value,
+
+  }
+  this.audienciaContestacionService.postaudienciaContestacion(body).subscribe({
+    next: (body) => {
+      this.idAudienciaC = body.id;
+      toast.success('Audiencia Guardada con Éxito', {
+                duration: 3000,
+              });
+      this.pdfDisabled = false;
+        this.guardarDisabled = true;
+
+    },
+    error(err) {
+
+      toast.error('Error al guardar', {
+        duration: 3000,
+      description:`${err}`
+      });
+
+  }})
+
+}
+
+  //------------SUBMIT PARTICIPANTES---///
   onSubmitParticipante(): void {
     const body = {
       ...this.participantesForm.value,
@@ -220,6 +330,15 @@ get participantesArray(): FormArray {
       this.participantesForm.reset();
       this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
     });
+  }
+  //-----------PDF------------------//
+  generarPdf(){
+
+    this.audienciaContestacionService.crearpdfBlob(this.idAudienciaC).subscribe((res: Blob) => {
+      const url = URL.createObjectURL(res);
+      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    });
+    this.cambiarTab("3");
   }
 
 

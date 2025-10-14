@@ -1,32 +1,29 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import { medida } from './medidas_proteccion.models';
-import { Avocatoria } from './avocatoria.model';
 import { Afectado } from './afectado.models';
 
+import { AudienciaPruebas } from './audiencia_prueba.model';
 
-interface MedidasEmergentesAttributes {
+interface MedidasDefinitivasAttributes {
   id: number;
   idMedida: number;
-  idAvocatoria: number;
+  idAP: number;
   idAfectado: number;
   observaciones: string;
   periodo: string;
 }
+interface MedidasDefinitivasCreationAttributes extends Optional<MedidasDefinitivasAttributes, 'id'> {}
 
-interface MedidasEmergentesCreationAttributes extends Optional<MedidasEmergentesAttributes, 'id'> {}
-
-export class MedidasEmergentes extends Model<MedidasEmergentesAttributes, MedidasEmergentesCreationAttributes> implements MedidasEmergentesAttributes {
+export class MedidasDefinitivas extends Model<MedidasDefinitivasAttributes, MedidasDefinitivasCreationAttributes> implements MedidasDefinitivasAttributes {
   declare id: number;
   declare idMedida: number;
-  declare idAvocatoria: number;
+  declare  idAP: number;
   declare idAfectado: number;
   declare observaciones: string;
   declare periodo: string;
-  declare Med?: medida
 }
-
-MedidasEmergentes.init({
+MedidasDefinitivas.init({
   id: {
     type: DataTypes.INTEGER,
     autoIncrement: true,
@@ -40,11 +37,11 @@ MedidasEmergentes.init({
       key: 'id',
     },
   },
-  idAvocatoria: {
+   idAP: {
     type: DataTypes.INTEGER,
     allowNull: false,
     references: {
-      model: Avocatoria,
+      model: AudienciaPruebas,
       key: 'id',
     },
   },
@@ -66,9 +63,7 @@ MedidasEmergentes.init({
   },
 }, {
   sequelize,
-  modelName: 'MedidasEmergentes',
-  tableName: 'medidas_emergentes',
+  modelName: 'MedidasDefinitivas',
+  tableName: 'medidas_definitivas',
   timestamps: false,
 });
-
-

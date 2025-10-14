@@ -42,6 +42,11 @@ export async function crearAvocatoria(data: {
 
     // Crear medidas emergentes asociadas en la tabla medidas_emergentes
     for (const medida of data.mediasEmergentes) {
+      console.log("Medida emergente a crear:", data);
+      if (!medida || medida.idMedida == null || medida.idAfectado == null) {
+    // Puedes lanzar un error o simplemente continuar
+    throw new Error("Medida emergente inválida: falta idMedida o idAfectado");
+  }
       await MedidasEmergentes.create({
         idMedida: medida.idMedida,
         idAfectado: medida.idAfectado,
@@ -89,6 +94,7 @@ export async function obtenerDenunciaParaAvocatoria(id: string) {
                         include:[
                             {
                                 model: Vulneracion,
+                                as: "vulneracion",
                                 attributes:['vulneracion']
 
                             }
@@ -123,7 +129,7 @@ export async function obtenerDenunciaParaAvocatoria(id: string) {
       edad: af.edad,
       vulneraciones: (af.vulneracionesI || []).map((v: any) => ({
         id: v.id,
-        vulneracion: v.Vulneracion?.vulneracion
+        vulneracion: v.vulneracion?.vulneracion
       }))
     })),
     denunciante: (denuncia.Denunciantes || []).map((d: any) => ({
@@ -160,6 +166,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
                 include: [
                   {
                     model: Vulneracion,
+                    as: "vulneracion",
                     attributes: ['id', 'vulneracion']
                   }
                 ]
@@ -177,6 +184,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
         include: [
           {
             model: medida,
+            as:'Med',
             attributes: ['medidas']
           }
         ]
@@ -222,7 +230,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
         vulneraciones: (af.vulneracionesI || []).map((v: any) => ({
           id: v.id,
           idVulneracion: v.idVulneracion,
-          vulneracion: v.Vulneracion?.vulneracion
+          vulneracion: v.vulneracion?.vulneracion
         }))
       })),
       denunciante: (denuncia.Denunciantes || []).map((d: any) => ({
@@ -246,7 +254,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
   };
 }
 //servicio para obtener los afectados de una denuncia seleccionada
-export async function obtenerAfectados(id: number) {
+export async function obtenerAfectados(id: number) { //---> se repite en audiencia de pruebas
 
   return await Afectado.findAll({
     where: { idDenuncia: id },
@@ -279,17 +287,17 @@ export const medidasPorAfectado = async (afectadoId: number) => {
   const resultadoFormateado = [];
 
   for (const mi of afectado.medidasI || []) {
-    console.log("Medidaaaaas aquii identificada:", mi.idMedida);
+   
     if (mi.medidas?.medidas) {
       resultadoFormateado.push({
         idMedida: mi.idMedida,
-        idafectado: afectado.id,
+        idAfectado: afectado.id,
         nombres: afectado.nombres,
         medida: mi.medidas.medidas
       });
     }
   }
-
+  console.log("Medidas identificadas:", resultadoFormateado);
   return resultadoFormateado;
 };
 
@@ -327,7 +335,7 @@ export async function editarAvocatoria(idAvocatoria: number, data: {
     await MedidasEmergentes.destroy({ where: { idAvocatoria: idAvocatoria }, transaction: t });
 
     // Crear nuevas medidas emergentes
-    for (const medida of data.mediasEmergentes) {
+    for(const medida of data.mediasEmergentes) {
       await MedidasEmergentes.create({
         idMedida: medida.idMedida,
         idAfectado: medida.idAfectado,

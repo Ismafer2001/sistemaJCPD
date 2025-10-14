@@ -17,6 +17,7 @@ import pdfRoutes from './routes/pdf.routes';
 import estatusRoutes from './routes/estatus.routes'; 
 import path from 'path';
 import audienciaContestacionRoutes from './routes/audienciaContestacion.routes';
+import audienciaPruebaRoutes from './routes/audienciaPruebas.routes';
 import uploadRoutes from './routes/upload.routes';
 
 
@@ -43,6 +44,7 @@ app.use('/api/reportes', reportedenunciasRoutes);
 app.use('/api/pdf', pdfRoutes); // Ruta para generar PDF de denuncias
 app.use('/api/estatus', estatusRoutes)
 app.use('/api/audiencia-contestacion', audienciaContestacionRoutes);
+app.use('/api/audiencia-pruebas', audienciaPruebaRoutes);
 
 app.use('/pdf', express.static(path.join(__dirname, '../public/pdf')));
 

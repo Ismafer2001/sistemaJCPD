@@ -1,3 +1,139 @@
-<p>
-  crear_resoluciones works!
-</p>
+<div class="pl-2 py-2 mb-1">
+  <h1 class="text-2xl font-bold">Crear Resoluciones</h1>
+</div>
+
+<hr class="border-yellow-300 border-1" />
+   <div class="flex  mb-0 gap-3 " id="tabs">
+    <button type="button" class="rounded-t-2xl p-2"
+       [ngClass]="{
+      'bg-blue-500 text-white': currentTab === '0',
+      'bg-gray-100': currentTab !== '0'
+    }"
+      (click)="cambiarTab('0')"
+
+    >
+      inicio
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('1')"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab  != '1',
+
+    }"
+    >
+     Pruebas
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('2')"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab  != '2',
+
+    }"
+    >
+     Medidas de proteccion
+    </button>
+     @if (currentTab==="3") {
+      <a
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('3')"
+
+
+      [ngClass]="{
+
+      'bg-blue-500 text-white': currentTab === '3',
+      'bg-gray-100': currentTab !== '3'
+    }"
+    >
+      pdf
+    </a>
+
+    }
+    <div class="flex flex-1 m-1 justify-end space-x-4">
+      <app-button-submit
+        type="button"
+        label="Cancelar"
+        color="cancelar"
+
+      >
+      </app-button-submit>
+       <app-button-submit
+    type="button"
+    label="Editar"
+    color="afirmar"
+
+     [disabled]="editarDisabled"
+
+
+    >
+
+    </app-button-submit>
+      <app-button-submit type="button"
+       label="Guardar"
+        color="submit"
+
+      [disabled]="guardarDisabled"
+      >
+      </app-button-submit>
+      <app-button-submit
+    type="button"
+    label="GenerarPDF"
+    color="submit"
+    [disabled]="pdfDisabled"
+
+
+
+    >
+
+    </app-button-submit>
+
+
+    </div>
+
+
+  </div>
+<form class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
+
+
+  <app-card-Form
+    [titulo]="'consideraciones'"
+      [hidden]="currentTab != '0'"
+    >
+    <div>
+        <quill-editor
+          [modules]="modules"
+
+          class="w-full h-50"
+        >
+        </quill-editor>
+      </div>
+
+  </app-card-Form>
+  <app-card-Form
+   [titulo]="'Resoluciones'"
+      [hidden]="currentTab != '1'"
+  >
+  <div>
+        <quill-editor
+          [modules]="modules"
+
+          class="w-full h-50"
+        >
+        </quill-editor>
+      </div>
+
+  </app-card-Form>
+  <app-card-Form [titulo]="'Medidas de proteccion'"
+        [hidden]="currentTab != '2'">
+
+       
+
+
+  </app-card-Form>
+
+
+</form>
+

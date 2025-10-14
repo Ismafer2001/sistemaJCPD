@@ -1,7 +1,7 @@
 <h1 class="text-2xl font-bold mb-4">Audiencia de pruebas</h1>
 <hr class="border-blue-200 border-1" />
 <!--tabs-->
-  <div class="flex  mb-0 gap-3 " id="tabs">
+  <div class="flex  mb-0 gap-1 " id="tabs">
     <button type="button" class="rounded-t-2xl p-2"
        [ngClass]="{
       'bg-blue-500 text-white': currentTab === '0',
@@ -17,7 +17,8 @@
       (click)="cambiarTab('1')"
 
       [ngClass]="{
-      'bg-blue-500 text-white': currentTab  != '0',
+      'bg-blue-500 text-white': currentTab  === '1',
+      'bg-gray-100': currentTab !== '1'
 
     }"
     >
@@ -28,33 +29,129 @@
       (click)="cambiarTab('2')"
 
       [ngClass]="{
-      'bg-blue-500 text-white': currentTab  != '0',
+      'bg-blue-500 text-white': currentTab  === '2',
+      'bg-gray-100': currentTab !== '2'
+
+    }"
+    >
+     Testimonios
+    </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('3')"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab  === '3',
+      'bg-gray-100': currentTab !== '3'
 
     }"
     >
      Audiencia reservada
     </button>
+    <button type="button"
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('4')"
+
+      [ngClass]="{
+      'bg-blue-500 text-white': currentTab  === '4',
+      'bg-gray-100': currentTab !== '4'
+
+    }"
+    >
+     Vulneraciones/ medidas
+    </button>
+
+
+
+     @if (currentTab==="5") {
+      <a
+      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
+      (click)="cambiarTab('5')"
+
+
+      [ngClass]="{
+
+      'bg-blue-500 text-white': currentTab === '5',
+      'bg-gray-100': currentTab !== '5'
+    }"
+    >
+      pdf
+    </a>
+
+    }
+    <div class="flex flex-1 mx-1 mt-5 justify-end space-x-1">
+      <app-button-submit
+        type="button"
+        label="Cancelar"
+        color="cancelar"
+        (clicked)="cancelar()"
+      >
+      </app-button-submit>
+       <app-button-submit
+    type="button"
+    label="Editar"
+    color="afirmar"
+    (clicked)="updateAudiencia()"
+     [disabled]="editarDisabled"
+
+
+    >
+
+    </app-button-submit>
+      <app-button-submit type="button"
+       label="Guardar"
+        color="submit"
+        (clicked)="submitAudienciaPrueba()"
+      [disabled]="guardarDisabled"
+      >
+      </app-button-submit>
+      <app-button-submit
+    type="button"
+    label="GenerarPDF"
+    color="submit"
+    [disabled]="pdfDisabled"
+    (clicked)="generarPdf()"
+
+
+    >
+
+    </app-button-submit>
+
+
+    </div>
 
 
   </div>
+  <form [formGroup]="audienciaPruebaForm" class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]" >
   <app-card-Form [hidden]="currentTab!='0'">
     <app-card-Form [titulo]="'inicio'" >
       <h4 class="justify-center">ACTA DE LA AUDIENCIA  DE PRUEBA DEL CASO Nº <span class="font-bold">XXXXXXXXJCPD-x-………. </span></h4>
-      <div class="  mx-auto text-gray-800 text-justify leading-relaxed">
+      <div class="grid grid-cols-3 md:grid-cols-3 gap-6 mb-4">
+        <!-- Fecha -->
+    <div>
+      <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha</label>
+      <input type="date" id="fecha" name="fecha" formControlName="fecha"
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75" />
+    </div>
 
-  <p>
-    En el Cantón <span class="underline decoration-dotted decoration-gray-400">…………</span>,
-    a los <span class="underline decoration-dotted decoration-gray-400">xxxxx</span> días del mes de
-    <span class="underline decoration-dotted decoration-gray-400">xxxxx</span> del año dos mil
-    <span class="underline decoration-dotted decoration-gray-400">xxxxxx</span>,
-    a las <span class="underline decoration-dotted decoration-gray-400">…………….…</span> horas y
-    <span class="underline decoration-dotted decoration-gray-400">……………</span> minutos,
-    ante la Junta Cantonal de Protección de Derechos de
-    <span class="underline decoration-dotted decoration-gray-400">………………………..</span>,
-    integrada por los miembros principales:
-  </p>
+    <!-- canton -->
+    <div>
+      <label for="canton" class="block text-sm font-medium text-gray-700">canton</label>
+      <input type="text" id="canton" [defaultValue]="datosAudienciaPrueba?.Canton" readonly
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75" />
+    </div>
 
-</div>
+
+
+    <!-- Hora -->
+    <div>
+      <label for="hora" class="block text-sm font-medium text-gray-700">Hora</label>
+      <input type="time" id="hora" name="hora" formControlName="Hora"
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75" />
+    </div>
+
+
+   </div>
 <div class="mt-6 flex justify-between gap-6 text-center text-gray-800">
 
   <!-- Miembro 1 -->
@@ -78,74 +175,158 @@
 </div>
 <p class="mt-2">se Instala la Audiencia de contestación prevista en</p>
       <div>
-        <select class="border-1 my-2">
+         <select formControlName="intalacionAudiencia" class="mt-1  inline-block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
+          <option value=""  disabled selected hidden >Seleccione...</option>
           <option value="Art 205 del  Código de la Niñez y Adolescencia">Art 205 del  Código de la Niñez y Adolescencia</option>
           <option value="Art 206 del  Código de la Niñez y Adolescencia">Art 206 del  Código de la Niñez y Adolescencia</option>
-        </select>
+        </select>.
       </div>
 
 
 
     </app-card-Form>
-    <app-card-Form [titulo]="'Partcipantes'">
+    <app-card-Form [titulo]="'Participantes'">
        <app-tablaEdit
-      [encabezados]="['asistio','nombres','tipo']"
+      [encabezados]="['nombres','apellidos','Cedula','Tipo']"
+        [columnas]="['nombres','apellidos','cedula','tipoParticipante']"
+        [datos]="participantes"
       >
 
       </app-tablaEdit>
+      <h2 class="my-3">Agregar</h2>
+
+      <div class="p-3  border-3 border-blue-200">
+
+        <form [formGroup]="participantesForm" class="mt-8 flex flex-wrap gap-4 items-end">
+
+        <label class="block text-sm font-medium text-gray-700">Nombres</label>
+        <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+        <label class="block text-sm font-medium text-gray-700">Apellidos</label>
+        <input type="text" formControlName="apellidos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+        <label class="block text-sm font-medium text-gray-700">Cédula</label>
+        <input type="text" formControlName="cedula" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+
+
+
+        <label class="block text-sm font-medium text-gray-700">Tipo</label>
+        <select formControlName="tipoParticipante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+          <option value="">Seleccione</option>
+          <option value="Testigo">Testigo</option>
+          <option value="Abogado">Abogado</option>
+        </select>
+
+        <button type="button" (click)="onSubmitParticipante()" class="p-2 rounded-2xl bg-amber-200">agregar</button>
+      </form>
+
+      </div>
 
     </app-card-Form>
   </app-card-Form>
 
   <app-card-Form [hidden]="currentTab!='1'">
 
-    <app-card-Form [titulo]="'pruebas accionada'">
-     <div class=" text-gray-800 text-justify leading-relaxed">
+    <app-card-Form [titulo]="'pruebas '">
+      <form [formGroup]="pruebasForm">
+         <div class=" text-gray-800 text-justify leading-relaxed">
   <!-- Párrafo formal -->
   <p class="mb-4">
     En cumplimiento a lo que determina la Constitución de la República Art.
     <span class="underline decoration-dotted decoration-gray-400">…………………</span>,
     se recepta la intervención de la Abogada
-    <span class="underline decoration-dotted decoration-gray-400">XXXXXXXXXXX</span>
-    en representación de la parte accionada; quien manifiesta que las pruebas testimoniales son:
+    <span class="underline decoration-dotted decoration-gray-400"><select formControlName="participanteIndex" class="block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Seleccione</option>
+                    <option *ngFor="let p of participantesNoAfectados" [value]="p.idx">{{p.nombres}} {{p.apellidos}}</option>
+                  </select></span>
+    en representación de la parte <select formControlName="parte" class="block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Seleccione parte</option>
+                    <option value="Actora">Actora</option>
+                    <option value="Accionada">Accionada</option>
+
+                  </select>; quien manifiesta que las pruebas testimoniales son:
   </p>
 
   <!-- Input para escribir las pruebas -->
   <textarea
     type="text"
+    formControlName="pruebas"
     placeholder="Describa las pruebas testimoniales aquí..."
     class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
   ></textarea>
 </div>
+<div class="flex items-end">
+                <button type="button" (click)="agregarPruebasParticipante()" class="h-10 px-6 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow hover:from-blue-600 hover:to-blue-800 transition">+ Agregar</button>
+              </div>
+
+      </form>
+      <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
+            <h3 class="font-bold mb-4 text-blue-700 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Manifestaciones registradas</h3>
+            <app-tablaEdit
+              [encabezados]="['abogado','parte','pruebas']"
+              [columnas]="['nombreCompleto','parte','pruebas']"
+              [datos]="pruebasTabla"
+            >
+            </app-tablaEdit>
+          </div>
+
 
 
     </app-card-Form>
 
-    <app-card-Form [titulo]="'pruebas actora'">
-     <div class=" text-gray-800 text-justify leading-relaxed">
-  <!-- Párrafo formal -->
-  <p class="mb-4">
-    En cumplimiento a lo que determina la Constitución de la República Art.
-    <span class="underline decoration-dotted decoration-gray-400">…………………</span>,
-    se recepta la intervención de la Abogada
-    <span class="underline decoration-dotted decoration-gray-400">XXXXXXXXXXX</span>
-    en representación de la parte actora; quien manifiesta que las pruebas testimoniales son:
-  </p>
 
-  <!-- Input para escribir las pruebas -->
-  <textarea
-    type="text"
-    placeholder="Describa las pruebas testimoniales aquí..."
-    class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-  ></textarea>
-</div>
+  </app-card-Form>
+
+  <app-card-Form [hidden]="currentTab!='2'" >
+    <app-card-Form [titulo]="'testimonios '">
+      <div class="space-y-8">
+
+          <div class="bg-white rounded-xl shadow-md p-6 border flex flex-col md:flex-row md:items-end gap-4">
+            <form [formGroup]="testimoniosForm" class="flex flex-col w-full gap-4">
+              <div class="w-full md:w-1/3 flex gap-2 items-end">
+                <div class="flex-1">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Se concede la palabra a</label>
+                  <select formControlName="participanteIndex" class="block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Seleccione</option>
+                    <option *ngFor="let p of participantesNoAfectados" [value]="p.idx">{{p.nombres}} {{p.apellidos}}</option>
+                  </select>
+                </div>
+                <div class="flex-1">
+                  <label class="block text-sm font-semibold text-gray-700 mb-1">Parte</label>
+                  <select formControlName="parte" class="block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Seleccione parte</option>
+                    <option value="Actora">Actora</option>
+                    <option value="Accionada">Accionada</option>
+
+                  </select>
+                </div>
+              </div>
+              <div class="flex-1">
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Manifiesta</label>
+                <textarea formControlName="testimonio" rows="3" placeholder="Escriba aquí la intervención..." class="w-full  border border-dotted border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"></textarea>
+              </div>
+              <div class="flex items-end">
+                <button type="button" (click)="agregarTestimoniosParticipante()" class="h-10 px-6 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow hover:from-blue-600 hover:to-blue-800 transition">+ Agregar</button>
+              </div>
+            </form>
+          </div>
+          <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
+            <h3 class="font-bold mb-4 text-blue-700 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Manifestaciones registradas</h3>
+            <app-tablaEdit
+              [encabezados]="['Nombre','testimonio']"
+              [columnas]="['nombreCompleto','testimonio']"
+              [datos]="testimoniosTabla"
+            >
+            </app-tablaEdit>
+          </div>
+        </div>
 
 
     </app-card-Form>
 
   </app-card-Form>
 
-  <app-card-Form [hidden]="currentTab!='2'" >
+  <app-card-Form [hidden]="currentTab!='3'" >
 
     <app-card-Form [titulo]="'audiencia'">
       <div class=" text-gray-800 text-justify leading-relaxed">
@@ -154,15 +335,20 @@
     Una vez escuchadas las versiones de las partes, y receptadas todas las pruebas;
      se les pide que abandonen momentáneamente la sala para dar paso
       a la audiencia reservada con el adolescente
-    <span class="underline decoration-dotted decoration-gray-400">…………………</span>,
+
+    @for (afectado of participantesAfectados; track $index) {
+      <span class="font-bold ">{{afectado.nombres}} {{afectado.apellidos}}</span>
+    }
 
     Quién indica:
   </p>
+
 
   <!-- Input para escribir las pruebas -->
   <textarea
     type="text"
     placeholder="Describa las pruebas testimoniales aquí..."
+    formControlName="afectadoManifiesta"
     class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
   ></textarea>
 </div>
@@ -170,5 +356,287 @@
     </app-card-Form>
 
   </app-card-Form>
+  <app-card-Form [hidden]="currentTab!='4'" >
+     <app-card-Form [titulo]="'Vulneraciones'">
+      <form  [formGroup]="vulneracionesIdentificadasForm" >
+  <!-- Párrafo formal -->
+  <p class="mb-4">
+     Se trata de una vulneración:</p>
+      <!-- Selector de afectados -->
+           <div class="grid grid-cols-3 gap-2">
+            <div class="h-full">
+            <label
+              for="afectados"
+              class="block text-sm font-medium text-gray-700 "
+              >Seleccionar afectado</label
+            >
+            <select
+              (change)="vulnercionIdentificada($event)"
+              id="afectados"
+              formControlName="idAfectado"
+              class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+            >
+              <option value=""  disabled selected hidden >Seleccione...</option>
+              @for (item of afectados; track $index) {
+              <option [value]="item.id">{{ item.nombres }}</option>
+              }
+            </select>
 
+            <div>
+            <label
+              for="medida"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              medida</label
+            >
+            <input
+              type="text"
+              [readonly]="true"
+              formControlName="vulneracion"
+              id="vulneracion"
+              name="vulneracion"
+              class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+              placeholder="vulneracion"
+            />
+          </div>
+
+          <div>
+            <label
+              for="detalles"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Observaciones</label
+            >
+            <textarea
+              id="detalles"
+              formControlName="detalles"
+              name="detalles"
+              rows="3"
+              class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+              placeholder="Escriba sus observaciones..."
+            ></textarea>
+          </div>
+
+          </div>
+
+
+
+          <!-- Lista de vulneraciones -->
+          <div class=" col-span-2 h-48 overflow-y-auto scrollbar-hide my-4  rounded-xl p-1 ring-1 ring-blue-200">
+
+              <div class="space-y-3">
+                <div
+                  *ngFor="let v of vulneraciones"
+                  class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 cursor-pointer flex items-start"
+                >
+                  <div class="flex items-center h-5">
+                    <input
+                      type="radio"
+                      [value]="v.id"
+                      [formControlName]="'idVulneracion'"
+                      [id]="'medida-' + v.id"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                  </div>
+                  <div class="ml-3">
+                    <label
+                      [for]="'medida-' + v.id"
+                      class="text-sm text-gray-700"
+                    >
+                      {{ v.vulneracion }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+
+
+          </div>
+
+           </div>
+          <div class="mt-2">
+            <button
+              type="button"
+              (click)="agregarVulneracionIdentificada()"
+
+              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Guardar
+            </button>
+          </div>
+
+
+     <div
+
+
+          class="mt-4 bg-white rounded shadow"
+        >
+          <app-tablaEdit
+            [encabezados]="['Afectado','vulneracion','detalles']"
+            [columnas]="['nombres', 'vulneracion', 'detalles']"
+            [datos]="vulneracionesIdentificadas"
+             [acciones]="true"
+            [eliminar]="eliminarVulneracionIdentificada.bind(this)"
+          ></app-tablaEdit>
+        </div>
+
+
+
+</form>
+
+    </app-card-Form>
+
+    <app-card-Form [titulo]="'medidas'">
+
+  <!-- Párrafo formal -->
+
+ <!-- Formulario para agregar medida -->
+        <form [formGroup]="medidasDefinitivasForm" class="">
+          <p >
+    Se establecen las siguientes medidas de protección:
+</p>
+          <!-- Selector de afectados -->
+           <div class="grid grid-cols-3 gap-2">
+            <div class="h-full">
+            <label
+              for="afectados"
+              class="block text-sm font-medium text-gray-700 "
+              >Seleccionar afectado</label
+            >
+            <select
+              (change)="medidasDefinitivas($event)"
+              id="afectados"
+              formControlName="idAfectado"
+              class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+            >
+              <option value=""  disabled selected hidden >Seleccione...</option>
+              @for (item of afectados; track $index) {
+              <option [value]="item.id">{{ item.nombres }}</option>
+              }
+            </select>
+
+            <div>
+            <label
+              for="medida"
+              class="block text-sm font-medium text-gray-700 mb-1"
+            >
+              medida</label
+            >
+            <input
+              type="text"
+              [readonly]="true"
+              formControlName="medida"
+              id="medida"
+              name="medida"
+              class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+              placeholder="medida"
+            />
+          </div>
+          <div>
+            <label
+              for="periodo"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Por periodo</label
+            >
+            <input
+              type="text"
+              formControlName="periodo"
+              id="periodo"
+              name="periodo"
+              class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+              placeholder="Ej: Julio - Septiembre"
+            />
+          </div>
+          <div>
+            <label
+              for="observaciones"
+              class="block text-sm font-medium text-gray-700 mb-1"
+              >Observaciones</label
+            >
+            <textarea
+              id="observaciones"
+              formControlName="observaciones"
+              name="observaciones"
+              rows="3"
+              class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+              placeholder="Escriba sus observaciones..."
+            ></textarea>
+          </div>
+
+          </div>
+
+          <!-- Tabla de medidas -->
+          <!-- Tabla de medidas emergentes -->
+
+          <!-- Lista de medidas por artículo -->
+          <div class="flex col-span-2 my-4 gap-2 h-60 ">
+            @for (articulo of medidasPorArticulo; track $index) {
+
+            <div
+              class="bg-white ring-1 ring-blue-200 rounded-lg shadow-md pt-0 p-1  overflow-auto"
+            >
+              <h3
+                class="bg-white sticky top-0 text-lg font-semibold text-gray-800 mb-1 h-8"
+              >
+                {{ articulo.articulo }}
+              </h3>
+
+              <div class="space-y-3">
+                <div
+                  *ngFor="let medida of articulo.medidas"
+                  class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 cursor-pointer flex items-start"
+                >
+                  <div class="flex items-center h-5">
+                    <input
+                      type="radio"
+                      [value]="medida.id"
+                      [formControlName]="'idMedida'"
+                      [id]="'medida-' + medida.id"
+                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    />
+                  </div>
+                  <div class="ml-3">
+                    <label
+                      [for]="'medida-' + medida.id"
+                      class="text-sm text-gray-700"
+                    >
+                      {{ medida.medida }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            }
+          </div>
+
+           </div>
+          <div class="mt-2">
+            <button
+              type="button"
+              (click)="guardarDetalle()"
+              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Guardar
+            </button>
+          </div>
+        </form>
+        <div
+          formArrayName="medidasDefinitivas"
+          class="mt-4 bg-white rounded shadow"
+        >
+          <app-tablaEdit
+            [encabezados]="['ID', 'Medida ', 'Periodo', 'Observaciones']"
+            [columnas]="['idMedida', 'medida', 'periodo', 'observaciones']"
+            [datos]="filteredMedidas"
+            [acciones]="true"
+            [mostrarEditar]="true"
+            [eliminar]="eliminar.bind(this)"
+            [editar]="editar.bind(this)"
+          ></app-tablaEdit>
+        </div>
+
+    </app-card-Form>
+
+  </app-card-Form>
+</form>
 

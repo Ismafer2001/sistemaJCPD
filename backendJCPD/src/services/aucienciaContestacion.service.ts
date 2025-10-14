@@ -1,15 +1,18 @@
+
 import { Afectado } from "../models/afectado.models";
 import { Citacion } from "../models/citaciones.model";
 import sequelize from "../config/database";
 import { Op } from "sequelize";
 import { AudienciaContestacion } from "../models/audiencia_constestacion.model";
 import { ParticipantesAudienciaContestacion } from "../models/participantes_audiencia.model";
-import { Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Otros } from "../models";
+import { Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Otros, usuarios } from "../models";
+import { MedidasEmergentes, medida } from "../models";
 
 interface ParticipanteData {
 	nombres: string;
+	apellidos: string;
 	cedula: string;
-	tipo_involucrado: string;
+	tipoParticipante: string;
 	asistio?: boolean;
 	justifico?: boolean;
 	manifiesta?: string;
@@ -24,8 +27,11 @@ interface AudienciaContestacionData {
 	dirigue: string;
 	indica: string;
 	manifiesta: string;
+	afectadoManifiesta?: string;
 	pdf_audiencia_contestacion: number;
+	seRatifica: string;
 	participantes: ParticipanteData[];
+	  estatus: "pendiente"|"en_proceso"|"completada";
 }
 //--- SERVICIOS PARA AUDIENCIA DE CONTESTACION ---//
 //crear audiencia de contestacion
@@ -41,7 +47,10 @@ export async function crearAudienciaContestacion(data: AudienciaContestacionData
 			dirigue: data.dirigue,
 			indica: data.indica,
 			manifiesta: data.manifiesta,
-			pdf_audiencia_contestacion: data.pdf_audiencia_contestacion
+			seRatifica: data.seRatifica,
+			afectadoManifiesta: data.afectadoManifiesta,
+			pdf_audiencia_contestacion: data.pdf_audiencia_contestacion,
+			estatus:  'completada',
 		}, { transaction: t });
 
 		if (Array.isArray(data.participantes)) {
@@ -49,8 +58,9 @@ export async function crearAudienciaContestacion(data: AudienciaContestacionData
 				await ParticipantesAudienciaContestacion.create({
 					idAC: audiencia.id,
 					nombres: participante.nombres,
+					apellidos: participante.apellidos,
 					cedula: participante.cedula,
-					tipo_involucrado: participante.tipo_involucrado,
+					tipoParticipante: participante.tipoParticipante,
 					asistio: participante.asistio ?? false,
 					justifico: participante.justifico ?? false,
 					manifiesta: participante.manifiesta ?? ''
@@ -75,38 +85,174 @@ export async function AudiencaContestacionDTO(id:string) {
 	error.name = "NoExisteAvocatoria";
 	throw error;
   }
-   const resultado = await Denuncia.findByPk(id, {
-  attributes: ['codigoTramite'],
-  include: [{
-	model: Avocatoria,
-	attributes: ['fechaCreado']
 
-  },
-  {
-	model: Canton,
-	attributes:['canton']
+	const resultado = await Denuncia.findByPk(id, {
+		attributes: ['codigoTramite'],
+		include: [
+			{
+				model: Avocatoria,
+				attributes: ['fechaCreado']
+			},
+			{
+				model: Canton,
+				attributes: ['canton'],
+				as: "canton"
+			}
+		]
+	});
 
-  }
-], 
-  
-});
+	// Obtener fecha y hora de la tabla citacion
+	const citacion = await Citacion.findOne({
+		where: { idDenuncia: id },
+		attributes: ['fecha', 'hora'],
+		order: [['fecha', 'ASC']]
+	});
 
+	const { codigoTramite, Avocatorium: avo, canton: can } = resultado as any;
 
-const { codigoTramite, Avocatorium:avo, Canton:can } = resultado as any;
-  
+	const respuestaFormateada = {
+		codigoTramite,
+		fechaCreado: avo?.fechaCreado || '',
+		Canton: can?.canton || '',
+		fechaCitacion: citacion?.fecha || '',
+		horaCitacion: citacion?.hora || ''
+	};
+	console.log(respuestaFormateada);
 
-const respuestaFormateada = {
-  codigoTramite,
+	return respuestaFormateada;
+}
 
-  fechaCreado: avo?.fechaCreado || '',
-  Canton: can?.canton || ''
-};
+// Servicio para obtener todos los datos relacionados con la audiencia de contestación
+export async function obtenerAudienciaContestacionCompleta(idAudiencia: number) {
+	// Buscar la audiencia principal
+	const audiencia = await AudienciaContestacion.findByPk(idAudiencia);
+	if (!audiencia) {
+		throw new Error('No existe la audiencia de contestación con el id proporcionado');
+	}
+	// Buscar el cantón de la audiencia (a través de la denuncia)
+	let usuariosPrincipales: any[] = [];
+	let nombreCanton = '';
+	const denuncia = await Denuncia.findByPk(audiencia.idDenuncia, { attributes: ['id_canton'] });
+	if (denuncia && denuncia.id_canton) {
+		usuariosPrincipales = await usuarios.findAll({
+			where: {
+				id_canton: denuncia.id_canton,
+				rol: 'principal',
+				isactivo: true
+			},
+			attributes: ['id', 'nombres', 'apellidos', 'correo', 'rol', 'id_canton']
+		});
+		const canton = await Canton.findByPk(denuncia.id_canton, { attributes: ['canton'] });
+		if (canton) nombreCanton = canton.canton;
+	}
+	// Buscar los participantes relacionados
+	const participantes = await ParticipantesAudienciaContestacion.findAll({
+		where: { idAC: idAudiencia },
+		attributes: ['nombres', 'apellidos', 'cedula', 'tipoParticipante', 'asistio', 'justifico', 'manifiesta']
+	});
 
-return respuestaFormateada
+	// Buscar todos los afectados de la denuncia
+	const afectados = await Afectado.findAll({
+		where: { idDenuncia: audiencia.idDenuncia },
+		attributes: ['id', 'nombres', 'apellidos', 'cedula']
+	});
 
-
+	// Buscar todas las medidas emergentes de los afectados
+	const medidasEmergentes = await Promise.all(afectados.map(async (a: any) => {
+		const medidas = await MedidasEmergentes.findAll({
+			where: { idAfectado: a.id },
+			include: [{ model: medida, as: 'Med', attributes: ['medidas'] }],
+			attributes: ['idMedida', 'periodo', 'observaciones']
+		});
+		return {
+			idAfectado: a.id,
+			nombres: a.nombres,
+			apellidos: a.apellidos,
+			cedula: a.cedula,
+			medidas: medidas.map((m: any) => ({
+				idMedida: m.idMedida,
+				medida: m.Med?.medidas,
+				periodo: m.periodo,
+				observaciones: m.observaciones
+			}))
+		};
+	}));
 
 	
+	  
+	// Estructura de respuesta
+	return {
+		idDenuncia: audiencia.idDenuncia,
+		codigoTramite: audiencia.codigoTramite,
+		fecha: audiencia.fecha,
+		hora: audiencia.hora,
+		instalacionAudiencia: audiencia.instalacionAudiencia,
+		dirigue: audiencia.dirigue,
+		indica: audiencia.indica,
+		manifiesta: audiencia.manifiesta,
+		seRatifica: audiencia.seRatifica,
+		pdf_audiencia_contestacion: audiencia.pdf_audiencia_contestacion,
+		afectadoManifiesta: audiencia.afectadoManifiesta,
+		canton: nombreCanton,
+		participantes: participantes.map(p => ({
+			nombres: p.nombres,
+			apellidos: p.apellidos,
+			cedula: p.cedula,
+			tipoParticipante: p.tipoParticipante,
+			asistio: p.asistio,
+			justifico: p.justifico,
+			manifiesta: p.manifiesta
+		})),
+		medidasEmergentesPorAfectado: medidasEmergentes,
+		usuariosPrincipalesCanton: usuariosPrincipales
+	};
+}
+
+// Servicio para actualizar la audiencia de contestación
+export async function actualizarAudienciaContestacion(idAudiencia: number, data: AudienciaContestacionData) {
+	const t = await sequelize.transaction();
+	try {
+		const audiencia = await AudienciaContestacion.findByPk(idAudiencia);
+		if (!audiencia) {
+			throw new Error('No existe la audiencia de contestación con el id proporcionado');
+		}
+		await audiencia.update({
+			idDenuncia: data.idDenuncia,
+			codigoTramite: data.codigoTramite,
+			fecha: data.fecha,
+			hora: data.hora,
+			instalacionAudiencia: data.instalacionAudiencia,
+			dirigue: data.dirigue,
+			indica: data.indica,
+			afectadoManifiesta: data.afectadoManifiesta,
+			manifiesta: data.manifiesta,
+			seRatifica: data.seRatifica,
+			pdf_audiencia_contestacion: data.pdf_audiencia_contestacion
+		}, { transaction: t });
+
+		// Actualizar participantes: eliminar los existentes y crear los nuevos
+		await ParticipantesAudienciaContestacion.destroy({ where: { idAC: idAudiencia }, transaction: t });
+		if (Array.isArray(data.participantes)) {
+			for (const participante of data.participantes) {
+				await ParticipantesAudienciaContestacion.create({
+					idAC: audiencia.id,
+					nombres: participante.nombres,
+					apellidos: participante.apellidos,
+					cedula: participante.cedula,
+					tipoParticipante: participante.tipoParticipante,
+					asistio: participante.asistio ?? false,
+					justifico: participante.justifico ?? false,
+					manifiesta: participante.manifiesta ?? ''
+				}, { transaction: t });
+			}
+		}
+
+		await t.commit();
+		return { success: true, audienciaId: audiencia.id };
+	} catch (error) {
+		await t.rollback();
+		throw error;
+	}
 }
 
 //----------------SERVICIO PARA PARTICIPANTES----------------------//
@@ -148,7 +294,7 @@ export async function getAfectadosYDirigidoA(idDenuncia: number) {
 			idsOtros.length > 0
 				? Otros.findAll({ where: { id: idsOtros, idDenuncia:idDenuncia }, attributes: ["id", "nombres", "apellidos", "cedula", "tipoParticipante"] })
 				: [],
-			Afectado.findAll({ where: { idDenuncia:idDenuncia }, attributes: ["nombres", "apellidos", "cedula"] }),
+			Afectado.findAll({ where: { idDenuncia:idDenuncia }, attributes: ["id", "nombres", "apellidos", "cedula"] }),
 			Otros.findAll({ where: { idDenuncia:idDenuncia, fase: 'audienciaContestacion' }, attributes: ["nombres", "apellidos", "cedula", "tipoParticipante"] })
 		]);
 		
@@ -158,13 +304,25 @@ export async function getAfectadosYDirigidoA(idDenuncia: number) {
 		const mapOtros = new Map(otros.map(o => [o.id, o]));
 
 		const resultado = [];
-		// Agregar todos los afectados aparte
+		// Agregar todos los afectados aparte, incluyendo sus medidas emergentes
 		for (const a of afectados) {
+			// Buscar medidas emergentes para el afectado
+			const medidas = await MedidasEmergentes.findAll({
+				where: { idAfectado: a.id },
+				include: [{ model: medida, as: 'Med', attributes: ['medidas'] }],
+				attributes: ['idMedida', 'periodo', 'observaciones']
+			});
 			resultado.push({
 				nombres: a.nombres,
 				apellidos: a.apellidos,
 				cedula: a.cedula,
-				tipoParticipante: 'Afectado'
+				tipoParticipante: 'Afectado',
+				medidasEmergentes: medidas.map(m => ({
+					idMedida: m.idMedida,
+					medida: m.Med?.medidas,
+					periodo: m.periodo,
+					observaciones: m.observaciones
+				}))
 			});
 		}
 
@@ -208,6 +366,8 @@ export async function getAfectadosYDirigidoA(idDenuncia: number) {
 
 	
 }
+
+//POSIBLEMNESTE ESTE DEMÁS
 //servicio para obtener los representantes institucionales
 export async function ObtenerRepresentantesInstitucionales(idDenuncia: number) {
 	const representantes = await Otros.findAll({
@@ -224,8 +384,6 @@ export async function ObtenerRepresentantesInstitucionales(idDenuncia: number) {
 	}));
 	
 }
-
-
 
 //servicio para  agregar mas participantes
 export async function AgregarOtrosParticipantes(data: any) {

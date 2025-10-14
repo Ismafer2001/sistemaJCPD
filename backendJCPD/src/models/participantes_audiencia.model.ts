@@ -6,8 +6,9 @@ import { Canton } from './cantones.models';
   interface ParticipantesAudienciaContestacionAttributes {
  id: number;
  nombres: string;
+ apellidos: string;
  cedula: string;
- tipo_involucrado: string;
+ tipoParticipante: string;
  asistio: boolean;
  justifico: boolean;
  manifiesta: string;
@@ -23,8 +24,9 @@ interface ParticipantesAudienciaContestacionCreationAttributes extends Optional<
   
 declare id: number;
 declare nombres: string;
+declare apellidos: string;
 declare cedula: string;
-declare tipo_involucrado: string;
+declare tipoParticipante: string;
 declare asistio: boolean;
 declare justifico: boolean;
 declare manifiesta: string;
@@ -36,11 +38,12 @@ declare idAC: number;
   
   ParticipantesAudienciaContestacion.init({
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    nombres: { type: DataTypes.STRING,unique:true  },
+    nombres: { type: DataTypes.STRING  },
+    apellidos: { type: DataTypes.STRING },
     
     cedula: { type: DataTypes.STRING },
     
-    tipo_involucrado: { type: DataTypes.STRING },
+    tipoParticipante: { type: DataTypes.STRING },
     asistio: { type: DataTypes.BOOLEAN },
     justifico: { type: DataTypes.BOOLEAN },
     

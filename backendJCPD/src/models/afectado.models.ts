@@ -2,6 +2,8 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import { medidasIdentificadas } from './medidasIdentificada.models';
+import { MedidasEmergentes } from './medidas_emergentes.model';
+import { VulneracionesIdentificadas } from './vulneracionesidentificadas.models';
 
 interface AfectadoAttributes {
   id: number;
@@ -23,19 +25,21 @@ interface AfectadoCreationAttributes extends Optional<AfectadoAttributes, 'id'> 
 }
 
 export class Afectado extends Model<AfectadoAttributes, AfectadoCreationAttributes> implements AfectadoAttributes {
-  public id!: number;
-  public cedula!: number;
-  public nombres!: string;
-  public apellidos!: string;
-  public edad!: number;
-  public sexo!: string;
-  public genero!: string;
-  public nacionalidad!: string;
-  public direccion!: string;
-  public mail!: string;
-  public telefono!: string;
-  public idDenuncia!: number;
-  public medidasI!: medidasIdentificadas[];
+  declare id: number;
+  declare cedula: number;
+  declare nombres: string;
+  declare apellidos: string;
+  declare edad: number;
+  declare sexo: string;
+  declare genero: string;
+  declare nacionalidad: string;
+  declare direccion: string;
+  declare mail: string;
+  declare telefono: string;
+  declare idDenuncia: number;
+  declare medidasI: medidasIdentificadas[];
+  declare medidasE: MedidasEmergentes[];
+  declare vulneracionesI?: VulneracionesIdentificadas[];
   
   
 }

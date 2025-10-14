@@ -6,13 +6,15 @@ import { Canton } from './cantones.models';
   interface ParticipantesAudienciaPruebasAttributes {
  id: number;
  nombres: string;
+ apellidos: string;
  cedula: string;
- tipo_involucrado: string;
- asistio: boolean;
+ tipoParticipante: string;
+ 
+parte: string;
  
  pruebas: string;
- pdfAudienciaPruebas: number;
- idAudienciaPruebas: number;
+
+ idAP: number;
   }
   
 interface ParticipantesAudienciaPruebasCreationAttributes extends Optional<ParticipantesAudienciaPruebasAttributes, 'id'>{
@@ -23,29 +25,29 @@ interface ParticipantesAudienciaPruebasCreationAttributes extends Optional<Parti
   
 declare id: number;
 declare nombres: string;
+declare apellidos: string;
 declare cedula: string;
-declare tipo_involucrado: string;
-declare asistio: boolean;
+declare tipoParticipante: string;
 
+declare parte: string;
 declare pruebas: string;
-declare pdfAudienciaPruebas: number;
-declare idAudienciaPruebas: number;
+
+declare idAP: number;
 
 
   }
   
   ParticipantesAudienciaPruebas.init({
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    nombres: { type: DataTypes.STRING,unique:true  },
-    
+    nombres: { type: DataTypes.STRING  },
+    apellidos: { type: DataTypes.STRING },
     cedula: { type: DataTypes.STRING },
-    
-    tipo_involucrado: { type: DataTypes.STRING },
-    asistio: { type: DataTypes.BOOLEAN },
-    
+    tipoParticipante: { type: DataTypes.STRING },
+    parte: { type: DataTypes.STRING },
     pruebas:{type: DataTypes.STRING},
-    pdfAudienciaPruebas:{type: DataTypes.INTEGER},
-    idAudienciaPruebas:{type: DataTypes.INTEGER},
+   
+    idAP:{type: DataTypes.INTEGER},
+    
     
   }, {
     sequelize,

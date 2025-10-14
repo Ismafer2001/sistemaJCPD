@@ -8,6 +8,7 @@ interface VulneracionesIdentificadasAttributes {
   id: number;
   idAfectado: number;
   idVulneracion: number;
+  detalles?: string;
 }
 
 interface VulneracionesIdentificadasCreationAttributes extends Optional<VulneracionesIdentificadasAttributes, 'id'>{
@@ -18,6 +19,8 @@ export class VulneracionesIdentificadas extends Model<VulneracionesIdentificadas
   declare id: number;
   declare idAfectado: number;
   declare idVulneracion: number;
+  declare detalles?: string;
+  declare vulneracion?: Vulneracion;
 }
 
 VulneracionesIdentificadas.init({
@@ -32,7 +35,13 @@ VulneracionesIdentificadas.init({
       model: Vulneracion,
       key: 'id'
     }
+  },
+  detalles: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
+    
+  
 }, {
   sequelize,
   modelName: 'VulneracionesIdentificadas',

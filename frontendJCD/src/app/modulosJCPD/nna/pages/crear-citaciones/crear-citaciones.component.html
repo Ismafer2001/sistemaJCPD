@@ -1,8 +1,8 @@
 <h1 class="text-2xl font-bold mb-4">citar</h1>
-<hr class="border-blue-200 border-1" />
-<div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300">
+<hr class="border-yellow-300 border-1" />
+
    <!--tabs-->
-  <div class="flex  mb-0 gap-3 " id="tabs">
+  <div class="flex mt-5 mb-0 gap-3 " id="tabs">
     <button type="button" class="rounded-t-2xl p-2"
        [ngClass]="{
       'bg-blue-500 text-white': currentTab === '0',
@@ -91,6 +91,8 @@
 
 
   </div>
+
+  <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
 
   <app-card-Form [hidden]="currentTab!='0'"  [titulo]="'citar'">
 
