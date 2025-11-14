@@ -39,10 +39,10 @@ export const getDenunciaCompletaCtrl = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'ID de denuncia inválido' });
     }
     const resultado = await getDenunciaCompleta(idDenuncia);
+    console.log(resultado)
     res.json(resultado);
   } catch (error) {
-    console.error('Error al obtener denuncia completa:', error);
-    res.status(500).json({ message: 'Error al obtener la denuncia completa' });
+    handlehttp(res, 'ERROR_AL_OBTENER_DENUNCIA_COMPLETA', error);
   }
 }
 
@@ -134,9 +134,8 @@ export async function putDenuncia(req: Request, res: Response) {
       denunciante: req.body.denunciante,
       denunciados: req.body.denunciados,
       afectados: req.body.afectados,
-      vulneracion: req.body.vulneraciones,
-      medida: req.body.medidas
-      
+      vulneraciones: req.body.vulneraciones,
+      medidas: req.body.medidas
 
     };
     const result = await actualizarDenuncia(idDenuncia, payload);
@@ -157,9 +156,8 @@ export const postCrearDenuncia = async (req: Request, res: Response): Promise<vo
       denunciante: req.body.denunciante,
       denunciados: req.body.denunciados,
       afectados: req.body.afectados,
-      vulneracion: req.body.vulneraciones,
-      medida: req.body.medidas
-      
+      vulneraciones: req.body.vulneraciones,
+      medidas: req.body.medidas
 
     };
 
@@ -204,6 +202,7 @@ export const getCrearPdfDenuncia = async (req: Request, res: Response) => {
   try {
     // Validación mínima: aseguramos que haya algún contenido en el body
     const { id } = req.params;
+    console.log("ID Denuncia:", id); // Línea de depuración
 
     // La función escribe directamente en `res` (stream PDF)
     await crearPdfDenunciaNNA(res, id);

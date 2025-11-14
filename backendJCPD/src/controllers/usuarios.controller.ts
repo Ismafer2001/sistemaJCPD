@@ -44,7 +44,7 @@ export const postRegistrarUsuario = async (req: Request, res: Response) => {
     res.status(201).json(nuevoUsuario);
   } catch (error:any) {
     if ( error.name === "Usuarioyaexiste") {
-      return res.status(400).json({ mensaje: error.message });
+      return res.status(400).json({ message: error.message });
     }
 
     handlehttp(res,"error_post_registar usuario", error);

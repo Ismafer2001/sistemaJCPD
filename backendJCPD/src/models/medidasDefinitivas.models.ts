@@ -22,6 +22,7 @@ export class MedidasDefinitivas extends Model<MedidasDefinitivasAttributes, Medi
   declare idAfectado: number;
   declare observaciones: string;
   declare periodo: string;
+  declare MedidasD?: medida;
 }
 MedidasDefinitivas.init({
   id: {

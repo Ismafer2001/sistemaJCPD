@@ -1,4 +1,5 @@
 
+
 import sequelize from "../config/database";
 import { Op } from "sequelize";
 import { 
@@ -15,7 +16,8 @@ import {
 	medida,
 	VulneracionesIdentificadas,
 	Vulneracion,
-	Testimonio } from "../models";
+	Testimonio, 
+	usuarios} from "../models";
 
 interface ParticipanteData {
 	nombres: string;
@@ -49,6 +51,143 @@ interface AudienciaPruebasData {
 }
 
 //--- SERVICIOS PARA AUDIENCIA DE PRUEBAS ---//
+// Servicio para obtener todos los datos de la audiencia de pruebas
+export async function obtenerAudienciaPruebasCompleta(idAudiencia: number) {
+	
+	// Buscar la audiencia principal
+	const audiencia = await AudienciaPruebas.findByPk(idAudiencia);
+	if (!audiencia) {
+		throw new Error('No existe la audiencia de pruebas con el id proporcionado');
+	}
+
+	// Buscar el cantón de la audiencia (a través de la denuncia)
+		let usuariosPrincipales: any[] = [];
+		let nombreCanton = '';
+		const denuncia = await Denuncia.findByPk(audiencia.idDenuncia, { attributes: ['id_canton'] });
+		if (denuncia && denuncia.id_canton) {
+			usuariosPrincipales = await usuarios.findAll({
+				where: {
+					id_canton: denuncia.id_canton,
+					rol: 'principal',
+					isactivo: true
+				},
+				attributes: ['id', 'nombres', 'apellidos', 'correo', 'rol', 'id_canton']
+			});
+			const canton = await Canton.findByPk(denuncia.id_canton, { attributes: ['canton'] });
+			if (canton) nombreCanton = canton.canton;
+		}
+
+	// Participantes de la audiencia de pruebas
+	const participantes = await ParticipantesAudienciaPruebas.findAll({
+		where: { idAP: idAudiencia },
+		attributes: ['id', 'nombres', 'apellidos', 'cedula', 'tipoParticipante', 'parte', 'pruebas']
+	});
+
+	// Participantes con testimonio
+	const participantesConTestimonio = await Promise.all(
+		participantes.map(async (p: any) => {
+			const testimonio = await Testimonio.findOne({
+				where: { idParticipante: p.id },
+				attributes: ['testimonio']
+			});
+			if (testimonio) {
+					return {
+					nombres: p.nombres,
+					apellidos: p.apellidos,
+					cedula: p.cedula,
+					tipoParticipante: p.tipoParticipante,
+					parte: p.parte,
+					
+					testimonio: testimonio.testimonio
+				};
+			}
+			return null;
+		})
+	);
+	const participantesConTestimonioFiltrados = participantesConTestimonio.filter(p => p !== null);
+
+	
+	// Buscar todos los afectados de la denuncia asociada a la audiencia
+	const afectados = await Afectado.findAll({
+		where: { idDenuncia: audiencia.idDenuncia },
+		attributes: ['id', 'nombres', 'apellidos', 'cedula']
+	});
+
+	// Vulneraciones identificadas por afectado
+	const vulneracionesPorAfectadoArr = await Promise.all(
+		afectados.map(async (afectado: any) => {
+			const vulneraciones = await VulneracionesIdentificadas.findAll({
+				where: { idAfectado: afectado.id },
+				include: [{ model: Vulneracion, as: 'vulneracion', attributes: ['vulneracion'] }],
+				attributes: ['id', 'idAfectado', 'idVulneracion', 'detalles']
+			});
+			return {
+				idAfectado: afectado.id,
+				nombres: afectado.nombres,
+				apellidos: afectado.apellidos,
+				cedula: afectado.cedula,
+				vulneraciones: vulneraciones.map((v: any) => ({
+					id: v.id,
+					idVulneracion: v.idVulneracion,
+					detalles: v.detalles,
+					vulneracion: v.vulneracion?.vulneracion
+				}))
+			};
+		})
+	);
+
+	// Medidas definitivas por afectado (fase denuncia)
+	const medidasDefinitivasPorAfectado = await Promise.all(
+		afectados.map(async (afectado: any) => {
+			const medidas = await MedidasDefinitivas.findAll({
+				where: { idAfectado: afectado.id },
+				include: [{ model: medida, as: 'MedidasD', attributes: ['medidas'] }],
+				attributes: ['idMedida', 'periodo', 'observaciones']
+			});
+			
+			return {
+				idAfectado: afectado.id,
+				nombres: afectado.nombres,
+				apellidos: afectado.apellidos,
+				cedula: afectado.cedula,
+				medidas: medidas.map((m: any) => ({
+					idMedida: m.idMedida,
+					medida: m.MedidasD?.medidas,
+					periodo: m.periodo,
+					observaciones: m.observaciones
+				}))
+			};
+		})
+		
+	);
+	
+
+	// Estructura de respuesta
+		return {
+			idDenuncia: audiencia.idDenuncia,
+			
+			codigoTramite: audiencia.codigoTramite,
+			fecha: audiencia.fecha,
+			hora: audiencia.hora,
+			instalacionAudiencia: audiencia.instalacionAudiencia,
+			afectadoManifiesta: audiencia.afectadoManifiesta,
+			pdf_audiencia_pruebas: audiencia.pdf_audiencia_pruebas,
+			estatus: audiencia.estatus,
+			canton: nombreCanton,
+			participantes: participantes.map(p => ({
+				nombres: p.nombres,
+				apellidos: p.apellidos,
+				cedula: p.cedula,
+				tipoParticipante: p.tipoParticipante,
+				parte: p.parte,
+				pruebas: p.pruebas
+			})),
+			medidasDefinitivas: medidasDefinitivasPorAfectado,
+			usuariosPrincipalesCanton: usuariosPrincipales,
+					participantesConTestimonio: participantesConTestimonioFiltrados,
+					vulneracionesPorAfectado: vulneracionesPorAfectadoArr
+				};
+}
 //crear audiencia de pruebas
 export async function crearAudienciaPruebas(data: AudienciaPruebasData) {
 	const t = await sequelize.transaction();
@@ -131,19 +270,36 @@ export async function actualizarAudienciaPruebas(idAudiencia: number, data: Audi
 		}, { transaction: t });
 
 		// Actualizar participantes: eliminar los existentes y crear los nuevos
+		// Obtener participantes existentes para limpiar testimonios relacionados
+		const participantesExistentes = await ParticipantesAudienciaPruebas.findAll({ where: { idAP: idAudiencia }, attributes: ['id'], transaction: t });
+		const participantesExistentesIds = participantesExistentes.map((p: any) => p.id);
+		if (participantesExistentesIds.length > 0) {
+			await Testimonio.destroy({ where: { idParticipante: participantesExistentesIds }, transaction: t });
+		}
+
+		// Eliminar participantes antiguos
 		await ParticipantesAudienciaPruebas.destroy({ where: { idAP: idAudiencia }, transaction: t });
+
+		// Crear y, si corresponde, crear testimonios para los nuevos participantes
 		if (Array.isArray(data.participantes)) {
 			for (const participante of data.participantes) {
-				await ParticipantesAudienciaPruebas.create({
+				const nuevoParticipante = await ParticipantesAudienciaPruebas.create({
 					idAP: audiencia.id,
 					nombres: participante.nombres,
-                    apellidos: participante.apellidos,
+					apellidos: participante.apellidos,
 					cedula: participante.cedula,
 					tipoParticipante: participante.tipoParticipante,
 					parte: participante.parte ?? '',
-					
 					pruebas: participante.pruebas ?? ''
 				}, { transaction: t });
+
+				if (participante.testimonio && participante.testimonio.trim() !== '') {
+					await Testimonio.create({
+						testimonio: participante.testimonio,
+						idParticipante: nuevoParticipante.id,
+						parte: participante.parte ?? ''
+					}, { transaction: t });
+				}
 			}
 		}
 
@@ -168,78 +324,30 @@ export async function AudienciaPruebasDTO(id:string) {
 				attributes: ['canton'],
 				as: "canton"
 			},
+			{
+				model: AudienciaPruebas,
+				as: "ap",
+				attributes: ['id']
+			}
 			
 		]
 	});
 
 	
 
-	const { codigoTramite,  canton: can } = resultado as any;
+	const { codigoTramite,  canton: can, ap:audienciaPruebas } = resultado as any;
 
 	const respuestaFormateada = {
 		codigoTramite,
 		
 		Canton: can?.canton || '',
+		id: audienciaPruebas?.id || null
 
 	};
 	console.log(respuestaFormateada);
 
 	return respuestaFormateada;
 }
-//servicio para obtener los afectados de una denuncia seleccionada
-export async function obtenerAfectados(id: number) { //---> se repite en audiencia de pruebas
-
-  return await Afectado.findAll({
-	where: { idDenuncia: id },
-	attributes: ['id', 'nombres'],
-  });
-};
-//servicio para obtener las medidas identificadas en la fase de denuncia de un afectado seleccionado    
-export const medidasEmergentesPorAfectado = async (afectadoId: number) => {
-  const afectado = await Afectado.findByPk(afectadoId, {
-	attributes: ['id', 'nombres'],
-	include: [
-	  {
-		model: MedidasEmergentes,
-		as: "medidasE",
-		attributes: ['idMedida','observaciones','periodo'],
-		include: [
-		  {
-			model: medida,
-			as: 'Med', // ← importante: debe coincidir con el modelo
-			attributes: ['medidas'],
-		  },
-		],
-	  },
-	],
-  });
-
-  if (!afectado){
-	console.log("No se encontró el afectado con ID:", afectadoId);
-	 return [];
-
-  }
-  console.log("Afectado encontrado:", afectado.toJSON());
-
-  const resultadoFormateado = [];
-
-  for (const mi of afectado.medidasE || []) {
-	
-   
-	if (mi.Med?.medidas) {
-	  resultadoFormateado.push({
-		idMedida: mi.idMedida,
-		idAfectado: afectado.id,
-		nombres: afectado.nombres,
-		medida: mi.Med.medidas,
-		periodo: mi.periodo,
-		observaciones: mi.observaciones
-	  });
-	}
-  }
-  console.log("Medidas Emergentes:", resultadoFormateado);
-  return resultadoFormateado;
-};
 
 
 //servicio para obtener las vulneraciones identificadas por afectados

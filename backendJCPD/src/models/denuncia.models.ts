@@ -5,6 +5,8 @@ import { Denunciante } from './denunciante.models';
 import { Denunciado } from './denunciado.models';
 import { Otros } from './Otros.models';
 import { Canton } from './cantones.models';
+import { Avocatoria } from './avocatoria.model';
+import { Notificacion } from './notificacion.model';
   
   interface DenunciaAttributes {
     id: number;
@@ -54,6 +56,8 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     declare Denunciantes?: Denunciante[];
     declare Denunciados?: Denunciado[];
     declare otros?: Otros[];
+    declare avocatoria?: Avocatoria;
+    declare Notificacions?: Notificacion[];
    
 
   }

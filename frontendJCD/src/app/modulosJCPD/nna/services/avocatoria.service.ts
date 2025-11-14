@@ -17,6 +17,7 @@ export class AvocatoriaService {
   getMedidasIdentificadas(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/medidas/${id}`);
   }
+  
   getAfectados(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/afectados/${id}`);
   }
@@ -29,6 +30,9 @@ export class AvocatoriaService {
   actualizarAvocatoria(id: number, avocatoria: Partial<any>): Observable<{ success: boolean; message: string }> {
       return this.http.put<any>(`${this.apiUrl}/${id}`, avocatoria);
     }
+ getAvocatoriaEditMode(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/avocatoria-completa/${id}`);
+  }
 
 
 

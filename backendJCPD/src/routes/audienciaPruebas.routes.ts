@@ -5,16 +5,20 @@ import {
 		getAudienciaPruebasDTO,
 		getParticipantesAudienciaContestacionCtrl,
 		postAgregarOtrosParticipantes,
-		getMedidasEmergentesPorAfectado,
 		getVulneracionesPorAfectado,
 		postVulneracionIdentificada,
 		deleteVulneracionIdentificada,
-		putVulneracionIdentificada
+		putVulneracionIdentificada,
+		getAudienciaPruebasCompleta,
+		getAudienciaPruebasPdf
 	} from '../controllers/audienciaPruebas.controller';
 // Vulneraciones identificadas
 
 
 const router = Router();
+// Obtener todos los datos completos de una audiencia de pruebas
+router.get('/datosaudienciapruebacompleta/:id', getAudienciaPruebasCompleta);;
+
 
 
 // Crear audiencia de pruebas
@@ -33,7 +37,7 @@ router.get('/participantes-audiencia-prueba/:idDenuncia', getParticipantesAudien
 router.post('/agregar-participante', postAgregarOtrosParticipantes);
 
 //obtener medidas emergentes por afectado
-router.get('/medidas/:id',getMedidasEmergentesPorAfectado);
+
 //obtener vulneraciones identificadas por afectado
 router.get('/vulneraciones/:id',getVulneracionesPorAfectado);
 
@@ -41,6 +45,8 @@ router.get('/vulneraciones/:id',getVulneracionesPorAfectado);
 router.post('/vulneracion-identificada', postVulneracionIdentificada);
 router.delete('/vulneracion-identificada/:id', deleteVulneracionIdentificada);
 router.put('/vulneracion-identificada/:id', putVulneracionIdentificada);
+
+router.get('/crearpdf/:id',  getAudienciaPruebasPdf);
 
 
 

@@ -126,7 +126,7 @@
     [columnas]="['nombres','parte','estado']"
     [encabezados]="['Nombres','Parte','Estado']"
     [datos]="involucrados"
-    [RouterLinkparam]="'nombres'"
+    [RouterLinkparam]=" 'nombres'"
     [cambiar]="cambiarTab.bind(this)"
 
     >
@@ -196,7 +196,7 @@
 
 
 
-      @if (currentTab===item.nombres && item.parte !== 'institucion' ) {
+      @if (currentTab===(item.nombres) && item.parte !== 'institucion' ) {
         <p class="mb-2">señora</p>
         <p><span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"> {{item.nombres}} </span></p>
         <p class="my-2">parte <span class="font-bold"> {{item.parte}}</span> </p>

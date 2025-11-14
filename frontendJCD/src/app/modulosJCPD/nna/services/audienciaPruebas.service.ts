@@ -26,9 +26,7 @@ export class AudienciaPruebasService {
     return this.http.post<any>(`${this.apiUrl}`, audienciaPrueba);
   }
 
-  getMedidasEmergentes(id: number): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/medidas/${id}`);
-  }
+
   getVulneracionesIdentificadas(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/vulneraciones/${id}`);
   }
@@ -40,6 +38,10 @@ export class AudienciaPruebasService {
   }
   actualizarVulneracionIdentificada(id: number, vulneracion: any): Observable<any> {
     return this.http.put<any>(`${this.apiUrl}/vulneracion-identificada/${id}`, vulneracion);
+  }
+
+   getAudienciaPruebaEditMode(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/datosaudienciapruebacompleta/${id}`);
   }
 
   crearpdfBlob(id: number): Observable<Blob> {

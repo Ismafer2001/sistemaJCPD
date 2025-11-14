@@ -12,7 +12,7 @@ router.get('/notificar/:id',getNotificacionDTO);
 router.post('/',postCreateOtro);
 router.post('/notificacion',postNotificacion);
 // Obtener los datos de una notificación por id
-router.get('/datosnotificacion/:id', getNotificacionById);
+router.get('/notificacion-completa/:id', getNotificacionById);
 
 router.get('/crearpdf/:id', getNotificacionPDF);
 router.put('/:id', verificarToken, putNotificacion);

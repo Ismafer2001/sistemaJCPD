@@ -70,10 +70,11 @@ export const postAudienciaContestacion = async (req: Request, res: Response) => 
 export const putAudienciaContestacion = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    console.log("ID recibido en el controlador:", id);
     const result = await actualizarAudienciaContestacion(Number(id), req.body);
     res.json(result);
   } catch (error) {
-    res.status(500).json({ message: 'Error al actualizar audiencia de contestación', error });
+    handlehttp(res, 'ERROR_AL_ACTUALIZAR_AUDIENCIA_CONTESTACION', error);
   }
 };
 

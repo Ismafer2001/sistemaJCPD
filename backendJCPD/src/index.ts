@@ -19,6 +19,10 @@ import path from 'path';
 import audienciaContestacionRoutes from './routes/audienciaContestacion.routes';
 import audienciaPruebaRoutes from './routes/audienciaPruebas.routes';
 import uploadRoutes from './routes/upload.routes';
+import seguimientoMedidasRoutes from './routes/seguimientoMedidas.routes';
+import resolucionesRoutes from './routes/resoluciones.routes';
+import  ControlImpugnacionRoutes  from './routes/controlImpugnacion.routes';
+import cierreCasoRoutes from './routes/cierreCaso.routes';
 
 
 const app = express();
@@ -45,8 +49,12 @@ app.use('/api/pdf', pdfRoutes); // Ruta para generar PDF de denuncias
 app.use('/api/estatus', estatusRoutes)
 app.use('/api/audiencia-contestacion', audienciaContestacionRoutes);
 app.use('/api/audiencia-pruebas', audienciaPruebaRoutes);
+app.use('/api/resoluciones', resolucionesRoutes);
+app.use('/api/seguimiento-medidas', seguimientoMedidasRoutes);
+app.use('/api/control-impugnacion', ControlImpugnacionRoutes);
+app.use('/api/cierre-caso', cierreCasoRoutes);
 
-app.use('/pdf', express.static(path.join(__dirname, '../public/pdf')));
+app.use('/files', express.static(path.join(__dirname, '../uploads')));
 
 
 // Verificar conexión con la base de datos y levantar el servidor

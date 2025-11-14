@@ -10,9 +10,9 @@
 </div>
 
 <hr class="border-yellow-300 border-1">
-<form [formGroup]="denunciaForm" (ngSubmit)="onSubmit()" class="space-y-6">
+<form [formGroup]="denunciaForm" (ngSubmit)="GuardarDenuncia()" class="space-y-6">
   <!-- Sección de Número de Trámite -->
-  <div>
+  <section>
     <h2 class="text-xl font-semibold my-4">Número de Trámite</h2>
 
     <div class="mt-1 grid grid-cols-2 max-w-md">
@@ -45,35 +45,52 @@
     >
       Solo se permiten números
     </div>
-  </div>
-  <div class="flex flex-col md:flex-row md:items-end md:space-x-6 space-y-6 md:space-y-0">
+  </section>
+  <!-- Seccion de canal de ingreso y tipo de denuncia -->
+  <section class="flex flex-col md:flex-row md:items-end md:space-x-6 space-y-6 md:space-y-0">
 
 
   <!-------------------- Tipo de Denuncia (Checkboxes) --------------------->
   <div class="flex-1">
     <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de denuncia</label>
-    <div class="space-y-2">
+    <div class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+    [ngClass]="{
+          ' border-1 border-red-500': denunciaForm.get('tipo_denuncia')?.invalid && denunciaForm.get('tipo_denuncia')?.touched
+        }">
 
       <label class="flex items-center space-x-2 cursor-pointer">
         <input
-          type="checkbox"
+          type="radio"
           class="h-5 w-5 text-yellow-500 border-gray-300 rounded focus:ring-yellow-400"
-          [checked]="denunciaForm.get('tipo_denuncia')?.value === 'oficio'"
-          (change)="seleccionarTipo('oficio')"
+          formControlName="tipo_denuncia"
+          value="oficio"
+
         />
         <span>Por oficio</span>
       </label>
 
       <label class="flex items-center space-x-2 cursor-pointer">
         <input
-          type="checkbox"
+          type="radio"
           class="h-5 w-5 text-yellow-500 border-gray-300 rounded focus:ring-yellow-400"
-          [checked]="denunciaForm.get('tipo_denuncia')?.value === 'externa'"
-          (change)="seleccionarTipo('externa')"
+          formControlName="tipo_denuncia"
+          value="externa"
+
         />
         <span>Externa</span>
       </label>
 
+    </div>
+    <div
+      *ngIf="
+        denunciaForm.get('tipo_denuncia')?.invalid && denunciaForm.get('tipo_denuncia')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="denunciaForm.get('tipo_denuncia')?.errors?.['required']"
+        >El tipo de denuncia es requerido</span
+
+      >
     </div>
   </div>
 
@@ -84,6 +101,9 @@
     formControlName="medio"
 
       class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+      [ngClass]="{
+          ' border-1 border-red-500': denunciaForm.get('medio')?.invalid && denunciaForm.get('medio')?.touched
+        }"
     >
       <option value="" disabled selected hidden>Seleccioná una opción</option>
       <option value="presencial">Presencial</option>
@@ -91,14 +111,23 @@
       <option value="parte_policial">Parte policial</option>
       <option value="otro">Otro</option>
     </select>
+    <div
+      *ngIf="
+        denunciaForm.get('medio')?.invalid && denunciaForm.get('medio')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="denunciaForm.get('medio')?.errors?.['required']"
+        >El medio es requerido</span>
+    </div>
   </div>
 
 
-</div>
+</section>
 
   <!-----------------------tabs----------------------->
-  <div class="flex  mb-0 gap-3 " id="tabs">
-    <a href="/nna/crearDenuncia#datosGenerales" class="rounded-t-2xl p-2"
+  <nav class="flex  mb-0 gap-3 " id="tabs">
+    <a class="rounded-t-2xl p-2"
 
        [ngClass]="{
 
@@ -113,7 +142,7 @@
       datos generales
     </a>
 
-    <a href="/nna/crearDenuncia#hechos"
+    <a
       class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
       (click)="cambiarTab(1)"
 
@@ -148,7 +177,7 @@
 
     <app-button-submit
     type="button"
-    label="Cancelar"
+    label="Volver"
     color="cancelar"
     (clicked)="cancelar()"
     >
@@ -202,27 +231,36 @@
     </button>-->
   </div>
 
-  </div>
+  </nav>
 
 
 
 
-  <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
+  <section class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
      <!--------------- Sección del Denunciante------------- -->
 
-
     <app-card-Form [titulo]="'Datos del Denunciante'" [hidden]="currentTab !== 0" id="datosGenerales">
-      <nna_creardenuncia_denunciante
+
+      <div class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
+         <nna_creardenuncia_denunciante
       [formGroup]="denuncianteForm"
       ></nna_creardenuncia_denunciante>
+      </div>
+
+
 
     </app-card-Form>
 
 
     <!-- Sección de Afectados -->
 
-      <app-card-Form [titulo]="'Datos de los Afectados'" [hidden]="currentTab !== 0">
-      <div formArrayName="afectados">
+      <app-card-Form [titulo]="'Datos de los Afectados'" [hidden]="currentTab !== 0"
+      >
+      <div formArrayName="afectados"
+       class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+       [ngClass]="{
+          ' border-1 border-red-500': denunciaForm.get('afectados')?.invalid && denunciaForm.get('afectados')?.touched
+        }">
         @if (denunciaForm.get('afectados')?.errors?.['required'] && denunciaForm.get('afectados')?.touched) {
             <div
 
@@ -244,7 +282,11 @@
     <!------------------------- Sección de Denunciados------------------ -->
 
       <app-card-Form [titulo]="'Datos de los Denunciados'" [hidden]="currentTab !== 0" >
-        <div class="" formArrayName="denunciados" >
+        <div class="" formArrayName="denunciados"
+        class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+       [ngClass]="{
+          ' border-1 border-red-500': denunciaForm.get('denunciados')?.invalid && denunciaForm.get('denunciados')?.touched
+        }">
           @if (denunciaForm.get('denunciados')?.errors?.['required'] && denunciaForm.get('denunciados')?.touched) {
             <div
 
@@ -307,6 +349,8 @@
 
       </app-card-Form>
 
+      <!-- Sección de Vulneraciones -->
+
       <app-card-Form [titulo]="'Vulneraciones'" [hidden]="currentTab !== 1">
 
         @if (denunciaForm.get('vulneraciones')?.errors?.['required'] && denunciaForm.get('vulneraciones')?.touched) {
@@ -318,11 +362,18 @@
         </div>
 
         }
+        <div class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+       [ngClass]="{
+          ' border-1 border-red-500': denunciaForm.get('vulneraciones')?.invalid && denunciaForm.get('vulneraciones')?.touched
+        }">
          <!-- Lista de Vulneraciones -->
       <app-nna_creardenuncia_vulneraciones
         [formArray]="vulneracionesForm"
         [formAfectados]="afectadosArray"
       ></app-nna_creardenuncia_vulneraciones>
+
+        </div>
+
 
 
       </app-card-Form>
@@ -375,10 +426,18 @@
         </div>
 
         }
+        <div class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+       [ngClass]="{
+          ' border-1 border-red-500': denunciaForm.get('medidas')?.invalid && denunciaForm.get('medidas')?.touched
+        }">
         <app-crear_denuncia_medidas
           [formArray]="medidasForm"
           [formAfectados]="afectadosArray"
         ></app-crear_denuncia_medidas>
+
+
+        </div>
+
 
 
       </app-card-Form>
@@ -388,7 +447,7 @@
         </div>
       }
 
-  </div>
+  </section>
 
 
 </form>

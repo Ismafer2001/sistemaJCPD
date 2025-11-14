@@ -11,9 +11,11 @@ import { RouterLink } from '@angular/router';
 export class FasesCardComponent implements OnInit {
 @Input() titulo:string='';
 @Input() estatus:string='';
+@Input() estatusFaseAnterior:string='';
 @Input() link:string='';
 @Input() idDenuncia:string='';
 @Input() linkDetalles:string='';
+@Input() noParams:boolean=false;
 
   constructor() { }
 

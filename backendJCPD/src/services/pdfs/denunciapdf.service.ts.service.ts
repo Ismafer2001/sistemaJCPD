@@ -95,8 +95,8 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 
 		// Vulneraciones por afectado
 		const vulneracionesBlocks: any[] = [];
-		if (Array.isArray(pdfData.vulneracion) && pdfData.vulneracion.length) {
-			for (const v of pdfData.vulneracion) {
+		if (Array.isArray(pdfData.vulneraciones) && pdfData.vulneraciones.length) {
+			for (const v of pdfData.vulneraciones) {
 				vulneracionesBlocks.push({ text: `Vulneraciones de ${v.nombre} (ID: ${v.id})`, style: 'subLabel', margin: [0, 6, 0, 2] });
 				const tableBody: any[] = [];
 				// Encabezado
@@ -105,9 +105,9 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 					{ text: 'Vulneración', bold: true, fillColor: '#eeeeee' }
 				]);
 				// Filas de datos
-				if (Array.isArray(v.vulneracion) && v.vulneracion.length) {
+				if (Array.isArray(v.vulneraciones) && v.vulneraciones.length) {
 					let num = 1;
-					for (const desc of v.vulneracion) {
+					for (const desc of v.vulneraciones) {
 						tableBody.push([
 							{ text: String(num), fontSize: 11 },
 							{ text: String(desc), fontSize: 11 }
@@ -140,8 +140,8 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 
 		// Medidas por afectado
 		const medidasBlocks: any[] = [];
-		if (Array.isArray(pdfData.medida) && pdfData.medida.length) {
-			for (const m of pdfData.medida) {
+		if (Array.isArray(pdfData.medidas) && pdfData.medidas.length) {
+			for (const m of pdfData.medidas) {
 				medidasBlocks.push({ text: `Medidas de protección de ${m.nombre} (ID: ${m.id})`, style: 'subLabel', margin: [0, 6, 0, 2] });
 				const tableBody: any[] = [];
 				// Encabezado
@@ -150,9 +150,9 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 					{ text: 'Medida de protección', bold: true, fillColor: '#eeeeee' }
 				]);
 				// Filas de datos
-				if (Array.isArray(m.medida) && m.medida.length) {
+				if (Array.isArray(m.medidas) && m.medidas.length) {
 					let num = 1;
-					for (const desc of m.medida) {
+					for (const desc of m.medidas) {
 						tableBody.push([
 							{ text: String(num), fontSize: 11 },
 							{ text: String(desc), fontSize: 11 }

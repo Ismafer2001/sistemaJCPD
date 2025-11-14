@@ -45,7 +45,7 @@ interface AudienciaContestacionCreationAttributes extends Optional<AudienciaCont
   AudienciaContestacion.init({
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
     codigoTramite: { type: DataTypes.STRING,unique:true  },
-    seRatifica: { type: DataTypes.STRING, defaultValue: false },
+    seRatifica: { type: DataTypes.STRING, defaultValue: "no" },
     fecha: { type: DataTypes.DATE },
     hora: { type: DataTypes.TIME },
     instalacionAudiencia: { type: DataTypes.STRING },

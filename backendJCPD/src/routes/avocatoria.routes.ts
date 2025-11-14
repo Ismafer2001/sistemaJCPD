@@ -7,7 +7,7 @@ const router = Router();
 
 // GET /api/avocaroria/:id
 router.get('/:id', getDenunciaParaAvocatoria);
-router.get('/dtos/:id', verificarToken, getAvocatoriaCompletaController);
+router.get('/avocatoria-completa/:id', verificarToken, getAvocatoriaCompletaController);
 
 router.get('/afectados/:id', getAfectadosAvocatoria);
 router.get('/medidas/:id',getMedidasIdentificadasPorAfecado)

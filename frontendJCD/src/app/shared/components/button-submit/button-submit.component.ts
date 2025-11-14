@@ -13,7 +13,7 @@ export class ButtonSubmitComponent  {
 
 @Input() label: string = 'Botón';
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
-  @Input() color: 'submit' | 'afirmar' | 'cancelar'|'error' = 'submit';
+  @Input() color: 'submit' | 'afirmar' | 'cancelar'|'accion' |'error' = 'submit';
 
   @Input() disabled: boolean = false;
   @Input() routerlink: string | undefined;
@@ -32,6 +32,8 @@ export class ButtonSubmitComponent  {
         return 'px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2';
       case 'cancelar':
         return 'px-4 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 disabled:opacity-50 flex items-center gap-2';
+        case 'accion':
+        return 'px-4 py-2 bg-amber-300 text-black rounded-md hover:bg-amber-400 disabled:opacity-50 flex items-center gap-2';
       case 'error':
         return 'bg-yellow-500 hover:bg-yellow-600 text-white';
 

@@ -14,7 +14,7 @@ export class AudienciaContestacionService {
     // Ajusta la URL según tu backend
     return this.http.get<any>(`${this.apiUrl}/afectados-dirigidoA/${idDenuncia}`);
   }
-  
+
   postCrearParticipante(participante: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/afectados-dirigidoA`, participante);
   }
@@ -32,5 +32,8 @@ export class AudienciaContestacionService {
   actualizarAudienciaContestacion(id: number, audienciaContestacion: Partial<any>): Observable<{ success: boolean; message: string }> {
       return this.http.put<any>(`${this.apiUrl}/${id}`, audienciaContestacion);
     }
+    getAudienciaContestacionEditMode(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/Datosaudienciacompleta/${id}`);
+  }
 
 }

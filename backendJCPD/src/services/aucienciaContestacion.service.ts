@@ -5,7 +5,7 @@ import sequelize from "../config/database";
 import { Op } from "sequelize";
 import { AudienciaContestacion } from "../models/audiencia_constestacion.model";
 import { ParticipantesAudienciaContestacion } from "../models/participantes_audiencia.model";
-import { Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Otros, usuarios } from "../models";
+import { Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Otros, usuarios, AudienciaPruebas } from "../models";
 import { MedidasEmergentes, medida } from "../models";
 
 interface ParticipanteData {
@@ -69,7 +69,7 @@ export async function crearAudienciaContestacion(data: AudienciaContestacionData
 		}
 
 		await t.commit();
-		return { success: true, audienciaId: audiencia.id };
+		return audiencia;
 	} catch (error) {
 		await t.rollback();
 		throw error;
@@ -91,12 +91,18 @@ export async function AudiencaContestacionDTO(id:string) {
 		include: [
 			{
 				model: Avocatoria,
+				as: 'avocatoria',
 				attributes: ['fechaCreado']
 			},
 			{
 				model: Canton,
 				attributes: ['canton'],
 				as: "canton"
+			},
+			{
+				model:AudienciaContestacion,
+				as: "ac" ,
+				attributes: ['id'],
 			}
 		]
 	});
@@ -108,16 +114,17 @@ export async function AudiencaContestacionDTO(id:string) {
 		order: [['fecha', 'ASC']]
 	});
 
-	const { codigoTramite, Avocatorium: avo, canton: can } = resultado as any;
+	const { codigoTramite, avocatoria: avo, canton: can, ac: audienciaContestacion } = resultado as any;
 
 	const respuestaFormateada = {
 		codigoTramite,
 		fechaCreado: avo?.fechaCreado || '',
 		Canton: can?.canton || '',
 		fechaCitacion: citacion?.fecha || '',
-		horaCitacion: citacion?.hora || ''
+		horaCitacion: citacion?.hora || '',
+		id: audienciaContestacion?.id || null
 	};
-	console.log(respuestaFormateada);
+	
 
 	return respuestaFormateada;
 }
@@ -129,6 +136,13 @@ export async function obtenerAudienciaContestacionCompleta(idAudiencia: number) 
 	if (!audiencia) {
 		throw new Error('No existe la audiencia de contestación con el id proporcionado');
 	}
+
+	// Buscar la audiencia de pruebas relacionada a la misma denuncia
+	const audienciaPruebas = await AudienciaPruebas.findOne({
+		where: { idDenuncia: audiencia.idDenuncia },
+		attributes: ['id']
+	});
+
 	// Buscar el cantón de la audiencia (a través de la denuncia)
 	let usuariosPrincipales: any[] = [];
 	let nombreCanton = '';
@@ -204,12 +218,14 @@ export async function obtenerAudienciaContestacionCompleta(idAudiencia: number) 
 			manifiesta: p.manifiesta
 		})),
 		medidasEmergentesPorAfectado: medidasEmergentes,
-		usuariosPrincipalesCanton: usuariosPrincipales
+		usuariosPrincipalesCanton: usuariosPrincipales,
+		idAudienciaPruebas: audienciaPruebas?.id || null
 	};
 }
 
 // Servicio para actualizar la audiencia de contestación
 export async function actualizarAudienciaContestacion(idAudiencia: number, data: AudienciaContestacionData) {
+	console.log("data recibida", data);
 	const t = await sequelize.transaction();
 	try {
 		const audiencia = await AudienciaContestacion.findByPk(idAudiencia);
@@ -248,7 +264,7 @@ export async function actualizarAudienciaContestacion(idAudiencia: number, data:
 		}
 
 		await t.commit();
-		return { success: true, audienciaId: audiencia.id };
+		return audiencia;
 	} catch (error) {
 		await t.rollback();
 		throw error;

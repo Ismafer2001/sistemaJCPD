@@ -5,18 +5,18 @@
     <p class="mt-2 text-gray-600">Cargando medidas...</p>
   </div>
 
-  <!-- Mensaje de error -->
-  <div *ngIf="error" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-    <span class="block sm:inline">{{ error }}</span>
-  </div>
+
 
   <div class="grid grid-cols-3">
      <!--selector de afectados-->
     <div class="">
       <label class="block text-sm font-medium text-gray-700">afectados</label>
       <select
-        formControlName="id_afectado"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+        formControlName="idAfectado"
+        class="mt-1 block w-full rounded-md  border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+        [ngClass]="{
+          ' border-1 border-red-500': medidasForm.get('idAfectado')?.invalid && medidasForm.get('idAfectado')?.touched
+        }"
       >
         <option value=""  disabled selected hidden >Seleccione afectado</option>
         @for(afectado of formAfectados.controls; track afectado; let i = $index)
@@ -26,12 +26,31 @@
 
         }
       </select>
-       <div class="mt-4">
+      <div
+      *ngIf="
+        medidasForm.get('idAfectado')?.invalid && medidasForm.get('idAfectado')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="medidasForm.get('idAfectado')?.errors?.['required']"
+        >El afectado es requerido</span>
+    </div>
+
+       <div class="mt-4 flex gap-4">
     <app-button-submit
       type="button"
-      label="Agregar Medidas"
+      [label]="modoEdicion ? 'Actualizar Medidas' : 'Agregar Medidas'"
       color="afirmar"
       (clicked)="agregarMedida()"
+    >
+    </app-button-submit>
+
+    <app-button-submit
+      *ngIf="modoEdicion"
+      type="button"
+      label="Cancelar Edición"
+      color="cancelar"
+      (clicked)="cancelarEdicion()"
     >
     </app-button-submit>
 
@@ -39,8 +58,14 @@
     </div>
 
   <!-- Lista de medidas por artículo -->
-  <div *ngIf="!loading && !error" class="flex gap-2 h-48  col-span-2 ">
-    <div *ngFor="let articulo of medidasPorArticulo" class=" bg-white ring-1 ring-blue-200 rounded-lg shadow-md pt-0 p-1 overflow-auto">
+
+  <div *ngIf="!loading && !error" class="flex gap-2 h-48  col-span-2 "
+  >
+
+    <div *ngFor="let articulo of medidasPorArticulo" class=" bg-white ring-1 ring-blue-200 rounded-lg shadow-md pt-0 p-1 overflow-auto"
+    [ngClass]="{
+          ' border-1 border-red-500': medidasForm.get('ids_medidas')?.invalid && medidasForm.get('ids_medidas')?.touched
+        }">
       <h3 class=" bg-white sticky top-0 text-lg font-semibold text-gray-800 mb-1 h-8">{{ articulo.articulo }}</h3>
 
       <div class="space-y-3">
@@ -70,11 +95,12 @@
   <div class=" overflow-x-auto rounded-xl bg-white shadow-xl md:col-span-2">
       <app-tablaEdit
       [encabezados]="['afectado','medidas ']"
-      [columnas]="['id_afectado', 'medidasPorArticulo']"
+      [columnas]="['idAfectado', 'medidasPorArticulo']"
       [datos]="mapeoAfectados"
       [acciones]="true"
       [eliminar]="eliminarRegistro.bind(this)"
-
+      [mostrarEditar]="true"
+      [editar]="editarMedidas.bind(this)"
     >
 
     </app-tablaEdit>

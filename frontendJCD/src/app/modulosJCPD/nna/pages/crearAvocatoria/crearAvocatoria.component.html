@@ -3,7 +3,7 @@
 </div>
 
 <hr class="border-yellow-300 border-1" />
-
+<!--seccion de indicador de tramite-->
 <app-card-Form>
   <div class="flex items-center justify-between mb-3">
     <h1 class="text-2xl font-bold">
@@ -27,15 +27,11 @@
     </span>
   </h1>
 </app-card-Form>
-<form
-  [formGroup]="avocatoriaForm"
-  (submit)="submitAvocatoria()"
-  class="space-y-6"
->
+
   <!--tabs-->
-  <div class="flex mb-0 gap-3" id="tabs">
+  <nav class="flex mb-0 gap-3" id="tabs">
     <a
-      [href]="'/nna/avocatoria/' + denunciaAvocatoria?.id + '#detalles'"
+
       class="rounded-t-2xl p-2"
       [ngClass]="{
         'bg-blue-500 text-white': currentTab === 0,
@@ -46,7 +42,7 @@
       Detalles
     </a>
     <a
-      [href]="'/nna/avocatoria/' + denunciaAvocatoria?.id + '#resoluciones'"
+
       class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
       (click)="cambiarTab(1)"
       [ngClass]="{
@@ -56,15 +52,16 @@
     >
       Resoluciones
     </a>
-    
+
     <a
-      [href]="'/nna/avocatoria/' + denunciaAvocatoria?.id + '#medidas'"
+
       class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
       (click)="cambiarTab(2)"
       [ngClass]="{
-        'bg-blue-500 text-white': currentTab === 2,
-        'bg-gray-100': currentTab !== 2
-      }"
+        'bg-red-500 text-white': avocatoriaForm.get('mediasEmergentes')?.invalid && avocatoriaForm.get('mediasEmergentes')?.touched,
+      'bg-blue-500 text-white': currentTab === 2,
+      'bg-gray-100': currentTab !== 2
+    }"
     >
       Medidas
     </a>
@@ -87,7 +84,7 @@
     <div class="flex flex-1 m-1 justify-end space-x-4">
       <app-button-submit
         type="button"
-        label="Cancelar"
+        label="Volver"
         color="cancelar"
         (clicked)="cancelar()"
       >
@@ -103,7 +100,7 @@
     >
 
     </app-button-submit>
-      <app-button-submit type="submit" label="Guardar" color="submit"
+      <app-button-submit type="button" label="Guardar" color="submit" (clicked)="submitAvocatoria()"
       [disabled]="guardarDisabled"
       >
       </app-button-submit>
@@ -121,11 +118,12 @@
 
 
     </div>
-  </div>
+  </nav>
+  <form
+  [formGroup]="avocatoriaForm"
 
-  <div
-    class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]"
-  >
+  class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]" #formContainer
+>
     <!--avocatoria inicial-->
     <app-card-Form
       [titulo]="'Avocatoria'"
@@ -173,7 +171,10 @@
         >, en uso de las atribuciones que le confieren
       </p>
       <div>
-        <select formControlName="articulo" class="m-1 p-1 block w-full rounded-md border-2  border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
+        <select formControlName="articulo" class="m-1 p-1 block w-full rounded-md border-2  border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+        [ngClass]="{
+          ' border-1 border-red-500': avocatoriaForm.get('articulo')?.invalid && avocatoriaForm.get('articulo')?.touched
+        }">
           <option value="" disabled selected hidden>Seleccioná una opción</option>
           <option value="Art 205 del  Código de la Niñez y Adolescencia">
             Art 205 del Código de la Niñez y Adolescencia
@@ -187,6 +188,15 @@
 
           </option>
         </select>
+        <div
+      *ngIf="
+        avocatoriaForm.get('articulo')?.invalid && avocatoriaForm.get('articulo')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="avocatoriaForm.get('articulo')?.errors?.['required']"
+        >El artículo es requerido</span>
+    </div>
       </div>
       <p class="leading-loose text-lg">
         AVOCA CONOCIMIENTO de <span >{{
@@ -253,10 +263,22 @@
       id="resoluciones"
     >
       <div>
+        <div
+      *ngIf="
+        avocatoriaForm.get('dispocisiones')?.invalid && avocatoriaForm.get('dispocisiones')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="avocatoriaForm.get('dispocisiones')?.errors?.['required']"
+        >el campo es requerido</span>
+    </div>
         <quill-editor
           [modules]="modules"
           formControlName="dispocisiones"
           class="w-full h-50"
+          [ngClass]="{
+          ' border-1 border-red-500': avocatoriaForm.get('dispocisiones')?.invalid && avocatoriaForm.get('dispocisiones')?.touched
+        }"
         >
         </quill-editor>
       </div>
@@ -268,7 +290,17 @@
 
 
         <!-- Formulario para agregar medida -->
-        <div [formGroup]="medidasEmergentesForm" class="">
+        <form [formGroup]="medidasEmergentesForm" class="">
+          <div
+      *ngIf="
+        avocatoriaForm.get('mediasEmergentes')?.invalid && avocatoriaForm.get('mediasEmergentes')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="avocatoriaForm.get('mediasEmergentes')?.errors?.['required']"
+        >Debe agregar almenos una medida</span>
+    </div>
+
           <p>Así mismo se disponen las medidas de protección:</p>
           <!-- Selector de afectados -->
            <div class="grid grid-cols-3 gap-2">
@@ -283,12 +315,24 @@
               id="afectados"
               formControlName="idAfectado"
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
-            >
+              [ngClass]="{
+          ' border-1 border-red-500': medidasEmergentesForm.get('idAfectado')?.invalid && medidasEmergentesForm.get('idAfectado')?.touched
+        }"
+              >
               <option value=""  disabled selected hidden >Seleccione...</option>
               @for (item of afectados; track $index) {
               <option [value]="item.id">{{ item.nombres }}</option>
               }
             </select>
+            <div
+      *ngIf="
+        medidasEmergentesForm.get('idAfectado')?.invalid && medidasEmergentesForm.get('idAfectado')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="medidasEmergentesForm.get('idAfectado')?.errors?.['required']"
+        >Debe seleccionar un afectado</span>
+    </div>
 
             <div>
             <label
@@ -305,7 +349,20 @@
               name="medida"
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
               placeholder="medida"
+              [ngClass]="{
+          ' border-1 border-red-500': medidasEmergentesForm.get('idAfectado')?.invalid && medidasEmergentesForm.get('idAfectado')?.touched
+        }"
             />
+            <div
+      *ngIf="
+        medidasEmergentesForm.get('idMedida')?.invalid && medidasEmergentesForm.get('idMedida')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="medidasEmergentesForm.get('idMedida')?.errors?.['required']"
+        >Debe seleccionar una medida</span>
+    </div>
+
           </div>
           <div>
             <label
@@ -320,7 +377,19 @@
               name="periodo"
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
               placeholder="Ej: Julio - Septiembre"
+              [ngClass]="{
+          ' border-1 border-red-500': medidasEmergentesForm.get('periodo')?.invalid && medidasEmergentesForm.get('periodo')?.touched
+        }"
             />
+            <div
+      *ngIf="
+        medidasEmergentesForm.get('idMedida')?.invalid && medidasEmergentesForm.get('idMedida')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="medidasEmergentesForm.get('periodo')?.errors?.['required']"
+        >Debe introducir el periodo</span>
+    </div>
           </div>
           <div>
             <label
@@ -335,8 +404,20 @@
               rows="3"
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
               placeholder="Escriba sus observaciones..."
+              [ngClass]="{
+          ' border-1 border-red-500': medidasEmergentesForm.get('periodo')?.invalid && medidasEmergentesForm.get('periodo')?.touched
+        }"
             ></textarea>
           </div>
+          <div
+      *ngIf="
+        medidasEmergentesForm.get('observaciones')?.invalid && medidasEmergentesForm.get('observaciones')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="medidasEmergentesForm.get('observaciones')?.errors?.['required']"
+        >Debe introducir observaciones</span>
+    </div>
 
           </div>
 
@@ -390,15 +471,28 @@
 
 
           <div class="mt-2">
-            <button
+            @if (editMediasMode && editMode) {
+              <button
               type="button"
-              (click)="guardarDetalle()"
+              (click)="actualizarMedidasEditMode()"
+              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Actualizar
+            </button>
+
+            }@else {
+              <button
+              type="button"
+              (click)="agregarMedidas()"
               class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Guardar
             </button>
+
+            }
+
           </div>
-        </div>
+        </form>
         <div
           formArrayName="mediasEmergentes"
           class="mt-4 bg-white rounded shadow"
@@ -420,5 +514,5 @@
           <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
         </div>
       }
-  </div>
+
 </form>

@@ -1,7 +1,7 @@
 
 import {  Transaction, } from "sequelize";
 import { avocatoriaDTO } from "../interfaces/avocatoria.interface";
-import { Denuncia, Afectado, Denunciante, Denunciado, Vulneracion, Canton, Avocatoria, VulneracionesIdentificadas, medida, medidasIdentificadas, MedidasEmergentes, usuarios } from "../models";
+import { Denuncia, Afectado, Denunciante, Denunciado, Vulneracion, Canton, Avocatoria, VulneracionesIdentificadas, medida, medidasIdentificadas, MedidasEmergentes, usuarios, Notificacion } from "../models";
 import sequelize from "../config/database";
 // Servicio para crear una avocatoria
 export async function crearAvocatoria(data: {
@@ -111,6 +111,11 @@ export async function obtenerDenunciaParaAvocatoria(id: string) {
                 model: Denunciado,
                 
                 attributes: ['nombres', 'apellidos']
+            },
+            {
+              model: Avocatoria,
+              as:'avocatoria',
+              attributes: ['id'],
             }
         ]
     });
@@ -140,7 +145,8 @@ export async function obtenerDenunciaParaAvocatoria(id: string) {
       nombres: d.nombres,
       apellidos: d.apellidos
     })),
-  tipoDenuncia: denuncia.tipo_denuncia === 'oficio' ? 'oficio' : 'denuncia'
+  tipoDenuncia: denuncia.tipo_denuncia === 'oficio' ? 'oficio' : 'denuncia',
+  idAvocatoria: denuncia.avocatoria?.id || null
   };
   return result;
 }
@@ -154,6 +160,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
          as: "denunciaAvocatoria",
         include: [
           { model: Canton, as: 'canton', attributes: ['id', 'canton'] },
+          { model: Notificacion, attributes: ['id'], limit: 1 },
           {
             model: Afectado,
             as: 'afectados',
@@ -245,12 +252,13 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
     medidasEmergentes: (avocatoria.medidasE || []).map((m: any) => ({
       id: m.id,
       idMedida: m.idMedida,
-      medida: m.medida?.medidas || '',
+      medida: m.Med?.medidas || '',
       idAfectado: m.idAfectado,
       periodo: m.periodo,
       observaciones: m.observaciones
     })),
-    usuariosPrincipales
+    usuariosPrincipales,
+    notificacion: (denuncia?.Notificacions && denuncia.Notificacions.length > 0) ? denuncia.Notificacions[0].id : null
   };
 }
 //servicio para obtener los afectados de una denuncia seleccionada
@@ -331,7 +339,11 @@ export async function editarAvocatoria(idAvocatoria: number, data: {
       estatus: data.estatus
     }, { transaction: t });
 
-    // Eliminar medidas emergentes anteriores
+   
+
+
+    if ( data.mediasEmergentes.length !== 0) {
+          // Eliminar medidas emergentes anteriores
     await MedidasEmergentes.destroy({ where: { idAvocatoria: idAvocatoria }, transaction: t });
 
     // Crear nuevas medidas emergentes
@@ -344,6 +356,13 @@ export async function editarAvocatoria(idAvocatoria: number, data: {
         observaciones: medida.observaciones
       }, { transaction: t });
     }
+
+    }
+
+    
+
+
+ 
 
     await t.commit();
     return await getAvocatoriaCompleta(idAvocatoria);

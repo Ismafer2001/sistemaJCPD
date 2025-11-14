@@ -5,7 +5,7 @@ import {
 	AudienciaPruebasDTO,
 	getParticipantesAudienciaContestacion,
 	AgregarOtrosParticipantes,
-	medidasEmergentesPorAfectado,
+	
 	vulneracionesPorAfectado,
 	agregarVulneracionIdentificada,
 	eliminarVulneracionIdentificada,
@@ -66,22 +66,7 @@ export const postAgregarOtrosParticipantes = async (req: Request, res: Response)
 		handlehttp(res,'Error al añadir participante' , error);
 	}
 };
-//obtener medidas emergentes por afectado
-export const getMedidasEmergentesPorAfectado = async (req: Request, res: Response) => {
-	try {
-		const id = parseInt(req.params.id);
-		  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
-		
-		  const afectado = await medidasEmergentesPorAfectado(id);
-		 
-		
-		  res.json({
-			afectado
-		  });
-	} catch (error) {
-		handlehttp(res,'Error al obtener medidas emergentes por afectado' , error);
-	}
-};
+
 
 export const getVulneracionesPorAfectado = async (req: Request, res: Response) => {
 	try {
@@ -131,6 +116,31 @@ export const putVulneracionIdentificada = async (req: Request, res: Response) =>
 	} catch (error) {
 		handlehttp(res, 'Error al actualizar vulneración identificada', error);
 	}
+};
+
+// Obtener todos los datos completos de una audiencia de pruebas
+import { obtenerAudienciaPruebasCompleta } from '../services/audienciaPrueba.service';
+import { crearPdfAudienciaPruebasNNA } from "../services/pdfs/audienciaPruebaspdf.service";
+
+export const getAudienciaPruebasCompleta = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const datos = await obtenerAudienciaPruebasCompleta(Number(id));
+        res.json(datos);
+    } catch (error) {
+        handlehttp(res, 'Error al obtener datos completos de la audiencia de pruebas', error);
+    }
+};
+
+//----------------pdfs--------------------//
+export const getAudienciaPruebasPdf = async (req: Request, res: Response) => {
+  try {
+	const { id } = req.params;
+	await crearPdfAudienciaPruebasNNA(res, Number(id));
+   
+  } catch (error) {
+	handlehttp(res, 'get_error_pdf_audiencia', error);
+  }
 };
 
 

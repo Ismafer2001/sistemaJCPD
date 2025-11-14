@@ -4,6 +4,7 @@ import sequelize from '../config/database';
 import { medidasIdentificadas } from './medidasIdentificada.models';
 import { MedidasEmergentes } from './medidas_emergentes.model';
 import { VulneracionesIdentificadas } from './vulneracionesidentificadas.models';
+import { MedidasDefinitivas } from './medidasDefinitivas.models';
 
 interface AfectadoAttributes {
   id: number;
@@ -39,6 +40,7 @@ export class Afectado extends Model<AfectadoAttributes, AfectadoCreationAttribut
   declare idDenuncia: number;
   declare medidasI: medidasIdentificadas[];
   declare medidasE: MedidasEmergentes[];
+  declare medidasD: MedidasDefinitivas[];
   declare vulneracionesI?: VulneracionesIdentificadas[];
   
   

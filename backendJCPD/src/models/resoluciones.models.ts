@@ -8,8 +8,9 @@ interface resolucionesAttributes {
     codigoTramite: string;
     consideraciones: string;
     resolucion: string;
-    pdf_resolucion: string;
+    pdf_resolucion?: string;
     idDenuncia: number;
+    estatus?: "pendiente"|"en_proceso"|"completada";
 }
 
 interface resolucionesCreationAttributes extends Optional<resolucionesAttributes, 'id'> { 
@@ -22,6 +23,8 @@ export class Resoluciones extends Model<resolucionesAttributes, resolucionesCrea
  declare resolucion: string;
  declare pdf_resolucion: string;
  declare idDenuncia: number;
+ declare estatus: "pendiente"|"en_proceso"|"completada";
+ 
 }
 
 Resoluciones.init({
@@ -31,6 +34,11 @@ Resoluciones.init({
     resolucion: { type: DataTypes.TEXT },
     pdf_resolucion: { type: DataTypes.STRING },
     idDenuncia: { type: DataTypes.INTEGER },
+    estatus: {
+    type: DataTypes.STRING,
+    defaultValue: "pendiente",
+    allowNull: false,
+  },
 }, {
     sequelize,
     modelName: 'Resoluciones',

@@ -33,8 +33,8 @@ export async function crearNotificacion(data: NotificacionDTO) {
         codigoTramite: data.codigoTramite,
         fechaAvocatoria: data.fecha,
         parte: data.parte,
-        diriguidoA: data.diriguidoA,
-        direccion: data.direccion,
+        diriguidoA: data?.diriguidoA,
+        direccion: data?.direccion,
         idUsuario: data.idUsuario,
         estatus: 'completada',
 
@@ -132,6 +132,7 @@ export async function notifiacionesDTO(id:string) {
   attributes: ['codigoTramite'],
   include: [{
     model: Avocatoria,
+    as:'avocatoria',
     attributes: ['fechaCreado']
 
   },
@@ -140,23 +141,30 @@ export async function notifiacionesDTO(id:string) {
     as: "canton",
     attributes:['canton']
 
+  },
+  {
+    model: Notificacion,
+    
+    attributes: ['id']
   }
 ], 
   
 });
+console.log("Resultado de la consulta:", resultado);
 
 
-const { codigoTramite, Avocatorium:avo, canton:can } = resultado as any;
+const { codigoTramite, avocatoria:avo, canton:can, Notificacions:notif } = resultado as any;
   
 
 const respuestaFormateada = {
   codigoTramite,
 
   fechaCreado: avo?.fechaCreado || '',
-  Canton: can?.canton || ''
+  Canton: can?.canton || '',
+  id: notif?.[0]?.id || ''
 };
 
-return respuestaFormateada
+return respuestaFormateada;
 
 
 
@@ -209,7 +217,7 @@ export async function actualizarNotificacion(idNotificacion: number, data: Notif
       diriguidoA: data.diriguidoA,
       direccion: data.direccion,
       idUsuario: data.idUsuario,
-      estatus: data.estatus || 'completada',
+      
     }, { transaction: t });
     await t.commit();
     return notificacion;

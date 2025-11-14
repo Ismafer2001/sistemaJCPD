@@ -21,6 +21,11 @@ import { ParticipantesAudienciaPruebas } from "./participantes_audiencia_pruebas
 import { Resoluciones } from "./resoluciones.models";
 import { MedidasDefinitivas } from "./medidasDefinitivas.models";
 import { Testimonio } from "./testimonios.models";
+import { CumpleMedidas } from "./cumpleMedidas.models";
+import { InformeAnexado } from "./informeAnexado.models";
+import { CierreCaso } from "./cierreCaso.models";
+import { InformesPresentados } from "./informes_presentados.models";
+import { ControlImpugnacion } from "./controlImpugnacion.model";
 
 //relacion usuario -- canton
 usuarios.belongsTo(Canton, { foreignKey: "id_canton" });
@@ -87,7 +92,7 @@ articulo.hasMany(medida, {
 
 // Relación: Una denuncia puede tener una avocatorias
 Avocatoria.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "denunciaAvocatoria" });
-Denuncia.hasOne(Avocatoria, { foreignKey: "idDenuncia" });
+Denuncia.hasOne(Avocatoria, { foreignKey: "idDenuncia", as:'avocatoria' });
 
 // Relación uno a muchos entre avocatoria y medidasemergentes
 Avocatoria.hasMany(MedidasEmergentes, {
@@ -157,8 +162,7 @@ MedidasDefinitivas.belongsTo(AudienciaPruebas, { foreignKey: "idAP" });
 
 // Relación uno a muchos entre medida y medidasdefinitivas
 medida.hasMany(MedidasDefinitivas, { foreignKey: "idMedida", as: "medidasD" });
-MedidasDefinitivas.belongsTo(medida, { foreignKey: "idMedida" });
-
+MedidasDefinitivas.belongsTo(medida, { foreignKey: "idMedida", as: "MedidasD" });
 // Relación uno a muchos: un afectado puede tener muchas medidas definitivas
 Afectado.hasMany(MedidasDefinitivas, {
   foreignKey: "idAfectado",
@@ -175,6 +179,34 @@ ParticipantesAudienciaPruebas.hasMany(Testimonio, {
 
 Resoluciones.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
 Denuncia.hasMany(Resoluciones, { foreignKey: "idDenuncia", as: "resoluciones" });
+
+// Relación uno a muchos entre medida y cumplimiento de medidas
+medida.hasMany(CumpleMedidas, { foreignKey: "idMedida", as: "cumpleM" });
+CumpleMedidas.belongsTo(medida, { foreignKey: "idMedida", as: "CumpleM" });
+
+Afectado.hasMany(CumpleMedidas, {
+  foreignKey: "idAfectado",
+  as: "cumpleM",
+});
+CumpleMedidas.belongsTo(Afectado, { foreignKey: "idAfectado", });
+
+InformeAnexado.hasMany(CumpleMedidas, {
+  foreignKey: "idPath",
+  as: "cumpleM",
+});
+CumpleMedidas.belongsTo(InformeAnexado, { foreignKey: "idPath", as: "InformeAnexado" });
+
+//relacion cierre caso -- denuncia
+CierreCaso.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "DenunciaCierre" });
+Denuncia.hasOne(CierreCaso, { foreignKey: "idDenuncia", as: "CierreCaso" });
+
+//relacion informes presentados -- cierre caso
+InformesPresentados.belongsTo(CierreCaso, { foreignKey: "idCierraCaso", as: "CierreCaso" });
+CierreCaso.hasMany(InformesPresentados, { foreignKey: "idCierraCaso", as: "InformesPresentados" });
+
+//relacion control impugnacion -- resoluciones
+ControlImpugnacion.belongsTo(Resoluciones, { foreignKey: "idResolucion", as: "Resolucion" });
+Resoluciones.hasMany(ControlImpugnacion, { foreignKey: "idResolucion", as: "ControlImpugnaciones" });
 
 
 export {
@@ -201,4 +233,10 @@ export {
   MedidasDefinitivas,
   Otros,
   Testimonio,
+  CumpleMedidas,
+  InformeAnexado,
+  CierreCaso,
+  InformesPresentados,
+  ControlImpugnacion
+
 };

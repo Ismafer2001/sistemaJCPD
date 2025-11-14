@@ -6,11 +6,11 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-tablaParticipantes',
   templateUrl: './tablaParticipantes.component.html',
-  styleUrls: ['./tablaParticipantes.component.css'],
+
    imports: [CommonModule]
 })
 export class TablaParticipantesComponent {
- 
+
   @Input() columnas: string[] = [];
   @Input() encabezados: string[] = [];
   @Input() datos: any[] = [];
@@ -22,6 +22,7 @@ export class TablaParticipantesComponent {
   @Input() editar: (item: any) => void = () => {};
 
   @Output() asistioChange = new EventEmitter<{item: any, index: number, value: boolean}>();
+  @Output() justificoChange = new EventEmitter<{item: any, index: number, value: boolean}>();
 
 
 
@@ -31,6 +32,13 @@ export class TablaParticipantesComponent {
     const checked = (event.target as HTMLInputElement).checked;
     this.asistioChange.emit({ item, index, value: checked });
   }
+  
+  // Maneja el cambio del checkbox de justificación
+  onJustificoChange(event: Event, item: any, index: number) {
+    const checked = (event.target as HTMLInputElement).checked;
+    this.justificoChange.emit({ item, index, value: checked });
+  }
+
 
   obtenerValorAnidado(obj: any, path: string): any {
     if (!obj || !path) return null;

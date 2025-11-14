@@ -1,7 +1,7 @@
 <h1 class="text-2xl font-bold mb-4">cierre de caso</h1>
 <hr class="border-blue-200 border-1" />
 
-<div class="flex  mb-0 gap-3 " id="tabs">
+<nav class="flex  mb-0 gap-3 " id="tabs">
     <button type="button" class="rounded-t-2xl p-2"
        [ngClass]="{
       'bg-blue-500 text-white': currentTab === '0',
@@ -23,63 +23,195 @@
     >
      informes citados
     </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('2')"
+    <div class="flex flex-1 m-1 justify-end space-x-4">
+      <app-button-submit
+        type="button"
+        label="Volver"
+        color="cancelar"
 
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab  != '0',
+      >
+      </app-button-submit>
+       <app-button-submit
+    type="button"
+    label="Editar"
+    color="afirmar"
 
-    }"
+
+
     >
-     Disposiciones
-    </button>
-  </div>
 
-  <app-card-Form [hidden]="currentTab!='0'">
-    <p class="font-bold">caso <span class="underline decoration-dotted decoration-gray-400">…………</span>,</p>
+    </app-button-submit>
+      <app-button-submit type="button" label="Guardar" color="submit" (clicked)="submitCierreCaso()"
 
-    <app-card-Form [titulo]="'informes presentados'" >
+      >
+      </app-button-submit>
+      <app-button-submit
+    type="button"
+    label="GenerarPDF"
+    color="submit"
 
+
+
+    >
+
+    </app-button-submit>
+
+
+    </div>
+
+  </nav>
+
+  <form [formGroup]="CierreCasoForm" class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
+     <app-card-Form [titulo]="'informes presentados'"  [hidden]="currentTab!='0'">
 
   <!-- Texto editable como formulario -->
-  <p class="text-gray-800">
-    De los informes presentados
-    <input type="text" placeholder="Nombre del informe o documento"
-      class="border-b border-gray-400 w-64 focus:outline-none focus:border-blue-500 mx-1" />
-    por
-    <input type="text" placeholder="Nombre del técnico o institución"
-      class="border-b border-gray-400 w-72 focus:outline-none focus:border-blue-500 mx-1" />,
-    con fecha
-    <input type="date"
-      class="border-b border-gray-400 focus:outline-none focus:border-blue-500 mx-1" />,
-    en donde manifiestan que: “se ha venido realizando visitas de seguimiento al
-    <input type="text" placeholder="Lugar o persona"
-      class="border-b border-gray-400 w-56 focus:outline-none focus:border-blue-500 mx-1" />
-    de manera imprevista donde se verifica que
-    <input type="text" placeholder="Nombre del evaluado"
-      class="border-b border-gray-400 w-56 focus:outline-none focus:border-blue-500 mx-1" />
-    está cumpliendo las medidas de protección dictadas por la JCPD-
-    <input type="text" placeholder="Código o referencia"
-      class="border-b border-gray-400 w-32 focus:outline-none focus:border-blue-500 mx-1" />”
-  </p>
+   <form [formGroup]="informesPresentadosForm" class="space-y-6">
+
+    <!-- Sección Principal -->
+    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-4">
+
+      <!-- Selección de Informe -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Informe presentado <span class="text-red-500">*</span>
+        </label>
+        <select formControlName="informe"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none transition-colors"
+          [ngClass]="{
+            'border-red-500 focus:border-red-500': informesPresentadosForm.get('informe')?.invalid && informesPresentadosForm.get('informe')?.touched
+          }">
+          <option value=""  disabled selected hidden >Seleccione...</option>
+          <option *ngFor="let informe of DatosCierreCaso?.informesAnexados" [value]="informe">
+            {{ informe }}
+          </option>
+        </select>
+      </div>
+
+
+      <!-- Técnico o Institución -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Presentado por (Técnico o Institución) <span class="text-red-500">*</span>
+        </label>
+        <input type="text"
+          placeholder="Ej: Dr. Juan Pérez - MIES"
+          formControlName="nombreTecnico"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75 transition-colors"
+          [ngClass]="{
+            'border-red-500 focus:border-red-500': informesPresentadosForm.get('nombreTecnico')?.invalid && informesPresentadosForm.get('nombreTecnico')?.touched
+          }"/>
+      </div>
+      <!-- Fecha -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Fecha del informe <span class="text-red-500">*</span>
+        </label>
+        <input type="date"
+          formControlName="fecha"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75 transition-colors"
+          [ngClass]="{
+            'border-red-500 focus:border-red-500': informesPresentadosForm.get('fecha')?.invalid && informesPresentadosForm.get('fecha')?.touched
+          }"/>
+      </div>
+      <!-- Lugar de seguimiento -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Lugar o persona objeto de seguimiento <span class="text-red-500">*</span>
+        </label>
+        <input type="text"
+          placeholder="Ej: Domicilio familiar, Centro de acogida, etc."
+          formControlName="lugar"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75 transition-colors transition-colors"
+          [ngClass]="{
+            'border-red-500 focus:border-red-500': informesPresentadosForm.get('lugar')?.invalid && informesPresentadosForm.get('lugar')?.touched
+          }"/>
+      </div>
+      <!-- Persona evaluada -->
+      <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Persona evaluada <span class="text-red-500">*</span>
+        </label>
+        <input type="text"
+          placeholder="Nombre del niño, niña o adolescente"
+          formControlName="personaEvaluada"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75 transition-colors"
+          [ngClass]="{
+            'border-red-500 focus:border-red-500': informesPresentadosForm.get('personaEvaluada')?.invalid && informesPresentadosForm.get('personaEvaluada')?.touched
+          }"/>
+      </div>
+
+
+    </div>
 
   <!-- Botón añadir -->
   <div class="text-right">
     <button
-      class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors"
+      type="button"
+      (click)="agregarInforme()"
+      class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+      [disabled]="informesPresentadosForm.invalid"
     >
       Añadir Informe
     </button>
   </div>
 
+  <!-- Tabla de informes agregados -->
+  <div *ngIf="informesPresentadosData.length > 0" class="mt-6">
+    <h3 class="text-lg font-medium text-gray-900 mb-4">Informes Agregados</h3>
+    <app-tablaEdit
+      [encabezados]="encabezadosInformes"
+      [columnas]="columnasInformes"
+      [datos]="informesPresentadosData"
+    >
+    </app-tablaEdit>
 
-    </app-card-Form>
+
+  </div>
+
+  </form>
+
 
   </app-card-Form>
-  <app-card-Form [hidden]="currentTab!='1'">
+  <app-card-Form [hidden]="currentTab!='1'" [titulo]="'Informes citados'" >
+    <div>
+        <div
+      *ngIf="
+        CierreCasoForm.get('conclusion')?.invalid && CierreCasoForm.get('conclusion')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="CierreCasoForm.get('conclusion')?.errors?.['required']"
+        >el campo es requerido</span>
+    </div>
+        <quill-editor
+          [modules]="modules"
+          formControlName="conclusion"
+          class="w-full h-50"
+          [ngClass]="{
+          ' border-1 border-red-500': CierreCasoForm.get('conclusion')?.invalid && CierreCasoForm.get('conclusion')?.touched
+        }"
+        >
+        </quill-editor>
+      </div>
 
-     <app-card-Form [titulo]="'Informes citados'" >
+    <div class="space-y-2">
+        <label class="block text-sm font-medium text-gray-700">
+          Actúe el Secretario Auxiliar  <span class="text-red-500">*</span>
+        </label>
+        <select formControlName="secretariaAuxiliar"
+          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none transition-colors"
+          [ngClass]="{
+            'border-red-500 focus:border-red-500': CierreCasoForm.get('secretariaAuxiliar')?.invalid && CierreCasoForm.get('secretariaAuxiliar')?.touched
+          }">
+          <option value=""  disabled selected hidden >Seleccione...</option>
+          <option value="secretaria"  d >Secretarioa</option>
+
+        </select>
+      </div>
+
+
+
+
 
   <p class="text-gray-800">
     De los informes citados y revisando el expediente, la Junta considera que: las disposiciones número
@@ -114,43 +246,12 @@
     />
   </p>
 
-  <!-- Botón añadir -->
-  <div class="text-right">
-    <button
-      class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors"
-    >
-      Añadir Revisión
-    </button>
-  </div>
-
-
-
-     </app-card-Form>
-
-
-
   </app-card-Form>
 
-  <app-card-Form [hidden]="currentTab!='2'">
-
-     <app-card-Form [titulo]="'Disposiciones'" >
-
-  <p class="text-gray-800 font-semibold">Por lo que la Junta, <span class="underline">DISPONE:</span></p>
-
-  <textarea
-    rows="6"
-    placeholder="Escribe aquí las disposiciones..."
-    class="bg-gray-100 w-full border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none"
-  >1).- Revocar todas las Medidas de Protección desde la Avocatoria de Conocimiento hasta la presente fecha por considerarse cumplidas; y se ordena el archivo provisional del expediente.
-
-3).- La Junta se reserva el derecho de reabrir el caso, si se presentara nuevos hechos en relación al mismo.</textarea>
 
 
-
-     </app-card-Form>
-
+  </form>
 
 
-  </app-card-Form>
 
 

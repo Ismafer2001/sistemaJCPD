@@ -1,6 +1,3 @@
-
-
-
 import { Transaction } from "sequelize";
 import sequelize from "../config/database";
 import {
@@ -11,6 +8,7 @@ import {
   VulneracionesIdentificadas,
   medidasIdentificadas,
   Canton,
+  Avocatoria,
 } from "../models";
 
 export interface datosDenuncia {
@@ -18,8 +16,8 @@ export interface datosDenuncia {
   denunciante?: Denunciante;
   denunciados?: Denunciado[];
   afectados?: Afectado[];
-  vulneracion?: { id_afectado: number; vulneraciones: number[] }[];
-  medida?: { id_afectado: number; medidas: number[] }[];
+  vulneraciones?: { idAfectado: number; vulneraciones: number[] }[];
+  medidas?: { idAfectado: number; medidas: number[] }[];
 }
 
 
@@ -92,11 +90,13 @@ export async function countDenuncias(id_canton:number, grupoPrioritario:string) 
 
 // Consulta una denuncia y devuelve el mismo formato que espera insertDenuncia
 export async function getDenunciaCompleta(idDenuncia: number) {
+  console.log("ID Denuncia:", idDenuncia); // Línea de depuración
   const denuncia = await Denuncia.findByPk(idDenuncia, {
     include: [
       { model: Denunciante, },
       { model: Denunciado,  },
-      { model: Afectado, as: 'afectados' }
+      { model: Afectado, as: 'afectados' },
+      { model: Avocatoria, as: 'avocatoria' }
     ]
   });
 
@@ -123,24 +123,25 @@ export async function getDenunciaCompleta(idDenuncia: number) {
   for (const v of VulneracionesIdentificadas) {
     const afectado = afectados.find((a: any) => a.id === v.idAfectado);
     const nombre = afectado ? `${afectado.nombres} ${afectado.apellidos}` : '';
-    const id = afectado ? afectado.id : v.idAfectado;
+    const idAfectado = afectado ? afectado.id : v.idAfectado;
     const vulnDesc = await (await import('../models/vulneraciones.models')).Vulneracion.findByPk(v.idVulneracion);
-    if (!mapVuln.has(id)) mapVuln.set(id, { id, nombre, vulneracion: [] });
-    if (vulnDesc) mapVuln.get(id).vulneracion.push(vulnDesc.vulneracion);
+    if (!mapVuln.has(idAfectado)) mapVuln.set(idAfectado, {  idAfectado, nombre, vulneraciones: [] });
+    if (vulnDesc) mapVuln.get(idAfectado).vulneraciones.push(vulnDesc.vulneracion);
   }
-  const vulneracion = Array.from(mapVuln.values());
+  const vulneraciones = Array.from(mapVuln.values());
 
   // Agrupar medidas por afectado en formato { id, nombre, medida: [desc1, desc2, ...] }
   const mapMed = new Map();
   for (const m of medidasIdentificadas) {
     const afectado = afectados.find((a: any) => a.id === m.idAfectado);
     const nombre = afectado ? `${afectado.nombres} ${afectado.apellidos}` : '';
-    const id = afectado ? afectado.id : m.idAfectado;
+    const idAfectado = afectado ? afectado.id : m.idAfectado;
     const medidaDesc = await (await import('../models/medidas_proteccion.models')).medida.findByPk(m.idMedida);
-    if (!mapMed.has(id)) mapMed.set(id, { id, nombre, medida: [] });
-    if (medidaDesc) mapMed.get(id).medida.push(medidaDesc.medidas);
+    if (!mapMed.has(idAfectado)) mapMed.set(idAfectado, { idAfectado, nombre, medidas: [] });
+    if (medidaDesc) mapMed.get(idAfectado).medidas.push(medidaDesc.medidas);
   }
-  const medida = Array.from(mapMed.values());
+  const medidas = Array.from(mapMed.values());
+  console.log("Medidas agrupadas:", medidas);
 
   // Extraer arrays de relaciones
   // Tipado explícito y solo alias Sequelize
@@ -156,8 +157,8 @@ export async function getDenunciaCompleta(idDenuncia: number) {
     afectados,
     denunciantes,
     denunciados,
-    vulneracion,
-    medida
+    vulneraciones,
+    medidas
   };
 }
 
@@ -173,8 +174,8 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       denunciante,
       denunciados = [],
       afectados = [],
-      vulneracion = [],
-      medida = [],
+      vulneraciones = [],
+      medidas = [],
     } = denunciajson;
 
 
@@ -235,9 +236,9 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       idMap.set(index, nuevoAfectado.id);
     }
 
-    // Asociar vulneraciones por id_afectado
-    for (const v of vulneracion) {
-      const realId = idMap.get(+v.id_afectado); // obtemos el id real del afectado 
+    // Asociar vulneraciones por idAfectado
+    for (const v of vulneraciones) {
+      const realId = idMap.get(+v.idAfectado); // obtemos el id real del afectado 
       
       if (realId && v.vulneraciones.length) {
         const data = v.vulneraciones.map((id: number) => ({
@@ -249,9 +250,9 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       }
     }
 
-    // Asociar medidas por id_afectado
-    for (const m of medida) {
-      const realId = idMap.get(+m.id_afectado);
+    // Asociar medidas por idAfectado
+    for (const m of medidas) {
+      const realId = idMap.get(+m.idAfectado);
       if (realId && m.medidas.length) {
         const data = m.medidas.map((id: number) => ({
           idAfectado: realId,
@@ -358,9 +359,9 @@ export async function actualizarDenuncia(idDenuncia: number, denunciajson: datos
 
       // Actualizar vulneraciones
       await VulneracionesIdentificadas.destroy({ where: { idAfectado: Array.from(idMap.values()) }, transaction: t });
-      if (denunciajson.vulneracion) {
-        for (const v of denunciajson.vulneracion) {
-          const realId = idMap.get(+v.id_afectado);
+      if (denunciajson.vulneraciones) {
+        for (const v of denunciajson.vulneraciones) {
+          const realId = idMap.get(+v.idAfectado);
           if (realId && v.vulneraciones.length) {
             const data = v.vulneraciones.map((id: number) => ({ idAfectado: realId, idVulneracion: id }));
             await VulneracionesIdentificadas.bulkCreate(data, { transaction: t });
@@ -370,9 +371,9 @@ export async function actualizarDenuncia(idDenuncia: number, denunciajson: datos
 
       // Actualizar medidas
       await medidasIdentificadas.destroy({ where: { idAfectado: Array.from(idMap.values()) }, transaction: t });
-      if (denunciajson.medida) {
-        for (const m of denunciajson.medida) {
-          const realId = idMap.get(+m.id_afectado);
+      if (denunciajson.medidas) {
+        for (const m of denunciajson.medidas) {
+          const realId = idMap.get(+m.idAfectado);
           if (realId && m.medidas.length) {
             const data = m.medidas.map((id: number) => ({ idAfectado: realId, idMedida: id }));
             await medidasIdentificadas.bulkCreate(data, { transaction: t });

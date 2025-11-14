@@ -44,6 +44,11 @@ export class CrearNotificacionesComponent implements OnInit {
   editarDisabled: boolean = true;
   idNotificacion!: number;
 
+notificacionCargada: any = null;
+  editMode: boolean = false;
+
+  ignoreFirstValueChangeAvocatoria: boolean = false;
+
 
 
 
@@ -58,23 +63,41 @@ export class CrearNotificacionesComponent implements OnInit {
     this.route.params.subscribe(params => {   ///<-----suscirbmos para obtener paramtro de la url
 
       this.denunciaId = +params['id'];
+      if (params['modo'] === 'editar') {
+        this.editMode = false;
+        this.guardarDisabled = true;
+        this.pdfDisabled = false;
+        this.editarDisabled = true;
+        this.ignoreFirstValueChangeAvocatoria = true;
+      }
 
     });
-
-    this.loadinvolucrados(this.denunciaId)
-    this.loadNotificados(this.denunciaId)
-
     this.formularioNotificados()
     this.formularioFormatoNotificacion();
+    if (!this.editMode) {
+      this.loadNotificados(this.denunciaId)
+
+
+    }
+
+
+
+
+    this.loadinvolucrados(this.denunciaId)
+
+
+
      this.nuevoNotificadoForm.get('idDenuncia')?.setValue(this.denunciaId);
 
     this.notificacionForm.get('idDenuncia')?.setValue(this.denunciaId);
 
     this.notificacionForm.valueChanges.subscribe(n=>{
+      console.log('Formulario de Notificación cambiado:', n);
       if (!this.guardarDisabled) return; // Solo si ya se guardó
       this.pdfDisabled = true;
       this.editarDisabled = false;
     });
+
 
   }
 
@@ -86,7 +109,6 @@ export class CrearNotificacionesComponent implements OnInit {
       apellidos: ['', Validators.required],
       cedula: ['', Validators.required],
       parte: ['', Validators.required],
-
       idDenuncia: [this.denunciaId]
     });
   }
@@ -101,6 +123,7 @@ export class CrearNotificacionesComponent implements OnInit {
       direccion:[],
       fecha:[this.fechaHoraActual.toISOString().split('T')[0]],
       numOficio:[],
+      id:[]
 
 
 
@@ -122,9 +145,29 @@ export class CrearNotificacionesComponent implements OnInit {
   loadNotificados(id:number){
     this.notificacionServices.getnotificacionDTO(id).subscribe(data=>{
       this.notificar=data;
+      console.log('Notificar cargado:', this.notificar);
        this.notificacionForm.patchValue({
           codigoTramite: this.notificar.codigoTramite,
 
+        });
+
+
+    })
+  }
+
+  loadNotificadosEditMode(id:number){
+    this.notificacionServices.getNotificacionEditMode(id).subscribe(data=>{
+      this.notificacionCargada=data;
+      console.log('Notificación cargada para edición:', this.notificacionCargada);
+       this.notificacionForm.patchValue({
+          codigoTramite: this.notificacionCargada.codigoTramite,
+          diriguidoA: this.notificacionCargada.diriguidoA,
+          idUsuario: this.notificacionCargada.idUsuario,
+          parte: this.notificacionCargada.parte,
+          direccion: this.notificacionCargada.direccion,
+          fecha: this.notificacionCargada.fecha,
+          numOficio: this.notificacionCargada.numOficio,
+          id: this.notificacionCargada.id
         });
 
 
@@ -137,10 +180,15 @@ export class CrearNotificacionesComponent implements OnInit {
 
   cambiarTab(valor: string) {
     this.currentTab = valor;
-
+    console.log(this.currentTab);
     const itemSeleccionado = this.involucrados.find(i => i.nombres === valor);
+    console.log(itemSeleccionado);
 
-    if (itemSeleccionado) {
+    if (this.editMode) {
+      this.loadNotificadosEditMode(this.notificacionForm.get('id')?.value);
+
+    }else{
+      if (itemSeleccionado) {
       this.notificacionForm.patchValue({
         diriguidoA: itemSeleccionado.nombres,
         parte: itemSeleccionado.parte
@@ -150,6 +198,10 @@ export class CrearNotificacionesComponent implements OnInit {
         this.notificacionForm.get('idUsuario')?.setValue(itemSeleccionado.idUsuario);
       }
     }
+
+    }
+
+
   }
 //------------submit-----//
 

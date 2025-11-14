@@ -9,6 +9,7 @@ export interface Denuncia {
   afectados: Afectado[];
   denunciado:Denunciado[];
   denunciante: Denunciante;
+  codigoTramite?: string;
 }
 export interface Denunciante {
   cedula: number;

@@ -16,6 +16,7 @@ export class AvocatoriaDetallesComponent  {
 
   onFileSelected(event: any) {
     this.archivo = event.target.files[0];
+    console.log('Archivo seleccionado:', this.archivo);
   }
 
   onDragOver(event: DragEvent) {

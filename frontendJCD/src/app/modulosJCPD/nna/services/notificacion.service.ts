@@ -34,6 +34,10 @@ postNotificar(notificar: any): Observable<any> {
       return this.http.put<any>(`${this.apiUrl}/${id}`, notificacion);
     }
 
+getNotificacionEditMode(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/notificacion-completa/${id}`);
+  }
+
 
 
 

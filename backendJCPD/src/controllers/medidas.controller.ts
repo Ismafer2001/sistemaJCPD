@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import { medida, articulo } from '../models';
+import { agregarMedidasEmergentes, medidasEmergentesPorAfectado, editarMedidaEmergente, eliminarMedidaEmergente, agregarMedidasDefinitivas, editarMedidaDefinitiva, medidasDefinitivasPorAfectado } from '../services/medidasproteccion.service';
+import { handlehttp } from '../utils/error.handle';
 
 // Obtener todas las medidas con sus artículos
 export const getAllMedidas = async (req: Request, res: Response) => {
@@ -47,53 +49,104 @@ export const getAllMedidas = async (req: Request, res: Response) => {
   }
 };
 
+//obtener medidas emergentes por afectado
+export const getMedidasEmergentesPorAfectado = async (req: Request, res: Response) => {
+	try {
+		const id = parseInt(req.params.id);
+		  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+		
+		  const afectado = await medidasEmergentesPorAfectado(id);
+		 
+		
+		  res.json({
+			afectado
+		  });
+      
+	} catch (error) {
+		handlehttp(res,'Error al obtener medidas emergentes por afectado' , error);
+	}
+};
 
-
-
-
-
-
-
-// Obtener medidas por ID de artículo
-/*export const getMedidasByArticulo = async (req: Request, res: Response) => {
+export const postMedidasEmergentes = async (req: Request, res: Response) => {
   try {
-    const { idArticulo } = req.params;
-    const medidas = await medida.findAll({
-      where: { idArticulo },
-      include: [{
-        model: articulo,
-        as: 'articulos',
-        attributes: ['id', 'articulo']
-      }],
-      order: [['medidas', 'ASC']]
-    });
-
-    if (!medidas.length) {
-      return res.status(404).json({
-        success: false,
-        message: 'No se encontraron medidas para este artículo'
-      });
+    const result = await agregarMedidasEmergentes(req.body);
+    res.status(201).json(result);
+  } catch (error:any) {
+     if ( error.name === "medidaEmergenteDuplicada") {
+      return res.status(400).json({ message: error.message });
     }
-
-    res.json({
-      success: true,
-      data: {
-        articulo: medidas[0].idArticulo,
-        medidas: medidas.map(m => ({
-          id: m.id,
-          medida: m.medidas
-        }))
-      }
-    });
-  } catch (error) {
-    console.error('Error al obtener medidas por artículo:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Error al obtener las medidas por artículo',
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    });
+    handlehttp(res, 'Error al agregar medidas emergentes', error);
   }
-};*/
+};
 
-// Obtener medidas identificadas por id de denuncia
+// Editar medida emergente
+export const putEditarMedidaEmergente = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido' });
+    const actualizado = await editarMedidaEmergente(id, req.body);
+    res.json({ success: true, data: actualizado });
+  } catch (error:any) {
+    if ( error.name === "medidaEmergenteDuplicada") {
+      return res.status(400).json({ message: error.message });
+    }
+    handlehttp(res, 'Error al editar medida emergente', error);
+  }
+};
 
+// Eliminar medida emergente
+export const deleteMedidaEmergente = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido' });
+    const resultado = await eliminarMedidaEmergente(id);
+    res.json(resultado);
+  } catch (error) {
+    handlehttp(res, 'Error al eliminar medida emergente', error);
+  }
+};
+
+export const getMedidasDefinitivasPorAfectado = async (req: Request, res: Response) => {
+	try {
+		const id = parseInt(req.params.id);
+		  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+		
+		  const afectado = await medidasDefinitivasPorAfectado(id);
+		 
+		
+		  res.json({
+			afectado
+		  });
+      
+	} catch (error) {
+		handlehttp(res,'Error al obtener medidas definitivas por afectado' , error);
+	}
+};
+//agregar medidas definitivas
+export const postMedidasDefinitivas = async (req: Request, res: Response) => {
+  try {
+    const result = await agregarMedidasDefinitivas(req.body);
+    res.status(201).json(result);
+  } catch (error:any) {
+     if ( error.name === "medidaDefinitivasDuplicada") {
+      return res.status(400).json({ message: error.message });
+    }
+    handlehttp(res, 'Error al agregar medidas definitivas', error);
+  }
+};
+
+//editar medidas definitivas
+export const putEditarMedidaDefinitiva = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    console.log("ID a editar:", id);
+    if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido' });
+    const actualizado = await editarMedidaDefinitiva(id, req.body);
+    res.json({ success: true, data: actualizado });
+  } catch (error:any) {
+    if ( error.name === "medidaDefinitivasDuplicada") {
+      return res.status(400).json({ message: error.message });
+    }
+    handlehttp(res, 'Error al editar medida definitiva', error);
+  }
+};

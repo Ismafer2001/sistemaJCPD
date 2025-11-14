@@ -9,25 +9,25 @@ import { Denuncia } from '@nna/interfaces/denuncia.interface';
   providedIn: 'root'
 })
 export class DenunciaService {
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = 'http://localhost:3000/api/denuncias';
 
   constructor(private http: HttpClient) { }
 
   crearDenuncia(denuncia: Omit<Denuncia, 'id'>): Observable<{ success: boolean; message: string; data: { id: number } }> {
-    return this.http.post<{ success: boolean; message: string; data: { id: number } }>(`${this.apiUrl}/denuncias`, denuncia);
+    return this.http.post<{ success: boolean; message: string; data: { id: number } }>(`${this.apiUrl}`, denuncia);
   }
   eliminarDenuncia(id:number ): Observable<any>{
 
-    return this.http.delete(`${this.apiUrl}/denuncias/${id}`)
+    return this.http.delete(`${this.apiUrl}/${id}`)
   }
 
   obtenerDenuncia(id: number): Observable<Denuncia> {
-    return this.http.get<Denuncia>(`${this.apiUrl}/denuncias/${id}`);
+    return this.http.get<Denuncia>(`${this.apiUrl}/${id}`);
   }
 
  obtenerNumTramite(grupoPrioritario: string, incrementar: boolean = false): Observable<{ numero: number }> {
   return this.http.get<{ numero: number }>(
-    `${this.apiUrl}/denuncias/num_tramite`,
+    `${this.apiUrl}/num_tramite`,
     {
       params: {
         grupoPrioritario,
@@ -41,7 +41,7 @@ export class DenunciaService {
   const params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
 
   return this.http.get<{ total: number }>(
-    `${this.apiUrl}/denuncias/countdenunciasActivas`,
+    `${this.apiUrl}/countdenunciasActivas`,
     { params }
   );
 }
@@ -59,13 +59,17 @@ export class DenunciaService {
       .set('page', String(page))
       .set('limit', String(limit));
 
-    return this.http.get<{ data: Denuncia[]; total: number; page: number; limit: number }>(`${this.apiUrl}/denuncias`, { params });
+    return this.http.get<{ data: Denuncia[]; total: number; page: number; limit: number }>(`${this.apiUrl}`, { params });
+  }
+
+   obtenerDenunciaEditMode(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/denuncia-completa/${id}`);
   }
 
 
 
   actualizarDenuncia(id: number, denuncia: Partial<Denuncia>): Observable<{ success: boolean; message: string }> {
-    return this.http.put<{ success: boolean; message: string }>(`${this.apiUrl}/denuncias/${id}`, denuncia);
+    return this.http.put<{ success: boolean; message: string }>(`${this.apiUrl}/${id}`, denuncia);
   }
 
 
@@ -74,7 +78,7 @@ export class DenunciaService {
    * Request PDF generation and return binary Blob (useful to trigger download)
    */
   crearpdfBlob(id: number): Observable<Blob> {
-    return this.http.get(`${this.apiUrl}/denuncias/crearpdf/${id}`, { responseType: 'blob' });
+    return this.http.get(`${this.apiUrl}/crearpdf/${id}`, { responseType: 'blob' });
   }
 }
 

@@ -30,4 +30,28 @@ export class MedidasService {
   getAllMedidas(): Observable<MedidasResponse> {
     return this.http.get<MedidasResponse>(this.apiUrl);
   }
+  getMedidasEmergentes(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/medidas-emergentes/${id}`);
+  }
+  agregarMedidasEmergentes(medidas: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/medidas-emergentes`, medidas);
+  }
+   eliminarMedidasEmergentes(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/medidas-emergentes/${id}`);
+  }
+  actualizarMedidasEmergentes(id: number, medidas: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/medidas-emergentes/${id}`, medidas);
+  }
+  getMedidasDefinitivas(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/medidas-definitivas/${id}`);
+  }
+  agregarMedidasDefinitivas(medidas: any): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/medidas-definitivas`, medidas);
+  }
+  eliminarMedidasDefinitivas(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/medidas-definitivas/${id}`);
+  }
+  actualizarMedidasDefinitivas(id: number, medidas: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/medidas-definitivas/${id}`, medidas);
+  }
 }

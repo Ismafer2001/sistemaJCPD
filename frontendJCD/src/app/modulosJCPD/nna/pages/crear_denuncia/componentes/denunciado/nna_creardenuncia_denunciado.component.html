@@ -209,36 +209,42 @@
     </div>
   </div>
 
-  <div class="mb-4">
+  <div class="mb-4 flex gap-4">
     <app-button-submit
       type="button"
-      label="Agregar Denunciado"
+      [label]="modoEdicion ? 'Actualizar Denunciado' : 'Agregar Denunciado'"
       color="afirmar"
       (clicked)="agregarDenunciado()"
     >
-
     </app-button-submit>
 
-
-
-
+    <app-button-submit
+      *ngIf="modoEdicion"
+      type="button"
+      label="Cancelar Edición"
+      color="cancelar"
+      (clicked)="cancelarEdicion()"
+    >
+    </app-button-submit>
   </div>
 
-  <!-- Lista de afectados agregados -->
-<div class=" overflow-x-auto rounded-xl bg-white shadow-xl md:col-span-2">
+  <!-- Lista de denunciados agregados -->
+<div class=" overflow-x-auto rounded-xl bg-white shadow-xl md:col-span-2" *ngIf="formArray && formArray.length > 0">
   <app-tablaEdit
   [columnas]="['cedula','nombres','apellidos',   'edad']"
   [encabezados]="['cedula','Nombres ', 'Apellidos', 'Edad',]"
-  [datos]="formArray.value"
+  [datos]="datosTabla"
   [acciones]="true"
   [eliminar]="eliminarDenunciado.bind(this)"
+  [mostrarEditar]="true"
+  [editar]="editarDenunciado.bind(this)"
   >
-
-
-
-
   </app-tablaEdit>
+</div>
 
+<!-- Mensaje cuando no hay denunciados -->
+<div class="md:col-span-2 text-center py-8 text-gray-500" *ngIf="!formArray || formArray.length === 0">
+  <p>No hay denunciados agregados. Agrega el primer denunciado para comenzar.</p>
 </div>
 
   <!--<table *ngIf="formArray.controls.length > 0">

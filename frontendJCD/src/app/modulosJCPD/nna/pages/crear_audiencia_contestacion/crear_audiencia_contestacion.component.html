@@ -2,7 +2,7 @@
 <hr class="border-blue-200 border-1" />
 
    <!--tabs-->
-  <div class="flex  mb-0 gap-3 " id="tabs">
+  <nav class="flex  mb-0 gap-3 " id="tabs">
     <button type="button" class="rounded-t-2xl p-2"
        [ngClass]="{
       'bg-blue-500 text-white': currentTab === '0',
@@ -93,25 +93,27 @@
     </div>
 
 
-  </div>
+  </nav>
   <form [formGroup]="audienciaForm" class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]" >
-
-
-
+  <!-- inicio de audiencia -->
        <app-card-Form [titulo]="'Instalacion'" [hidden]="currentTab!='0'">
          <div class="grid grid-cols-3 md:grid-cols-3 gap-6 mb-4">
         <!-- Fecha -->
     <div>
       <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha</label>
       <input type="date" id="fecha" name="fecha" formControlName="fecha"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75" />
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+        [ngClass]="{
+          ' border-1 border-red-500': audienciaForm.get('fecha')?.invalid && audienciaForm.get('fecha')?.touched
+        }" />
     </div>
 
     <!-- canton -->
     <div>
       <label for="canton" class="block text-sm font-medium text-gray-700">canton</label>
       <input type="text" id="canton" [defaultValue]="datosAudiencia?.Canton" readonly
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75" />
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+         />
     </div>
 
 
@@ -119,14 +121,20 @@
     <!-- Hora -->
     <div>
       <label for="hora" class="block text-sm font-medium text-gray-700">Hora</label>
-      <input type="time" id="hora" name="hora" formControlName="Hora"
-        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75" />
+      <input type="time" id="hora" name="hora" formControlName="hora"
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+        [ngClass]="{
+          ' border-1 border-red-500': audienciaForm.get('hora')?.invalid && audienciaForm.get('hora')?.touched
+        }" />
     </div>
 
 
    </div>
       <p>se Instala la Audiencia de contestación prevista en
-         <select formControlName="intalacionAudiencia" class="mt-1  inline-block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
+         <select formControlName="instalacionAudiencia" class="mt-1  inline-block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+         [ngClass]="{
+          ' border-1 border-red-500': audienciaForm.get('instalacionAudiencia')?.invalid && audienciaForm.get('instalacionAudiencia')?.touched
+        }">
           <option value=""  disabled selected hidden >Seleccione...</option>
           <option value="Art 205 del  Código de la Niñez y Adolescencia">Art 205 del  Código de la Niñez y Adolescencia</option>
           <option value="Art 206 del  Código de la Niñez y Adolescencia">Art 206 del  Código de la Niñez y Adolescencia</option>
@@ -136,7 +144,10 @@
 
 
       <p>según la Avocatoria de Conocimiento N.-{{datosAudiencia?.codigoTramite}} De fecha {{datosAudiencia?.fechaCreado |date}}</p>
-      <p>dirige la presente audiencia la señor-a <select formControlName="dirigue" class="mt-1  inline-block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none" name="" id="">
+      <p>dirige la presente audiencia la señor-a <select formControlName="dirigue" class="mt-1  inline-block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none" name="" id=""
+        [ngClass]="{
+          ' border-1 border-red-500': audienciaForm.get('dirigue')?.invalid && audienciaForm.get('dirigue')?.touched
+        }">
         <option value=""  disabled selected hidden >Seleccione...</option>
         @for (item of miembrosPrincipales; track $index) {
           <option value="{{item.nombres}} {{item.apellidos}}">{{item.nombres}} {{item.apellidos}}</option>
@@ -155,6 +166,7 @@
 
     </app-card-Form>
 
+<!-- particiantes de la  audiencia -->
       <app-card-Form [titulo]="'Participantes'" [hidden]="currentTab!='1'">
 
       <div formArrayName="participantes">
@@ -164,39 +176,48 @@
         [datos]="participantes"
 
         (asistioChange)="onAsistioChange($event)"
+        (justificoChange)="onJustificoChange($event)"
       >
       </app-tablaParticipantes>
       </div>
 
 
 
-      <h2 class="my-3">Agregar</h2>
+      <h2 class="mt-1 text-xl text-blue-500 font-semibold mb-4">Agregar Participante</h2>
 
-      <div class="p-3  border-3 border-blue-200">
+      <div class="bg-white rounded-xl shadow-md p-4 border  ">
 
-        <form [formGroup]="participantesForm" class="mt-8 flex flex-wrap gap-4 items-end">
+        <form [formGroup]="participantesForm" class=" grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
 
-        <label class="block text-sm font-medium text-gray-700">Nombres</label>
-        <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Nombres</label>
+          <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
+        </div>
 
-        <label class="block text-sm font-medium text-gray-700">Apellidos</label>
-        <input type="text" formControlName="apellidos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Apellidos</label>
+          <input type="text" formControlName="apellidos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
+        </div>
 
-        <label class="block text-sm font-medium text-gray-700">Cédula</label>
-        <input type="text" formControlName="cedula" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Cédula</label>
+          <input type="text" formControlName="cedula" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
+        </div>
 
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Tipo</label>
+          <select formControlName="tipoParticipante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
+            <option value="">Seleccione</option>
+            <option value="Denunciante">Denunciante</option>
+            <option value="Denunciado">Denunciado</option>
+            <option value="Testigo">Testigo</option>
+            <option value="Representante">Representante</option>
+          </select>
+        </div>
 
-
-        <label class="block text-sm font-medium text-gray-700">Tipo</label>
-        <select formControlName="tipoParticipante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-          <option value="">Seleccione</option>
-          <option value="Denunciante">Denunciante</option>
-          <option value="Denunciado">Denunciado</option>
-          <option value="Testigo">Testigo</option>
-          <option value="Representante">Representante</option>
-        </select>
-
-        <button type="button" (click)="onSubmitParticipante()" class="p-2 rounded-2xl bg-amber-200">agregar</button>
+        <div class="flex items-end">
+          <button type="button" (click)="onSubmitParticipante()" class="p-2 px-4 rounded-2xl bg-amber-200 hover:bg-amber-300 transition-colors">Agregar</button>
+        </div>
       </form>
 
       </div>
@@ -215,24 +236,34 @@
             <div class="flex flex-col gap-4 mt-2">
               <div class="flex items-center gap-6">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">¿Se ratifica en el informe?</label>
-                <div class="flex items-center gap-4">
+                <div class="flex items-center gap-4"
+                [ngClass]="{
+          ' border-1 border-red-500': audienciaForm.get('seRatifica')?.invalid && audienciaForm.get('seRatifica')?.touched
+        }">
                   <label class="flex items-center gap-1">
-                    <input type="radio" formControlName="ratificaInforme" value="si" class="accent-blue-600" />
+                    <input type="radio" formControlName="seRatifica" value="si" class="accent-blue-600"
+                     />
                     <span class="text-gray-700">Sí</span>
                   </label>
                   <label class="flex items-center gap-1">
-                    <input type="radio" formControlName="ratificaInforme" value="no" class="accent-blue-600" />
+                    <input type="radio" formControlName="seRatifica" value="no" class="accent-blue-600" />
                     <span class="text-gray-700">No</span>
                   </label>
                 </div>
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Dejo sentado el contenido del mismo, que en la parte pertinente y fundamental indica: </label>
-                <textarea formControlName="seIndica" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" ></textarea>
+                <textarea formControlName="indica" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                [ngClass]="{
+          ' border-1 border-red-500': audienciaForm.get('indica')?.invalid && audienciaForm.get('indica')?.touched
+        }" ></textarea>
               </div>
               <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Después de que puse este informe debo de manifestar lo siguiente: </label>
-                <textarea formControlName="manifiesta" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" ></textarea>
+                <textarea formControlName="manifiesta" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                [ngClass]="{
+          ' border-1 border-red-500': audienciaForm.get('manifiesta')?.invalid && audienciaForm.get('manifiesta')?.touched
+        }" ></textarea>
               </div>
             </div>
 
@@ -261,9 +292,13 @@
           <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
             <h3 class="font-bold mb-4 text-blue-700 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Manifestaciones registradas</h3>
             <app-tablaEdit
-              [encabezados]="['Nombre','Manifestación']"
+              [encabezados]="['Nombre','Manifestación','Acciones']"
               [columnas]="['nombreCompleto','manifiesta']"
               [datos]="manifestacionesTabla"
+              [acciones]="true"
+              [mostrarEditar]="true"
+              [editar]="editarManifestacion.bind(this)"
+              [eliminar]="eliminarManifestacion.bind(this)"
             >
             </app-tablaEdit>
           </div>
@@ -279,9 +314,17 @@
           formControlName="afectadoManifiesta"
           placeholder="Escriba aquí la intervención..."
           class="w-full resize-none border border-dotted border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"
+          [ngClass]="{
+          ' border-1 border-red-500': audienciaForm.get('afectadoManifiesta')?.invalid && audienciaForm.get('afectadoManifiesta')?.touched
+        }"
         ></textarea>
 
       </app-card-Form>
+      @if (pdfSrc) {
+        <div class="pdf-container" [hidden]="currentTab !== '3'">
+          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+        </div>
+      }
 
 
 

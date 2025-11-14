@@ -125,7 +125,6 @@
   <form [formGroup]="audienciaPruebaForm" class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]" >
   <app-card-Form [hidden]="currentTab!='0'">
     <app-card-Form [titulo]="'inicio'" >
-      <h4 class="justify-center">ACTA DE LA AUDIENCIA  DE PRUEBA DEL CASO Nº <span class="font-bold">XXXXXXXXJCPD-x-………. </span></h4>
       <div class="grid grid-cols-3 md:grid-cols-3 gap-6 mb-4">
         <!-- Fecha -->
     <div>
@@ -146,7 +145,7 @@
     <!-- Hora -->
     <div>
       <label for="hora" class="block text-sm font-medium text-gray-700">Hora</label>
-      <input type="time" id="hora" name="hora" formControlName="Hora"
+      <input type="time" id="hora" name="hora" formControlName="hora"
         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75" />
     </div>
 
@@ -175,7 +174,7 @@
 </div>
 <p class="mt-2">se Instala la Audiencia de contestación prevista en</p>
       <div>
-         <select formControlName="intalacionAudiencia" class="mt-1  inline-block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
+         <select formControlName="instalacionAudiencia" class="mt-1  inline-block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
           <option value=""  disabled selected hidden >Seleccione...</option>
           <option value="Art 205 del  Código de la Niñez y Adolescencia">Art 205 del  Código de la Niñez y Adolescencia</option>
           <option value="Art 206 del  Código de la Niñez y Adolescencia">Art 206 del  Código de la Niñez y Adolescencia</option>
@@ -611,13 +610,26 @@
 
            </div>
           <div class="mt-2">
-            <button
+            @if (editMediasMode && editMode) {
+              <button
               type="button"
-              (click)="guardarDetalle()"
+              (click)="actualizarMedidasEditMode()"
+              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Actualizar
+            </button>
+
+            }@else {
+              <button
+              type="button"
+              (click)="agregarMedidas()"
               class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Guardar
             </button>
+
+            }
+
           </div>
         </form>
         <div
@@ -638,5 +650,10 @@
     </app-card-Form>
 
   </app-card-Form>
+  @if (pdfSrc) {
+        <div class="pdf-container" [hidden]="currentTab !== '5'">
+          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+        </div>
+      }
 </form>
 

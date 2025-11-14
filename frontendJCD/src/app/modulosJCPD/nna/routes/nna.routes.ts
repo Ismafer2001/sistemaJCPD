@@ -25,7 +25,7 @@ export const nnaRoutes: Routes = [
 
       },
       {
-        path:'avocatoria/:id',
+        path:'avocatoria/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/crearAvocatoria/crearAvocatoria.component')
 
@@ -39,57 +39,57 @@ export const nnaRoutes: Routes = [
 
       },
       {
-        path:'notificaciones/:id',
+        path:'notificaciones/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/crear-Notificaciones/crear-Notificaciones.component')
 
 
       },
       {
-        path:'citaciones/:id',
+        path:'citaciones/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/crear-citaciones/crear-citaciones.component')
 
 
       },
       {
-        path:'audienciaDeContestacion/:id',
+        path:'audienciaDeContestacion/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/crear_audiencia_contestacion/crear_audiencia_contestacion.component')
 
 
       },
       {
-        path:'audienciaDePruebas/:id',
+        path:'audienciaDePruebas/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/crear_audiencia_prueba/crear_audiencia_prueba.component')
 
 
       },
-      
+
       {
-        path:'resoluciones/:id',
+        path:'resoluciones/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/crear_resoluciones/crear_resoluciones.component')
 
 
       },
       {
-        path:'seguimiento/:id',
+        path:'seguimiento/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/anexar_seguimiento/anexar_seguimiento.component')
 
 
       },
       {
-        path:'impugnacion/:id',
+        path:'impugnacion/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/control_impugnacion/control_impugnacion.component')
 
 
       },
       {
-        path:'cierreDeCaso/:id',
+        path:'cierreDeCaso/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/cierre_caso/cierre_caso.component')
 

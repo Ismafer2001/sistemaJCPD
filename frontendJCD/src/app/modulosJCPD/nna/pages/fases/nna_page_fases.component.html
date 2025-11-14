@@ -11,7 +11,7 @@
     >
 
     </app-button-submit>
-    
+
   </div>
   <h1 class="text-2xl font-bold">Niño: <span class="text-xl text-gray-500">{{denuncia?.afectados}}</span></h1>
 
@@ -27,7 +27,9 @@
         [idDenuncia]="item.idDenuncia"
         [link]="item.link"
         [linkDetalles]="item.linkDetalles"
-        >
+        [noParams]="item.noParams"
+        [estatusFaseAnterior]="item.faseAnterior"
+      >
 
       </app-fases-card>
 

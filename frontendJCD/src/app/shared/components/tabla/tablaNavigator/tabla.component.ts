@@ -28,6 +28,7 @@ obtenerValorAnidado(obj: any, path: string): any {
 tabs(item:any){
   const tab = item[this.RouterLinkparam];
   this.cambiar(tab)
+  console.log('Tab seleccionado00000:', tab);
 
 }
 
