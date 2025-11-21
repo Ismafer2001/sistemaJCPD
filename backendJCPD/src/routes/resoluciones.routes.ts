@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAfectados, postCrearResolucion, getResolucionesPorDenuncia, getResolucionPorId, getResolucionPdf } from '../controllers/resoluciones.controller';
+import { getAfectados, postCrearResolucion, getResolucionesPorDenuncia, getResolucionPdf, getResolucionCompleta, putActualizarResolucion } from '../controllers/resoluciones.controller';
 import { verificarToken } from '../middleware/auth.middleware';
 
 
@@ -12,11 +12,15 @@ router.get('/afectados/:id', getAfectados);
 // Ruta para crear una nueva resolución
 router.post('', verificarToken, postCrearResolucion);
 
-// Ruta para obtener resoluciones por denuncia
-router.get('/denuncia/:idDenuncia', getResolucionesPorDenuncia);
+// Ruta para obtener resoluciones por denuncia (retorna solo ID)
+router.get('/resolucion-denuncia/:idDenuncia', verificarToken, getResolucionesPorDenuncia);
 
-// Ruta para obtener una resolución por ID
-router.get('/:id', getResolucionPorId);
+// Ruta para obtener resolución completa con todos los datos relacionados
+router.get('/resolucion-completa/:id', verificarToken, getResolucionCompleta);
+
+// Ruta para actualizar una resolución
+router.put('/:id', verificarToken, putActualizarResolucion);
+
 router.get('/crearpdf/:id',  getResolucionPdf);
 
 

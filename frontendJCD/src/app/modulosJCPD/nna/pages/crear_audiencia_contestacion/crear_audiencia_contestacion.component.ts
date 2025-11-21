@@ -49,7 +49,7 @@ export class Crear_audienciaComponent implements OnInit {
   miembrosPrincipales: any[] = [];
   pdfSrc: SafeResourceUrl | null = null;
 
-  // Estados internos para los botones (sin la lógica de audiencia de prueba)
+  // Estados internos para los botones (sin la lógica de audiencia pruebas)
   private _pdfDisabled: boolean = true;
   private _guardarDisabled: boolean = false;
   private _editarDisabled: boolean = true;
@@ -60,26 +60,28 @@ export class Crear_audienciaComponent implements OnInit {
   guardarDisabled: boolean = false;
   editarDisabled: boolean = true;
 
-  existeAudienciaPrueba: any = null;
-
-  // Método para actualizar los estados de los botones
-  private actualizarEstadoBotones(): void {
-    // PDF: Si existe audiencia de prueba, siempre activo. Si no, respeta el estado manual
-    this.pdfDisabled = this.existeAudienciaPrueba ? false : this._pdfDisabled;
-
-    // Guardar: Si existe audiencia de prueba, siempre deshabilitado. Si no, respeta el estado manual
-    this.guardarDisabled = this.existeAudienciaPrueba ? true : this._guardarDisabled;
-
-    // Editar: Si existe audiencia de prueba, siempre deshabilitado. Si no, respeta el estado manual
-    this.editarDisabled = this.existeAudienciaPrueba ? true : this._editarDisabled;
-  }
   idAudienciaC!: number;
+  existeAudienciaPrueba: any = null;
 
   editMode: boolean = false;
   ignoreFirstValueChangeAvocatoria: boolean = false;
   audienciaContestacionCargada:any=null
   // snapshot of the form after loading in edit mode
   private initialAudienciaSnapshot: any = null;
+
+  // Método para actualizar los estados de los botones
+  private actualizarEstadoBotones(): void {
+    const tieneAudienciaPrueba = this.existeAudienciaPrueba !== null && this.existeAudienciaPrueba !== undefined;
+
+    // PDF: Si existe audiencia prueba, siempre activo. Si no, respeta el estado manual
+    this.pdfDisabled = tieneAudienciaPrueba ? false : this._pdfDisabled;
+
+    // Guardar: Si existe audiencia prueba, siempre deshabilitado. Si no, respeta el estado manual
+    this.guardarDisabled = tieneAudienciaPrueba ? true : this._guardarDisabled;
+
+    // Editar: Si existe audiencia prueba, siempre deshabilitado. Si no, respeta el estado manual
+    this.editarDisabled = tieneAudienciaPrueba ? true : this._editarDisabled;
+  }
 
   constructor(
     private router: Router,
@@ -110,7 +112,6 @@ export class Crear_audienciaComponent implements OnInit {
         this._pdfDisabled = false;
         this._editarDisabled = true;
         this.actualizarEstadoBotones();
-        // prevent the first programmatic patch from toggling buttons
         this.ignoreFirstValueChangeAvocatoria = true;
       }
 
@@ -127,12 +128,14 @@ export class Crear_audienciaComponent implements OnInit {
     });
 
     this.principalesActivos();
+    this.actualizarEstadoBotones();
 
     this.audienciaForm.valueChanges.subscribe(() => {
-      // If we're in edit mode but the initial snapshot is not ready yet, ignore programmatic changes
+      // In edit mode: ignore the first change caused by patchValue, then
+      // when the user modifies the form enable 'Editar' and disable PDF
       if (this.editMode) {
-        if (this.initialAudienciaSnapshot === null) {
-          // still loading initial data -> do not toggle
+        if (this.ignoreFirstValueChangeAvocatoria) {
+          this.ignoreFirstValueChangeAvocatoria = false;
           return;
         }
 
@@ -141,22 +144,11 @@ export class Crear_audienciaComponent implements OnInit {
           return;
         }
 
-        try {
-          const current = this.audienciaForm.getRawValue();
-          const same = JSON.stringify(current) === JSON.stringify(this.initialAudienciaSnapshot);
-          if (same) return; // no user changes yet
-          this._pdfDisabled = true;
-          this._editarDisabled = false;
-          this.actualizarEstadoBotones();
-          return;
-        } catch (e) {
-          // fallback: use ignore flag once
-          if (this.ignoreFirstValueChangeAvocatoria) { this.ignoreFirstValueChangeAvocatoria = false; return; }
-          this._pdfDisabled = true;
-          this._editarDisabled = false;
-          this.actualizarEstadoBotones();
-          return;
-        }
+        // Cuando hay cambios reales del usuario, deshabilitar PDF y habilitar editar
+        this._pdfDisabled = true;
+        this._editarDisabled = false;
+        this.actualizarEstadoBotones();
+        return;
       }
       // Creation mode: keep previous behavior (only toggle after saved)
       if (!this.guardarDisabled) return; // Solo si ya se guardó
@@ -375,23 +367,23 @@ get participantesArray(): FormArray {
 
 audienciaContestacionEditMode()
 {
-  this.cargandoDatosEdicion = true; // Marcar que estamos cargando datos
+  this.cargandoDatosEdicion = true;
   this.audienciaContestacionService.getAudienciaContestacionEditMode(this.idAudienciaC).subscribe(data => {
       this.audienciaContestacionCargada = data;
-      this.existeAudienciaPrueba = data.idAudienciaPruebas;
-      this.actualizarEstadoBotones(); // Actualizar estados después de cargar audiencia de prueba
+      this.existeAudienciaPrueba = data?.idAudienciaPruebas ?? null;
+      this.actualizarEstadoBotones(); // Actualizar estados después de cargar audiencia prueba
 
-      // Mostrar toast si existe audiencia de prueba
+      // Mostrar toast si existe audiencia prueba
       if(this.existeAudienciaPrueba){
         this.audienciaForm.disable();
         this.actualizarEstadoBotones();
         toast.warning('No puedes editar esta audiencia de contestación', {
           duration: 10000,
-          description: 'Ya existe una audiencia de prueba asociada a esta audiencia',
+          description: 'Ya existe una audiencia de prueba asociada a esta audiencia de contestación',
         });
       }
 
-      console.log('audiencia cargada', this.audienciaContestacionCargada);
+console.log('audiencia cargada', this.audienciaContestacionCargada);
       // Patch basic fields into the form (handle different backend keys)
       const codigo = data?.codigoTramite ?? data?.codigo_tramite ?? data?.codigo ?? '';
       const hora = data?.horaCitacion ?? data?.hora_citacion ?? data?.hora ?? data?.Hora ?? '';
@@ -441,6 +433,13 @@ audienciaContestacionEditMode()
 
       // sync local copy
       this.participantes = this.participantesArray.getRawValue();
+
+      // Ensure initial button state for edit mode: PDF enabled, Edit disabled
+      if (this.editMode) {
+        this._pdfDisabled = false;
+        this._editarDisabled = true;
+        this.actualizarEstadoBotones();
+      }
 
       // take a snapshot of the loaded form so we can detect real user changes
       try {
@@ -493,6 +492,7 @@ cancelar(): void {
         this._pdfDisabled = false;
         this._editarDisabled = true;
         this.actualizarEstadoBotones();
+
       },
       error: (err) => {
         toast.error('Error al actualizar la audiencia', {
@@ -525,9 +525,11 @@ cancelar(): void {
       toast.success('Audiencia Guardada con Éxito', {
                 duration: 3000,
               });
+              this.editMode = true;
       this._pdfDisabled = false;
       this._guardarDisabled = true;
       this.actualizarEstadoBotones();
+
     },
     error(err) {
 

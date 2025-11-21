@@ -1,8 +1,48 @@
 import { Afectado,
          medida,
          MedidasDefinitivas,
-         MedidasEmergentes } from "../models";
+         MedidasEmergentes, 
+         medidasIdentificadas} from "../models";
 import { Op } from 'sequelize';
+
+//servicio para obtener las medidas identificadas en la fase de denuncia de un afectado seleccionado    
+export const medidasIdentificadasPorAfectado = async (afectadoId: number) => {
+  const afectado = await Afectado.findByPk(afectadoId, {
+    attributes: ['id', 'nombres'],
+    include: [
+      {
+        model: medidasIdentificadas,
+        as: "medidasI",
+        attributes: ['idMedida'],
+        include: [
+          {
+            model: medida,
+            as: 'medidas', // ← importante: debe coincidir con el modelo
+            attributes: ['medidas'],
+          },
+        ],
+      },
+    ],
+  });
+
+  if (!afectado) return [];
+
+  const resultadoFormateado = [];
+
+  for (const mi of afectado.medidasI || []) {
+   
+    if (mi.medidas?.medidas) {
+      resultadoFormateado.push({
+        idMedida: mi.idMedida,
+        idAfectado: afectado.id,
+        nombres: afectado.nombres,
+        medida: mi.medidas.medidas
+      });
+    }
+  }
+  console.log("Medidas identificadas:", resultadoFormateado);
+  return resultadoFormateado;
+};
 
 //servicio para obtener las medidas identificadas en la fase de denuncia de un afectado seleccionado    
 export const medidasEmergentesPorAfectado = async (afectadoId: number) => {
@@ -55,12 +95,12 @@ export const medidasEmergentesPorAfectado = async (afectadoId: number) => {
 export async function agregarMedidasEmergentes(data: {
     idAfectado: number;
     idMedida: number;
-    idAvocatoria: number;
+    
     periodo: string;
     observaciones: string;
 }) {
     // Validar datos mínimos
-    if (!data.idAfectado || !data. idMedida || !data.idAvocatoria) {
+    if (!data.idAfectado || !data. idMedida ) {
         throw new Error("Faltan datos obligatorios: idAfectado o idVulneracion");
     }
 
@@ -82,7 +122,7 @@ export async function agregarMedidasEmergentes(data: {
   const nuevaVulneracion = await MedidasEmergentes.create({
     idAfectado: data.idAfectado,
     idMedida: data.idMedida,
-    idAvocatoria: data.idAvocatoria,
+    
     periodo: data.periodo,
     observaciones: data.observaciones
   });
@@ -94,7 +134,7 @@ export async function agregarMedidasEmergentes(data: {
 export async function editarMedidaEmergente(id: number, data: {
   idAfectado?: number;
   idMedida?: number;
-  idAvocatoria?: number;
+  
   periodo?: string;
   observaciones?: string;
   
@@ -105,7 +145,7 @@ export async function editarMedidaEmergente(id: number, data: {
   const camposActualizar: any = {};
   if (data.idAfectado !== undefined) camposActualizar.idAfectado = data.idAfectado;
   if (data.idMedida !== undefined) camposActualizar.idMedida = data.idMedida;
-  if (data.idAvocatoria !== undefined) camposActualizar.idAvocatoria = data.idAvocatoria;
+  
   if (data.periodo !== undefined) camposActualizar.periodo = data.periodo;
   if (data.observaciones !== undefined) camposActualizar.observaciones = data.observaciones;
 
@@ -190,12 +230,12 @@ export const medidasDefinitivasPorAfectado = async (afectadoId: number) => {
 export async function agregarMedidasDefinitivas(data: {
     idAfectado: number;
     idMedida: number;
-    idAP: number;
+    
     periodo: string;
     observaciones: string;
 }) {
     // Validar datos mínimos
-    if (!data.idAfectado || !data. idMedida || !data.idAP) {
+    if (!data.idAfectado || !data. idMedida) {
         throw new Error("Faltan datos obligatorios: idAfectado o idVulneracion");
     }
 
@@ -217,7 +257,7 @@ export async function agregarMedidasDefinitivas(data: {
   const nuevaVulneracion = await MedidasDefinitivas.create({
     idAfectado: data.idAfectado,
     idMedida: data.idMedida,
-    idAP: data.idAP,
+    
     periodo: data.periodo,
     observaciones: data.observaciones
   });
@@ -229,7 +269,7 @@ export async function agregarMedidasDefinitivas(data: {
 export async function editarMedidaDefinitiva(id: number, data: {
   idAfectado?: number;
   idMedida?: number;
-  idAP?: number;
+  
   periodo?: string;
   observaciones?: string;
   
@@ -240,7 +280,7 @@ export async function editarMedidaDefinitiva(id: number, data: {
   const camposActualizar: any = {};
   if (data.idAfectado !== undefined) camposActualizar.idAfectado = data.idAfectado;
   if (data.idMedida !== undefined) camposActualizar.idMedida = data.idMedida;
-  if (data.idAP !== undefined) camposActualizar.idAP = data.idAP;
+  
   if (data.periodo !== undefined) camposActualizar.periodo = data.periodo;
   if (data.observaciones !== undefined) camposActualizar.observaciones = data.observaciones;
 

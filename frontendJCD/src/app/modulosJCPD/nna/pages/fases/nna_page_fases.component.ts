@@ -33,6 +33,7 @@ export class NnaPageFasesComponent implements OnInit {
   resoluciones:string ='';
   cumplimientoMedidas:string ='';
   controlImpugnacion:string ='';
+  cierreCaso:string ='';
   denunciastatus:string ='';
  tarjetasAvocatoria: any[] = [];
 
@@ -57,6 +58,7 @@ ngOnInit() {
       this.resoluciones = estatus.resoluciones;
       this.cumplimientoMedidas = estatus.cumplimientoMedidas;
       this.controlImpugnacion = estatus.controlImpugnacion;
+      this.cierreCaso = estatus.cierreCaso;
 
       this.armarArrayFases();
 
@@ -151,7 +153,7 @@ ngOnInit() {
   ,
   {
     titulo: 'Cierre de caso',
-    estatus: 'pendiente',
+    estatus: this.cierreCaso,
     idDenuncia: this.denuncia?.idDenuncia,
     link: '/nna/cierreDeCaso',
     linkDetalles: '/nna/detalle-cierre',

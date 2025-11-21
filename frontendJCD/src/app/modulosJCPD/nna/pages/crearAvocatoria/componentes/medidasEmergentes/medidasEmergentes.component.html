@@ -1,143 +1,9 @@
-<div class="pl-2 py-2 mb-1">
-  <h1 class="text-2xl font-bold">Crear Resoluciones</h1>
-</div>
-
-<hr class="border-yellow-300 border-1" />
-   <div class="flex  mb-0 gap-3 " id="tabs">
-    <button type="button" class="rounded-t-2xl p-2"
-       [ngClass]="{
-      'bg-blue-500 text-white': currentTab === '0',
-      'bg-gray-100': currentTab !== '0'
-    }"
-      (click)="cambiarTab('0')"
-
-    >
-      inicio
-    </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('1')"
-
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab  != '1',
-
-    }"
-    >
-     Pruebas
-    </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('2')"
-
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab  != '2',
-
-    }"
-    >
-     Medidas de proteccion
-    </button>
-     @if (currentTab==="3") {
-      <a
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('3')"
+<!--
+        <form [formGroup]="medidasEmergentesForm" class="">
 
 
-      [ngClass]="{
-
-      'bg-blue-500 text-white': currentTab === '3',
-      'bg-gray-100': currentTab !== '3'
-    }"
-    >
-      pdf
-    </a>
-
-    }
-    <div class="flex flex-1 m-1 justify-end space-x-4">
-      <app-button-submit
-        type="button"
-        label="Cancelar"
-        color="cancelar"
-
-      >
-      </app-button-submit>
-       <app-button-submit
-    type="button"
-    label="Editar"
-    color="afirmar"
-
-     [disabled]="editarDisabled"
-     (clicked)=" updateResolucion()"
-
-
-    >
-
-    </app-button-submit>
-      <app-button-submit type="button"
-       label="Guardar"
-        color="submit"
-        (clicked)="submitResoluciones()"
-
-      [disabled]="guardarDisabled"
-      >
-      </app-button-submit>
-      <app-button-submit
-    type="button"
-    label="GenerarPDF"
-    color="submit"
-    [disabled]="pdfDisabled"
-    (clicked)="generarPdf()"
-
-
-
-    >
-
-    </app-button-submit>
-
-
-    </div>
-
-
-  </div>
-<form [formGroup]="resolucionesForm" class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
-
-
-  <app-card-Form
-    [titulo]="'consideraciones'"
-      [hidden]="currentTab != '0'"
-    >
-    <div>
-        <quill-editor
-
-          [modules]="modules"
-          formControlName="consideraciones"
-
-          class="w-full h-50"
-        >
-        </quill-editor>
-      </div>
-
-  </app-card-Form>
-  <app-card-Form
-   [titulo]="'Resoluciones'"
-      [hidden]="currentTab != '1'"
-  >
-  <div>
-        <quill-editor
-          [modules]="modules"
-          formControlName="resolucion"
-
-          class="w-full h-50"
-        >
-        </quill-editor>
-      </div>
-
-  </app-card-Form>
-  <app-card-Form [titulo]="'Medidas de proteccion'"
-        [hidden]="currentTab != '2'">
-
-    <form [formGroup]="medidasDefinitivasForm">
-
-      <!-- Selector de afectados -->
+          <p>Así mismo se disponen las medidas de protección:</p>
+          
            <div class="grid grid-cols-3 gap-2">
             <div class="h-full">
             <label
@@ -146,16 +12,28 @@
               >Seleccionar afectado</label
             >
             <select
-              (change)="medidaDefinitiva($event)"
+              (change)="medidasEmergentes($event)"
               id="afectados"
               formControlName="idAfectado"
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
-            >
+              [ngClass]="{
+          ' border-1 border-red-500': medidasEmergentesForm.get('idAfectado')?.invalid && medidasEmergentesForm.get('idAfectado')?.touched
+        }"
+              >
               <option value=""  disabled selected hidden >Seleccione...</option>
               @for (item of afectados; track $index) {
               <option [value]="item.id">{{ item.nombres }}</option>
               }
             </select>
+            <div
+      *ngIf="
+        medidasEmergentesForm.get('idAfectado')?.invalid && medidasEmergentesForm.get('idAfectado')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="medidasEmergentesForm.get('idAfectado')?.errors?.['required']"
+        >Debe seleccionar un afectado</span>
+    </div>
 
             <div>
             <label
@@ -172,7 +50,20 @@
               name="medida"
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
               placeholder="medida"
+              [ngClass]="{
+          ' border-1 border-red-500': medidasEmergentesForm.get('idAfectado')?.invalid && medidasEmergentesForm.get('idAfectado')?.touched
+        }"
             />
+            <div
+      *ngIf="
+        medidasEmergentesForm.get('idMedida')?.invalid && medidasEmergentesForm.get('idMedida')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="medidasEmergentesForm.get('idMedida')?.errors?.['required']"
+        >Debe seleccionar una medida</span>
+    </div>
+
           </div>
           <div>
             <label
@@ -187,7 +78,19 @@
               name="periodo"
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
               placeholder="Ej: Julio - Septiembre"
+              [ngClass]="{
+          ' border-1 border-red-500': medidasEmergentesForm.get('periodo')?.invalid && medidasEmergentesForm.get('periodo')?.touched
+        }"
             />
+            <div
+      *ngIf="
+        medidasEmergentesForm.get('idMedida')?.invalid && medidasEmergentesForm.get('idMedida')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="medidasEmergentesForm.get('periodo')?.errors?.['required']"
+        >Debe introducir el periodo</span>
+    </div>
           </div>
           <div>
             <label
@@ -202,15 +105,24 @@
               rows="3"
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
               placeholder="Escriba sus observaciones..."
+              [ngClass]="{
+          ' border-1 border-red-500': medidasEmergentesForm.get('periodo')?.invalid && medidasEmergentesForm.get('periodo')?.touched
+        }"
             ></textarea>
           </div>
+          <div
+      *ngIf="
+        medidasEmergentesForm.get('observaciones')?.invalid && medidasEmergentesForm.get('observaciones')?.touched
+      "
+      class="text-red-500 text-sm mt-1"
+    >
+      <span *ngIf="medidasEmergentesForm.get('observaciones')?.errors?.['required']"
+        >Debe introducir observaciones</span>
+    </div>
 
           </div>
 
-          <!-- Tabla de medidas -->
-          <!-- Tabla de medidas emergentes -->
 
-          <!-- Lista de medidas por artículo -->
           <div class="flex col-span-2 my-4 gap-2 h-60 ">
             @for (articulo of medidasPorArticulo; track $index) {
 
@@ -228,7 +140,6 @@
                   *ngFor="let medida of articulo.medidas"
                   class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 cursor-pointer flex items-start"
                 >
-
                   <div class="flex items-center h-5">
                     <input
                       type="radio"
@@ -254,44 +165,44 @@
           </div>
 
            </div>
-          <div class="mt-2">
-            <button
-              type="button"
-              (click)="agregarMedidasDefinitivas()"
 
+
+
+          <div class="mt-2">
+            @if (editMediasMode && editMode) {
+              <button
+              type="button"
+              (click)="actualizarMedidasEditMode()"
+              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Actualizar
+            </button>
+
+            }@else {
+              <button
+              type="button"
+              (click)="agregarMedidas()"
               class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Guardar
             </button>
 
+            }
 
           </div>
-
-
         </form>
         <div
-
+          formArrayName="mediasEmergentes"
           class="mt-4 bg-white rounded shadow"
         >
           <app-tablaEdit
             [encabezados]="['ID', 'Medida ', 'Periodo', 'Observaciones']"
             [columnas]="['idMedida', 'medida', 'periodo', 'observaciones']"
-            [datos]="medidasDefinitivas"
-
-
+            [datos]="filteredMedidas"
+            [acciones]="true"
+            [mostrarEditar]="true"
+            [eliminar]="eliminar.bind(this)"
+            [editar]="editar.bind(this)"
           ></app-tablaEdit>
         </div>
-
-
-
-
-  </app-card-Form>
-  @if (pdfSrc) {
-        <div class="pdf-container" [hidden]="currentTab !== '3'">
-          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
-        </div>
-      }
-
-
-</form>
-
+      -->

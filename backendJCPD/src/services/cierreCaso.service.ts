@@ -14,6 +14,7 @@ interface CierreCasoData {
     conclusion: string;
     secretariaAuxiliar: string;
     informesPresentados: InformeData[];
+    estatus?: "pendiente"|"en_proceso"|"completada";
 }
 
 export async function crearCierreCaso(data: CierreCasoData) {
@@ -25,7 +26,8 @@ export async function crearCierreCaso(data: CierreCasoData) {
             idDenuncia: data.idDenuncia,
             codigoTramite: data.codigoTramite,
             conclusion: data.conclusion,
-            secretariaAuxiliar: data.secretariaAuxiliar
+            secretariaAuxiliar: data.secretariaAuxiliar,
+            estatus:"completada"
         }, { transaction });
 
         // 2. Crear los informes presentados usando el ID del cierre de caso

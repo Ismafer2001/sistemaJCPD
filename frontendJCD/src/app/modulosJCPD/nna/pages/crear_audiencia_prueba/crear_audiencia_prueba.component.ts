@@ -69,13 +69,36 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
   datosAudienciaPrueba: any;
   miembrosPrincipales: any[] = [];
   pdfSrc: SafeResourceUrl | null = null;
+  // Estados internos para los botones (sin la lógica de resolución)
+  private _pdfDisabled: boolean = true;
+  private _guardarDisabled: boolean = false;
+  private _editarDisabled: boolean = true;
+  private cargandoDatosEdicion = false; // Flag para ignorar cambios durante carga
+
+  // Estados para los botones que se calculan explícitamente
   pdfDisabled: boolean = true;
   guardarDisabled: boolean = false;
   editarDisabled: boolean = true;
+
+  // Método para actualizar los estados de los botones
+  private actualizarEstadoBotones(): void {
+    const tieneResolucion = this.existeResolucion !== null && this.existeResolucion !== undefined;
+
+    // PDF: Si existe resolución, siempre activo. Si no, respeta el estado manual
+    this.pdfDisabled = tieneResolucion ? false : this._pdfDisabled;
+
+    // Guardar: Si existe resolución, siempre deshabilitado. Si no, respeta el estado manual
+    this.guardarDisabled = tieneResolucion ? true : this._guardarDisabled;
+
+    // Editar: Si existe resolución, siempre deshabilitado. Si no, respeta el estado manual
+    this.editarDisabled = tieneResolucion ? true : this._editarDisabled;
+  }
+
   idAudienciaP!: number;
 
   editMode: boolean = false;
   ignoreFirstValueChangeAvocatoria: boolean = false;
+  existeResolucion: any = null;
 
   constructor(private router: Router,
     private route: ActivatedRoute,
@@ -87,6 +110,8 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
     private vulneracionService: VulneracionService,
     private sanitizer: DomSanitizer) { }
 
+
+
   //inicializa el componente//
   ngOnInit() {
 
@@ -94,10 +119,11 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
       this.denunciaId = +params['id'];
       if (params['modo'] === 'editar') {
         this.editMode = true;
-        this.guardarDisabled = true;
-        this.pdfDisabled = false;
-        this.editarDisabled = true;
-        // prevent the first programmatic patch from toggling buttons
+        // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
+        this._guardarDisabled = true;
+        this._pdfDisabled = false;
+        this._editarDisabled = true;
+        this.actualizarEstadoBotones();
         this.ignoreFirstValueChangeAvocatoria = true;
       }
       // Cargar afectados y dirigidoA cuando tengamos el idDenuncia
@@ -117,6 +143,7 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
     this.principalesActivos();
     // Inicializar formulario de audiencia
     this.formularioAudienciaPrueba();
+    this.actualizarEstadoBotones();
     this.formularioParticipantes()
     this.formularioMedidasDefinitivas()
     this.formularioVulneracionesIdentificadas()
@@ -131,12 +158,12 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
 
     this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
 
+    // Suscripción inteligente a cambios del formulario
     this.audienciaPruebaForm.valueChanges.subscribe(value => {
       console.log('Audiencia Form Value Changes:', value);
-      // Si el formulario cambia después de guardar, deshabilita PDF y edición
-      if (!this.guardarDisabled) return; // Solo si ya se guardó
-      this.pdfDisabled = true;
-      this.editarDisabled = false;
+      if (!this.cargandoDatosEdicion) {
+        this.actualizarEstadoBotones();
+      }
     });
     this.participantesForm.valueChanges.subscribe(value => {
       console.log('Participantes Form Value Changes:', value);
@@ -350,7 +377,7 @@ seleccionarMEdida() {
     medidasDefinitivas(event: Event) {
     const target = event.target as HTMLSelectElement;
   const afectadoId = parseInt(target.value, 10);
-  
+
   if (!afectadoId) return;
   // reset editor to avoid leftover selection from other afectado
   this.resetEditor();
@@ -551,8 +578,9 @@ resetEditor() {
         });
         this.resetEditor();
         this.editMediasMode = false;
-        this.editarDisabled = true;
-        this.pdfDisabled = false;
+        this._editarDisabled = true;
+        this._pdfDisabled = false;
+        this.actualizarEstadoBotones();
         const fg = this.medidasDefinitivasForm;
   if (fg.invalid) {
     fg.markAllAsTouched();
@@ -772,9 +800,24 @@ get participantesArray(): FormArray {
     });
   }
   audienciaPruebasEditMode(id: number){
+    this.cargandoDatosEdicion = true;
     this.audienciaPruebasService.getAudienciaPruebaEditMode(id).subscribe(data => {
       console.log('Datos de audiencia para editar cargados', data);
       if (!data) return;
+
+      this.existeResolucion = data?.idResolucion ?? null;
+      this.actualizarEstadoBotones(); // Actualizar estados después de cargar resolución
+
+      // Mostrar toast si existe resolución
+      if(this.existeResolucion){
+        this.audienciaPruebaForm.disable();
+        this.actualizarEstadoBotones();
+        toast.warning('No puedes editar esta audiencia de prueba', {
+          duration: 10000,
+          description: 'Ya existe una resolución asociada a esta audiencia de prueba',
+        });
+      }
+
       // Patch main fields defensively (support multiple backend keys)
       const codigo = data?.codigoTramite ?? data?.codigo_tramite ?? data?.codigo ?? '';
       const hora = data?.horaCitacion ?? data?.hora_citacion ?? data?.Hora ?? data?.hora ?? '';
@@ -796,6 +839,20 @@ get participantesArray(): FormArray {
         instalacionAudiencia: data?.instalacionAudiencia ?? '',
         afectadoManifiesta: data?.afectadoManifiesta ?? '',
       }, { emitEvent: false });
+
+      // Ensure initial button state for edit mode: PDF enabled, Edit disabled
+      if (this.editMode) {
+        this._pdfDisabled = false;
+        this._editarDisabled = true;
+        this.actualizarEstadoBotones();
+      }
+      // Clear the ignore flag on the next tick so the first real user change is handled
+      setTimeout(() => { this.ignoreFirstValueChangeAvocatoria = false; }, 0);
+
+      // Marcar que terminó la carga de datos para permitir detectar cambios reales del usuario
+      setTimeout(() => {
+        this.cargandoDatosEdicion = false;
+      }, 100); // Pequeño delay para asegurar que todos los patchValue hayan terminado
 
       // Populate participantes FormArray if provided
       const posibles = data?.participantes ?? data?.asistentes ?? data?.participantesRegistrados ?? [];
@@ -897,8 +954,9 @@ get participantesArray(): FormArray {
           toast.success('Audiencia Actualizada con Éxito', {
             duration: 3000,
           });
-          this.pdfDisabled = false;
-            this.editarDisabled = true;
+          this._pdfDisabled = false;
+          this._editarDisabled = true;
+          this.actualizarEstadoBotones();
 
         },
         error: (err) => {
@@ -931,8 +989,9 @@ get participantesArray(): FormArray {
                 duration: 3000,
               });
               this.editMode = true;
-      this.pdfDisabled = false;
-        this.guardarDisabled = true;
+      this._pdfDisabled = false;
+        this._guardarDisabled = true;
+        this.actualizarEstadoBotones();
 
     },
     error(err) {

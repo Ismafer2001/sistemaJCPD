@@ -1,10 +1,11 @@
 import { Router,  } from 'express';
-import { getAllMedidas, getMedidasEmergentesPorAfectado, postMedidasEmergentes, putEditarMedidaEmergente, deleteMedidaEmergente, getMedidasDefinitivasPorAfectado, postMedidasDefinitivas, putEditarMedidaDefinitiva } from '../controllers/medidas.controller';
+import { getAllMedidas, getMedidasEmergentesPorAfectado, postMedidasEmergentes, putEditarMedidaEmergente, deleteMedidaEmergente, getMedidasDefinitivasPorAfectado, postMedidasDefinitivas, putEditarMedidaDefinitiva, getMedidasIdentificadasPorAfectado } from '../controllers/medidas.controller';
 
 const router = Router();
 
 // Obtener todas las medidas agrupadas por artículo
 router.get('/', getAllMedidas);
+router.get('/medidas-identificadas/:id', getMedidasIdentificadasPorAfectado);
 router.get('/medidas-emergentes/:id', getMedidasEmergentesPorAfectado);
 router.get('/medidas-definitivas/:id', getMedidasDefinitivasPorAfectado);
 router.post('/medidas-definitivas', postMedidasDefinitivas);

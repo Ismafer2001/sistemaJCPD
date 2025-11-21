@@ -13,6 +13,8 @@ import ButtonSubmitComponent from '@shared/components/button-submit/button-submi
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toast } from 'ngx-sonner';
+import { forkJoin, Observable, of } from 'rxjs';
+import { catchError, finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-crearAvocatoria',
@@ -32,15 +34,16 @@ export class CrearAvocatoriaComponent implements OnInit {
   medidasEmergentesForm!: FormGroup;
   editMode: boolean = false;
   editMediasMode: boolean = false;
+   medidasEmergentesArray: any[] = [];
   //------------------------------------
   denunciaAvocatoria: any = null;
   avocatoriacargada: any = null;
   medidasPorArticulo: ArticuloMedidas[] = [];
   afectados: any[] = [{id: 0, nombres: ''}];
-  medidasIdenificadas: [] = [];
+
   // Guarda las medidas que el usuario eliminó localmente por afectado
-  removedMedidasByAfectado: Map<number, Set<number>> = new Map();
-  selectedIndex: number | null = null;
+
+
   denunciaId: number = 0;
   currentTab = 0;
   fechaHoraActual: Date = new Date();
@@ -126,17 +129,12 @@ export class CrearAvocatoriaComponent implements OnInit {
     });
 
 
-    this.cargarMedidas();
+    this.cargarListaDeMedidas();
     this.formularioAvocatoria();
     this.formularioMedidasEmergentes();
-    this.seleccionarMEdida();
+    this.seleccionarMedida();
 
-    if (this.editMode){
-      this.loadMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
 
-    }else{
-       this.loadMedidasIDentificadas(this.medidasEmergentesForm.get('idAfectado')?.value);
-    }
 
     //----escucha cambios en los formularios para debug----//
 
@@ -205,7 +203,7 @@ CUARTO.-<p>`,
 
       ],
       articulo: ['', Validators.required],
-      mediasEmergentes: this.fb.array([], Validators.required),
+
 
     })
 
@@ -217,7 +215,8 @@ CUARTO.-<p>`,
       medida: ['', Validators.required],
       periodo: ['', Validators.required],
       observaciones: ['', Validators.required],
-      id: []
+      id: ['', Validators.required]
+
     });
   }
 
@@ -228,42 +227,13 @@ CUARTO.-<p>`,
   return this.avocatoriaForm.get('mediasEmergentes') as FormArray;
 }
 
-  // Devuelve solo las medidas que pertenecen al afectado actualmente seleccionado
-  get filteredMedidas(): any[] {
-    const idAfectado = Number(this.medidasEmergentesForm.get('idAfectado')?.value);
-    if (!idAfectado) return [];
-    return (this.medidas.value || []).filter((m: any) => Number(m.idAfectado) === idAfectado);
-  }
 
 
 
   //---------------llenar formulario-----------------//
-   agregarAfectado(): void {
-  if (this.medidasEmergentesForm.valid) {
-    this.medidas.push(this.fb.group(this.medidasEmergentesForm.value));
-    this.medidasEmergentesForm.reset(); // limpio el form para el siguiente
-  } else {
-    this.medidasEmergentesForm.markAllAsTouched(); // para que muestre errores
-  }
-}
 
-seleccionarMEdida() {
-  this.medidasEmergentesForm.get('idMedida')!
-    .valueChanges
-    .subscribe((id: number | string) => {
-      const numId = Number(id);
-      // Busca el nombre en tu catálogo
-      const encontrado = this.medidasPorArticulo
-        .flatMap(a => a.medidas)
-        .find(m => m.id === numId);
 
-      this.medidasEmergentesForm.patchValue(
-        { medida: encontrado?.medida ?? '' },
-        { emitEvent: false }
-      );
-    });
 
-}
 
   //--------------carga de datos---------//
 
@@ -278,6 +248,7 @@ seleccionarMEdida() {
       // Mostrar toast si existe notificación
       if(this.existeNotificacion){
         this.avocatoriaForm.disable();
+        this.medidasEmergentesForm.disable();
         this.actualizarEstadoBotones();
         toast.warning('No puedes editar esta avocatoria', {
           duration: 10000,
@@ -323,32 +294,7 @@ seleccionarMEdida() {
         // Clear the ignore flag on the next tick so the first real user change is handled
         setTimeout(() => { this.ignoreFirstValueChangeAvocatoria = false; }, 0);
 
-       /* // Populate mediasEmergentes FormArray
-        const arr = this.avocatoriaForm.get('mediasEmergentes') as FormArray;
-        // clear existing
-        while (arr.length) arr.removeAt(0);
 
-        // Backend may return the measures under different keys
-        const medidasList = this.avocatoriacargada.mediasEmergentes ?? this.avocatoriacargada.medias ?? this.avocatoriacargada.medidasEmergentes ?? this.avocatoriacargada.medidas ?? [];
-
-        if (Array.isArray(medidasList)) {
-          medidasList.forEach((it: any) => {
-            // normalize fields
-            const idAfectado = it.idAfectado ?? it.id_afectado ?? it.idAfectadoSeleccionado ?? it.idAfectado ?? 0;
-            const idMedida = it.idMedida ?? it.id_medida ?? it.idMedida ?? it.idMedida ?? null;
-            const medidaTexto = it.medida ?? it.descripcion ?? it.texto ?? it.medida_text ?? '';
-            const periodo = it.periodo ?? it.period ?? '';
-            const observaciones = it.observaciones ?? it.obs ?? it.observation ?? '';
-
-            arr.push(this.fb.group({
-              idAfectado: [idAfectado],
-              idMedida: [idMedida],
-              medida: [medidaTexto],
-              periodo: [periodo],
-              observaciones: [observaciones]
-            }));
-          });
-        }*/
       }
 
       // Marcar que terminó la carga de datos para permitir detectar cambios reales del usuario
@@ -383,79 +329,40 @@ seleccionarMEdida() {
       }
     });
   }
+
+  //-------LOGICA DE MEDIDAS EMERGENTES EN AVOCATORIA-----------------//
+
+  //cargar afectado para selccionar en el formulario de medidas emergentes
   LoadAfectados(id: number) {
     this.avocatoriaService.getAfectados(id).subscribe({
       next: (data) => {
         this.afectados = data;
-
-        console.log(this.afectados)
       },
       error: (err) => {
         console.error('Error al cargar los afectados', err);
       }
     });
   }
-   loadMedidasIDentificadas(id:number){
+//rellenar el formulario al seleccionar una medida
+  seleccionarMedida() {
+  this.medidasEmergentesForm.get('idMedida')!
+    .valueChanges
+    .subscribe((id: number | string) => {
+      const numId = Number(id);
+      // Busca el nombre en tu catálogo
+      const encontrado = this.medidasPorArticulo
+        .flatMap(a => a.medidas)
+        .find(m => m.id === numId);
 
-     if (!id) return;
-
-  this.avocatoriaService.getMedidasIdentificadas(id)
-    .subscribe((res: any) => {
-      const lista = Array.isArray(res?.afectado) ? res.afectado : []; // [{ nombre, medida }, ...]
-
-      for (const item of lista) {
-        // evita re-agregar medidas que el usuario eliminó localmente
-        const removedSet = this.removedMedidasByAfectado.get(id);
-        if (removedSet && item.idMedida && removedSet.has(Number(item.idMedida))) {
-          continue;
-        }
-        // evita duplicar por (afectado + texto de la medida)
-        const yaExiste = this.medidas.controls.some(fg =>
-          fg.get('idAfectado')?.value === id &&
-          fg.get('medida')?.value === item.medida
-        );
-        if (yaExiste) continue;
-
-        this.medidas.push(this.fb.group({
-          idAfectado:    [id],       // viene del select
-          idMedida:      [item.idMedida],             // aún no lo resolvemos
-          medida:        [item.medida || ''],// texto para mostrar
-          periodo:       [''],               // el usuario lo llenará
-          observaciones: ['']                // el usuario lo llenará
-        }));
-      }
-
-      // opcional: ver cómo quedó el array
-      // console.log('mediasEmergentes:', this.medidas.getRawValue());
+      this.medidasEmergentesForm.patchValue(
+        { medida: encontrado?.medida ?? '' },
+        { emitEvent: false }
+      );
     });
-  }
-  loadMedidasEmergentes(id:number){
-     if (!id) return;
-  this.medidasService.getMedidasEmergentes(id)
-    .subscribe((res: any) => {
-      const lista = Array.isArray(res?.afectado) ? res.afectado : []; // [{ nombre, medida }, ...]
-      for (const item of lista) {
-         // evita duplicar por (afectado + texto de la medida)
-        const yaExiste = this.medidas.controls.some(fg =>
-          fg.get('idAfectado')?.value === id &&
-          fg.get('medida')?.value === item.medida
-        );
-        if (yaExiste) continue;
 
-        this.medidas.push(this.fb.group({
-          idAfectado:    [id],       // viene del select
-          idMedida:      [item.idMedida],             // aún no lo resolvemos
-          medida:        [item.medida || ''],// texto para mostrar
-          periodo:       [item.periodo || ''],               // el usuario lo llenará
-          observaciones: [item.observaciones || ''],
-          id:           [item.id || '']                // el usuario lo llenará
-        }));
-      }
-      // opcional: ver cómo quedó el array
-      // console.log('mediasEmergentes:', this.medidas.getRawValue());
-    });
-  }
-  cargarMedidas() {
+}
+//cargar listado de la medidas de poroteccion por articulo
+  cargarListaDeMedidas() {
 
     this.medidasService.getAllMedidas().subscribe({
       next: (response) => {
@@ -469,101 +376,172 @@ seleccionarMEdida() {
       }
     });
   }
-  //-------otrso----/
-  medidasEmergentes(event: Event) {
+
+   medidasEmergentes(event: Event) {
     const target = event.target as HTMLSelectElement;
-  const afectadoId = parseInt(target.value, 10);
-  if (!afectadoId) return;
+
+    const afectadoId = parseInt(target.value, 10);
+    if (!afectadoId) return;
   // reset editor to avoid leftover selection from other afectado
-  this.resetEditor();
-  if (this.editMode){
-    this.loadMedidasEmergentes(afectadoId);
+    this.resetEditor();
 
-  }else{
-    this.loadMedidasIDentificadas(afectadoId);
+    this.loadMedidasporAfectado(afectadoId);
 
   }
-
-
-  }
-
-   cambiarTab(tab: number) {
-    this.currentTab = tab;
-  }
-  //-------guardar formualrio---------------//
-  // Verifica si ya existe la medida para el mismo afectado (clave compuesta)
-  isAgregada(idMedida: number, idAfectado: number): boolean {
-    return this.medidas.controls.some(ctrl => {
-      const mid = Number(ctrl.get('idMedida')?.value);
-      const aid = Number(ctrl.get('idAfectado')?.value);
-      return mid === Number(idMedida) && aid === Number(idAfectado);
-    });
-  }
-  //MODIFICAR PARA EL EDITMODE     <-------------------
-  agregarMedidas(){
-    const fg = this.medidasEmergentesForm;
-  if (fg.invalid) {
-    fg.markAllAsTouched();
-    toast.error('Error al agregar medida', {
-      duration: 3000,
-      description: 'Por Favor, Completa Todos los Campos Requeridos'
-    });
-    return;
-  }
-    if (this.editMode){
-      this.agregarMedidaAfectadoEditMode(fg);
-
-    }else{
-      this.guardarDetalleMedidas(fg);
-    }
-    toast.success('Medida agregada con éxito', {
-        duration: 3000,
-      });
-
-  }
-  guardarDetalleMedidas(fg: FormGroup) {
-  const v = fg.getRawValue(); // { idMedida, medida, periodo, observaciones }
-
-  if (this.selectedIndex === null) {
-  // Crear: valida duplicados por idMedida y afectado
-  if (this.isAgregada(Number(v.idMedida), Number(v.idAfectado))) {
-      toast.warning('Ya agregaste esta medida para este afectado', {
-                duration: 3000,
-              });
+  /**
+   * Obtiene las medidas emergentes por afectado y las almacena en el array
+   */
+  obtenerMedidasEmergentesPorAfectado(afectadoId: number): void {
+    if (!afectadoId) {
+      console.warn('No se puede obtener medidas emergentes: ID de afectado no disponible');
+      this.medidasEmergentesArray = [];
       return;
     }
 
-    const fila = this.fb.group({
-      idAfectado: [Number(v.idAfectado), Validators.required],
-      idMedida: [Number(v.idMedida), Validators.required],
-      medida: [v.medida, Validators.required],
-      periodo: [v.periodo, Validators.required],
-      observaciones: [v.observaciones, Validators.required],
-    });
+    console.log('Actualizando medidas emergentes para afectado:', afectadoId);
 
-    this.medidas.push(fila);
-
-  } else {
-    // Actualizar la fila existente
-    (this.medidas.at(this.selectedIndex) as FormGroup).patchValue({
-      idMedida: Number(v.idMedida),
-      medida: v.medida,
-      periodo: v.periodo,
-      observaciones: v.observaciones,
+    this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
+      next: (response: any) => {
+        if (response && Array.isArray(response)) {
+          this.medidasEmergentesArray = response;
+          console.log('Medidas emergentes actualizadas:', this.medidasEmergentesArray);
+        } else {
+          console.warn('Respuesta inesperada del servicio:', response);
+          this.medidasEmergentesArray = [];
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al obtener medidas emergentes por afectado:', error);
+        this.medidasEmergentesArray = [];
+      }
     });
   }
 
-  this.resetEditor();
-}
+  loadMedidasporAfectado(afectadoId: number) {
+    if (!afectadoId) return;
 
-agregarMedidaAfectadoEditMode(fg: FormGroup){
+    // PRIMERO: Verificar si ya existen medidas emergentes para este afectado
+    this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
+      next: (responseMedidasEmergentes: any) => {
+        const medidasEmergentesExistentes = Array.isArray(responseMedidasEmergentes) ? responseMedidasEmergentes : [];
 
-  const body = { ...fg.value, idAvocatoria: this.idAvocatoria };
+        if (medidasEmergentesExistentes.length > 0) {
+          // Si ya existen medidas emergentes, solo cargarlas y mostrarlas
+          console.log('Ya existen medidas emergentes para este afectado, cargando existentes...');
+          this.medidasEmergentesArray = medidasEmergentesExistentes;
+          console.log('Medidas emergentes existentes cargadas:', this.medidasEmergentesArray);
+        } else {
+          // Si NO existen medidas emergentes, entonces cargar y agregar las medidas identificadas
+          console.log('No existen medidas emergentes, procediendo a cargar medidas identificadas...');
+          this.cargarYAgregarMedidasIdentificadas(afectadoId);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al verificar medidas emergentes existentes:', error);
+        // En caso de error, intentar cargar medidas identificadas como fallback
+        this.cargarYAgregarMedidasIdentificadas(afectadoId);
+      }
+    });
+  }
+
+  private cargarYAgregarMedidasIdentificadas(afectadoId: number) {
+    // Consumir API de medidas identificadas
+    this.medidasService.getMedidasidentificadas(afectadoId).subscribe({
+      next: (response: any) => {
+        console.log('Medidas identificadas obtenidas:', response);
+
+        // Obtener la lista de medidas del afectado
+        const medidasIdentificadas = Array.isArray(response?.afectado) ? response.afectado : [];
+
+        if (medidasIdentificadas.length > 0) {
+          // Agregar cada medida una por una como medida emergente
+          this.agregarMedidasEmergentesIndividualmente(medidasIdentificadas, afectadoId);
+        } else {
+          console.log('No se encontraron medidas identificadas para este afectado');
+          // Asegurar que el array esté vacío si no hay medidas
+          this.medidasEmergentesArray = [];
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al cargar medidas identificadas:', error);
+        this.medidasEmergentesArray = [];
+      }
+    });
+  }
+
+  private agregarMedidasEmergentesIndividualmente(medidas: any[], afectadoId: number) {
+    if (medidas.length === 0) {
+      console.log('No hay medidas identificadas para procesar');
+      this.medidasEmergentesArray = [];
+      return;
+    }
+
+    console.log(`Procesando ${medidas.length} medidas identificadas para agregar como medidas emergentes`);
+
+    // Crear array de observables para todas las operaciones
+    const requests: Observable<any>[] = medidas.map((medida, index) => {
+      const medidaEmergente = {
+        idAfectado: afectadoId,
+        idMedida: medida.idMedida || medida.id || null,
+        medida: medida.medida || medida.descripcion || '',
+        periodo: medida.periodo || '', // Se puede dejar vacío para que el usuario lo complete
+        observaciones: medida.observaciones || 'Medida agregada automáticamente desde medidas identificadas'
+      };
+
+      // Retornar observable con manejo de errores individual
+      return this.medidasService.agregarMedidasEmergentes(medidaEmergente).pipe(
+        catchError((error) => {
+          console.error(`Error al agregar medida emergente ${index + 1}:`, error);
+          // Retornar un observable con error controlado para que forkJoin no se detenga
+          return of({ error: true, medida: medidaEmergente, errorDetails: error });
+        })
+      );
+    });
+
+    // Usar forkJoin para esperar a que TODAS las operaciones terminen
+    forkJoin(requests).pipe(
+      finalize(() => {
+        console.log('Todas las operaciones de medidas emergentes han finalizado');
+      })
+    ).subscribe({
+      next: (responses) => {
+        // Contar éxitos y errores
+        const exitosos = responses.filter(r => !r.error).length;
+        const errores = responses.filter(r => r.error).length;
+
+        console.log(`✅ Medidas procesadas: ${exitosos} exitosas, ${errores} con errores`);
+
+        if (exitosos > 0) {
+          console.log('Actualizando lista de medidas emergentes...');
+          // Ahora SÍ actualizar la lista porque sabemos que las operaciones terminaron
+          this.obtenerMedidasEmergentesPorAfectado(afectadoId);
+        } else {
+          console.warn('Ninguna medida fue agregada exitosamente');
+          this.medidasEmergentesArray = [];
+        }
+      },
+      error: (error) => {
+        console.error('Error crítico en el procesamiento de medidas:', error);
+        // En caso de error crítico, intentar cargar las medidas existentes
+        this.obtenerMedidasEmergentesPorAfectado(afectadoId);
+      }
+    });
+  }
+
+
+agregarMedida(fg: FormGroup){
+
+  const body = { ...fg.value };
   this.medidasService.agregarMedidasEmergentes(body).subscribe({
     next: () => {
 
-      this.loadMedidasEmergentes(fg.get('idAfectado')?.value);
+      this.obtenerMedidasEmergentesPorAfectado(this.medidasEmergentesForm.get('idAfectado')?.value);
       this.resetEditor();
+      toast.success('Medida agregada con éxito', {
+          duration: 3000,
+          description: 'La medida se agregó correctamente.',
+
+        });
 
     },
     error: (error:any) => {
@@ -593,79 +571,49 @@ resetEditor() {
     periodo: '',
     observaciones: '',
   });
-  this.selectedIndex = null;
+
 }
 
   // -----------Eliminar una medida aceptando índice o item (flexible)
-  eliminar(itemOrIndex: any): void {
+  eliminarMedida(registro: any): void {
     if (!this.medidas) return;
 
-    let index: number | null = null;
-
-    if (typeof itemOrIndex === 'number') {
-      index = itemOrIndex;
-    } else if (itemOrIndex && (itemOrIndex.idMedida || itemOrIndex.idMedida === 0)) {
-      // buscar por idMedida y idAfectado (clave compuesta)
-      const idMedida = Number(itemOrIndex.idMedida);
-      const idAfectado = Number(itemOrIndex.idAfectado ?? itemOrIndex.idAfectado);
-      index = this.medidas.controls.findIndex(ctrl => Number(ctrl.get('idMedida')?.value) === idMedida && Number(ctrl.get('idAfectado')?.value) === idAfectado);
-    } else if (typeof itemOrIndex === 'object') {
-      // si recibimos directamente el control/value, intentar localizar hilo por igualdad de objeto
-      index = this.medidas.controls.findIndex(ctrl => ctrl.value === itemOrIndex || JSON.stringify(ctrl.value) === JSON.stringify(itemOrIndex));
-    }
-
-    if (index === -1 || index === null) return;
-
-
-
-    // Si la fila tiene idMedida (viene del backend), registrar su eliminación para no re-cargarla
-    const fg = this.medidas.at(index) as FormGroup;
-    const idMedidaVal = fg?.get('idMedida')?.value;
-    const idAfectadoVal = fg?.get('idAfectado')?.value;
-    if (idMedidaVal != null && idMedidaVal !== '' && idAfectadoVal != null) {
-      const idMedidaNum = Number(idMedidaVal);
-      const idAfectadoNum = Number(idAfectadoVal);
-      let set = this.removedMedidasByAfectado.get(idAfectadoNum);
-      if (!set) {
-        set = new Set<number>();
-        this.removedMedidasByAfectado.set(idAfectadoNum, set);
+    this.medidasService.eliminarMedidasEmergentes(registro.id).subscribe({
+      next: () => {
+        toast.success('Medida eliminada con éxito', {
+          duration: 3000,
+        });
+        this.obtenerMedidasEmergentesPorAfectado(this.medidasEmergentesForm.get('idAfectado')?.value);
+      },
+      error: (err) => {
+        toast.error('Error al eliminar medida', {
+          duration: 3000,
+          description: err
+        });
       }
-      set.add(idMedidaNum);
-    }
+    })
 
-    this.medidas.removeAt(index);
+
   }
 
   // Editar una medida: carga la fila seleccionada en el formulario para editar
 
-  editar(itemOrIndex: any): void {
-    if (!this.medidas) return;
+  SeleccionarParaEditar(registro: any): void {
 
-    let index: number | null = null;
+    if (!this.medidasEmergentesArray || this.medidasEmergentesArray.length === 0) return;
 
-    if (typeof itemOrIndex === 'number') {
-      index = itemOrIndex;
-    } else if (itemOrIndex && (itemOrIndex.idMedida || itemOrIndex.idMedida === 0)) {
-      const idMedida = Number(itemOrIndex.idMedida);
-      const idAfectado = Number(itemOrIndex.idAfectado ?? itemOrIndex.idAfectado);
-      // localizar usando clave compuesta
-      index = this.medidas.controls.findIndex(ctrl => Number(ctrl.get('idMedida')?.value) === idMedida && Number(ctrl.get('idAfectado')?.value) === idAfectado);
-    } else if (typeof itemOrIndex === 'object') {
-      index = this.medidas.controls.findIndex(ctrl => ctrl.value === itemOrIndex || JSON.stringify(ctrl.value) === JSON.stringify(itemOrIndex));
-    }
-
-    if (index === -1 || index === null) return;
-
-    const fg = this.medidas.at(index) as FormGroup;
+    // Cargar los datos del item en el formulario de edición
     this.medidasEmergentesForm.patchValue({
-      idAfectado: fg.get('idAfectado')?.value,
-      idMedida: fg.get('idMedida')?.value,
-      medida: fg.get('medida')?.value,
-      periodo: fg.get('periodo')?.value,
-      observaciones: fg.get('observaciones')?.value,
-      id: fg.get('id')?.value
+      idAfectado: registro.idAfectado || registro.id_afectado,
+      idMedida: registro.idMedida || registro.id_medida,
+      medida: registro.medida || registro.descripcion,
+      periodo: registro.periodo,
+      observaciones: registro.observaciones,
+      id: registro.id
     });
-    this.selectedIndex = index;
+
+    console.log('id elegido:', registro.id);
+
     this.editMediasMode = true;
     // Scroll the form container to top so the editor is visible to the user
     this.scrollFormToTop();
@@ -693,8 +641,12 @@ resetEditor() {
       console.warn('scrollFormToTop failed', e);
     }
   }
-  actualizarMedidasEditMode(){
-    console.log('Editando medida en modo edición');
+  actualizarMedida(){
+    const fg = this.medidasEmergentesForm;
+  if (fg.invalid) {
+    fg.markAllAsTouched();
+    return;
+  }
       this.medidasService.actualizarMedidasEmergentes(this.medidasEmergentesForm.get('id')?.value, this.medidasEmergentesForm.value).subscribe({
       next: () => {
         toast.success('Medida actualizada con éxito', {
@@ -702,23 +654,9 @@ resetEditor() {
         });
         this.resetEditor();
         this.editMediasMode = false;
-        const fg = this.medidasEmergentesForm;
-  if (fg.invalid) {
-    fg.markAllAsTouched();
-    return;
-  }
-  const v = fg.getRawValue();
 
-  if (this.selectedIndex !==null) {
-     (this.medidas.at(this.selectedIndex) as FormGroup).patchValue({
-      idMedida: Number(v.idMedida),
-      medida: v.medida,
-      periodo: v.periodo,
-      observaciones: v.observaciones,
-    });
 
-  }
-        this.loadMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
+        this.obtenerMedidasEmergentesPorAfectado(this.medidasEmergentesForm.get('idAfectado')?.value);
       },
       error: (err) => {
         toast.error('Error al actualizar medida', {
@@ -728,8 +666,12 @@ resetEditor() {
       }
     });
   }
-//---------cancelar-------------------//
-cancelar(): void {
+//---------Botones de la navegacion ------------------//\
+
+ cambiarTab(tab: number) {
+    this.currentTab = tab;
+  }
+regresar(): void {
     this.router.navigate(['/nna/fases/'+ this.denunciaAvocatoria?.id]);
   }
 
@@ -786,6 +728,7 @@ submitAvocatoria() {
       this._pdfDisabled = false;
         this._guardarDisabled = true;
         this.actualizarEstadoBotones();
+        this.router.navigate(['/nna/avocatoria/editar/'+ this.denunciaAvocatoria?.id]);
 
     },
     error(err) {

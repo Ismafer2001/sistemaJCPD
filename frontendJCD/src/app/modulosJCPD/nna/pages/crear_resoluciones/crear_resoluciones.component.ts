@@ -4,6 +4,7 @@ import { FormBuilder,
    FormGroup,
     ReactiveFormsModule,
     Validators} from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DenunciaService } from '@nna/services/denuncia.service';
 import { MedidasService } from '@nna/services/medidas.service';
@@ -41,10 +42,20 @@ export class Crear_resolucionesComponent implements OnInit {
  //
 
  //Variables para controlar los botones//
- pdfDisabled: boolean = true;
-  guardarDisabled: boolean = false;
-  editarDisabled: boolean = true;
-  idAvocatoria!: number;
+  // Estados internos de botones
+  private _pdfDisabled: boolean = true;
+  private _guardarDisabled: boolean = false;
+  private _editarDisabled: boolean = true;
+  private cargandoDatosEdicion: boolean = false;
+
+  // Getters para acceso público
+  get pdfDisabled(): boolean { return this._pdfDisabled; }
+  get guardarDisabled(): boolean { return this._guardarDisabled; }
+  get editarDisabled(): boolean { return this._editarDisabled; }
+
+  editMode: boolean = false;
+  ignoreFirstValueChange: boolean = false;
+  idResolucion!: number;
   //---------------------------///
     modules = {
   toolbar: [
@@ -65,17 +76,59 @@ export class Crear_resolucionesComponent implements OnInit {
     ['link', 'image']                         // Insertar enlaces, imágenes y videos
   ]
 };
+pdfSrc: SafeResourceUrl | null = null;
 
   constructor(private fb: FormBuilder,
     private medidasService:MedidasService,
     private resolucionesService:ResolucionesService,
     private route: ActivatedRoute,
-    private denunciaService:DenunciaService
+    private denunciaService:DenunciaService,
+    private sanitizer: DomSanitizer,
+    private router: Router,
   ) { }
+
+  private actualizarEstadoBotones(): void {
+    if (this.cargandoDatosEdicion) {
+      return;
+    }
+
+    const formularioValido = this.resolucionesForm?.valid ?? false;
+    const formularioTocado = this.resolucionesForm?.dirty || this.resolucionesForm?.touched;
+
+    if (this.editMode) {
+      // En modo edición: Guardar SIEMPRE deshabilitado
+      this._guardarDisabled = true;
+
+      if (!formularioTocado) {
+        // Estado inicial: PDF habilitado, Editar deshabilitado
+        this._pdfDisabled = false;
+        this._editarDisabled = true;
+      } else {
+        // Cuando hay cambios: PDF deshabilitado, Editar habilitado
+        this._pdfDisabled = true;
+        this._editarDisabled = false;
+      }
+    } else {
+      // En modo creación: Guardar habilitado (si válido y tocado), PDF y Editar deshabilitados
+      this._guardarDisabled = !formularioValido || !formularioTocado;
+      this._pdfDisabled = true;
+      this._editarDisabled = true;
+    }
+  }
 
   ngOnInit() {
      this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
+      if (params['modo'] === 'editar') {
+        this.editMode = true;
+        this.cargandoDatosEdicion = true;
+        // En modo edición: PDF habilitado, Guardar deshabilitado, Editar deshabilitado
+        this._pdfDisabled = false;
+        this._guardarDisabled = true;
+        this._editarDisabled = true;
+        this.ignoreFirstValueChange = true;
+        this.cargarDatosEditMode(this.denunciaId);
+      }
       this.LoadAfectados(this.denunciaId);
        this.loadDenunciaDetails(this.denunciaId);
 
@@ -84,13 +137,25 @@ export class Crear_resolucionesComponent implements OnInit {
     this.cargarMedidas();
     this.seleccionarMedida();
     this.formularioresoluciones();
+    this.actualizarEstadoBotones();
 
     this.medidasDefinitivasForm.valueChanges.subscribe(value => {
       console.log('Medidas Definitivas Form Value Changes:', value);
     })
 
-    this.resolucionesForm.valueChanges.subscribe(value => {
-      console.log('Resoluciones Form Value Changes:', value);
+    // Suscripción inteligente a cambios del formulario
+    this.resolucionesForm.valueChanges.subscribe(() => {
+      if (this.ignoreFirstValueChange) {
+        this.ignoreFirstValueChange = false;
+        return;
+      }
+
+      if (this.cargandoDatosEdicion) {
+        return;
+      }
+
+      // Actualizar estados según el modo y cambios
+      this.actualizarEstadoBotones();
     });
   }
 
@@ -172,6 +237,36 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
       });
     }
 
+
+    cargarDatosEditMode(idDenuncia:number){
+      this.resolucionesService.getresolucion(idDenuncia).subscribe(data =>{
+        this.idResolucion = data.id;
+        this.resolucionesService.getResolucionEditMode(this.idResolucion).subscribe(data => {
+          console.log('Datos de resolución en modo edición:', data);
+
+          // Realizar patchValue con los datos cargados
+          if (data) {
+            this.resolucionesForm.patchValue({
+              consideraciones: data.consideraciones || this.resolucionesForm.get('consideraciones')?.value,
+              resolucion: data.resolucion || '',
+              codigoTramite: data.codigoTramite || this.resolucionesForm.get('codigoTramite')?.value,
+              idDenuncia: data.idDenuncia || this.denunciaId
+            }, { emitEvent: false });
+
+            // Finalizar carga de datos y actualizar botones
+            this.cargandoDatosEdicion = false;
+            this._pdfDisabled = false;
+            this._editarDisabled = true;
+            this.actualizarEstadoBotones();
+
+            // Clear ignore flag para detectar cambios reales
+            setTimeout(() => { this.ignoreFirstValueChange = false; }, 0);
+
+
+          }
+        });
+      });
+    }
     //Carga de datos de vulneraciones identificadas
   loadMedidasDefinitivas(id:number){
     if (!id) return;
@@ -231,9 +326,50 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
 }
 
 
+  // Método para manejar el click del botón Editar
+  habilitarEdicion(): void {
+    // Al hacer click en Editar: Editar se deshabilita, PDF se habilita
+    this._editarDisabled = true;
+    this._pdfDisabled = false;
+  }
+
 //--------tabs----------------
    cambiarTab(tab: string) {
     this.currentTab = tab;
+  }
+
+  updateResolucion() {
+    if (this.resolucionesForm.invalid) {
+      this.resolucionesForm.markAllAsTouched();
+      toast.error('Formulario inválido', {
+        duration: 3000,
+        description: 'Por Favor, Completa Todos los Campos Requeridos'
+      });
+      return;
+    }
+
+    const body = {
+      ...this.resolucionesForm.value,
+    };
+
+    this.resolucionesService.actualizarResolucion(this.idResolucion, body).subscribe({
+      next: (response) => {
+        toast.success('Resolución Actualizada con Éxito', {
+          duration: 3000,
+        });
+        // Marcar formulario como pristine para reflejar que no hay cambios pendientes
+        this.resolucionesForm.markAsPristine();
+        // Estados después de actualizar: Guardar deshabilitado, PDF habilitado, Editar deshabilitado
+        this._guardarDisabled = true;
+        this._pdfDisabled = false;
+        this._editarDisabled = true;
+      },
+      error: (err) => {
+        toast.error('Error al actualizar la resolución', {
+          duration: 3000,
+        });
+      }
+    });
   }
 
   submitResoluciones(){
@@ -250,16 +386,19 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
 
   }
   this.resolucionesService.postResolucion(body).subscribe({
-      next: (body) => {
-       // this.idResolucion = body.id;
+      next: (response) => {
+        this.idResolucion = response.id;
+        this.editMode = true;
         toast.success('Resolución Guardada con Éxito', {
           duration: 3000,
         });
 
-        this.pdfDisabled = false;
-          this.guardarDisabled = true;
+        this._pdfDisabled = false;
+        this._guardarDisabled = true;
+        this.actualizarEstadoBotones();
 
       },
+
       error(err) {
 
         toast.error('Error al guardar', {
@@ -268,8 +407,19 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
         });
 
     }})
+     this.router.navigate(['/nna/resoluciones/editar/'+this.denunciaId]);
 
 
+  }
+
+   generarPdf(){
+
+    this.resolucionesService.crearpdfBlob(this.idResolucion).subscribe((res: Blob) => {
+      console.log('esta es el id del pdf', this.idResolucion);
+      const url = URL.createObjectURL(res);
+      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    });
+    this.cambiarTab('3');
   }
 
 }

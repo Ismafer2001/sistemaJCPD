@@ -17,7 +17,8 @@ import {
 	VulneracionesIdentificadas,
 	Vulneracion,
 	Testimonio, 
-	usuarios} from "../models";
+	usuarios,
+	Resoluciones} from "../models";
 
 interface ParticipanteData {
 	nombres: string;
@@ -63,7 +64,18 @@ export async function obtenerAudienciaPruebasCompleta(idAudiencia: number) {
 	// Buscar el cantón de la audiencia (a través de la denuncia)
 		let usuariosPrincipales: any[] = [];
 		let nombreCanton = '';
-		const denuncia = await Denuncia.findByPk(audiencia.idDenuncia, { attributes: ['id_canton'] });
+		let idResolucion = null;
+		const denuncia = await Denuncia.findByPk(audiencia.idDenuncia, { 
+			attributes: ['id_canton'],
+			include: [
+				{
+					model: Resoluciones,
+					as: 'resoluciones',
+					attributes: ['id'],
+					limit: 1
+				}
+			]
+		});
 		if (denuncia && denuncia.id_canton) {
 			usuariosPrincipales = await usuarios.findAll({
 				where: {
@@ -75,6 +87,12 @@ export async function obtenerAudienciaPruebasCompleta(idAudiencia: number) {
 			});
 			const canton = await Canton.findByPk(denuncia.id_canton, { attributes: ['canton'] });
 			if (canton) nombreCanton = canton.canton;
+			
+			// Extraer ID de la resolución
+			const resoluciones = (denuncia as any).resoluciones;
+			if (resoluciones && resoluciones.length > 0) {
+				idResolucion = resoluciones[0].id;
+			}
 		}
 
 	// Participantes de la audiencia de pruebas
@@ -165,7 +183,7 @@ export async function obtenerAudienciaPruebasCompleta(idAudiencia: number) {
 	// Estructura de respuesta
 		return {
 			idDenuncia: audiencia.idDenuncia,
-			
+			idResolucion: idResolucion,
 			codigoTramite: audiencia.codigoTramite,
 			fecha: audiencia.fecha,
 			hora: audiencia.hora,
@@ -212,7 +230,7 @@ export async function crearAudienciaPruebas(data: AudienciaPruebasData) {
 			  await MedidasDefinitivas.create({
 				idMedida: medida.idMedida,
 				idAfectado: medida.idAfectado,
-				idAP: audiencia.id,
+				
 				periodo: medida.periodo,
 				observaciones: medida.observaciones,
 				// Cambia este campo si tu modelo usa otro nombre

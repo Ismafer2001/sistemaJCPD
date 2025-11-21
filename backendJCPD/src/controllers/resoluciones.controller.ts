@@ -1,5 +1,5 @@
 import { crearPdfResolucionNNA } from '../services/pdfs/resolucionespdf.service';
-import { obtenerAfectados, crearResolucion, obtenerResolucionesPorDenuncia, obtenerResolucionPorId } from '../services/resoluciones.service';
+import { obtenerAfectados, crearResolucion, obtenerResolucionesPorDenuncia, obtenerResolucionCompleta, actualizarResolucion } from '../services/resoluciones.service';
 import { handlehttp } from '../utils/error.handle';
 import { Request, Response } from 'express';
 
@@ -40,14 +40,18 @@ export const postCrearResolucion = async (req: Request, res: Response) => {
       idDenuncia: parseInt(idDenuncia)
     });
 
-    res.status(201).json(resultado);
+    res.status(201).json({
+      success: true,
+      message: 'Denuncia creada exitosamente',
+      data: { id: resultado.id }
+    });
 
   } catch (error) {
     handlehttp(res, 'Error al crear resolución', error);
   }
 };
 
-// Controlador para obtener resoluciones por denuncia
+// Controlador para obtener resoluciones por denuncia (retorna solo ID)
 export const getResolucionesPorDenuncia = async (req: Request, res: Response) => {
   try {
     const idDenuncia = parseInt(req.params.idDenuncia);
@@ -58,19 +62,43 @@ export const getResolucionesPorDenuncia = async (req: Request, res: Response) =>
         message: 'ID de denuncia inválido'
       });
     }
+    
 
-    const resoluciones = await obtenerResolucionesPorDenuncia(idDenuncia);
-    res.json(resoluciones);
+    const resultado = await obtenerResolucionesPorDenuncia(idDenuncia);
+    console.log( 'aquiiiiiiiiiiii',resultado)
+    res.json(resultado);
 
   } catch (error) {
     handlehttp(res, 'Error al obtener resoluciones', error);
   }
 };
 
-// Controlador para obtener una resolución por ID
-export const getResolucionPorId = async (req: Request, res: Response) => {
+// Controlador para obtener resolución completa con todos los datos relacionados
+export const getResolucionCompleta = async (req: Request, res: Response) => {
+  try {
+    const idResolucion = parseInt(req.params.id);
+
+    if (isNaN(idResolucion)) {
+      return res.status(400).json({
+        success: false,
+        message: 'ID de resolución inválido'
+      });
+    }
+
+    const resolucionCompleta = await obtenerResolucionCompleta(idResolucion);
+    
+    res.json( resolucionCompleta);
+
+  } catch (error) {
+    handlehttp(res, 'Error al obtener resolución completa', error);
+  }
+};
+
+// Controlador para actualizar una resolución
+export const putActualizarResolucion = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    const { codigoTramite, consideraciones, resolucion, pdf_resolucion, estatus } = req.body;
 
     if (isNaN(id)) {
       return res.status(400).json({
@@ -79,14 +107,32 @@ export const getResolucionPorId = async (req: Request, res: Response) => {
       });
     }
 
-    const resolucion = await obtenerResolucionPorId(id);
-    res.json(resolucion);
+    // Validar que al menos un campo sea proporcionado
+    if (!codigoTramite && !consideraciones && !resolucion && !pdf_resolucion && !estatus) {
+      return res.status(400).json({
+        success: false,
+        message: 'Debe proporcionar al menos un campo para actualizar'
+      });
+    }
+
+    const resolucionActualizada = await actualizarResolucion(id, {
+      codigoTramite,
+      consideraciones,
+      resolucion,
+      pdf_resolucion,
+      estatus
+    });
+
+    res.json({
+      success: true,
+      message: 'Resolución actualizada exitosamente',
+      data: resolucionActualizada
+    });
 
   } catch (error) {
-    handlehttp(res, 'Error al obtener resolución', error);
+    handlehttp(res, 'Error al actualizar resolución', error);
   }
 };
-
 
 //----------------pdfs--------------------//
 export const getResolucionPdf = async (req: Request, res: Response) => {

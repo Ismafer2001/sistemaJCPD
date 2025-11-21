@@ -30,6 +30,9 @@ export class MedidasService {
   getAllMedidas(): Observable<MedidasResponse> {
     return this.http.get<MedidasResponse>(this.apiUrl);
   }
+  getMedidasidentificadas(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/medidas-identificadas/${id}`);
+  }
   getMedidasEmergentes(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/medidas-emergentes/${id}`);
   }

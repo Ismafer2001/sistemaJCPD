@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { medida, articulo } from '../models';
-import { agregarMedidasEmergentes, medidasEmergentesPorAfectado, editarMedidaEmergente, eliminarMedidaEmergente, agregarMedidasDefinitivas, editarMedidaDefinitiva, medidasDefinitivasPorAfectado } from '../services/medidasproteccion.service';
+import { agregarMedidasEmergentes, medidasEmergentesPorAfectado, editarMedidaEmergente, eliminarMedidaEmergente, agregarMedidasDefinitivas, editarMedidaDefinitiva, medidasDefinitivasPorAfectado, medidasIdentificadasPorAfectado } from '../services/medidasproteccion.service';
 import { handlehttp } from '../utils/error.handle';
 
 // Obtener todas las medidas con sus artículos
@@ -48,6 +48,23 @@ export const getAllMedidas = async (req: Request, res: Response) => {
     });
   }
 };
+//obtener medidas emergentes por afectado
+export const getMedidasIdentificadasPorAfectado = async (req: Request, res: Response) => {
+	try {
+		const id = parseInt(req.params.id);
+		  if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+		
+		  const afectado = await medidasIdentificadasPorAfectado(id);
+		 
+		
+		  res.json({
+			afectado
+		  });
+      
+	} catch (error) {
+		handlehttp(res,'Error al obtener medidas emergentes por afectado' , error);
+	}
+};
 
 //obtener medidas emergentes por afectado
 export const getMedidasEmergentesPorAfectado = async (req: Request, res: Response) => {
@@ -58,9 +75,9 @@ export const getMedidasEmergentesPorAfectado = async (req: Request, res: Respons
 		  const afectado = await medidasEmergentesPorAfectado(id);
 		 
 		
-		  res.json({
+		  res.json(
 			afectado
-		  });
+		  );
       
 	} catch (error) {
 		handlehttp(res,'Error al obtener medidas emergentes por afectado' , error);

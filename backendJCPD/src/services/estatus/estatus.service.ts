@@ -1,4 +1,4 @@
-import { AudienciaContestacion, AudienciaPruebas, Avocatoria, CumpleMedidas, Denuncia, Notificacion, Resoluciones, Afectado } from "../../models";
+import { AudienciaContestacion, AudienciaPruebas, Avocatoria, CumpleMedidas, Denuncia, Notificacion, Resoluciones, Afectado, CierreCaso } from "../../models";
 import { Citacion } from "../../models/citaciones.model";
 import { ControlImpugnacion } from "../../models/controlImpugnacion.model";
 
@@ -47,6 +47,12 @@ export async function estatus(id:string) {
                         required: false
                     }
                 ]
+            },
+            {
+                model: CierreCaso,
+                as: 'CierreCaso',
+                attributes: ['estatus'],
+                required: false
             }
         ]
 
@@ -110,6 +116,7 @@ export async function estatus(id:string) {
     resoluciones: estadoPlano.resoluciones?.[0]?.estatus || '',
     cumplimientoMedidas: cumplimientoMedidas,
     controlImpugnacion: controlImpugnacion,
+    cierreCaso: estadoPlano.CierreCaso?.estatus || '',
   };
   console.log(respuestaFormateada);
     return respuestaFormateada;

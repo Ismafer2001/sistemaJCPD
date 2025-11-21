@@ -92,7 +92,7 @@ export async function crearResolucion(data: {
   resolucion: string;
   pdf_resolucion?: string;
   idDenuncia: number;
-  estatus: "pendiente"|"en_proceso"|"completada";
+  estatus?: "pendiente"|"en_proceso"|"completada";
 }) {
   const t = await sequelize.transaction();
   try {
@@ -131,37 +131,63 @@ export async function crearResolucion(data: {
 // Servicio para obtener resoluciones por denuncia
 export async function obtenerResolucionesPorDenuncia(idDenuncia: number) {
   try {
-    const resoluciones = await Resoluciones.findAll({
+    const resolucion = await Resoluciones.findOne({
       where: { idDenuncia },
+      attributes: ['id'],
       order: [['fecha_creado', 'DESC']]
     });
 
-    return {
-      success: true,
-      data: resoluciones,
-      count: resoluciones.length
-    };
+    return resolucion
 
   } catch (error) {
     throw error;
   }
 }
 
-// Servicio para obtener una resolución por ID
-export async function obtenerResolucionPorId(id: number) {
+// Servicio para actualizar una resolución
+export async function actualizarResolucion(id: number, data: {
+  codigoTramite?: string;
+  consideraciones?: string;
+  resolucion?: string;
+  pdf_resolucion?: string;
+  estatus?: "pendiente"|"en_proceso"|"completada";
+}) {
+  const t = await sequelize.transaction();
   try {
-    const resolucion = await Resoluciones.findByPk(id);
-
-    if (!resolucion) {
+    // Buscar la resolución a actualizar
+    const resolucionExistente = await Resoluciones.findByPk(id);
+    
+    if (!resolucionExistente) {
       throw new Error('Resolución no encontrada');
     }
 
-    return {
-      success: true,
-      data: resolucion
-    };
+    // Si se está actualizando el código de trámite, verificar que sea único
+    if (data.codigoTramite && data.codigoTramite !== resolucionExistente.codigoTramite) {
+      const existeCodigo = await Resoluciones.findOne({
+        where: { codigoTramite: data.codigoTramite }
+      });
+
+      if (existeCodigo) {
+        throw new Error('El código de trámite ya existe');
+      }
+    }
+
+    // Actualizar la resolución
+    await resolucionExistente.update({
+      codigoTramite: data.codigoTramite ?? resolucionExistente.codigoTramite,
+      consideraciones: data.consideraciones ?? resolucionExistente.consideraciones,
+      resolucion: data.resolucion ?? resolucionExistente.resolucion,
+      pdf_resolucion: data.pdf_resolucion ?? resolucionExistente.pdf_resolucion,
+      
+    }, { transaction: t });
+
+    await t.commit();
+    
+    // Retornar la resolución actualizada
+    return await Resoluciones.findByPk(id);
 
   } catch (error) {
+    await t.rollback();
     throw error;
   }
 }

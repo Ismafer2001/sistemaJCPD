@@ -13,13 +13,7 @@ export async function crearAvocatoria(data: {
   idDenuncia: number;
   estatus: "pendiente"|"en_proceso"|"completada";
   
-  mediasEmergentes: Array<{
-    idAfectado: number;
-    idMedida: number;
-    medida: string;
-    periodo: string;
-    observaciones: string;
-  }>;
+  
 }) {
   const existe = await Avocatoria.findOne({ where: { idDenuncia: data.idDenuncia } });
   if (existe) {
@@ -40,22 +34,7 @@ export async function crearAvocatoria(data: {
       estatus:  'completada',
     }, { transaction: t });
 
-    // Crear medidas emergentes asociadas en la tabla medidas_emergentes
-    for (const medida of data.mediasEmergentes) {
-      console.log("Medida emergente a crear:", data);
-      if (!medida || medida.idMedida == null || medida.idAfectado == null) {
-    // Puedes lanzar un error o simplemente continuar
-    throw new Error("Medida emergente inválida: falta idMedida o idAfectado");
-  }
-      await MedidasEmergentes.create({
-        idMedida: medida.idMedida,
-        idAfectado: medida.idAfectado,
-        idAvocatoria: nuevaAvocatoria.id ,
-        periodo: medida.periodo,
-        observaciones: medida.observaciones,
-        // Cambia este campo si tu modelo usa otro nombre
-      }, { transaction: t });
-    }
+   
 
     await t.commit();
     return nuevaAvocatoria;
@@ -177,23 +156,23 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
                     attributes: ['id', 'vulneracion']
                   }
                 ]
+              },
+              {
+                model: MedidasEmergentes,
+                as: 'medidasE',
+                attributes: ['id', 'idMedida', 'idAfectado', 'periodo', 'observaciones'],
+                include: [
+                  {
+                    model: medida,
+                    as:'Med',
+                    attributes: ['medidas']
+                  }
+                ]
               }
             ]
           },
           { model: Denunciante, attributes: ['nombres', 'apellidos'] },
           { model: Denunciado, attributes: ['nombres', 'apellidos'] }
-        ]
-      },
-      {
-        model: MedidasEmergentes,
-        as: 'medidasE',
-        attributes: ['id', 'idMedida', 'idAfectado', 'periodo', 'observaciones'],
-        include: [
-          {
-            model: medida,
-            as:'Med',
-            attributes: ['medidas']
-          }
         ]
       }
     ]
@@ -215,6 +194,26 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
   }
 
   const denuncia = avocatoria.denunciaAvocatoria;
+  
+  // Recopilar todas las medidas emergentes de todos los afectados
+  const medidasEmergentes: any[] = [];
+  if (denuncia?.afectados) {
+    denuncia.afectados.forEach((afectado: any) => {
+      if (afectado.medidasE) {
+        afectado.medidasE.forEach((medida: any) => {
+          medidasEmergentes.push({
+            id: medida.id,
+            idMedida: medida.idMedida,
+            medida: medida.Med?.medidas || '',
+            idAfectado: medida.idAfectado,
+            periodo: medida.periodo,
+            observaciones: medida.observaciones
+          });
+        });
+      }
+    });
+  }
+
   return {
     id: avocatoria.id,
     codigoTramite: avocatoria.codigoTramite,
@@ -249,14 +248,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
         apellidos: d.apellidos
       }))
     } : null,
-    medidasEmergentes: (avocatoria.medidasE || []).map((m: any) => ({
-      id: m.id,
-      idMedida: m.idMedida,
-      medida: m.Med?.medidas || '',
-      idAfectado: m.idAfectado,
-      periodo: m.periodo,
-      observaciones: m.observaciones
-    })),
+    medidasEmergentes,
     usuariosPrincipales,
     notificacion: (denuncia?.Notificacions && denuncia.Notificacions.length > 0) ? denuncia.Notificacions[0].id : null
   };
@@ -339,30 +331,6 @@ export async function editarAvocatoria(idAvocatoria: number, data: {
       estatus: data.estatus
     }, { transaction: t });
 
-   
-
-
-    if ( data.mediasEmergentes.length !== 0) {
-          // Eliminar medidas emergentes anteriores
-    await MedidasEmergentes.destroy({ where: { idAvocatoria: idAvocatoria }, transaction: t });
-
-    // Crear nuevas medidas emergentes
-    for(const medida of data.mediasEmergentes) {
-      await MedidasEmergentes.create({
-        idMedida: medida.idMedida,
-        idAfectado: medida.idAfectado,
-        idAvocatoria: idAvocatoria,
-        periodo: medida.periodo,
-        observaciones: medida.observaciones
-      }, { transaction: t });
-    }
-
-    }
-
-    
-
-
- 
 
     await t.commit();
     return await getAvocatoriaCompleta(idAvocatoria);

@@ -84,9 +84,9 @@
     <div class="flex flex-1 m-1 justify-end space-x-4">
       <app-button-submit
         type="button"
-        label="Volver"
+        label="Regresar"
         color="cancelar"
-        (clicked)="cancelar()"
+        (clicked)="regresar()"
       >
       </app-button-submit>
        <app-button-submit
@@ -291,15 +291,7 @@
 
         <!-- Formulario para agregar medida -->
         <form [formGroup]="medidasEmergentesForm" class="">
-          <div
-      *ngIf="
-        avocatoriaForm.get('mediasEmergentes')?.invalid && avocatoriaForm.get('mediasEmergentes')?.touched
-      "
-      class="text-red-500 text-sm mt-1"
-    >
-      <span *ngIf="avocatoriaForm.get('mediasEmergentes')?.errors?.['required']"
-        >Debe agregar almenos una medida</span>
-    </div>
+          
 
           <p>Así mismo se disponen las medidas de protección:</p>
           <!-- Selector de afectados -->
@@ -471,10 +463,10 @@
 
 
           <div class="mt-2">
-            @if (editMediasMode && editMode) {
+            @if (editMediasMode ) {
               <button
               type="button"
-              (click)="actualizarMedidasEditMode()"
+              (click)="actualizarMedida()"
               class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Actualizar
@@ -483,7 +475,7 @@
             }@else {
               <button
               type="button"
-              (click)="agregarMedidas()"
+              (click)="agregarMedida(medidasEmergentesForm)"
               class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Guardar
@@ -500,11 +492,11 @@
           <app-tablaEdit
             [encabezados]="['ID', 'Medida ', 'Periodo', 'Observaciones']"
             [columnas]="['idMedida', 'medida', 'periodo', 'observaciones']"
-            [datos]="filteredMedidas"
+            [datos]="medidasEmergentesArray"
             [acciones]="true"
             [mostrarEditar]="true"
-            [eliminar]="eliminar.bind(this)"
-            [editar]="editar.bind(this)"
+            [eliminar]="eliminarMedida.bind(this)"
+            [editar]="SeleccionarParaEditar.bind(this)"
           ></app-tablaEdit>
         </div>
 

@@ -8,7 +8,7 @@ import { AudienciaPruebas } from './audiencia_prueba.model';
 interface MedidasDefinitivasAttributes {
   id: number;
   idMedida: number;
-  idAP: number;
+  
   idAfectado: number;
   observaciones: string;
   periodo: string;
@@ -18,7 +18,7 @@ interface MedidasDefinitivasCreationAttributes extends Optional<MedidasDefinitiv
 export class MedidasDefinitivas extends Model<MedidasDefinitivasAttributes, MedidasDefinitivasCreationAttributes> implements MedidasDefinitivasAttributes {
   declare id: number;
   declare idMedida: number;
-  declare  idAP: number;
+  
   declare idAfectado: number;
   declare observaciones: string;
   declare periodo: string;
@@ -38,14 +38,7 @@ MedidasDefinitivas.init({
       key: 'id',
     },
   },
-   idAP: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: AudienciaPruebas,
-      key: 'id',
-    },
-  },
+   
   idAfectado: {
     type: DataTypes.INTEGER,
     allowNull: false,

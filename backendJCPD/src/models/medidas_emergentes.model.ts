@@ -8,7 +8,7 @@ import { Afectado } from './afectado.models';
 interface MedidasEmergentesAttributes {
   id: number;
   idMedida: number;
-  idAvocatoria: number;
+  
   idAfectado: number;
   observaciones: string;
   periodo: string;
@@ -19,7 +19,7 @@ interface MedidasEmergentesCreationAttributes extends Optional<MedidasEmergentes
 export class MedidasEmergentes extends Model<MedidasEmergentesAttributes, MedidasEmergentesCreationAttributes> implements MedidasEmergentesAttributes {
   declare id: number;
   declare idMedida: number;
-  declare idAvocatoria: number;
+  
   declare idAfectado: number;
   declare observaciones: string;
   declare periodo: string;
@@ -40,14 +40,7 @@ MedidasEmergentes.init({
       key: 'id',
     },
   },
-  idAvocatoria: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Avocatoria,
-      key: 'id',
-    },
-  },
+  
   idAfectado: {
     type: DataTypes.INTEGER,
     allowNull: false,

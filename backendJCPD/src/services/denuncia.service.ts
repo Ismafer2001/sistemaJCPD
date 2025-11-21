@@ -68,6 +68,7 @@ export async function obtenerNumTramite({ incrementar = false } = {}, id_canton:
     order: [["num_tramite", "DESC"]],
   });
 
+  
   if (!tramite) return 0;
 
 
@@ -196,7 +197,8 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
   const cantonRecord = await Canton.findByPk(denuncia.id_canton);
   const cantonName = cantonRecord ? cantonRecord.canton : `${denuncia.id_canton}`;
   const currentYear = new Date().getFullYear();
-  denuncia.codigoTramite = `${denuncia.num_tramite}-JCPD-${cantonName}-${currentYear}-NIÑOS`;
+  const numTramiteFormateado = denuncia.num_tramite.toString().padStart(4, '0');
+  denuncia.codigoTramite = `${numTramiteFormateado}-JCPD-${cantonName}-${currentYear}-NIÑOS`;
 
 
     const nuevaDenuncia = await Denuncia.create({...denuncia, estatus:'completada', codigoTramite: denuncia.codigoTramite}, { transaction: t });//agremamos la denuncia a la base de datos

@@ -94,12 +94,7 @@ articulo.hasMany(medida, {
 Avocatoria.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "denunciaAvocatoria" });
 Denuncia.hasOne(Avocatoria, { foreignKey: "idDenuncia", as:'avocatoria' });
 
-// Relación uno a muchos entre avocatoria y medidasemergentes
-Avocatoria.hasMany(MedidasEmergentes, {
-  foreignKey: "idAvocatoria",
-  as: "medidasE",
-});
-MedidasEmergentes.belongsTo(Avocatoria, { foreignKey: "idAvocatoria" });
+
 
 // Relación uno a muchos entre medida y medidasemergentes
 medida.hasMany(MedidasEmergentes, { foreignKey: "idMedida", as: "medidasE" });
@@ -153,12 +148,8 @@ ParticipantesAudienciaPruebas.belongsTo(AudienciaPruebas, {
 AudienciaPruebas.hasMany(ParticipantesAudienciaPruebas, {
   foreignKey: "idAP", as: "PAC",
 });
-// Relación uno a muchos entre resoluciones y medidasdefinitivas
-AudienciaPruebas.hasMany(MedidasDefinitivas, {
-  foreignKey: "idAP",
-  as: "medidasD",
-});
-MedidasDefinitivas.belongsTo(AudienciaPruebas, { foreignKey: "idAP" });
+
+
 
 // Relación uno a muchos entre medida y medidasdefinitivas
 medida.hasMany(MedidasDefinitivas, { foreignKey: "idMedida", as: "medidasD" });

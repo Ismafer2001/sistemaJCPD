@@ -8,6 +8,7 @@ interface CierreCasoAttributes {
     codigoTramite: string;
     conclusion: string;
     secretariaAuxiliar: string;
+    estatus?: "pendiente"|"en_proceso"|"completada";
 }
 
 interface CierreCasoCreationAttributes extends Optional<CierreCasoAttributes, 'id'> {}
@@ -18,6 +19,7 @@ export class CierreCaso extends Model<CierreCasoAttributes, CierreCasoCreationAt
     declare codigoTramite: string;
     declare conclusion: string;
     declare secretariaAuxiliar: string;
+    declare  estatus: "pendiente"|"en_proceso"|"completada";
 }
 
 CierreCaso.init({
@@ -45,7 +47,12 @@ CierreCaso.init({
     secretariaAuxiliar: {
         type: DataTypes.STRING(255),
         allowNull: false,
-    }
+    },
+  estatus: {
+    type: DataTypes.STRING,
+    defaultValue: "pendiente",
+    allowNull: false,
+  },
 }, {
     sequelize,
     modelName: 'CierreCaso',
