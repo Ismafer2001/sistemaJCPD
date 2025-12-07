@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { getAfectados, postCrearResolucion, getResolucionesPorDenuncia, getResolucionPdf, getResolucionCompleta, putActualizarResolucion } from '../controllers/resoluciones.controller';
+import { getResolucionesTotales } from '../controllers/estadisticas/resolucionesReporte.controller';
 import { verificarToken } from '../middleware/auth.middleware';
 
 
 
 const router = Router();
+
 
 // Ruta para obtener afectados de una denuncia
 router.get('/afectados/:id', getAfectados);

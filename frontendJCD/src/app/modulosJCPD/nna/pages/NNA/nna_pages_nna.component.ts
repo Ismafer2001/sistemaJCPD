@@ -1,6 +1,6 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
-import { RouterLink } from "@angular/router";
+import { ActivatedRoute} from "@angular/router";
 import { DenunciaService, } from "@nna/services/denuncia.service";
 import { Denuncia } from "@nna/interfaces/denuncia.interface";
 import { HttpErrorResponse } from "@angular/common/http";
@@ -14,7 +14,7 @@ import { UserService, Usuario } from "@admin/services/user.service";
 @Component({
   selector: 'nna-page-nna',
   standalone: true,
-  imports: [ CommonModule, TablaNavigatorComponent, CardFormComponent, ButtonSubmitComponent,RouterLink,CardFormComponent, PaginacionComponent ],
+  imports: [ CommonModule, TablaNavigatorComponent, CardFormComponent, ButtonSubmitComponent,CardFormComponent, PaginacionComponent ],
   templateUrl: './nna_page_nna.component.html',
 })
 export class NnaPageNnaComponent implements OnInit {
@@ -29,12 +29,24 @@ export class NnaPageNnaComponent implements OnInit {
   pageSize = 5;
   // total items from server
   totalDenuncias = 0;
+  grupo: string = "";
 
-  constructor(private denunciaService: DenunciaService, private UserService:UserService) {
+  constructor(private denunciaService: DenunciaService,
+     private UserService:UserService,
+    private route:ActivatedRoute) {
 
   }
 
   ngOnInit(): void {
+    this.route.params.subscribe(params => {
+    if (params['grupo']=='nna') {
+      this.grupo = "nna"
+
+    } else {
+      this.grupo = "adultos"
+
+    };
+  })
 
     this.cargarDenuncias();
     this.totalDenunciasActivas();
@@ -58,7 +70,7 @@ export class NnaPageNnaComponent implements OnInit {
 
     this.loading = true;
     this.error = null;
-    this.denunciaService.obtenerDenunciasPaginadas('nna', page, this.pageSize).subscribe({
+    this.denunciaService.obtenerDenunciasPaginadas(this.grupo, page, this.pageSize).subscribe({
       next: (resp) => {
         console.log('Denuncias paginadas recibidas:', resp);
         this.denuncias = resp.data || [];
@@ -88,7 +100,7 @@ export class NnaPageNnaComponent implements OnInit {
 
 
    totalDenunciasActivas(){
-    this.denunciaService.contarDenunciasActivas('nna').subscribe(n=>{
+    this.denunciaService.contarDenunciasActivas(this.grupo).subscribe(n=>{
       this.denunciasActivas=n.total;
     })
   }

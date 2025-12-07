@@ -69,6 +69,11 @@ export class Crear_audienciaComponent implements OnInit {
   // snapshot of the form after loading in edit mode
   private initialAudienciaSnapshot: any = null;
 
+  // Nuevas propiedades para el modo edición de participantes
+  modoEdicionParticipante: boolean = false;
+  participanteEnEdicionIndex: number = -1;
+  datosOriginalesParticipante: any = null;
+
   // Método para actualizar los estados de los botones
   private actualizarEstadoBotones(): void {
     const tieneAudienciaPrueba = this.existeAudienciaPrueba !== null && this.existeAudienciaPrueba !== undefined;
@@ -204,7 +209,7 @@ export class Crear_audienciaComponent implements OnInit {
       apellidos: ['', Validators.required],
       cedula: ['', Validators.required],
       tipoParticipante: ['', Validators.required],
-      asistio: [false, Validators.required],
+      asistio: [false,],
       manifiesta: ['', ],
       idDenuncia: [this.denunciaId],
       justifico: [false],
@@ -563,7 +568,152 @@ cancelar(): void {
       this.participantes = this.participantesArray.getRawValue();
       this.participantesForm.reset();
       this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+
+      toast.success('Participante agregado correctamente');
     });
+  }
+
+  //-----------MÉTODOS PARA EDITAR/ELIMINAR PARTICIPANTES---///
+
+  /**
+   * Editar participante - Carga los datos en el formulario y cambia a modo edición
+   */
+  editarParticipante(item: any, index: number) {
+    // Verificar que el índice sea válido
+    if (index < 0 || index >= this.participantesArray.length) {
+      toast.error('Error: Participante no encontrado');
+      return;
+    }
+
+    // Guardar datos originales para poder cancelar
+    const participanteControl = this.participantesArray.at(index);
+    this.datosOriginalesParticipante = { ...participanteControl.value };
+
+    // Activar modo edición
+    this.modoEdicionParticipante = true;
+    this.participanteEnEdicionIndex = index;
+
+    // Cargar datos en el formulario
+    this.participantesForm.patchValue({
+      nombres: item.nombres || '',
+      apellidos: item.apellidos || '',
+      cedula: item.cedula || '',
+      tipoParticipante: item.tipoParticipante || '',
+      asistio: item.asistio || false,
+      justifico: item.justifico || false,
+      manifiesta: item.manifiesta || '',
+      idDenuncia: item.idDenuncia || this.denunciaId
+    });
+
+    toast.info('Participante cargado para edición', {
+      duration: 3000,
+      description: `Editando: ${item.nombres} ${item.apellidos}`
+    });
+  }
+
+  /**
+   * Eliminar participante - Elimina del FormArray y actualiza la tabla
+   */
+  eliminarParticipante(item: any, index: number) {
+    // Verificar que el índice sea válido
+    if (index < 0 || index >= this.participantesArray.length) {
+      toast.error('Error: Participante no encontrado');
+      return;
+    }
+
+    // Confirmar eliminación
+    if (confirm(`¿Estás seguro de eliminar a ${item.nombres} ${item.apellidos}?`)) {
+      // Eliminar del FormArray
+      this.participantesArray.removeAt(index);
+
+      // Actualizar array local para la tabla
+      this.participantes = this.participantesArray.getRawValue();
+
+      // Si estábamos editando este participante, cancelar edición
+      if (this.modoEdicionParticipante && this.participanteEnEdicionIndex === index) {
+        this.cancelarEdicionParticipante();
+      }
+
+      // Si eliminamos un participante antes del que estamos editando, ajustar índice
+      if (this.modoEdicionParticipante && this.participanteEnEdicionIndex > index) {
+        this.participanteEnEdicionIndex--;
+      }
+
+      toast.success('Participante eliminado correctamente', {
+        duration: 3000,
+        description: `${item.nombres} ${item.apellidos} ha sido eliminado`
+      });
+    }
+  }
+
+  /**
+   * Actualizar participante - Guarda los cambios del participante en edición
+   */
+  actualizarParticipante() {
+    if (this.participantesForm.invalid) {
+      this.participantesForm.markAllAsTouched();
+      toast.error('Formulario inválido', {
+        duration: 3000,
+        description: 'Por favor, completa todos los campos requeridos'
+      });
+      return;
+    }
+
+    if (!this.modoEdicionParticipante || this.participanteEnEdicionIndex === -1) {
+      toast.error('Error: No hay participante en edición');
+      return;
+    }
+
+    // Obtener el control del participante en edición
+    const participanteControl = this.participantesArray.at(this.participanteEnEdicionIndex);
+
+    // Actualizar con los nuevos valores
+    participanteControl.patchValue({
+      nombres: this.participantesForm.get('nombres')?.value,
+      apellidos: this.participantesForm.get('apellidos')?.value,
+      cedula: this.participantesForm.get('cedula')?.value,
+      tipoParticipante: this.participantesForm.get('tipoParticipante')?.value,
+      asistio: this.participantesForm.get('asistio')?.value,
+      justifico: this.participantesForm.get('justifico')?.value,
+      manifiesta: this.participantesForm.get('manifiesta')?.value,
+      idDenuncia: this.participantesForm.get('idDenuncia')?.value
+    });
+
+    // Actualizar array local para la tabla
+    this.participantes = this.participantesArray.getRawValue();
+
+    // Salir del modo edición
+    this.cancelarEdicionParticipante();
+
+    toast.success('Participante actualizado correctamente', {
+      duration: 3000,
+      description: 'Los cambios han sido guardados'
+    });
+  }
+
+  /**
+   * Cancelar edición - Restaura el formulario y sale del modo edición
+   */
+  cancelarEdicionParticipante() {
+    // Restaurar datos originales si es necesario
+    if (this.datosOriginalesParticipante && this.participanteEnEdicionIndex !== -1) {
+      const participanteControl = this.participantesArray.at(this.participanteEnEdicionIndex);
+      participanteControl.patchValue(this.datosOriginalesParticipante);
+    }
+
+    // Resetear formulario
+    this.participantesForm.reset();
+    this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+
+    // Salir del modo edición
+    this.modoEdicionParticipante = false;
+    this.participanteEnEdicionIndex = -1;
+    this.datosOriginalesParticipante = null;
+
+    // Actualizar array local
+    this.participantes = this.participantesArray.getRawValue();
+
+    toast.info('Edición cancelada');
   }
   //-----------PDF------------------//
   generarPdf(){

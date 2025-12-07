@@ -4,44 +4,66 @@
           @for (header of encabezados; track $index) {
             <th class=" p-2 ">{{header}}</th>
           }
-          <th class="p-2" >Asistió</th>
-          <th class="p-2" >Justificó</th>
+          @if (!mostrarDescargaPdf) {
+            <th class="p-2" >Asistió</th>
+            <th class="p-2" >Justificó</th>
+          }
            @if (botonEstado) {
             <th class="p-2">
               Estado
             </th>
           }
 
-          @if(acciones){
+          @if(acciones || mostrarDescargaPdf){
             <th class=" p-1 ">
-              acciones
+              @if (mostrarDescargaPdf) {
+                Acciones
+              } @else {
+                acciones
+              }
             </th>
-
           }
-
-
         </tr>
       </thead>
       <tbody class="">
         @for (item of datos; track $index) {
           <tr class="hover:bg-gray-50  border-t-2 border-t-blue-100  " >
             @for (col of columnas; track $index) {
-              <td class=" whitespace-pre-line  p-2">{{item[col] }}</td>
+              <!-- Para modo PDF, mostrar botón de descarga en la columna del archivo -->
+              @if (mostrarDescargaPdf && col === columnaPdfNombre) {
+                <td class=" whitespace-pre-line  p-2">
+                  <button
+                    (click)="descargarPdf(item[col])"
+                    class="text-blue-600 hover:text-blue-800 underline flex items-center gap-1 text-sm"
+                  >
+                    <i [class]="iconoPdf"></i>
+                    {{textoPdfBoton}}
+                  </button>
+                </td>
+              } @else {
+                <td class=" whitespace-pre-line  p-2">{{item[col] }}</td>
+              }
             }
-            <!-- Checkbox de asistencia -->
-            <td class="p-2 text-center" >
-              <input type="checkbox" [checked]="item.asistio" (change)="onCheckboxChange($event, item, $index)" />
-            </td>
-            <!-- Checkbox de justificación -->
-            <td class="p-2 text-center" >
-              <input type="checkbox" [checked]="item.justifico" (change)="onJustificoChange($event, item, $index)" />
-            </td>
-
-            @if (acciones) {
+           
+            @if (acciones && !mostrarDescargaPdf) {
               <td class="p-2">
                 @if (mostrarEditar) {
                   <button type="button" (click)="editar(item)"
                 class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded">
+                  editar
+                </button>
+                }
+                <button type="button" (click)="eliminar(item)"class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
+                  eliminar
+                </button>
+              </td>
+            }
+
+            @if (mostrarDescargaPdf && acciones) {
+              <td class="p-2">
+                @if (mostrarEditar) {
+                  <button type="button" (click)="editar(item)"
+                class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-2 py-1 rounded mr-1">
                   editar
                 </button>
                 }

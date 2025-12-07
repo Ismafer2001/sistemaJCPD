@@ -1,40 +1,42 @@
 <form [formGroup]="formGroup" class="grid grid-cols-1 md:grid-cols-2 gap-4">
   <!-- Cédula -->
   <div class="form-group">
-    <label class="block text-sm font-medium text-gray-700">Cédula</label>
-    <input
-      type="text"
-      formControlName="cedula"
-      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
-      placeholder="Ingrese la cédula"
-      [ngClass]="{
-          'border-1 border-red-500': formGroup.get('cedula')?.invalid && formGroup.get('cedula')?.touched
-        }"
+     <!-- Cédula -->
+
+
+    <app-inputs
+    label="Cédula"
+    type="text"
+    placeholder="Ingrese la cédula"
+    [formGroup]="formGroup"
+    [control]="$any(formGroup.get('cedula')!)"
     >
-    <div *ngIf="formGroup.get('cedula')?.invalid && formGroup.get('cedula')?.touched" class="text-red-500 text-sm mt-1">
-      <span *ngIf="formGroup.get('cedula')?.errors?.['required']">La Cédula es requerida</span>
-      <span *ngIf="formGroup.get('cedula')?.errors?.['pattern']">La Cédula debe tener 10 dígitos</span>
-      <span *ngIf="formGroup.get('cedula')?.errors?.['cedulaInvalida']"> Cédula invalida </span>
-    </div>
+
+    <!-- Mensajes de error personalizados -->
+    <span *ngIf="formGroup.get('cedula')?.errors?.['required']">La Cédula es requerida</span>
+    <span *ngIf="formGroup.get('cedula')?.errors?.['pattern']">La Cédula debe tener 10 dígitos</span>
+    <span *ngIf="formGroup.get('cedula')?.errors?.['cedulaInvalida']">Cédula inválida</span>
+  </app-inputs>
   </div>
 
   <!-- Nombres -->
   <div class="form-group">
-    <label class="block text-sm font-medium text-gray-700">Nombres</label>
-    <input
-      type="text"
-      formControlName="nombres"
-      class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
-      placeholder="Ingrese los nombres"
-      [ngClass]="{
-          'border-1 border-red-500': formGroup.get('nombres')?.invalid && formGroup.get('nombres')?.touched
-        }"
-
+    <app-inputs
+    label="Nombres"
+    type="text"
+    placeholder="Ingrese los nombres"
+    [formGroup]="formGroup"
+    [control]="$any(formGroup.get('nombres')!)"
     >
-    <div *ngIf="formGroup.get('nombres')?.invalid && formGroup.get('nombres')?.touched" class="text-red-500 text-sm mt-1">
+
+    <!-- Mensajes de error personalizados -->
+
       <span *ngIf="formGroup.get('nombres')?.errors?.['required']">Los nombres son requeridos</span>
       <span *ngIf="formGroup.get('nombres')?.errors?.['minlength']">Los nombres deben tener al menos 2 caracteres</span>
-    </div>
+
+  </app-inputs>
+    
+
   </div>
 
   <!-- Apellidos -->

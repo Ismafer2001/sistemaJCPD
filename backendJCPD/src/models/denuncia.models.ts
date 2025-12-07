@@ -10,7 +10,7 @@ import { Notificacion } from './notificacion.model';
   
   interface DenunciaAttributes {
     id: number;
-    grupoPrioritario:"nna"|"mujeres|adultos";
+    grupoPrioritario:"nna"|"mujeres"|"adultos";
     medio?: "internet"|"presencial";
     tipo_denuncia?: "oficio"|"externa";
     num_tramite?: number;
@@ -34,7 +34,7 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
   export class Denuncia extends Model<DenunciaAttributes, DenunciaCreationAttributes> implements DenunciaAttributes {
   
     declare id: number;
-    declare grupoPrioritario:"nna"|"mujeres|adultos";
+    declare grupoPrioritario:"nna"|"mujeres"|"adultos";
     declare medio:"internet"|"presencial";
     declare tipo_denuncia: "oficio"|"externa";
     declare fechaCreado: Date;

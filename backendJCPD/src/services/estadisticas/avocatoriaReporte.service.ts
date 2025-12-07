@@ -33,11 +33,13 @@ export const contarAvocatorias = async (filtros: FiltroAvocatoria) => {
     where: whereAvocatoria,
     include: [{
       model: Denuncia,
+      as: "denunciaAvocatoria",
       
       attributes: [],
       where: whereDenuncia
     }]
   });
+  console.log("Total de avocatorias:", totalAvocatorias);
 
   return totalAvocatorias;
 };
@@ -64,13 +66,7 @@ export const contarMedidasEmergentes = async (filtros: FiltroAvocatoria) => {
 
   const total = await MedidasEmergentes.count({
     include: [
-      {
-        model: Avocatoria,
-        
-        required: true,
-        attributes: [],
-        where: whereAvocatoria
-      },
+      
       {
         model: Afectado,
         
@@ -79,8 +75,18 @@ export const contarMedidasEmergentes = async (filtros: FiltroAvocatoria) => {
           model: Denuncia,
           
           attributes: [],
-          where: whereDenuncia
-        }]
+          where: whereDenuncia,
+          include: [
+              {
+                model: Avocatoria,
+                as:'avocatoria',
+                required: true,
+                attributes: [],
+                where: whereAvocatoria
+              }
+            ]
+        }
+      ]
       }
     ]
   });
@@ -110,6 +116,7 @@ export const contarMedidasAgrupadasPorArticulo = async (filtro: FiltroAvocatoria
     include: [
       {
         model: medida,
+        as: "Med" ,
     attributes: ['id','medidas'],
         include: [
           {
@@ -130,19 +137,23 @@ export const contarMedidasAgrupadasPorArticulo = async (filtro: FiltroAvocatoria
             where: {
               grupoPrioritario: filtro.grupoPrioritario,
               id_canton: filtro.id_canton
-            }
+            },
+            include: [
+              {
+                model: Avocatoria,
+                as:'avocatoria',
+                required: true,
+                attributes: [],
+                where: whereFechaAvocatoria
+              }
+            ]
           }
         ]
       },
-      {
-        model: Avocatoria,
-        required: true,
-        attributes: [],
-        where: whereFechaAvocatoria
-      }
+      
     ],
   // usar alias de include para GROUP BY compatible con Sequelize/MySQL
-  group: ['medida.id', 'medida.medidas', 'medida->articulo.id', 'medida->articulo.articulo'],
+  group: ['Med.id', 'Med.medidas', 'Med->articulo.id', 'Med->articulo.articulo'],
     raw: true,
     nest: true
   });
@@ -150,7 +161,7 @@ export const contarMedidasAgrupadasPorArticulo = async (filtro: FiltroAvocatoria
   const resumen: Record<string, Record<string, number>> = {};
 
   for (const item of resultado) {
-    const medidaData = (item as any).medida;
+    const medidaData = (item as any).Med;
     const articuloNombreRaw = (medidaData?.articulo?.articulo || 'Sin artículo').toString().trim();
     const articuloKey = articuloNombreRaw.replace(/\s+/g, '_');
     const nombreMedida = (medidaData?.medidas || 'Medida_desconocida').toString();
@@ -192,6 +203,7 @@ export async function vulneracionesagrupadas(filtro: FiltroAvocatoria) {
     include: [
       {
         model: Vulneracion,
+        as: "vulneracion",
         attributes: ['id', 'vulneracion']
       },
       {
@@ -207,6 +219,7 @@ export async function vulneracionesagrupadas(filtro: FiltroAvocatoria) {
             include: [
               {
                 model: Avocatoria,
+                as:'avocatoria',
                 required: true,
                 attributes: [],
                 where: whereFechaAvocatoria

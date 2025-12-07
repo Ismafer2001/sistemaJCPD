@@ -1,0 +1,16 @@
+
+
+  <label class="block text-sm font-medium text-gray-700">{{label}}</label>
+      <input
+        [type]="type"
+        [formControl]="$any(control)"
+        class="px-2 py-0.5 text-base block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+        [placeholder]="placeholder"
+        [ngClass]="{'border-1 border-red-500': isInvalid}"
+      >
+      <div *ngIf="isInvalid" class="text-red-500 text-sm mt-1">
+        <ng-content></ng-content>
+      </div>
+
+
+

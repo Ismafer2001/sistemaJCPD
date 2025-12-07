@@ -19,6 +19,17 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 		const pdfData = await getDenunciaCompleta(idDenuncia);
 
 		const now = new Date();
+		// tipo de denuncia
+		const tipoDenuncia = pdfData.denuncia?.tipo_denuncia;
+		let señoresMiembrosPrincipales={}; 
+		if (tipoDenuncia === 'externa') {
+			 señoresMiembrosPrincipales = 
+			{ text: 'SEÑORES MIEMBROS PRINCIPALES DE LA JUNTA CANTONAL DE PROTECCIÓN DE DERECHOS ',bold: true, alignment: 'center' }
+		}else{
+			 señoresMiembrosPrincipales = 
+			{ text: 'NOSOTROS MIEMBROS PRINCIPALES DE LA JUNTA CANTONAL DE PROTECCIÓN DE DERECHOS  ',bold: true, alignment: 'center' }
+		}
+		
 		// Bloques de denunciante
 		const denunciante = pdfData.denunciantes && pdfData.denunciantes.length ? pdfData.denunciantes[0] : {};
 		const denuncianteBlock = {
@@ -27,8 +38,11 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 				body: [
 					[{ text: 'Nombres', bold: true, fontSize: 12 },{ text: `${denunciante?.nombres  || ''}`, fontSize: 12 }],
 					[{ text: 'Apellidos', bold: true, fontSize: 12 },{ text: `${denunciante?.apellidos || ''}`, fontSize: 12 }],
+					[{ text: 'Cédula', bold: true, fontSize: 12 },{ text: `${denunciante?.cedula || ''}`, fontSize: 12 }],
+					[{ text: 'Nacionalidad', bold: true, fontSize: 12 },{ text: `${denunciante?.nacionalidad || ''}`, fontSize: 12 }],
 					[{ text: 'Edad', bold: true, fontSize: 12 },{ text: `${denunciante?.edad || ''}`, fontSize: 12 }],
 					[{ text: 'Sexo', bold: true, fontSize: 12 },{ text: `${denunciante?.sexo || ''}`, fontSize: 12 }],
+					
 					[{ text: 'Dirección', bold: true, fontSize: 12 },{ text: `${denunciante?.direccion || ''}`, fontSize: 12 }],
 					[{ text: 'Teléfono / Mail', bold: true, fontSize: 12 },{ text: `${denunciante?.telefono || ''} / ${denunciante?.mail || ''}`, fontSize: 12 }]
 				]
@@ -49,9 +63,13 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 						body: [
 							[{ text: 'Nombres', bold: true, fontSize: 12 }, { text: a?.nombres || '', fontSize: 12 }],
 							[{ text: 'Apellidos', bold: true, fontSize: 12 }, { text: a?.apellidos || '', fontSize: 12 }],
+							[{ text: 'Cédula', bold: true, fontSize: 12 }, { text: a?.cedula || '', fontSize: 12 }],
+							[{ text: 'Nacionalidad', bold: true, fontSize: 12 },{ text: a?.nacionalidad || '', fontSize: 12 }],
 							[{ text: 'Edad', bold: true, fontSize: 12 }, { text: a?.edad || '', fontSize: 12 }],
 							[{ text: 'Sexo', bold: true, fontSize: 12 }, { text: a?.sexo || '', fontSize: 12 }],
-							[{ text: 'Cédula', bold: true, fontSize: 12 }, { text: a?.cedula || '', fontSize: 12 }]
+							[{ text: 'Dirección', bold: true, fontSize: 12 },{ text: a?.direccion || '', fontSize: 12 }],
+							
+							[{ text: 'Teléfono / Mail', bold: true, fontSize: 12 },{ text: `${a?.telefono || ''} / ${a?.mail || ''}`, fontSize: 12 }]
 						]
 					},
 					margin: [0, 4, 0, 8]
@@ -74,9 +92,14 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 						body: [
 							[{ text: 'Nombres', bold: true, fontSize: 12 }, { text: d?.nombres || '', fontSize: 12 }],
 							[{ text: 'Apellidos', bold: true, fontSize: 12 }, { text: d?.apellidos || '', fontSize: 12 }],
+							[{ text: 'Cédula', bold: true, fontSize: 12 }, { text: d?.cedula || '', fontSize: 12 }],
+							[{ text: 'Nacionalidad', bold: true, fontSize: 12 },{ text: `${d?.nacionalidad || ''}`, fontSize: 12 }],
 							[{ text: 'Edad', bold: true, fontSize: 12 }, { text: d?.edad || '', fontSize: 12 }],
 							[{ text: 'Sexo', bold: true, fontSize: 12 }, { text: d?.sexo || '', fontSize: 12 }],
-							[{ text: 'Dirección', bold: true, fontSize: 12 }, { text: d?.direccion || '', fontSize: 12 }]
+							[{ text: 'Dirección', bold: true, fontSize: 12 }, { text: d?.direccion || '', fontSize: 12 }],
+							[{ text: 'Teléfono / Mail', bold: true, fontSize: 12 },{ text: `${d?.telefono || ''} / ${d?.mail || ''}`, fontSize: 12 }],
+							[{ text: 'Parentesco con persona afectada', bold: true, fontSize: 12 }, { text: d?.parentezco || '', fontSize: 12 }],
+							
 						]
 					},
 					margin: [0, 4, 0, 8]
@@ -87,17 +110,17 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 		}
 
 		// Bloque sobre los hechos
-		const sobreHechosBlock = [
-			{ text: 'Sobre el hecho', style: 'section' },
+		const sobreHechosBlock = 
+			
 			{ text: pdfData?.denuncia?.descripcion_hechos || '(Sin descripción proporcionada)', margin: [0, 0, 0, 10] }
-		];
+		
 
 
 		// Vulneraciones por afectado
 		const vulneracionesBlocks: any[] = [];
 		if (Array.isArray(pdfData.vulneraciones) && pdfData.vulneraciones.length) {
 			for (const v of pdfData.vulneraciones) {
-				vulneracionesBlocks.push({ text: `Vulneraciones de ${v.nombre} (ID: ${v.id})`, style: 'subLabel', margin: [0, 6, 0, 2] });
+				vulneracionesBlocks.push({ text: `Vulneraciones de ${v.nombre} `, style: 'subLabel', margin: [0, 6, 0, 2] });
 				const tableBody: any[] = [];
 				// Encabezado
 				tableBody.push([
@@ -133,16 +156,16 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 		}
 
 		// Solicitud
-		const solicitudBlock = [
-			{ text: 'Solicitud', style: 'section' },
+		const solicitudBlock = 
+			
 			{ text: pdfData?.denuncia?.solicitud || '(Sin solicitud proporcionada)', margin: [0, 0, 0, 10] }
-		];
+		
 
 		// Medidas por afectado
 		const medidasBlocks: any[] = [];
 		if (Array.isArray(pdfData.medidas) && pdfData.medidas.length) {
 			for (const m of pdfData.medidas) {
-				medidasBlocks.push({ text: `Medidas de protección de ${m.nombre} (ID: ${m.id})`, style: 'subLabel', margin: [0, 6, 0, 2] });
+				medidasBlocks.push({ text: `Medidas de protección de ${m.nombre} `, style: 'subLabel', margin: [0, 6, 0, 2] });
 				const tableBody: any[] = [];
 				// Encabezado
 				tableBody.push([
@@ -179,20 +202,21 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 
 		// Firma del denunciante
 		const firmaBlock = [
-			{ text: '\n\nFirma del denunciante:', margin: [0, 20, 0, 0] },
+			{ text: '\n\n___________________________', margin: [0, 20, 0, 0] },
 			{ text: `Nombres y apellidos: ${denunciante?.nombres || ''} ${denunciante?.apellidos || ''}`, margin: [0, 2, 0, 0] },
 			{ text: `Cédula: ${denunciante?.cedula || ''}`, margin: [0, 2, 0, 0] }
 		];
 
 		const docDefinition: any = {
 			info: {
-				title: 'Denuncia',
+				title: `Denuncia-${pdfData.denuncia?.codigoTramite || 'SIN_CODIGO'}`,
 				author: 'JCPD',
 				creationDate: now
 			},
 			content: [
-				{ text: 'FORMULARIO DE DENUNCIA', style: 'title', alignment: 'center' },
+				{ text: ` Denuncia: ${pdfData.denuncia?.codigoTramite || 'SIN_CODIGO'}`, style: 'title', alignment: 'center' },
 				{ text: '\n' },
+				señoresMiembrosPrincipales,
 				{ text: '1. DATOS DEL/LA DENUNCIANTE', style: 'section' },
 				denuncianteBlock,
 				{ text: '\n2. AFECTADOS (PERSONAS EN SITUACION DE VULNERACION O RIESGO)', style: 'section' },
@@ -200,21 +224,22 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 				{ text: '\n3. DATOS DEL/LA DENUNCIADO(A)', style: 'section' },
 				...denunciadosBlocks,
 				{ text: '\n4. SOBRE EL HECHO', style: 'section' },
-				...sobreHechosBlock,
+				sobreHechosBlock,
 				{ text: '\n5. VULNERACIONES POR AFECTADO', style: 'section' },
 				...vulneracionesBlocks,
 				{ text: '\n6. SOLICITUD', style: 'section' },
-				...solicitudBlock,
+				solicitudBlock,
 				{ text: '\n7. MEDIDAS DE PROTECCIÓN POR AFECTADO', style: 'section' },
 				...medidasBlocks,
+				{ text: '\nEs justicia,etc' },
 				...firmaBlock
 			],
 			styles: {
-				title: { fontSize: 16, bold: true },
+				title: { fontSize: 14, bold: true },
 				section: { fontSize: 12, bold: true, margin: [0, 8, 0, 4] },
-				subLabel: { fontSize: 11, italics: true }
+				subLabel: { fontSize: 12, }
 			},
-			defaultStyle: { fontSize: 10 }
+			defaultStyle: { fontSize: 12 }
 		};
 
 		// Crear el pdf y enviar buffer

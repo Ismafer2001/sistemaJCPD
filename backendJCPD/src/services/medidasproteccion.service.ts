@@ -306,3 +306,10 @@ export async function editarMedidaDefinitiva(id: number, data: {
   await registro.update(camposActualizar);
   return registro;
 }
+// Eliminar una medida emergente por ID
+export async function eliminarMedidaDefinitivas(id: number) {
+  const registro = await MedidasDefinitivas.findByPk(id);
+  if (!registro) throw new Error('Medida definitiva no encontrada');
+  await registro.destroy();
+  return { success: true, message: 'Medida definitiva eliminada' };
+}

@@ -198,7 +198,10 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
   const cantonName = cantonRecord ? cantonRecord.canton : `${denuncia.id_canton}`;
   const currentYear = new Date().getFullYear();
   const numTramiteFormateado = denuncia.num_tramite.toString().padStart(4, '0');
-  denuncia.codigoTramite = `${numTramiteFormateado}-JCPD-${cantonName}-${currentYear}-NIÑOS`;
+  
+  // Determinar el sufijo basado en el grupo prioritario
+  const sufijo = denuncia.grupoPrioritario === 'nna' ? 'NIÑOS' : 'AM';
+  denuncia.codigoTramite = `${numTramiteFormateado}-JCPD-${cantonName}-${currentYear}-${sufijo}`;
 
 
     const nuevaDenuncia = await Denuncia.create({...denuncia, estatus:'completada', codigoTramite: denuncia.codigoTramite}, { transaction: t });//agremamos la denuncia a la base de datos

@@ -1,0 +1,40 @@
+<nav class="flex mb-0 gap-3" id="tabs">
+  <!-- Tabs dinámicos -->
+  @for (tab of tabs; track tab.id) {
+    <button
+    type="button"
+      class="text-base rounded-t-2xl p-2 cursor-pointer transition-colors duration-200"
+      [ngClass]="{
+        'bg-red-500 text-white': tab.hasError && tab.errorCondition,
+        'bg-blue-500 text-white': currentTab === tab.id && !(tab.hasError && tab.errorCondition),
+        'bg-gray-100': currentTab !== tab.id && !(tab.hasError && tab.errorCondition)
+      }"
+      (click)="onTabChange(tab.id)"
+    >
+      {{ tab.label }}
+    </button>
+  }
+
+  <!-- Botones de acción -->
+  <div class="flex flex-1 m-1 justify-end ">
+    @for (action of actions; track action.id) {
+      <button
+        [type]="action.type || 'button'"
+        (click)="onActionClick(action.id)"
+        class="w-10 h-10 flex items-center justify-center text-gray-700 font-medium transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        [ngClass]="action.hoverClass || 'hover:bg-blue-700 hover:text-white'"
+        [title]="action.tooltip"
+        [disabled]="action.disabled"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          class="w-5 h-5"
+          [innerHTML]="getSafeHtml(action.icon)"
+        >
+        </svg>
+      </button>
+    }
+  </div>
+</nav>

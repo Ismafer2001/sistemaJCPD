@@ -22,6 +22,8 @@ import { validarCedulaEcuador } from '@shared/validators/cedula.validators';
 import {ButtonSubmitComponent} from '@shared/components/button-submit/button-submit.component';
 import { toast } from 'ngx-sonner';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Formulario.component';
+import { requiredWhen } from '@shared/validators/validacionOpcional.validators';
 //import { Generador_PDFService } from '../../../shared/services/pdf/generador_PDF.service';
 
 @Component({
@@ -37,19 +39,66 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
     Nna_creardenuncia_denunciadoComponent,
     Nna_creardenuncia_vulneracionesComponent,
     Crear_denuncia_medidasComponent,
-    CardFormComponent, ButtonSubmitComponent
+    CardFormComponent, ButtonSubmitComponent,
+    NavFormularioComponent
   ],
 })
 export class NnaPageCrearDenunciaComponent implements OnInit {
+//--- Configuración de tabs------//
+  tabsConfig: any[] = [
+    {
+      id: 0,
+      label: 'datos generales'
+    },
+    {
+      id: 1,
+      label: 'sobre los hechos'
+    },
+    {
+      id: 2,
+      label: 'pdf'
+    }
+  ];
+  currentTab = 0; //variable para cambiar pestañas del formulario
+// Configuración de botones de acción
+  actionsConfig: any[] = [
+    {
+      id: 'update',
+      type: 'button',
+      icon: `<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+      <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />`,
+      tooltip: 'Actualizar denuncia',
+      hoverClass: 'hover:bg-blue-700 hover:text-white',
+      disabled: true
+    },
+    {
+      id: 'save',
+      type: 'button',
+      icon: `<path fill-rule="evenodd" d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875h11.47c.497 0 .974.197 1.326.548l2.905 2.905c.351.352.549.829.549 1.326V20.25c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm14.625-.375v4.5c0 .621-.504 1.125-1.125 1.125h-10.5A1.125 1.125 0 0 1 5.625 7.5V3h12.75Zm-12.75 9.75c0-.621.504-1.125 1.125-1.125h10.5c.621 0 1.125.504 1.125 1.125v5.625c0 .621-.504 1.125-1.125 1.125H6.75a1.125 1.125 0 0 1-1.125-1.125v-5.625Z" clip-rule="evenodd"/>
+<path d="M15.75 3h1.5v3.75h-1.5V3Z" fill="currentColor"/>
+<path d="M8.25 15h7.5v1.5h-7.5V15Zm0 2.25h7.5v1.5h-7.5v-1.5Z" fill="currentColor"/>`,
+      tooltip: 'Guardar denuncia',
+      hoverClass: 'hover:bg-green-600 hover:text-white',
+      disabled: false
+    },
+    {
+      id: 'pdf',
+      type: 'button',
+      icon: `<path d="M14.25 1.5v4.875c0 .621.504 1.125 1.125 1.125h4.875M9 1.5H5.625c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V7.5L14.25 1.5H9Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<rect x="6" y="9" width="12" height="5" rx="0.5" fill="currentColor"/>
+<path d="M7.5 10.5h1.2c.5 0 .8.3.8.8s-.3.8-.8.8h-.7v1h-.5v-2.6Zm.5.5v.8h.7c.2 0 .3-.1.3-.4s-.1-.4-.3-.4h-.7ZM10.5 10.5h1c.8 0 1.3.5 1.3 1.3s-.5 1.3-1.3 1.3h-1v-2.6Zm.5.5v1.6h.5c.4 0 .8-.2.8-.8s-.4-.8-.8-.8h-.5ZM14 10.5h2v.5h-1.5v.5h1.2v.5h-1.2v1h-.5v-2.5Z" fill="white"/>
+<path d="M12 16v5m0 0l-2.5-2.5M12 21l2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+      tooltip: 'Generar PDF',
+      hoverClass: 'hover:bg-green-600 hover:text-white',
+      disabled: true
+    }
+  ];
 
   existeAvocatoria: any = null;
-
-  private ignoreFirstValueChange = false;
-  private cargandoDatosEdicion = false; // Nueva flag para ignorar cambios durante carga
   numTramiteDisabled = true;
-  currentTab = 0; //variable para cambiar pestañas del formulario
-  denunciaForm!: FormGroup;
   incrementar = false;
+
+
   denunciaedit:any =null;
   editMode: boolean = false;
 
@@ -60,31 +109,12 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   canton!: string;
   pdfSrc: SafeResourceUrl | null = null;
   idDenuncia!: number;
-
-  // Estados internos para los botones (sin la lógica de avocatoria)
-  private _pdfDisabled: boolean = true;
-  private _guardarDisabled: boolean = false;
-  private _editarDisabled: boolean = true;
-
-  // Estados para los botones que se calculan explícitamente
-  pdfDisabled: boolean = true;
-  guardarDisabled: boolean = false;
-  editarDisabled: boolean = true;
-
-  // Método para actualizar los estados de los botones
-  private actualizarEstadoBotones(): void {
-    // PDF: Si existe avocatoria, siempre activo. Si no, respeta el estado manual
-    this.pdfDisabled = this.existeAvocatoria ? false : this._pdfDisabled;
-
-    // Guardar: Si existe avocatoria, siempre deshabilitado. Si no, respeta el estado manual
-    this.guardarDisabled = this.existeAvocatoria ? true : this._guardarDisabled;
-
-    // Editar: Si existe avocatoria, siempre deshabilitado. Si no, respeta el estado manual
-    this.editarDisabled = this.existeAvocatoria ? true : this._editarDisabled;
-  }
-
+  grupo: string = "";
+  isEditDenunciaActivate:boolean=false;
+  denunciaForm!: FormGroup;
   vulneracionesCatalogo: Vulneracion[] = [];
   medidasPorArticulo: ArticuloMedidas[] = [];
+  tipoDenunciaSeleccionado: string = '';
 
   constructor(
     private AuthService: AuthService,
@@ -120,20 +150,40 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         console.error('Error al cargar medidas:', err);
       }
     });
-    this.route.queryParams.subscribe(params => {
+    this.denunciaFormulario();
+    this.route.params.subscribe(params => {
       if (params['id']) {
-        this.editMode = true;
         this.idDenuncia = +params['id'];
-        console.log('Modo Edición Activado para ID:', this.idDenuncia);
-        // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
-        this._guardarDisabled = true;
-        this._pdfDisabled = false;  // PDF habilitado
-        this._editarDisabled = true; // Editar deshabilitado hasta que haya cambios
-        this.actualizarEstadoBotones();
+
+
       }
+
+    })
+    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
+    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+    this.route.params.subscribe(params => {
+
+      if (params['modo']==='editar') {
+        this.editMode = true;
+        this.denunciaForm.disable();
+
+
+        // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
+         this.actionsConfig[1].disabled = true
+       this.actionsConfig[2].disabled = false // PDF habilitado
+        this.actionsConfig[0].disabled = false; // Editar deshabilitado hasta que haya cambios
+
+      }else{
+        this.actionsConfig[1].disabled = false
+        this.actionsConfig[2].disabled = true
+
+      };
+
+
+
     });
 
-    this.denunciaFormulario();
+
 
     this.AuthService.getUsuarioActual().subscribe((user) => {
       this.denunciaForm.get('id_canton')?.setValue(user.id_canton);
@@ -141,9 +191,9 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
     });
 
     if (!this.editMode) {
-      this.denunciaService.obtenerNumTramite('nna').subscribe((res) => {
+      this.denunciaService.obtenerNumTramite(this.grupo).subscribe((res) => {
         if (res.numero) {
-          this.denunciaService.obtenerNumTramite('nna', true).subscribe((res2) => {
+          this.denunciaService.obtenerNumTramite(this.grupo, true).subscribe((res2) => {
             this.setearNumTramite(res2.numero);
           });
         } else {
@@ -151,28 +201,36 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
           this.denunciaForm.get('num_tramite')?.enable();
         }
       });
-      // Suscripción para modo creación
-      this.denunciaForm.valueChanges.subscribe((data) => {
-        console.log('Formulario cambiado:', data);
 
-        if (!this.guardarDisabled) return; // Solo si ya se guardó
-        this._pdfDisabled = true;
-        this._editarDisabled = false;
-        this.actualizarEstadoBotones();
-      });
     } else {
       // Cargar datos y luego suscribirse a valueChanges para evitar que se dispare al hacer patchValue
       this.cargarDatosEdicion(this.idDenuncia);
 
     }
+    // Suscripción para modo creación
+      this.denunciaForm.valueChanges.subscribe((data) => {
+        console.log('Formulario cambiado:', data);
+      });
+
+
+      this.denunciaForm.get('tipo_denuncia')?.valueChanges.subscribe((value) => {
+        this.tipoDenunciaSeleccionado = value;
+        console.log('Tipo de denuncia seleccionado:', this.tipoDenunciaSeleccionado);
+         const denuncianteGroup = this.denunciaForm.get('denunciante') as FormGroup;
+    Object.keys(denuncianteGroup.controls).forEach(key => {
+      denuncianteGroup.get(key)?.updateValueAndValidity();
+    });
+      })
+
 
   }
+
 
 
   //--------- CREACION FORMULARIO--------------------//
   denunciaFormulario() {
     this.anioActual = new Date().getFullYear();
-    this.canton = '';
+
 
     this.denunciaForm = this.fb.group({
       num_tramite: [
@@ -184,27 +242,49 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         ],
       ],
       tipo_denuncia: ["", Validators.required],
-      medio: ['', Validators.required],
+      medio: ['', Validators.required
+
+        ],
 
       anio: [this.anioActual],
 
       denunciante: this.fb.group({
-        cedula: ['', [Validators.required, Validators.pattern('^[0-9]{10}$'),validarCedulaEcuador] ],
-        nombres: ['', [Validators.required, Validators.minLength(2)]],
-        apellidos: ['', [Validators.required, Validators.minLength(2)]],
-        edad: [
-          '',
-          [Validators.required, Validators.min(0), Validators.max(120)],
-        ],
-        sexo: ['', Validators.required],
-
-        nacionalidad: ['', Validators.required],
-        direccion: ['', [Validators.required, Validators.minLength(5)]],
-        mail: ['', [Validators.required, Validators.email]],
-        telefono: [
-          '',
-          [Validators.required, Validators.pattern('^[0-9]{10}$')],
-        ],
+        cedula: ['', [
+          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio'),
+          Validators.pattern('^[0-9]{10}$'),
+          validarCedulaEcuador
+        ]],
+        nombres: ['', [
+          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio'),
+          Validators.minLength(2)
+        ]],
+        apellidos: ['', [
+          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio'),
+          Validators.minLength(2)
+        ]],
+        edad: ['', [
+          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio'),
+          Validators.min(0),
+          Validators.max(120)
+        ]],
+        sexo: ['', [
+          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio')
+        ]],
+        nacionalidad: ['', [
+          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio')
+        ]],
+        direccion: ['', [
+          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio'),
+          Validators.minLength(5)
+        ]],
+        mail: ['', [
+          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio'),
+          Validators.email
+        ]],
+        telefono: ['', [
+          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio'),
+          Validators.pattern('^[0-9]{10}$')
+        ]],
       }),
       afectados: this.fb.array([], [Validators.required]),
       denunciados: this.fb.array([], Validators.required),
@@ -213,7 +293,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       vulneraciones: this.fb.array([], [Validators.required]),
       medidas: this.fb.array([], [Validators.required]),
       id_canton: [],
-      grupoPrioritario: ['nna'],
+      grupoPrioritario: [this.grupo],
     });
   }
 
@@ -240,43 +320,18 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
   //CARGA DE DATOS EN MODO EDICION
   cargarDatosEdicion(id: number): void {
-    // Estados iniciales para modo editar sin avocatoria
-    this._pdfDisabled = false;    // PDF habilitado
-    this._editarDisabled = true;  // Editar deshabilitado hasta detectar cambios
-    this.cargandoDatosEdicion = true; // Marcar que estamos cargando datos
-    this.actualizarEstadoBotones();
-    this.ignoreFirstValueChange = true;
-
-    this.denunciaForm.valueChanges.subscribe((data) => {
-      if (this.ignoreFirstValueChange) {
-        this.ignoreFirstValueChange = false;
-        return;
-      }
-
-      // Ignorar cambios mientras estamos cargando datos de edición
-      if (this.cargandoDatosEdicion) {
-        return;
-      }
-
-      // Cuando hay cambios reales del usuario, deshabilitar PDF y habilitar editar
-      this._pdfDisabled = true;
-      this._editarDisabled = false;
-      this.actualizarEstadoBotones();
-    });
 
 
     this.denunciaService.obtenerDenunciaEditMode(id).subscribe(data => {
       this.denunciaedit = data.denuncia;
-      console.log('Denuncia en modo edición:', data);
-      this.ignoreFirstValueChange = true;
+
       this.existeAvocatoria=data.denuncia.avocatoria
-      this.actualizarEstadoBotones(); // Actualizar estados después de cargar avocatoria
       this.denunciaForm.patchValue(this.denunciaedit);
 
       if(this.existeAvocatoria){
+        this.actionsConfig[0].disabled = true
         this.denunciaForm.disable();
-        // Con avocatoria, la lógica se maneja automáticamente por los métodos
-        this.actualizarEstadoBotones();
+
         toast.warning('No puedes editar esta denuncia', {
           duration: 10000,
           description: 'Ya existe una avocatoria asociada a esta denuncia',
@@ -454,10 +509,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         });
       }
 
-      // Marcar que terminó la carga de datos para permitir detectar cambios reales del usuario
-      setTimeout(() => {
-        this.cargandoDatosEdicion = false;
-      }, 100); // Pequeño delay para asegurar que todos los patchValue hayan terminado
+
 
     });
   }
@@ -486,7 +538,34 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
   //---------------------------FUNCIONES CRUD FORMULARIO-------------------///
   cancelar(): void {
-    this.router.navigate(['/nna']);
+    this.router.navigate([this.grupo]);
+  }
+
+  handleAction(actionId: string) {
+    switch (actionId) {
+      case 'update':
+        this.habilitarEdicion();
+        break;
+      case 'save':
+        if (this.editMode) {
+          this.updateDenuncia(this.idDenuncia);
+        }else{
+          this.GuardarDenuncia();
+        }
+
+        break;
+      case 'pdf':
+        this.generarPdf();
+        break;
+    }
+  }
+  habilitarEdicion(){
+    this.isEditDenunciaActivate=true;
+    this.denunciaForm.enable();
+    this.actionsConfig[1].disabled = false
+    this.actionsConfig[2].disabled = true
+    this.actionsConfig[0].disabled = true;
+
   }
 
   updateDenuncia(id: number) {
@@ -500,9 +579,11 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         toast.success('Denuncia Actualizada con Éxito', {
           duration: 3000,
         });
-        this._pdfDisabled = false;
-        this._editarDisabled = true;
-        this.actualizarEstadoBotones();
+         this.actionsConfig[1].disabled = true
+    this.actionsConfig[2].disabled = false
+    this.actionsConfig[0].disabled = false;
+    this.isEditDenunciaActivate=false;
+    this.denunciaForm.disable();
       },
       error: (err) => {
         toast.error('Error al Actualizar la Denuncia', {
@@ -513,6 +594,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   }
 
   GuardarDenuncia(): void {
+
     if (this.denunciaForm.invalid) {
       this.denunciaForm.markAllAsTouched();
 
@@ -524,13 +606,14 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       return;
     }
     // Construir el código de trámite
-    const numTramite = this.denunciaForm.get('num_tramite')?.value;
-    const codigoTramite = `${numTramite}-JCPD-${this.canton}-${this.anioActual}-NIÑOS`;
+    //const sufijo = this.grupo === 'nna' ? 'NIÑOS' : 'AM';
+    //const numTramite = this.denunciaForm.get('num_tramite')?.value;
+    //const codigoTramite = `${numTramite}-JCPD-${this.canton}-${this.anioActual}-${sufijo}`;
 
     // Construir el objeto final
     const body = {
       ...this.denunciaForm.value,
-      codigoTramite,
+      //codigoTramite,
       status: 'completada',
     };
 
@@ -541,12 +624,12 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       next: (body) => {
         this.loading = false;
         this.idDenuncia = body.data.id;
+
+        this.router.navigate(['../editar/'+ this.idDenuncia], { relativeTo: this.route });
         toast.success('Denuncia Guardada con Éxito', {
           duration: 3000,
         });
-        this._pdfDisabled = false;
-        this._guardarDisabled = true;
-        this.actualizarEstadoBotones();
+
 
       },
       error: (err) => {
@@ -560,11 +643,16 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
 //---------------------------GENERAR PDF-------------------//
   generarPdf(){
+    this.actionsConfig[2].disabled = true
 
     this.denunciaService.crearpdfBlob(this.idDenuncia).subscribe((res: Blob) => {
+
+
       console.log('esta es el id del pdf', this.idDenuncia);
       const url = URL.createObjectURL(res);
       this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      this.actionsConfig[2].disabled = false
+
     });
     this.cambiarTab(2);
   }

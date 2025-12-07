@@ -256,8 +256,10 @@
   <div class="mb-4 flex gap-3">
     <app-button-submit
       type="button"
-      [label]="modoEdicion ? 'Actualizar Afectado' : 'Agregar Afectado'"
-      color="afirmar"
+      [label]="modoEdicion ? 'Actualizar afectado ' : 'Agregar'"
+      color="submit"
+      icon="plus"
+      
       (clicked)="agregarAfectado()"
     >
     </app-button-submit>

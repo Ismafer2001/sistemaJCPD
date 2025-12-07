@@ -1,36 +1,44 @@
-<div class="   pl-2 py-2  mb-1 " id="tituloDenuncia">
 
+<div class="">
+  <div class="   pl-2 py-2  mb-1 " id="tituloDenuncia">
 
-  <h1 class="text-2xl font-bold flex items-center gap-2 ">
+ <app-button-submit
+    type="button"
+    label="Volver"
+    color="cancelar"
+    (clicked)="cancelar()"
+    >
+
+    </app-button-submit>
+  <h2 class="text-2xl font-bold flex items-center gap-2 ">
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-9 text-yellow-500">
   <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875ZM12.75 12a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V18a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V12Z" clip-rule="evenodd" />
   <path d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
-</svg>Crear Nueva Denuncia</h1>
+</svg>Crear Nueva Denuncia</h2>
 
 </div>
 
 <hr class="border-yellow-300 border-1">
-<form [formGroup]="denunciaForm" (ngSubmit)="GuardarDenuncia()" class="space-y-6">
+<form [formGroup]="denunciaForm"  class="space-y-6">
   <!-- Sección de Número de Trámite -->
   <section>
-    <h2 class="text-xl font-semibold my-4">Número de Trámite</h2>
-
+    <label class="block text-sm font-medium text-gray-700">Número de Trámite</label>
     <div class="mt-1 grid grid-cols-2 max-w-md">
       <input
         type="text"
         id="num_tramite"
-        x
+
         formControlName="num_tramite"
-        class="min-w-0 block px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+        class="min-w-0 block px-2 py-0.5 text-base rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
         placeholder="Ingrese el número"
          [readonly]="numTramiteDisabled"
 
       />
 
       <span
-        class="items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500"
+        class="items-center text-base  rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500"
       >
-        -JCPD-{{ canton }}-{{ anioActual }}-NIÑOS
+        -JCPD-{{ canton }}-{{ anioActual }}-{{this.grupo === 'nna' ? 'NIÑOS' : 'AM'}}
       </span>
     </div>
     <div
@@ -126,120 +134,21 @@
 </section>
 
   <!-----------------------tabs----------------------->
-  <nav class="flex  mb-0 gap-3 " id="tabs">
-    <a class="rounded-t-2xl p-2"
-
-       [ngClass]="{
-
-  'bg-blue-500 text-white': currentTab === 0 ,
-      'bg-gray-100': currentTab !== 0
-    }"
-
-
-      (click)="cambiarTab(0)"
-
-    >
-      datos generales
-    </a>
-
-    <a
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab(1)"
-
-      [ngClass]="{
-        'bg-red-500 text-white': denunciaForm.get('descripcion_hechos')?.invalid && denunciaForm.get('descripcion_hechos')?.touched,
-      'bg-blue-500 text-white': currentTab === 1,
-      'bg-gray-100': currentTab !== 1
-    }"
-    >
-      sobre los hechos
-    </a>
-
-    @if (currentTab===2) {
-      <a
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab(2)"
-
-
-      [ngClass]="{
-
-      'bg-blue-500 text-white': currentTab === 2,
-      'bg-gray-100': currentTab !== 2
-    }"
-    >
-      pdf
-    </a>
-
-    }
-
-    <div class="flex flex-1 m-1 justify-end space-x-4">
-
-
-    <app-button-submit
-    type="button"
-    label="Volver"
-    color="cancelar"
-    (clicked)="cancelar()"
-    >
-
-    </app-button-submit>
-     <app-button-submit
-    type="button"
-    label="Editar"
-    color="afirmar"
-    (clicked)="updateDenuncia(idDenuncia)"
-    [disabled]="editarDisabled"
-
-    >
-
-    </app-button-submit>
-    <app-button-submit
-    type="submit"
-    label="Guardar"
-    color="submit"
-
-    [disabled]="guardarDisabled"
-
-
-    >
-
-    </app-button-submit>
-
-    <app-button-submit
-    type="button"
-    label="GenerarPDF"
-    color="submit"
-    (click)="generarPdf()"
-    [disabled]="pdfDisabled"
-
-    >
-
-    </app-button-submit>
-
-
-
-    <!--<button
-      type="submit"
-      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-      [disabled]="denunciaForm.invalid || loading"
-      [title]="
-        denunciaForm.invalid ? 'Complete todos los campos requeridos' : ''
-      "
-    >
-      <span *ngIf="loading">Guardando...</span>
-      <span *ngIf="!loading">Guardar</span>
-    </button>-->
-  </div>
-
-  </nav>
+  <app-nav-formulario
+  [tabs]="tabsConfig"
+  [actions]="actionsConfig"
+  [currentTab]="currentTab"
+  (tabChanged)="cambiarTab($event)"
+  (actionClicked)="handleAction($event)"
+></app-nav-formulario>
 
 
 
 
-  <section class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
+  <section  class="bg-gray-50 p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)] ">
      <!--------------- Sección del Denunciante------------- -->
 
-    <app-card-Form [titulo]="'Datos del Denunciante'" [hidden]="currentTab !== 0" id="datosGenerales">
+    <app-card-Form [titulo]="'Datos del Denunciante'" [hidden]="currentTab !== 0" id="datosGenerales" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
 
       <div class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
          <nna_creardenuncia_denunciante
@@ -254,7 +163,7 @@
 
     <!-- Sección de Afectados -->
 
-      <app-card-Form [titulo]="'Datos de los Afectados'" [hidden]="currentTab !== 0"
+      <app-card-Form [titulo]="'Datos de los Afectados'" [hidden]="currentTab !== 0" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')"
       >
       <div formArrayName="afectados"
        class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
@@ -281,7 +190,7 @@
 
     <!------------------------- Sección de Denunciados------------------ -->
 
-      <app-card-Form [titulo]="'Datos de los Denunciados'" [hidden]="currentTab !== 0" >
+      <app-card-Form [titulo]="'Datos de los Denunciados'" [hidden]="currentTab !== 0" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')" >
         <div class="" formArrayName="denunciados"
         class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
        [ngClass]="{
@@ -308,7 +217,7 @@
 
     <!--------------- Sección de Hechos --------------------->
 
-      <app-card-Form [titulo]="'Hechos'" [hidden]="currentTab !== 1" id="hechos">
+      <app-card-Form [titulo]="'Hechos'" [hidden]="currentTab !== 1" id="hechos" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
          <!-- Descripción de Hechos -->
       <div class="mb-6">
         <label
@@ -351,7 +260,7 @@
 
       <!-- Sección de Vulneraciones -->
 
-      <app-card-Form [titulo]="'Vulneraciones'" [hidden]="currentTab !== 1">
+      <app-card-Form [titulo]="'Vulneraciones'" [hidden]="currentTab !== 1" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
 
         @if (denunciaForm.get('vulneraciones')?.errors?.['required'] && denunciaForm.get('vulneraciones')?.touched) {
             <div
@@ -384,7 +293,7 @@
 
        <!-- Descripción de solicitud -->
 
-      <app-card-Form [titulo]="'Solicitud'" [hidden]="currentTab !== 1">
+      <app-card-Form [titulo]="'Solicitud'" [hidden]="currentTab !== 1" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
         <label
           for="descripcion_solicitud"
           class="block text-sm font-medium text-gray-700"
@@ -416,7 +325,7 @@
 
       </app-card-Form>
  <!--  ----------------------Lista de Medidas --------------->
-      <app-card-Form [titulo]="'Medidas de Protección'" [hidden]="currentTab !== 1">
+      <app-card-Form [titulo]="'Medidas de Protección'" [hidden]="currentTab !== 1" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
        @if (denunciaForm.get('vulneraciones')?.errors?.['required'] && denunciaForm.get('vulneraciones')?.touched) {
             <div
 
@@ -441,6 +350,7 @@
 
 
       </app-card-Form>
+
       @if (pdfSrc) {
         <div class="pdf-container" [hidden]="currentTab !== 2">
           <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
@@ -451,3 +361,5 @@
 
 
 </form>
+
+</div>

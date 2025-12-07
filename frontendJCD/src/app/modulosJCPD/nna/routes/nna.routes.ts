@@ -12,7 +12,13 @@ export const nnaRoutes: Routes = [
         loadComponent: () => import('@nna/pages/NNA/nna_pages_nna.component'),
       },
       {
-        path: 'crearDenuncia',
+        path: 'denuncia/:modo',
+
+        loadComponent: () =>
+          import('@nna/pages/crear_denuncia/nna_page_crearDenuncia.component'),
+      },
+      {
+        path: 'denuncia/:modo/:id',
 
         loadComponent: () =>
           import('@nna/pages/crear_denuncia/nna_page_crearDenuncia.component'),
@@ -96,7 +102,7 @@ export const nnaRoutes: Routes = [
 
       },
       {
-        path: 'reportes-nna',
+        path: 'reportes',
         loadChildren: () =>
           import('@nna/routes/reportes.routes')
       },

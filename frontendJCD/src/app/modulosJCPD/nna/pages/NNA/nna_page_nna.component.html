@@ -45,7 +45,7 @@
 <section>
   <div class="flex justify-between items-center mb-4">
     <div class="flex items-center space-x-3">
-      <app-button-submit type="button" label="Nueva denuncia +" color="accion" routerLink="crearDenuncia"></app-button-submit>
+      <app-button-submit type="button" label="Nueva denuncia +" color="accion" [link]="['denuncia', 'crear']"></app-button-submit>
     </div>
     <div class="w-[250px]">
       <div class="flex border rounded overflow-hidden">
@@ -63,7 +63,7 @@
         [columnas]="['idDenuncia','codigoTramite','Afectado','cedulasAfectados','fecha']"
         [encabezados]="['ID','codigo tramite','Nombre','cedula','fecha']"
         [datos]="pagedDenuncias"
-        [RouterLink]="'/nna/fases'"
+        [RouterLink]="grupo+'/fases'"
         [RouterLinkparam]="'idDenuncia'"
       ></tablaNavigator>
     </div>

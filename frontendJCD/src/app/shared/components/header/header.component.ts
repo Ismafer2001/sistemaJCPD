@@ -2,6 +2,7 @@
 
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '@auth/services/auth.service';
 
 @Component({
@@ -18,9 +19,19 @@ export class headerComponent implements OnInit {
   cantonUsuario: string = '';
 
   mostrarMenuUsuario = false;
-  constructor(private AuthService: AuthService) {}
+  nombreModulo: string = "";
+  constructor(private AuthService: AuthService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
+    this.route.params.subscribe(params => {
+    if (params['grupo']=='nna') {
+      this.nombreModulo = "Niñez y Adolescencia"
+
+    } else if (params['grupo']=='adultos') {
+      this.nombreModulo = "Adultos Mayores"
+
+    };
+  })
     this.AuthService.getUsuarioActual().subscribe(user => {
   this.nombreUsuario = user.nombres;
   this.rolUsuario = user.rol;

@@ -1,7 +1,7 @@
 <h1 class="text-2xl font-bold mb-4">Audiencia de pruebas</h1>
 <hr class="border-blue-200 border-1" />
 <!--tabs-->
-  <div class="flex  mb-0 gap-1 " id="tabs">
+  <nav class="flex  mb-0 gap-1 " id="tabs">
     <button type="button" class="rounded-t-2xl p-2"
        [ngClass]="{
       'bg-blue-500 text-white': currentTab === '0',
@@ -121,7 +121,7 @@
     </div>
 
 
-  </div>
+  </nav>
   <form [formGroup]="audienciaPruebaForm" class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]" >
   <app-card-Form [hidden]="currentTab!='0'">
     <app-card-Form [titulo]="'inicio'" >
@@ -188,35 +188,77 @@
        <app-tablaEdit
       [encabezados]="['nombres','apellidos','Cedula','Tipo']"
         [columnas]="['nombres','apellidos','cedula','tipoParticipante']"
-        [datos]="participantes"
+        [datos]="participantesTabla"
+        [acciones]="true"
+        [mostrarEditar]="true"
+        [editar]="editarParticipante.bind(this)"
+        [eliminar]="eliminarParticipante.bind(this)"
       >
 
       </app-tablaEdit>
-      <h2 class="my-3">Agregar</h2>
+      <h2 class="mt-1 text-xl text-blue-500 font-semibold mb-4">Agregar Participante</h2>
 
-      <div class="p-3  border-3 border-blue-200">
+      <div class="bg-white rounded-xl shadow-md p-4 border">
 
-        <form [formGroup]="participantesForm" class="mt-8 flex flex-wrap gap-4 items-end">
+        <form [formGroup]="participantesForm" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
 
-        <label class="block text-sm font-medium text-gray-700">Nombres</label>
-        <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Nombres</label>
+          <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
+        </div>
 
-        <label class="block text-sm font-medium text-gray-700">Apellidos</label>
-        <input type="text" formControlName="apellidos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Apellidos</label>
+          <input type="text" formControlName="apellidos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
+        </div>
 
-        <label class="block text-sm font-medium text-gray-700">Cédula</label>
-        <input type="text" formControlName="cedula" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Cédula</label>
+          <input type="text" formControlName="cedula" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
+        </div>
 
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Tipo</label>
+          <select formControlName="tipoParticipante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
+            <option value="">Seleccione</option>
+            <option value="Denunciante">Denunciante</option>
+            <option value="Denunciado">Denunciado</option>
+            <option value="Testigo">Testigo</option>
+            <option value="Abogado">Abogado</option>
+            <option value="Representante">Representante</option>
+          </select>
+        </div>
 
+        <!-- Botones condicionales -->
+        <div class="flex items-end gap-2">
+          <!-- Modo normal: Botón Agregar -->
+          <app-button-submit
+            *ngIf="!modoEdicionParticipante"
+            label="Agregar"
+            type="button"
+            color="afirmar"
+            [disabled]="!participantesForm.valid"
+            (clicked)="onSubmitParticipante()">
+          </app-button-submit>
 
-        <label class="block text-sm font-medium text-gray-700">Tipo</label>
-        <select formControlName="tipoParticipante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-          <option value="">Seleccione</option>
-          <option value="Testigo">Testigo</option>
-          <option value="Abogado">Abogado</option>
-        </select>
+          <!-- Modo edición: Botones Actualizar y Cancelar -->
+          <ng-container *ngIf="modoEdicionParticipante">
+            <app-button-submit
+              label="Actualizar"
+              type="button"
+              color="afirmar"
+              [disabled]="!participantesForm.valid"
+              (clicked)="actualizarParticipante()">
+            </app-button-submit>
 
-        <button type="button" (click)="onSubmitParticipante()" class="p-2 rounded-2xl bg-amber-200">agregar</button>
+            <app-button-submit
+              label="Cancelar"
+              type="button"
+              color="cancelar"
+              (clicked)="cancelarEdicionParticipante()">
+            </app-button-submit>
+          </ng-container>
+        </div>
       </form>
 
       </div>
@@ -254,17 +296,39 @@
     class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
   ></textarea>
 </div>
-<div class="flex items-end">
-                <button type="button" (click)="agregarPruebasParticipante()" class="h-10 px-6 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow hover:from-blue-600 hover:to-blue-800 transition">+ Agregar</button>
-              </div>
-
-      </form>
+              <div class="flex items-end gap-2">
+                @if (modoEdicionPruebas) {
+                  <app-button-submit
+                    type="button"
+                    label="Actualizar"
+                    color="submit"
+                    (clicked)="agregarPruebasParticipante()"
+                  ></app-button-submit>
+                  <app-button-submit
+                    type="button"
+                    label="Cancelar"
+                    color="cancelar"
+                    (clicked)="cancelarEdicionPruebas()"
+                  ></app-button-submit>
+                } @else {
+                  <app-button-submit
+                    type="button"
+                    label="Agregar"
+                    color="accion"
+                    (clicked)="agregarPruebasParticipante()"
+                  ></app-button-submit>
+                }
+              </div>      </form>
       <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
             <h3 class="font-bold mb-4 text-blue-700 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Manifestaciones registradas</h3>
             <app-tablaEdit
               [encabezados]="['abogado','parte','pruebas']"
               [columnas]="['nombreCompleto','parte','pruebas']"
               [datos]="pruebasTabla"
+              [acciones]="true"
+              [mostrarEditar]="true"
+              [editar]="editarPruebas.bind(this)"
+              [eliminar]="eliminarPruebas.bind(this)"
             >
             </app-tablaEdit>
           </div>
@@ -304,8 +368,28 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Manifiesta</label>
                 <textarea formControlName="testimonio" rows="3" placeholder="Escriba aquí la intervención..." class="w-full  border border-dotted border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"></textarea>
               </div>
-              <div class="flex items-end">
-                <button type="button" (click)="agregarTestimoniosParticipante()" class="h-10 px-6 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow hover:from-blue-600 hover:to-blue-800 transition">+ Agregar</button>
+              <div class="flex items-end gap-2">
+                @if (modoEdicionTestimonios) {
+                  <app-button-submit
+                    type="button"
+                    label="Actualizar"
+                    color="submit"
+                    (clicked)="agregarTestimoniosParticipante()"
+                  ></app-button-submit>
+                  <app-button-submit
+                    type="button"
+                    label="Cancelar"
+                    color="cancelar"
+                    (clicked)="cancelarEdicionTestimonios()"
+                  ></app-button-submit>
+                } @else {
+                  <app-button-submit
+                    type="button"
+                    label="Agregar"
+                    color="accion"
+                    (clicked)="agregarTestimoniosParticipante()"
+                  ></app-button-submit>
+                }
               </div>
             </form>
           </div>
@@ -315,6 +399,10 @@
               [encabezados]="['Nombre','testimonio']"
               [columnas]="['nombreCompleto','testimonio']"
               [datos]="testimoniosTabla"
+              [acciones]="true"
+              [mostrarEditar]="true"
+              [editar]="editarTestimonios.bind(this)"
+              [eliminar]="eliminarTestimonios.bind(this)"
             >
             </app-tablaEdit>
           </div>
@@ -610,10 +698,10 @@
 
            </div>
           <div class="mt-2">
-            @if (editMediasMode && editMode) {
+            @if (editMediasMode ) {
               <button
               type="button"
-              (click)="actualizarMedidasEditMode()"
+              (click)="actualizarMedida()"
               class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Actualizar
@@ -622,7 +710,7 @@
             }@else {
               <button
               type="button"
-              (click)="agregarMedidas()"
+              (click)="agregarMedida(medidasDefinitivasForm)"
               class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Guardar
@@ -639,11 +727,11 @@
           <app-tablaEdit
             [encabezados]="['ID', 'Medida ', 'Periodo', 'Observaciones']"
             [columnas]="['idMedida', 'medida', 'periodo', 'observaciones']"
-            [datos]="filteredMedidas"
+            [datos]="medidasDefinitivasArray"
             [acciones]="true"
             [mostrarEditar]="true"
-            [eliminar]="eliminar.bind(this)"
-            [editar]="editar.bind(this)"
+            [eliminar]="eliminarMedida.bind(this)"
+            [editar]="SeleccionarParaEditar.bind(this)"
           ></app-tablaEdit>
         </div>
 

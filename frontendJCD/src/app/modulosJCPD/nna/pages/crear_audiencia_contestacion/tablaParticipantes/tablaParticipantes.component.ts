@@ -18,8 +18,8 @@ export class TablaParticipantesComponent {
   @Input() mostrarEditar = false;
   @Input() botonEstado: boolean = false;
 
-  @Input() eliminar: (item: any) => void = () => {};
-  @Input() editar: (item: any) => void = () => {};
+  @Input() eliminar: (item: any, index: number) => void = () => {};
+  @Input() editar: (item: any, index: number) => void = () => {};
 
   @Output() asistioChange = new EventEmitter<{item: any, index: number, value: boolean}>();
   @Output() justificoChange = new EventEmitter<{item: any, index: number, value: boolean}>();

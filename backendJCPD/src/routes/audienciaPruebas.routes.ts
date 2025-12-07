@@ -12,10 +12,14 @@ import {
 		getAudienciaPruebasCompleta,
 		getAudienciaPruebasPdf
 	} from '../controllers/audienciaPruebas.controller';
+import { getAudienciasPruebasTotales } from '../controllers/estadisticas/audienciaPruebasReporte.controller';
+import { verificarToken } from '../middleware/auth.middleware';
 // Vulneraciones identificadas
 
 
 const router = Router();
+
+
 // Obtener todos los datos completos de una audiencia de pruebas
 router.get('/datosaudienciapruebacompleta/:id', getAudienciaPruebasCompleta);;
 

@@ -372,6 +372,7 @@ export async function getAfectadosYDirigidoA(idDenuncia: number) {
 				tipoParticipante: o.tipoParticipante || 'Otro'
 			});
 		}
+		console.log("Resultado participantes:", resultado);
 
 		
 
@@ -383,23 +384,7 @@ export async function getAfectadosYDirigidoA(idDenuncia: number) {
 	
 }
 
-//POSIBLEMNESTE ESTE DEMÁS
-//servicio para obtener los representantes institucionales
-export async function ObtenerRepresentantesInstitucionales(idDenuncia: number) {
-	const representantes = await Otros.findAll({
-		where: {
-			idDenuncia,
-			tipoParticipante: "Representante"
-		},
-		attributes: ["nombres", "apellidos", "cedula", "tipoParticipante"]
-	});
-	return representantes.map(r => ({
-		nombres: [r.nombres, r.apellidos].filter(Boolean).join(' ').trim(),
-		cedula: r.cedula,
-		tipoParticipante: r.tipoParticipante
-	}));
-	
-}
+
 
 //servicio para  agregar mas participantes
 export async function AgregarOtrosParticipantes(data: any) {
@@ -416,19 +401,5 @@ export async function AgregarOtrosParticipantes(data: any) {
   });
   return nuevoParticipante;
 }
-//servicio para  agregar representantes institucionales
-export async function AgregarRepresentantesInstitucionales(data: any) {
-	// params: { nombres, apellidos, cedula, tipoParticipante, idDenuncia }
-  const { nombres, apellidos, cedula, idDenuncia } = data;
 
-  const nuevoRepresentante = await Otros.create({
-    nombres,
-    apellidos,
-    cedula,
-    tipoParticipante:"Representante",
-    idDenuncia,
-    fase: 'audienciaContestacion'
-  });
-  return nuevoRepresentante;
-}
 

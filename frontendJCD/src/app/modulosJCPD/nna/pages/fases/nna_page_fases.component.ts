@@ -21,7 +21,7 @@ interface Estatus {
 export class NnaPageFasesComponent implements OnInit {
   denunciaId: number = 0;
   denuncia:any =null
-
+  grupo:string =''
 
   loading: boolean = true;
   error: string | null = null;
@@ -41,6 +41,8 @@ export class NnaPageFasesComponent implements OnInit {
 
   constructor(private route: ActivatedRoute, private denunciaServices:DenunciaService, private fasesService:FasesService) {}
 ngOnInit() {
+  const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
+    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
   this.route.params.subscribe(params => {
     this.denunciaId = +params['id'];
 
@@ -73,17 +75,17 @@ ngOnInit() {
        {
     titulo: 'Denuncia',
     estatus:this.denunciastatus,
-    link: '/nna/crearDenuncia',
+    link: `/${this.grupo}/denuncia`,
     linkDetalles: '/nna/detalle-denuncia',
     idDenuncia: this.denuncia?.idDenuncia,
-    noParams:true,
+
     faseAnterior: this.denunciastatus,
   },
   {
     titulo: 'Avocatoria',
     estatus: this.avocatoria,
     idDenuncia: this.denuncia?.idDenuncia,
-    link: '/nna/avocatoria',
+    link: `/${this.grupo}/avocatoria`,
     linkDetalles: '/nna/detalle-vocatoria',
     faseAnterior: this.denunciastatus,
   },
@@ -92,7 +94,7 @@ ngOnInit() {
     titulo: 'Notificaciónes',
     estatus: this.notificacion,
     idDenuncia: this.denuncia?.idDenuncia ,
-    link: '/nna/notificaciones',
+    link: `/${this.grupo}/notificaciones`,
     linkDetalles: '/nna/detalle-notificacion',
     faseAnterior: this.avocatoria,
   },
@@ -100,7 +102,7 @@ ngOnInit() {
     titulo: 'Citaciones',
     estatus: this.cita,
     idDenuncia: this.denuncia?.idDenuncia ,
-    link: '/nna/citaciones',
+    link: `/${this.grupo}/citaciones`,
     linkDetalles: '/nna/detalle-citaciones',
     faseAnterior: this.notificacion,
   },
@@ -108,7 +110,7 @@ ngOnInit() {
     titulo: 'Audiencia de Contestacion',
     estatus: this.audienciaC,
     idDenuncia: this.denuncia?.idDenuncia,
-    link: '/nna/audienciaDeContestacion',
+    link: `/${this.grupo}/audienciaDeContestacion`,
     linkDetalles: '/nna/detalle-audiencia-constestacion'
     ,
     faseAnterior: this.cita,
@@ -118,7 +120,7 @@ ngOnInit() {
     titulo: 'Audiencia de Pruebas',
     estatus: this.audienciaP,
     idDenuncia: this.denuncia?.idDenuncia,
-    link: '/nna/audienciaDePruebas',
+    link: `/${this.grupo}/audienciaDePruebas`,
     linkDetalles: '/nna/detalle-audiencia-pruebas'
     ,
     faseAnterior: this.audienciaC,
@@ -128,7 +130,7 @@ ngOnInit() {
     titulo: 'Resoluciones',
     estatus: this.resoluciones,
     idDenuncia: this.denuncia?.idDenuncia,
-    link: '/nna/resoluciones',
+    link: `/${this.grupo}/resoluciones`,
     linkDetalles: '/nna/detalle-resoluciones',
     faseAnterior: this.audienciaP,
   }
@@ -137,7 +139,7 @@ ngOnInit() {
     titulo: 'Cumplimiento de medidas',
     estatus: this.cumplimientoMedidas,
     idDenuncia: this.denuncia?.idDenuncia,
-    link: '/nna/seguimiento',
+    link: `/${this.grupo}/seguimiento`,
     linkDetalles: '/nna/detalle-seguimiento',
     faseAnterior: this.resoluciones
   }
@@ -146,7 +148,7 @@ ngOnInit() {
     titulo: 'Control de impugnacion',
     estatus: this.controlImpugnacion,
     idDenuncia: this.denuncia?.idDenuncia,
-    link: '/nna/impugnacion',
+    link: `/${this.grupo}/impugnacion`,
     linkDetalles: '/nna/detalle-impugnacion',
     faseAnterior: this.cumplimientoMedidas,
   }
@@ -155,7 +157,7 @@ ngOnInit() {
     titulo: 'Cierre de caso',
     estatus: this.cierreCaso,
     idDenuncia: this.denuncia?.idDenuncia,
-    link: '/nna/cierreDeCaso',
+    link: `/${this.grupo}/cierreDeCaso`,
     linkDetalles: '/nna/detalle-cierre',
     faseAnterior: this.controlImpugnacion,
   }

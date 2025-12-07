@@ -174,7 +174,10 @@
       [encabezados]="['nombres','apellidos','Cedula','Tipo']"
         [columnas]="['nombres','apellidos','cedula','tipoParticipante']"
         [datos]="participantes"
-
+        [acciones]="true"
+        [mostrarEditar]="true"
+        [editar]="editarParticipante.bind(this)"
+        [eliminar]="eliminarParticipante.bind(this)"
         (asistioChange)="onAsistioChange($event)"
         (justificoChange)="onJustificoChange($event)"
       >
@@ -215,8 +218,35 @@
           </select>
         </div>
 
-        <div class="flex items-end">
-          <button type="button" (click)="onSubmitParticipante()" class="p-2 px-4 rounded-2xl bg-amber-200 hover:bg-amber-300 transition-colors">Agregar</button>
+        <!-- Botones condicionales -->
+        <div class="flex items-end gap-2">
+          <!-- Modo normal: Botón Agregar -->
+          <app-button-submit
+            *ngIf="!modoEdicionParticipante"
+            label="Agregar"
+            type="button"
+            color="afirmar"
+            [disabled]="!participantesForm.valid"
+            (clicked)="onSubmitParticipante()">
+          </app-button-submit>
+
+          <!-- Modo edición: Botones Actualizar y Cancelar -->
+          <ng-container *ngIf="modoEdicionParticipante">
+            <app-button-submit
+              label="Actualizar"
+              type="button"
+              color="afirmar"
+              [disabled]="!participantesForm.valid"
+              (clicked)="actualizarParticipante()">
+            </app-button-submit>
+
+            <app-button-submit
+              label="Cancelar"
+              type="button"
+              color="cancelar"
+              (clicked)="cancelarEdicionParticipante()">
+            </app-button-submit>
+          </ng-container>
         </div>
       </form>
 

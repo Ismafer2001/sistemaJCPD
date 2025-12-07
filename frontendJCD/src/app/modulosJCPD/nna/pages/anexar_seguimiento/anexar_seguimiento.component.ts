@@ -6,11 +6,16 @@ import { AnexarSeguimientoMedidasService } from '@nna/services/anexarSeguimiento
 import { DenunciaService } from '@nna/services/denuncia.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
+import { CumpleMedidasTablaComponent } from './cumpleMedidasTabla/cumpleMedidasTabla.component';
 
 @Component({
   selector: 'app-anexar_seguimiento',
   templateUrl: './anexar_seguimiento.component.html',
-  imports: [CardFormComponent, CommonModule, ReactiveFormsModule,TablaEditComponent]
+  imports: [CardFormComponent,
+     CommonModule,
+      ReactiveFormsModule,
+
+    CumpleMedidasTablaComponent]
 
 })
 export class Anexar_seguimientoComponent implements OnInit {
@@ -133,7 +138,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       error: (err) => {
         console.error('Error al cargar medidas cumplidas:', err);
         // Fallback a datos de prueba si hay error
-        this.cargarDatosPrueba();
+        
       }
     });
   }
@@ -142,7 +147,7 @@ export class Anexar_seguimientoComponent implements OnInit {
   procesarMedidasCumplidasReales(data: any[]) {
     if (!Array.isArray(data)) {
       console.warn('Los datos no son un array, usando datos de prueba');
-      this.cargarDatosPrueba();
+
       return;
     }
 
@@ -309,38 +314,11 @@ export class Anexar_seguimientoComponent implements OnInit {
     } else {
       // Si no hay afectado seleccionado, usar datos de prueba
       console.log('No hay afectado seleccionado, usando datos de prueba...');
-      this.cargarDatosPrueba();
+
     }
   }
 
-  // Cargar datos de prueba para la tabla
-  cargarDatosPrueba() {
-    const datosPrueba = [
-      {
-        id: 1,
-        nombreArchivo: 'informe_cumplimiento_01.pdf',
-        medidas: [
-          { idMedida: 1, cumple: true },
-          { idMedida: 2, cumple: false },
-          { idMedida: 3, cumple: true }
-        ],
-        fechaCreacion: new Date().toISOString(),
-        codigoTramite: 'TRM-2024-001'
-      },
-      {
-        id: 2,
-        nombreArchivo: 'informe_cumplimiento_02.pdf',
-        medidas: [
-          { idMedida: 1, cumple: true },
-          { idMedida: 2, cumple: true }
-        ],
-        fechaCreacion: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // hace 7 días
-        codigoTramite: 'TRM-2024-002'
-      }
-    ];
 
-    this.tablaMedidasCumplidas = this.procesarDatosTabla(datosPrueba);
-  }
 
   // Procesar los datos para mostrar en la tabla
   procesarDatosTabla(informes: any[]): any[] {
@@ -408,6 +386,9 @@ export class Anexar_seguimientoComponent implements OnInit {
       console.warn('Nombre de archivo no válido');
       return;
     }
+    console.log('evento:', event);
+    console.log('Nombre del archivo a descargar:', nombreArchivo);
+    console.log('Código de trámite actual:', this.codigoTramite);
 
     if (!this.codigoTramite) {
       console.warn('Código de trámite no disponible');
@@ -419,13 +400,8 @@ export class Anexar_seguimientoComponent implements OnInit {
     const downloadUrl = `${baseUrl}/files/${this.codigoTramite}/seguimiento/${nombreArchivo}`;
     console.log('Iniciando descarga desde URL:', downloadUrl);
 
-    // Crear elemento <a> temporal para forzar descarga
-    const link = document.createElement('a');
-    link.href = downloadUrl;
-    link.download = nombreArchivo;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    // Abrir en nueva pestaña
+    window.open(downloadUrl, '_blank');
   }
 
   // Resetear formulario después de envío exitoso

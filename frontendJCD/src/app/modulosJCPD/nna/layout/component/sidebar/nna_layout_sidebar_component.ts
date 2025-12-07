@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '@auth/services/auth.service';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 
 
 @Component({
@@ -9,11 +9,29 @@ import { Router, RouterLink } from '@angular/router';
   templateUrl: './nna_layout_sidebar.component.html',
 
 })
-export class SidebarComponent   {
+export class SidebarComponent  implements OnInit {
 
-  constructor(private authService: AuthService,private router: Router){
+  grupo: string = '';
+
+  constructor(private authService: AuthService,private router: Router,
+    private route: ActivatedRoute
+  ){
 
   }
+
+  ngOnInit(): void {
+    this.route.params.subscribe(params => {
+
+    if (params['grupo']=='nna') {
+      this.grupo = "nna"
+
+    } else {
+      this.grupo = "adultos"
+
+    };
+  })
+  }
+
 
   logout(): void {
     localStorage.removeItem('token');

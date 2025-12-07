@@ -14,6 +14,7 @@ import { toast } from 'ngx-sonner';
 import { ArticuloMedidas, MedidasService } from '@nna/services/medidas.service';
 import { AvocatoriaService } from '@nna/services/avocatoria.service';
 import { Vulneracion, VulneracionService } from '@nna/services/vulneracion.service';
+import { catchError, finalize, forkJoin, Observable, of } from 'rxjs';
 
 interface involucrados{
   nombres: string,
@@ -48,6 +49,12 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
   denunciaId = 0;
 
   editMediasMode: boolean = false;
+  modoEdicionParticipante: boolean = false;
+  modoEdicionPruebas: boolean = false;
+  modoEdicionTestimonios: boolean = false;
+  indexParticipanteEditando: number | null = null;
+  indexPruebasEditando: number | null = null;
+  indexTestimoniosEditando: number | null = null;
   //variables de formularios//
   audienciaPruebaForm!: FormGroup;
   participantesForm!: FormGroup;
@@ -57,11 +64,13 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
   vulneracionesIdentificadasForm!: FormGroup;
   //-------------------------------//
   afectados: any[] = [{id: 0, nombres: ''}];
-  removedMedidasByAfectado: Map<number, Set<number>> = new Map();
+
   selectedIndex: number | null = null;
 
-  removedVulneracionesByAfectado: Map<number, Set<number>> = new Map();
+
   vulneraciones: Vulneracion[] = [];
+
+  medidasDefinitivasArray: any[] = [];
 
   participantes: involucrados[] = [];
   vulneracionesIdentificadas: vulneracionesIdentificadas[] = [];
@@ -148,7 +157,7 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
     this.formularioMedidasDefinitivas()
     this.formularioVulneracionesIdentificadas()
     //inicialiar carga de datos
-    this.loadMedidasEmergentes(this.medidasDefinitivasForm.get('idAfectado')?.value);
+
     this.cargarMedidas();
     this.loadVulneraciones();
     this.loadVulneracionesIdentificadas(this.vulneracionesIdentificadasForm.get('idAfectado')?.value)
@@ -301,65 +310,7 @@ seleccionarMEdida() {
 
 }
 
- loadMedidasEmergentes(id:number){
-     if (!id) return;
-  this.medidasService.getMedidasEmergentes(id)
-    .subscribe((res: any) => {
-      const lista = Array.isArray(res?.afectado) ? res.afectado : []; // [{ nombre, medida }, ...]
-      for (const item of lista) {
-        // evita re-agregar medidas que el usuario eliminó localmente
-        const removedSet = this.removedMedidasByAfectado.get(id);
-        if (removedSet && item.idMedida && removedSet.has(Number(item.idMedida))) {
-          continue;
-        }
-        // evita duplicar por (afectado + texto de la medida)
-        const yaExiste = this.medidas.controls.some(fg =>
-          fg.get('idAfectado')?.value === id &&
-          fg.get('medida')?.value === item.medida
-        );
-        if (yaExiste) continue;
-        this.medidas.push(this.fb.group({
-          idAfectado:    [id],       // viene del select
-          idMedida:      [item.idMedida],             // aún no lo resolvemos
-          medida:        [item.medida || ''],// texto para mostrar
-          periodo:       [item.periodo || ''],               // el usuario lo llenará
-          observaciones: [item.observaciones || '']                // el usuario lo llenará
-        }));
-      }
-      // opcional: ver cómo quedó el array
-      // console.log('mediasEmergentes:', this.medidas.getRawValue());
-    });
-  }
-  loadMedidasDefinitivas(id:number){
-     if (!id) return;
-  this.medidasService.getMedidasDefinitivas(id)
-    .subscribe((res: any) => {
-      const lista = Array.isArray(res?.afectado) ? res.afectado : []; // [{ nombre, medida }, ...]
-      for (const item of lista) {
-        // evita re-agregar medidas que el usuario eliminó localmente
-        const removedSet = this.removedMedidasByAfectado.get(id);
-        if (removedSet && item.idMedida && removedSet.has(Number(item.idMedida))) {
-          continue;
-        }
-        // evita duplicar por (afectado + texto de la medida)
-        const yaExiste = this.medidas.controls.some(fg =>
-          fg.get('idAfectado')?.value === id &&
-          fg.get('medida')?.value === item.medida
-        );
-        if (yaExiste) continue;
-        this.medidas.push(this.fb.group({
-          idAfectado:    [id],       // viene del select
-          idMedida:      [item.idMedida],             // aún no lo resolvemos
-          medida:        [item.medida || ''],// texto para mostrar
-          periodo:       [item.periodo || ''],               // el usuario lo llenará
-          observaciones: [item.observaciones || ''],
-          id:           [item.id || '']                // el usuario lo llenará
-        }));
-      }
-      // opcional: ver cómo quedó el array
-      // console.log('mediasEmergentes:', this.medidas.getRawValue());
-    });
-  }
+
 
   cargarMedidas() {
     this.medidasService.getAllMedidas().subscribe({
@@ -381,110 +332,248 @@ seleccionarMEdida() {
   if (!afectadoId) return;
   // reset editor to avoid leftover selection from other afectado
   this.resetEditor();
-  if (this.editMode){
-    this.loadMedidasDefinitivas(afectadoId);
+  this.loadMedidasporAfectado(afectadoId);
 
-  }else{
-    this.loadMedidasEmergentes(afectadoId);
 
   }
-
-  }
-  // Verifica si ya existe la medida para el mismo afectado (clave compuesta)
-  isAgregada(idMedida: number, idAfectado: number): boolean {
-    return this.medidas.controls.some(ctrl => {
-      const mid = Number(ctrl.get('idMedida')?.value);
-      const aid = Number(ctrl.get('idAfectado')?.value);
-      return mid === Number(idMedida) && aid === Number(idAfectado);
-    });
-  }
-
-  //MODIFICAR PARA EL EDITMODE     <-------------------
-  agregarMedidas(){
-    if (this.editMode){
-      this.agregarMedidaAfectadoEditMode();
-    }else{
-      this.guardarDetalleMedidas();
-    }
-  }
-
-  guardarDetalleMedidas() {
-    console.log('Guardando detalle de medida emergente');
-  const fg = this.medidasDefinitivasForm;
-  if (fg.invalid) {
-    fg.markAllAsTouched();
-    console.log('Formulario de medida inválido');
-    return;
-
-  }
-
-  const v = fg.getRawValue(); // { idMedida, medida, periodo, observaciones }
-
-  if (this.selectedIndex === null) {
-  // Crear: valida duplicados por idMedida y afectado
-  if (this.isAgregada(Number(v.idMedida), Number(v.idAfectado))) {
-      // aquí puedes mostrar un mensaje al usuario si quieres
+  obtenerMedidasDefinitivasPorAfectado(afectadoId: number): void {
+    if (!afectadoId) {
+      console.warn('No se puede obtener medidas definitivas: ID de afectado no disponible');
+      this.medidasDefinitivasArray = [];
       return;
     }
 
-    const fila = this.fb.group({
-      idAfectado: [Number(v.idAfectado), Validators.required],
-      idMedida: [Number(v.idMedida), Validators.required],
-      medida: [v.medida, Validators.required],
-      periodo: [v.periodo, Validators.required],
-      observaciones: [v.observaciones, Validators.required],
+    console.log('Actualizando medidas definitivas para afectado:', afectadoId);
+    this.medidasService.getMedidasDefinitivas(afectadoId).subscribe({
+      next: (response: any) => {
+        if (response && Array.isArray(response.afectado)) {
+          this.medidasDefinitivasArray = response.afectado;
+          console.log('Medidas definitivas actualizadas:', this.medidasDefinitivasArray);
+        } else {
+          console.warn('Respuesta inesperada del servicio:', response);
+          this.medidasDefinitivasArray = [];
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al obtener medidas definitivas por afectado:', error);
+        this.medidasDefinitivasArray = [];
+      }
+    });
+  }
+   loadMedidasporAfectado(afectadoId: number) {
+    if (!afectadoId) return;
+
+    // PRIMERO: Verificar si ya existen medidas emergentes para este afectado
+    this.medidasService.getMedidasDefinitivas(afectadoId).subscribe({
+      next: (responseMedidasDefinitivas: any) => {
+        const medidasDefinitivasExistentes = Array.isArray(responseMedidasDefinitivas.afectado) ? responseMedidasDefinitivas.afectado : [];
+
+        if (medidasDefinitivasExistentes.length > 0) {
+          // Si ya existen medidas emergentes, solo cargarlas y mostrarlas
+          console.log('Ya existen medidas emergentes para este afectado, cargando existentes...');
+          this.medidasDefinitivasArray = medidasDefinitivasExistentes;
+          console.log('Medidas emergentes existentes cargadas:', this.medidasDefinitivasArray);
+        } else {
+          // Si NO existen medidas emergentes, entonces cargar y agregar las medidas identificadas
+          console.log('No existen medidas emergentes, procediendo a cargar medidas identificadas...');
+          this.cargarYAgregarMedidasDefinitivas(afectadoId);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al verificar medidas emergentes existentes:', error);
+        // En caso de error, intentar cargar medidas identificadas como fallback
+        this.cargarYAgregarMedidasDefinitivas(afectadoId);
+      }
+    });
+  }
+  private cargarYAgregarMedidasDefinitivas(afectadoId: number) {
+    // Consumir API de medidas identificadas
+    this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
+      next: (response: any) => {
+        console.log('Medidas identificadas obtenidas:', response);
+
+        // Obtener la lista de medidas del afectado
+        const medidasEmergentes = Array.isArray(response?.afectado) ? response.afectado : [];
+
+        if (medidasEmergentes.length > 0) {
+          // Agregar cada medida una por una como medida definitiva
+          this.agregarMedidasDefinitivasIndividualmente(medidasEmergentes, afectadoId);
+        } else {
+          console.log('No se encontraron medidas identificadas para este afectado');
+          // Asegurar que el array esté vacío si no hay medidas
+          this.medidasDefinitivasArray = [];
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al cargar medidas identificadas:', error);
+        this.medidasDefinitivasArray = [];
+      }
+    });
+  }
+  private agregarMedidasDefinitivasIndividualmente(medidas: any[], afectadoId: number) {
+      if (medidas.length === 0) {
+        console.log('No hay medidas identificadas para procesar');
+        this.medidasDefinitivasArray = [];
+        return;
+      }
+
+      console.log(`Procesando ${medidas.length} medidas identificadas para agregar como medidas definitivas`);
+
+      // Crear array de observables para todas las operaciones
+      const requests: Observable<any>[] = medidas.map((medida, index) => {
+        const medidaDefinitiva = {
+          idAfectado: afectadoId,
+          idMedida: medida.idMedida || medida.id || null,
+          medida: medida.medida || medida.descripcion || '',
+          periodo: medida.periodo || '', // Se puede dejar vacío para que el usuario lo complete
+          observaciones: medida.observaciones || 'Medida agregada automáticamente desde medidas identificadas'
+        };
+
+        // Retornar observable con manejo de errores individual
+        return this.medidasService.agregarMedidasDefinitivas(medidaDefinitiva).pipe(
+          catchError((error) => {
+            console.error(`Error al agregar medida definitiva ${index + 1}:`, error);
+            // Retornar un observable con error controlado para que forkJoin no se detenga
+            return of({ error: true, medida: medidaDefinitiva, errorDetails: error });
+          })
+        );
+      });
+
+      // Usar forkJoin para esperar a que TODAS las operaciones terminen
+      forkJoin(requests).pipe(
+        finalize(() => {
+          console.log('Todas las operaciones de medidas emergentes han finalizado');
+        })
+      ).subscribe({
+        next: (responses) => {
+          // Contar éxitos y errores
+          const exitosos = responses.filter(r => !r.error).length;
+          const errores = responses.filter(r => r.error).length;
+
+          console.log(`✅ Medidas procesadas: ${exitosos} exitosas, ${errores} con errores`);
+
+          if (exitosos > 0) {
+            console.log('Actualizando lista de medidas definitivas...');
+            // Ahora SÍ actualizar la lista porque sabemos que las operaciones terminaron
+            this.obtenerMedidasDefinitivasPorAfectado(afectadoId);
+          } else {
+            console.warn('Ninguna medida fue agregada exitosamente');
+            this.medidasDefinitivasArray = [];
+          }
+        },
+        error: (error) => {
+          console.error('Error crítico en el procesamiento de medidas:', error);
+          // En caso de error crítico, intentar cargar las medidas existentes
+          this.obtenerMedidasDefinitivasPorAfectado(afectadoId);
+        }
+      });
+    }
+    agregarMedida(fg: FormGroup){
+
+      const body = { ...fg.value };
+      this.medidasService.agregarMedidasDefinitivas(body).subscribe({
+        next: () => {
+
+          this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
+          this.resetEditor();
+          toast.success('Medida agregada con éxito', {
+              duration: 3000,
+              description: 'La medida se agregó correctamente.',
+
+            });
+
+        },
+        error: (error:any) => {
+          if (error) {
+            toast.warning(error, {
+            duration: 3000,
+
+          });
+
+          }else{
+            toast.error('Error al agregar medida ', {
+              duration: 3000,
+              description: 'Intente nuevamente más tarde.',
+
+            });
+          }
+        }
+      });
+    }
+    eliminarMedida(registro: any): void {
+        if (!this.medidas) return;
+
+        this.medidasService.eliminarMedidasDefinitivas(registro.id).subscribe({
+          next: () => {
+            toast.success('Medida eliminada con éxito', {
+              duration: 3000,
+            });
+            this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
+          },
+          error: (err) => {
+            toast.error('Error al eliminar medida', {
+              duration: 3000,
+              description: err
+            });
+          }
+        })
+
+
+      }
+      SeleccionarParaEditar(registro: any): void {
+
+    if (!this.medidasDefinitivasArray || this.medidasDefinitivasArray.length === 0) return;
+
+    // Cargar los datos del item en el formulario de edición
+    this.medidasDefinitivasForm.patchValue({
+      idAfectado: registro.idAfectado || registro.id_afectado,
+      idMedida: registro.idMedida || registro.id_medida,
+      medida: registro.medida || registro.descripcion,
+      periodo: registro.periodo,
+      observaciones: registro.observaciones,
+      id: registro.id
     });
 
-    this.medidas.push(fila);
+    console.log('id elegido:', registro.id);
 
-  } else {
-    // Actualizar la fila existente
-    (this.medidas.at(this.selectedIndex) as FormGroup).patchValue({
-      idMedida: Number(v.idMedida),
-      medida: v.medida,
-      periodo: v.periodo,
-      observaciones: v.observaciones,
+    this.editMediasMode = true;
+    // Scroll the form container to top so the editor is visible to the user
+
+
+  }
+   actualizarMedida(){
+    const fg = this.medidasDefinitivasForm;
+  if (fg.invalid) {
+    fg.markAllAsTouched();
+    return;
+  }
+      this.medidasService.actualizarMedidasDefinitivas(this.medidasDefinitivasForm.get('id')?.value, this.medidasDefinitivasForm.value).subscribe({
+      next: () => {
+        toast.success('Medida actualizada con éxito', {
+          duration: 3000,
+        });
+        this.resetEditor();
+        this.editMediasMode = false;
+
+
+        this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
+      },
+      error: (err) => {
+        toast.error('Error al actualizar medida', {
+          duration: 3000,
+          description: err
+        });
+      }
     });
   }
 
-  this.resetEditor();
-}
-agregarMedidaAfectadoEditMode(){
-  console.log('Agregando medida en modo edición');
-  const body = { ...this.medidasDefinitivasForm.value, idAP: this.idAudienciaP };
-  this.medidasService.agregarMedidasDefinitivas(body).subscribe({
-    next: () => {
-
-      this.loadMedidasDefinitivas(this.medidasDefinitivasForm.get('idAfectado')?.value);
-      this.resetEditor();
-      toast.success('Medida agregada con éxito', {
-        duration: 3000,
-
-      });
-    },
-    error: (error:any) => {
-      if (error) {
-        toast.warning(error, {
-        duration: 3000,
-
-      });
-
-      }else{
-        toast.error('Error al agregar medida ', {
-          duration: 3000,
-          description: 'Intente nuevamente más tarde.',
-
-        });
-      }
 
 
 
 
 
 
-    }
-  });
-}
+
 //--------------------------/////
 resetEditor() {
   const afectado = this.medidasDefinitivasForm.get('idAfectado')?.value;
@@ -498,115 +587,9 @@ resetEditor() {
   this.selectedIndex = null;
 }
  // -----------Eliminar una medida aceptando índice o item (flexible)
-  eliminar(itemOrIndex: any): void {
-    if (!this.medidas) return;
-
-    let index: number | null = null;
-
-    if (typeof itemOrIndex === 'number') {
-      index = itemOrIndex;
-    } else if (itemOrIndex && (itemOrIndex.idMedida || itemOrIndex.idMedida === 0)) {
-      // buscar por idMedida y idAfectado (clave compuesta)
-      const idMedida = Number(itemOrIndex.idMedida);
-      const idAfectado = Number(itemOrIndex.idAfectado ?? itemOrIndex.idAfectado);
-      index = this.medidas.controls.findIndex(ctrl => Number(ctrl.get('idMedida')?.value) === idMedida && Number(ctrl.get('idAfectado')?.value) === idAfectado);
-    } else if (typeof itemOrIndex === 'object') {
-      // si recibimos directamente el control/value, intentar localizar hilo por igualdad de objeto
-      index = this.medidas.controls.findIndex(ctrl => ctrl.value === itemOrIndex || JSON.stringify(ctrl.value) === JSON.stringify(itemOrIndex));
-    }
-
-    if (index === -1 || index === null) return;
 
 
 
-    // Si la fila tiene idMedida (viene del backend), registrar su eliminación para no re-cargarla
-    const fg = this.medidas.at(index) as FormGroup;
-    const idMedidaVal = fg?.get('idMedida')?.value;
-    const idAfectadoVal = fg?.get('idAfectado')?.value;
-    if (idMedidaVal != null && idMedidaVal !== '' && idAfectadoVal != null) {
-      const idMedidaNum = Number(idMedidaVal);
-      const idAfectadoNum = Number(idAfectadoVal);
-      let set = this.removedMedidasByAfectado.get(idAfectadoNum);
-      if (!set) {
-        set = new Set<number>();
-        this.removedMedidasByAfectado.set(idAfectadoNum, set);
-      }
-      set.add(idMedidaNum);
-    }
-
-    this.medidas.removeAt(index);
-  }
-
-  // Editar una medida: carga la fila seleccionada en el formulario para editar
-  editar(itemOrIndex: any): void {
-    if (!this.medidas) return;
-
-    let index: number | null = null;
-
-    if (typeof itemOrIndex === 'number') {
-      index = itemOrIndex;
-    } else if (itemOrIndex && (itemOrIndex.idMedida || itemOrIndex.idMedida === 0)) {
-      const idMedida = Number(itemOrIndex.idMedida);
-      const idAfectado = Number(itemOrIndex.idAfectado ?? itemOrIndex.idAfectado);
-      // localizar usando clave compuesta
-      index = this.medidas.controls.findIndex(ctrl => Number(ctrl.get('idMedida')?.value) === idMedida && Number(ctrl.get('idAfectado')?.value) === idAfectado);
-    } else if (typeof itemOrIndex === 'object') {
-      index = this.medidas.controls.findIndex(ctrl => ctrl.value === itemOrIndex || JSON.stringify(ctrl.value) === JSON.stringify(itemOrIndex));
-    }
-
-    if (index === -1 || index === null) return;
-
-    const fg = this.medidas.at(index) as FormGroup;
-    this.medidasDefinitivasForm.patchValue({
-      idAfectado: fg.get('idAfectado')?.value,
-      idMedida: fg.get('idMedida')?.value,
-      medida: fg.get('medida')?.value,
-      periodo: fg.get('periodo')?.value,
-      observaciones: fg.get('observaciones')?.value,
-       id: fg.get('id')?.value
-    });
-    this.selectedIndex = index;
-    this.editMediasMode = true;
-  }
-
-  actualizarMedidasEditMode(){
-    console.log('Editando medida en modo edición');
-      this.medidasService.actualizarMedidasDefinitivas(this.medidasDefinitivasForm.get('id')?.value, this.medidasDefinitivasForm.value).subscribe({
-      next: () => {
-        toast.success('Medida actualizada con éxito', {
-          duration: 3000,
-        });
-        this.resetEditor();
-        this.editMediasMode = false;
-        this._editarDisabled = true;
-        this._pdfDisabled = false;
-        this.actualizarEstadoBotones();
-        const fg = this.medidasDefinitivasForm;
-  if (fg.invalid) {
-    fg.markAllAsTouched();
-    return;
-  }
-  const v = fg.getRawValue();
-
-  if (this.selectedIndex !==null) {
-     (this.medidas.at(this.selectedIndex) as FormGroup).patchValue({
-      idMedida: Number(v.idMedida),
-      medida: v.medida,
-      periodo: v.periodo,
-      observaciones: v.observaciones,
-    });
-
-  }
-        this.loadMedidasDefinitivas(this.medidasDefinitivasForm.get('idAfectado')?.value);
-      },
-      error: (err) => {
-        toast.error('Error al actualizar medida', {
-          duration: 3000,
-          description: err
-        });
-      }
-    });
-  }
 
   //-----SECCION PARTICIPANTES-----//
 
@@ -627,7 +610,7 @@ resetEditor() {
       instalacionAudiencia: [''],
       afectadoManifiesta: [''],
       participantes: this.fb.array([]),
-      medidasDefinitivas: this.fb.array([], Validators.required),
+      
     });
   }
 
@@ -637,8 +620,8 @@ resetEditor() {
       apellidos: ['', Validators.required],
       cedula: ['', Validators.required],
       tipoParticipante: ['', Validators.required],
-      pruebas: ['', Validators.required],
-      parte: ['', Validators.required],
+      pruebas: [''],
+      parte: [''],
       idDenuncia: [this.denunciaId]
     });
   }
@@ -664,7 +647,11 @@ resetEditor() {
 
       //------GETTER FORMULARIOS-------------------//
 get participantesArray(): FormArray {
-    return this.audienciaPruebaForm.get('participantes') as FormArray;
+    if (!this.audienciaPruebaForm) {
+      return this.fb.array([]);
+    }
+    const array = this.audienciaPruebaForm.get('participantes') as FormArray;
+    return array || this.fb.array([]);
   }
 
   // Devuelve los participantes que no son afectados (para el select de manifestaciones)
@@ -679,61 +666,311 @@ get participantesArray(): FormArray {
       .map((ctrl, idx) => ({ ...ctrl.value, idx }))
       .filter(p => p.tipoParticipante === 'Afectado');
   }
+
+  // Getter para la tabla de participantes (todos los participantes del FormArray)
+  get participantesTabla() {
+    if (!this.participantesArray) {
+      return [];
+    }
+    try {
+      return this.participantesArray.getRawValue() || [];
+    } catch (error) {
+      console.error('Error al obtener participantesTabla:', error);
+      return [];
+    }
+  }
   // Getter para la tabla de testimonios (nombre completo y testimonio)
   get testimoniosTabla() {
-    return this.participantesArray.getRawValue()
-      .filter((p: any) => p.testimonio && p.testimonio.trim() !== '')
-      .map((p: any) => ({
-        nombreCompleto: (p.nombres || '') + ' ' + (p.apellidos || ''),
-        testimonio: p.testimonio || '',
-        parte: p.parte || ''
-      }));
+    if (!this.participantesArray) {
+      return [];
+    }
+    try {
+      return this.participantesArray.getRawValue()
+        .filter((p: any) => p && p.testimonio && p.testimonio.trim() !== '')
+        .map((p: any) => ({
+          nombreCompleto: (p.nombres || '') + ' ' + (p.apellidos || ''),
+          testimonio: p.testimonio || '',
+          parte: p.parte || ''
+        }));
+    } catch (error) {
+      console.error('Error al obtener testimoniosTabla:', error);
+      return [];
+    }
   }
    // Getter para la tabla de pruebas (nombre completo y pruebas)
   get pruebasTabla() {
-    return this.participantesArray.getRawValue()
-      .filter((p: any) => p.pruebas && p.pruebas.trim() !== '')
-      .map((p: any) => ({
-        nombreCompleto: (p.nombres || '') + ' ' + (p.apellidos || ''),
-        pruebas: p.pruebas || '',
-        parte: p.parte || ''
-      }));
+    if (!this.participantesArray) {
+      return [];
+    }
+    try {
+      return this.participantesArray.getRawValue()
+        .filter((p: any) => p && p.pruebas && p.pruebas.trim() !== '')
+        .map((p: any) => ({
+          nombreCompleto: (p.nombres || '') + ' ' + (p.apellidos || ''),
+          pruebas: p.pruebas || '',
+          parte: p.parte || ''
+        }));
+    } catch (error) {
+      console.error('Error al obtener pruebasTabla:', error);
+      return [];
+    }
   }
 
 
 
   // Método para agregar el testimonio al participante seleccionado
   agregarTestimoniosParticipante() {
-    const idx = this.testimoniosForm.get('participanteIndex')?.value;
-    const texto = this.testimoniosForm.get('testimonio')?.value;
-    const parte = this.testimoniosForm.get('parte')?.value;
-    if (idx !== '' && idx !== null && texto) {
-      const participanteCtrl = this.participantesArray.at(Number(idx));
-      if (participanteCtrl) {
-        participanteCtrl.get('testimonio')?.setValue(texto);
-        participanteCtrl.get('parte')?.setValue(parte);
-        this.testimoniosForm.reset();
+    if (this.modoEdicionTestimonios && this.indexTestimoniosEditando !== null) {
+      this.actualizarTestimonios();
+    } else {
+      const idx = this.testimoniosForm.get('participanteIndex')?.value;
+      const texto = this.testimoniosForm.get('testimonio')?.value;
+      const parte = this.testimoniosForm.get('parte')?.value;
+      if (idx !== '' && idx !== null && texto) {
+        const participanteCtrl = this.participantesArray.at(Number(idx));
+        if (participanteCtrl) {
+          participanteCtrl.get('testimonio')?.setValue(texto);
+          participanteCtrl.get('parte')?.setValue(parte);
+          this.testimoniosForm.reset();
+        }
       }
     }
+  }
 
+  // Editar testimonios
+  editarTestimonios(indexOrData: number | any): void {
+    let testimonioData: any;
 
+    // Determinar si recibimos un índice o un objeto de datos
+    if (typeof indexOrData === 'number') {
+      // Caso 1: Recibimos un índice numérico
+      const index = indexOrData;
+      if (!this.testimoniosTabla || index < 0 || index >= this.testimoniosTabla.length) {
+        console.error('Índice de testimonios inválido o datos no disponibles');
+        return;
+      }
+      testimonioData = this.testimoniosTabla[index];
+    } else {
+      // Caso 2: Recibimos un objeto de datos (desde tablaEdit)
+      testimonioData = indexOrData;
+    }
 
+    if (!testimonioData || !testimonioData.nombreCompleto) {
+      console.error('Datos de testimonio incompletos:', testimonioData);
+      return;
+    }
+
+    // Buscar el participante correspondiente en el array
+    const participanteIndex = this.participantesArray.controls.findIndex(ctrl => {
+      const nombreCompleto = (ctrl.get('nombres')?.value || '') + ' ' + (ctrl.get('apellidos')?.value || '');
+      return nombreCompleto === testimonioData.nombreCompleto;
+    });
+
+    if (participanteIndex !== -1) {
+      this.testimoniosForm.patchValue({
+        participanteIndex: participanteIndex,
+        testimonio: testimonioData.testimonio || '',
+        parte: testimonioData.parte || ''
+      });
+      this.modoEdicionTestimonios = true;
+      this.indexTestimoniosEditando = participanteIndex;
+    } else {
+      console.error('No se encontró el participante correspondiente');
+    }
+  }
+
+  // Actualizar testimonios
+  actualizarTestimonios(): void {
+    if (this.indexTestimoniosEditando !== null) {
+      const testimonio = this.testimoniosForm.get('testimonio')?.value;
+      const parte = this.testimoniosForm.get('parte')?.value;
+      const participanteCtrl = this.participantesArray.at(this.indexTestimoniosEditando);
+      if (participanteCtrl) {
+        participanteCtrl.get('testimonio')?.setValue(testimonio);
+        participanteCtrl.get('parte')?.setValue(parte);
+        this.cancelarEdicionTestimonios();
+        toast.success('Testimonios actualizados con éxito', { duration: 3000 });
+      }
+    }
+  }
+
+  // Cancelar edición testimonios
+  cancelarEdicionTestimonios(): void {
+    this.modoEdicionTestimonios = false;
+    this.indexTestimoniosEditando = null;
+    this.testimoniosForm.reset();
+  }
+
+  // Eliminar testimonios
+  eliminarTestimonios(indexOrData: number | any): void {
+    let testimonioData: any;
+
+    // Determinar si recibimos un índice o un objeto de datos
+    if (typeof indexOrData === 'number') {
+      // Caso 1: Recibimos un índice numérico
+      const index = indexOrData;
+      if (!this.testimoniosTabla || index < 0 || index >= this.testimoniosTabla.length) {
+        console.error('Índice de testimonios inválido o datos no disponibles');
+        return;
+      }
+      testimonioData = this.testimoniosTabla[index];
+    } else {
+      // Caso 2: Recibimos un objeto de datos (desde tablaEdit)
+      testimonioData = indexOrData;
+    }
+
+    if (!testimonioData || !testimonioData.nombreCompleto) {
+      console.error('Datos de testimonio incompletos:', testimonioData);
+      return;
+    }
+
+    // Buscar el participante correspondiente en el array
+    const participanteIndex = this.participantesArray.controls.findIndex(ctrl => {
+      const nombreCompleto = (ctrl.get('nombres')?.value || '') + ' ' + (ctrl.get('apellidos')?.value || '');
+      return nombreCompleto === testimonioData.nombreCompleto;
+    });
+
+    if (participanteIndex !== -1) {
+      const participanteCtrl = this.participantesArray.at(participanteIndex);
+      participanteCtrl.get('testimonio')?.setValue('');
+      participanteCtrl.get('parte')?.setValue('');
+      toast.success('Testimonios eliminados con éxito', { duration: 3000 });
+
+      // Si estamos editando este testimonio, cancelar edición
+      if (this.indexTestimoniosEditando === participanteIndex) {
+        this.cancelarEdicionTestimonios();
+      }
+    } else {
+      console.error('No se encontró el participante correspondiente');
+    }
   }
 
    // Método para agregar pruebas al participante seleccionado
   agregarPruebasParticipante() {
-    const idx = this.pruebasForm.get('participanteIndex')?.value;
-    const pruebas = this.pruebasForm.get('pruebas')?.value;
-    const parte = this.pruebasForm.get('parte')?.value;
-    if (idx !== '' && idx !== null && pruebas) {
-      const participanteCtrl = this.participantesArray.at(Number(idx));
+    if (this.modoEdicionPruebas && this.indexPruebasEditando !== null) {
+      this.actualizarPruebas();
+    } else {
+      const idx = this.pruebasForm.get('participanteIndex')?.value;
+      const pruebas = this.pruebasForm.get('pruebas')?.value;
+      const parte = this.pruebasForm.get('parte')?.value;
+      if (idx !== '' && idx !== null && pruebas) {
+        const participanteCtrl = this.participantesArray.at(Number(idx));
+        if (participanteCtrl) {
+          participanteCtrl.get('pruebas')?.setValue(pruebas);
+          participanteCtrl.get('parte')?.setValue(parte);
+          this.pruebasForm.reset();
+        }
+      }
+      console.log('aquiiiiiii'+this.pruebasTabla);
+    }
+  }
+
+  // Editar pruebas
+  editarPruebas(indexOrData: number | any): void {
+    let pruebasData: any;
+
+    // Determinar si recibimos un índice o un objeto de datos
+    if (typeof indexOrData === 'number') {
+      // Caso 1: Recibimos un índice numérico
+      const index = indexOrData;
+      if (!this.pruebasTabla || index < 0 || index >= this.pruebasTabla.length) {
+        console.error('Índice de pruebas inválido o datos no disponibles');
+        return;
+      }
+      pruebasData = this.pruebasTabla[index];
+    } else {
+      // Caso 2: Recibimos un objeto de datos (desde tablaEdit)
+      pruebasData = indexOrData;
+    }
+
+    if (!pruebasData || !pruebasData.nombreCompleto) {
+      console.error('Datos de pruebas incompletos:', pruebasData);
+      return;
+    }
+
+    // Buscar el participante correspondiente en el array
+    const participanteIndex = this.participantesArray.controls.findIndex(ctrl => {
+      const nombreCompleto = (ctrl.get('nombres')?.value || '') + ' ' + (ctrl.get('apellidos')?.value || '');
+      return nombreCompleto === pruebasData.nombreCompleto;
+    });
+
+    if (participanteIndex !== -1) {
+      this.pruebasForm.patchValue({
+        participanteIndex: participanteIndex,
+        pruebas: pruebasData.pruebas || '',
+        parte: pruebasData.parte || ''
+      });
+      this.modoEdicionPruebas = true;
+      this.indexPruebasEditando = participanteIndex;
+    } else {
+      console.error('No se encontró el participante correspondiente');
+    }
+  }
+
+  // Actualizar pruebas
+  actualizarPruebas(): void {
+    if (this.indexPruebasEditando !== null) {
+      const pruebas = this.pruebasForm.get('pruebas')?.value;
+      const parte = this.pruebasForm.get('parte')?.value;
+      const participanteCtrl = this.participantesArray.at(this.indexPruebasEditando);
       if (participanteCtrl) {
         participanteCtrl.get('pruebas')?.setValue(pruebas);
         participanteCtrl.get('parte')?.setValue(parte);
-        this.pruebasForm.reset();
+        this.cancelarEdicionPruebas();
+        toast.success('Pruebas actualizadas con éxito', { duration: 3000 });
       }
     }
-    console.log('aquiiiiiii'+this.pruebasTabla);
+  }
+
+  // Cancelar edición pruebas
+  cancelarEdicionPruebas(): void {
+    this.modoEdicionPruebas = false;
+    this.indexPruebasEditando = null;
+    this.pruebasForm.reset();
+  }
+
+  // Eliminar pruebas
+  eliminarPruebas(indexOrData: number | any): void {
+    let pruebasData: any;
+
+    // Determinar si recibimos un índice o un objeto de datos
+    if (typeof indexOrData === 'number') {
+      // Caso 1: Recibimos un índice numérico
+      const index = indexOrData;
+      if (!this.pruebasTabla || index < 0 || index >= this.pruebasTabla.length) {
+        console.error('Índice de pruebas inválido o datos no disponibles');
+        return;
+      }
+      pruebasData = this.pruebasTabla[index];
+    } else {
+      // Caso 2: Recibimos un objeto de datos (desde tablaEdit)
+      pruebasData = indexOrData;
+    }
+
+    if (!pruebasData || !pruebasData.nombreCompleto) {
+      console.error('Datos de pruebas incompletos:', pruebasData);
+      return;
+    }
+
+    // Buscar el participante correspondiente en el array
+    const participanteIndex = this.participantesArray.controls.findIndex(ctrl => {
+      const nombreCompleto = (ctrl.get('nombres')?.value || '') + ' ' + (ctrl.get('apellidos')?.value || '');
+      return nombreCompleto === pruebasData.nombreCompleto;
+    });
+
+    if (participanteIndex !== -1) {
+      const participanteCtrl = this.participantesArray.at(participanteIndex);
+      participanteCtrl.get('pruebas')?.setValue('');
+      participanteCtrl.get('parte')?.setValue('');
+      toast.success('Pruebas eliminadas con éxito', { duration: 3000 });
+
+      // Si estamos editando estas pruebas, cancelar edición
+      if (this.indexPruebasEditando === participanteIndex) {
+        this.cancelarEdicionPruebas();
+      }
+    } else {
+      console.error('No se encontró el participante correspondiente');
+    }
   }
 
 
@@ -1006,18 +1243,134 @@ get participantesArray(): FormArray {
 }
 //------------SUBMIT PARTICIPANTES---///
   onSubmitParticipante(): void {
-    const body = {
-      ...this.participantesForm.value,
-    };
-    console.log(body);
-    this.audienciaPruebasService.postCrearParticipante(body).subscribe(() => {
-      // Agregar al FormArray de audienciaForm
-      this.participantesArray.push(this.fb.group({ ...this.participantesForm.value }));
-      // Actualizar el array participantes para reflejar el cambio en la tabla
+    if (this.modoEdicionParticipante && this.indexParticipanteEditando !== null) {
+      this.actualizarParticipante();
+    } else {
+      const body = {
+        ...this.participantesForm.value,
+      };
+      console.log(body);
+      this.audienciaPruebasService.postCrearParticipante(body).subscribe(() => {
+        // Agregar al FormArray de audienciaForm
+        this.participantesArray.push(this.fb.group({ ...this.participantesForm.value }));
+        // Actualizar el array participantes para reflejar el cambio en la tabla
+        this.participantes = this.participantesArray.getRawValue();
+        this.participantesForm.reset();
+        this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+      });
+    }
+  }
+
+  // Editar participante
+  editarParticipante(indexOrData: number | any): void {
+    let index: number;
+    let participanteData: any;
+
+    // Determinar si recibimos un índice o un objeto de datos
+    if (typeof indexOrData === 'number') {
+      // Caso 1: Recibimos un índice numérico
+      index = indexOrData;
+      const participantesData = this.participantesTabla;
+      if (!participantesData || index < 0 || index >= participantesData.length) {
+        console.error('Índice de participante inválido:', index, 'Total:', participantesData?.length);
+        return;
+      }
+      participanteData = participantesData[index];
+    } else {
+      // Caso 2: Recibimos un objeto de datos (desde tablaEdit)
+      participanteData = indexOrData;
+      // Buscar el índice correspondiente en el array
+      const participantesData = this.participantesTabla;
+      index = participantesData.findIndex(p =>
+        p.nombres === participanteData.nombres &&
+        p.apellidos === participanteData.apellidos &&
+        p.cedula === participanteData.cedula
+      );
+
+      if (index === -1) {
+        console.error('No se pudo encontrar el participante en el array:', participanteData);
+        return;
+      }
+    }
+
+    // Verificar que el FormArray esté sincronizado
+    if (!this.participantesArray || index >= this.participantesArray.length) {
+      console.error('FormArray no sincronizado. Index:', index, 'Array length:', this.participantesArray?.length);
+      return;
+    }
+
+    const participanteControl = this.participantesArray.at(index);
+    if (!participanteControl) {
+      console.error('Control de participante no encontrado en índice:', index);
+      return;
+    }
+
+    const participante = participanteControl.value;
+    this.participantesForm.patchValue(participante);
+    this.modoEdicionParticipante = true;
+    this.indexParticipanteEditando = index;
+  }
+
+  // Actualizar participante
+  actualizarParticipante(): void {
+    if (this.indexParticipanteEditando !== null) {
+      const participanteActualizado = this.participantesForm.value;
+      this.participantesArray.at(this.indexParticipanteEditando).patchValue(participanteActualizado);
       this.participantes = this.participantesArray.getRawValue();
-      this.participantesForm.reset();
-      this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
-    });
+      this.cancelarEdicionParticipante();
+      toast.success('Participante actualizado con éxito', { duration: 3000 });
+    }
+  }
+
+  // Cancelar edición participante
+  cancelarEdicionParticipante(): void {
+    this.modoEdicionParticipante = false;
+    this.indexParticipanteEditando = null;
+    this.participantesForm.reset();
+    this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+  }
+
+  // Eliminar participante
+  eliminarParticipante(indexOrData: number | any): void {
+    let index: number;
+
+    // Determinar si recibimos un índice o un objeto de datos
+    if (typeof indexOrData === 'number') {
+      // Caso 1: Recibimos un índice numérico
+      index = indexOrData;
+    } else {
+      // Caso 2: Recibimos un objeto de datos (desde tablaEdit)
+      const participanteData = indexOrData;
+      // Buscar el índice correspondiente en el array
+      const participantesData = this.participantesTabla;
+      index = participantesData.findIndex(p =>
+        p.nombres === participanteData.nombres &&
+        p.apellidos === participanteData.apellidos &&
+        p.cedula === participanteData.cedula
+      );
+
+      if (index === -1) {
+        console.error('No se pudo encontrar el participante a eliminar:', participanteData);
+        return;
+      }
+    }
+
+    // Verificar que el índice sea válido
+    if (index < 0 || index >= this.participantesArray.length) {
+      console.error('Índice inválido para eliminar participante:', index);
+      return;
+    }
+
+    this.participantesArray.removeAt(index);
+    this.participantes = this.participantesArray.getRawValue();
+    toast.success('Participante eliminado con éxito', { duration: 3000 });
+
+    // Si estamos editando el participante que se eliminó, cancelar edición
+    if (this.indexParticipanteEditando === index) {
+      this.cancelarEdicionParticipante();
+    } else if (this.indexParticipanteEditando !== null && this.indexParticipanteEditando > index) {
+      this.indexParticipanteEditando--;
+    }
   }
   //-----------PDF------------------//
   generarPdf(){

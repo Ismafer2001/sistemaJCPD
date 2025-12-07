@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { QuillModule } from 'ngx-quill';
 
-import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ArticuloMedidas, MedidasService } from '@nna/services/medidas.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
@@ -15,6 +15,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toast } from 'ngx-sonner';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
+import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Formulario.component';
 
 @Component({
   selector: 'app-crearAvocatoria',
@@ -24,7 +25,8 @@ import { catchError, finalize } from 'rxjs/operators';
       QuillModule,
       CardFormComponent,
       ButtonSubmitComponent,
-      TablaEditComponent],
+      TablaEditComponent,
+    NavFormularioComponent],
 })
 export class CrearAvocatoriaComponent implements OnInit {
   @ViewChild('formContainer', { static: false }) formContainerRef?: ElementRef<HTMLElement>;
@@ -223,9 +225,7 @@ CUARTO.-<p>`,
 
 
   //-------getters de formulario-----------------//
-  get medidas(): FormArray {
-  return this.avocatoriaForm.get('mediasEmergentes') as FormArray;
-}
+
 
 
 
@@ -247,7 +247,7 @@ CUARTO.-<p>`,
 
       // Mostrar toast si existe notificación
       if(this.existeNotificacion){
-        this.avocatoriaForm.disable();
+        //this.avocatoriaForm.disable();
         this.medidasEmergentesForm.disable();
         this.actualizarEstadoBotones();
         toast.warning('No puedes editar esta avocatoria', {
@@ -402,8 +402,8 @@ CUARTO.-<p>`,
 
     this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
       next: (response: any) => {
-        if (response && Array.isArray(response)) {
-          this.medidasEmergentesArray = response;
+        if (response && Array.isArray(response.afectado)) {
+          this.medidasEmergentesArray = response.afectado;
           console.log('Medidas emergentes actualizadas:', this.medidasEmergentesArray);
         } else {
           console.warn('Respuesta inesperada del servicio:', response);
@@ -423,7 +423,7 @@ CUARTO.-<p>`,
     // PRIMERO: Verificar si ya existen medidas emergentes para este afectado
     this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
       next: (responseMedidasEmergentes: any) => {
-        const medidasEmergentesExistentes = Array.isArray(responseMedidasEmergentes) ? responseMedidasEmergentes : [];
+        const medidasEmergentesExistentes = Array.isArray(responseMedidasEmergentes.afectado) ? responseMedidasEmergentes.afectado : [];
 
         if (medidasEmergentesExistentes.length > 0) {
           // Si ya existen medidas emergentes, solo cargarlas y mostrarlas
@@ -576,7 +576,7 @@ resetEditor() {
 
   // -----------Eliminar una medida aceptando índice o item (flexible)
   eliminarMedida(registro: any): void {
-    if (!this.medidas) return;
+
 
     this.medidasService.eliminarMedidasEmergentes(registro.id).subscribe({
       next: () => {

@@ -8,9 +8,14 @@ import { getAfectadosYDirigidoAController,
          getAudienciaContestacionCompleta,
           getAudienciaContestacionPdf,
            putAudienciaContestacion } from '../controllers/audienciaContestacion.controller';
+import { getAudienciasContestacionTotales } from '../controllers/estadisticas/audienciaContestacionReporte.controller';
+import { verificarToken } from '../middleware/auth.middleware';
 
 
 const router = Router();
+
+
+
 router.get('/datos-audiencia/:id', getDatosAudienciaController);
 
 // GET /audiencia-contestacion/completa/:id
@@ -25,5 +30,7 @@ router.post('/afectados-dirigidoA', postaniadirParticipante);
 router.post('', postAudienciaContestacion);
 router.get('/crearpdf/:id',  getAudienciaContestacionPdf);
 router.put('/:id',  putAudienciaContestacion);
+
+
 
 export default router;

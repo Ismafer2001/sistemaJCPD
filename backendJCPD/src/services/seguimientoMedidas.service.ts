@@ -25,13 +25,14 @@ export async function agregarCumplimientoMedidas(payload: any) {
       const idMedida = m.idMedida ?? m.idmedida ?? m.idmedida;
       const idAfectado = m.idAfectado ?? m.idAfectado ?? m.id_afectado ?? m.idAfectado;
       const cumple = typeof m.cumple === 'boolean' ? m.cumple : (m.cumple === '1' || m.cumple === 1);
+      const estatus = 'completada'
 
       if (!idMedida || !idAfectado) {
         await t.rollback();
         throw new Error('Cada medida debe contener idMedida y idAfectado');
       }
 
-      registros.push({ idMedida, cumple, idPath: informe.id, idAfectado });
+      registros.push({ idMedida, cumple, estatus, idPath: informe.id, idAfectado });
     }
 
     // opcional: validar que las medidas referencien medidas existentes

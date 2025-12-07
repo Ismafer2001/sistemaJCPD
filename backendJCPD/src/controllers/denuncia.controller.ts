@@ -205,7 +205,11 @@ export const getCrearPdfDenuncia = async (req: Request, res: Response) => {
     console.log("ID Denuncia:", id); // Línea de depuración
 
     // La función escribe directamente en `res` (stream PDF)
-    await crearPdfDenunciaNNA(res, id);
+    
+      await crearPdfDenunciaNNA(res, id);
+      
+    
+    
   } catch (error) {
     console.error('postCrearPdfDenuncia error:', error);
     handlehttp(res, 'ERROR_post.pdf', error);

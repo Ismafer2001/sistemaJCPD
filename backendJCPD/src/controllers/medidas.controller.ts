@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { medida, articulo } from '../models';
-import { agregarMedidasEmergentes, medidasEmergentesPorAfectado, editarMedidaEmergente, eliminarMedidaEmergente, agregarMedidasDefinitivas, editarMedidaDefinitiva, medidasDefinitivasPorAfectado, medidasIdentificadasPorAfectado } from '../services/medidasproteccion.service';
+import { agregarMedidasEmergentes, medidasEmergentesPorAfectado, editarMedidaEmergente, eliminarMedidaEmergente, agregarMedidasDefinitivas, editarMedidaDefinitiva, medidasDefinitivasPorAfectado, medidasIdentificadasPorAfectado, eliminarMedidaDefinitivas } from '../services/medidasproteccion.service';
 import { handlehttp } from '../utils/error.handle';
 
 // Obtener todas las medidas con sus artículos
@@ -75,9 +75,9 @@ export const getMedidasEmergentesPorAfectado = async (req: Request, res: Respons
 		  const afectado = await medidasEmergentesPorAfectado(id);
 		 
 		
-		  res.json(
-			afectado
-		  );
+		  res.json({
+        afectado
+      });
       
 	} catch (error) {
 		handlehttp(res,'Error al obtener medidas emergentes por afectado' , error);
@@ -165,5 +165,17 @@ export const putEditarMedidaDefinitiva = async (req: Request, res: Response) => 
       return res.status(400).json({ message: error.message });
     }
     handlehttp(res, 'Error al editar medida definitiva', error);
+  }
+};
+
+// Eliminar medida definitiva
+export const deleteMedidaDefinitiva = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+    if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido' });
+    const resultado = await eliminarMedidaDefinitivas(id);
+    res.json(resultado);
+  } catch (error) {
+    handlehttp(res, 'Error al eliminar medida definitiva', error);
   }
 };

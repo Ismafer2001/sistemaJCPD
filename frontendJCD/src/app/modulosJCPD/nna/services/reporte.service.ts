@@ -67,5 +67,23 @@ private apiUrl = 'http://localhost:3000/api/reportes'; // adaptalo si tenés pre
     return this.http.get(`${this.apiUrl}/citacionestotales`, { params });
   }
 
+  //------------------REPORTES AUDIENCIA CONTESTACION ---------------//
+  getReporteAudienciaContestacion(grupoPrioritario: string, desde?: string, hasta?: string): Observable<any> {
+    let params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
 
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+
+    return this.http.get(`${this.apiUrl}/audienciascontestaciontotales`, { params });
+  }
+
+  //------------------REPORTES AUDIENCIA PRUEBAS ---------------//
+  getReporteAudienciaPruebas(grupoPrioritario: string, desde?: string, hasta?: string): Observable<any> {
+    let params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
+
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+
+    return this.http.get(`${this.apiUrl}/audienciaspruebastotales`, { params });
+  }
 }

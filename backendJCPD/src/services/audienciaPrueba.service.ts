@@ -12,7 +12,7 @@ import {
 	ParticipantesAudienciaContestacion,
 	MedidasDefinitivas,
 	Afectado,
-	MedidasEmergentes,
+	
 	medida,
 	VulneracionesIdentificadas,
 	Vulneracion,
@@ -47,7 +47,7 @@ interface AudienciaPruebasData {
 	afectadoManifiesta?: string;
 	pdf_audiencia_pruebas: string;
 	participantes: ParticipanteData[];
-	medidasDefinitivas: medidaDefinitivaData[];
+	
 	estatus: "pendiente"|"en_proceso"|"completada";
 }
 
@@ -221,21 +221,7 @@ export async function crearAudienciaPruebas(data: AudienciaPruebasData) {
 			estatus:  'completada',
 		}, { transaction: t });
 		// Crear medidas emergentes asociadas en la tabla medidas_emergentes
-			for (const medida of data.medidasDefinitivas) {
-			  console.log("Medida definitivas a crear:", data);
-			  if (!medida || medida.idMedida == null || medida.idAfectado == null) {
-			// Puedes lanzar un error o simplemente continuar
-			throw new Error("Medida definitivas inválida: falta idMedida o idAfectado");
-		  }
-			  await MedidasDefinitivas.create({
-				idMedida: medida.idMedida,
-				idAfectado: medida.idAfectado,
-				
-				periodo: medida.periodo,
-				observaciones: medida.observaciones,
-				// Cambia este campo si tu modelo usa otro nombre
-			  }, { transaction: t });
-			}
+		
 
 		if (Array.isArray(data.participantes)) {
 			for (const participante of data.participantes) {
