@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router,} from '@angular/router';
+import { ActivatedRoute, Router, RouterLink,} from '@angular/router';
 import { AuthService } from '@auth/services/auth.service';
 import { NotificacionService } from '@nna/services/notificacion.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
@@ -25,7 +25,13 @@ interface notificacion{
 @Component({
   selector: 'app-crear-Notificaciones',
   templateUrl: './crear-Notificaciones.component.html',
-  imports: [CardFormComponent, TablaNavigatorComponent, CommonModule, ReactiveFormsModule, FormsModule, ButtonSubmitComponent]
+  imports: [CardFormComponent,
+     TablaNavigatorComponent,
+      CommonModule,
+      ReactiveFormsModule,
+       FormsModule,
+        ButtonSubmitComponent,
+      RouterLink]
 })
 
 

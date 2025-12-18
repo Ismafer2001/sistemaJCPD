@@ -37,10 +37,10 @@ export async function crearPdfResolucionNNA(res: Response, idResolucion: any): P
           ? htmlToPdfmake(pdfData.consideraciones, dom.window).map((block: any) => ({ ...block, margin: [0, 0, 0, 20] }))
           : [{ text: '(Sin consideraciones registradas)', margin: [0, 0, 0, 20] }]),
         {
-          text: 'RESOLUCIONES',
+          text: 'RESUELVE',
           bold: true,
           fontSize: 14,
-          alignment: 'center',
+          alignment: 'left',
           margin: [0, 20, 0, 20]
         },
         ...(pdfData.resolucion
@@ -75,6 +75,37 @@ export async function crearPdfResolucionNNA(res: Response, idResolucion: any): P
             margin: [0, 0, 0, 20]
           }
         ])),
+        // Sección de firmas
+        {
+          text: 'SECCIÓN FIRMAS',
+          bold: true,
+          fontSize: 14,
+          alignment: 'center',
+          margin: [0, 30, 0, 20]
+        },
+        {
+          table: {
+            widths: ['33%', '33%', '34%'],
+            body: [
+              [
+                { text: '', border: [true, true, true, true], margin: [0, 30, 0, 30] },
+                { text: '', border: [true, true, true, true], margin: [0, 30, 0, 30] },
+                { text: '', border: [true, true, true, true], margin: [0, 30, 0, 30] }
+              ],
+              [
+                { text: (pdfData.usuariosPrincipalesCanton && pdfData.usuariosPrincipalesCanton[0]) ? `${pdfData.usuariosPrincipalesCanton[0].nombres || ''} ${pdfData.usuariosPrincipalesCanton[0].apellidos || ''}`.trim() : '', alignment: 'center', fontSize: 11 },
+                { text: (pdfData.usuariosPrincipalesCanton && pdfData.usuariosPrincipalesCanton[1]) ? `${pdfData.usuariosPrincipalesCanton[1].nombres || ''} ${pdfData.usuariosPrincipalesCanton[1].apellidos || ''}`.trim() : '', alignment: 'center', fontSize: 11 },
+                { text: (pdfData.usuariosPrincipalesCanton && pdfData.usuariosPrincipalesCanton[2]) ? `${pdfData.usuariosPrincipalesCanton[2].nombres || ''} ${pdfData.usuariosPrincipalesCanton[2].apellidos || ''}`.trim() : '', alignment: 'center', fontSize: 11 }
+              ],
+              [
+                { text: 'Miembro-a Principal', alignment: 'center', fontSize: 11 },
+                { text: 'Miembro-a Principal', alignment: 'center', fontSize: 11 },
+                { text: 'Miembro-a Principal', alignment: 'center', fontSize: 11 }
+              ]
+            ]
+          },
+          margin: [0, 10, 0, 20]
+        }
       ]
     };
 

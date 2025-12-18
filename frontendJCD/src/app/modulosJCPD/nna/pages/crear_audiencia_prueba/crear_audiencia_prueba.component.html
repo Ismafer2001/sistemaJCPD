@@ -1,131 +1,33 @@
-<h1 class="text-2xl font-bold mb-4">Audiencia de pruebas</h1>
-<hr class="border-blue-200 border-1" />
-<!--tabs-->
-  <nav class="flex  mb-0 gap-1 " id="tabs">
-    <button type="button" class="rounded-t-2xl p-2"
-       [ngClass]="{
-      'bg-blue-500 text-white': currentTab === '0',
-      'bg-gray-100': currentTab !== '0'
-    }"
-      (click)="cambiarTab('0')"
+<div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <a
+    [routerLink]="[`../../../fases/${denunciaId}`]"
 
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
     >
-      inicio
-    </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('1')"
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
 
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab  === '1',
-      'bg-gray-100': currentTab !== '1'
-
-    }"
-    >
-     Pruebas
-    </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('2')"
-
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab  === '2',
-      'bg-gray-100': currentTab !== '2'
-
-    }"
-    >
-     Testimonios
-    </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('3')"
-
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab  === '3',
-      'bg-gray-100': currentTab !== '3'
-
-    }"
-    >
-     Audiencia reservada
-    </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('4')"
-
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab  === '4',
-      'bg-gray-100': currentTab !== '4'
-
-    }"
-    >
-     Vulneraciones/ medidas
-    </button>
-
-
-
-     @if (currentTab==="5") {
-      <a
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('5')"
-
-
-      [ngClass]="{
-
-      'bg-blue-500 text-white': currentTab === '5',
-      'bg-gray-100': currentTab !== '5'
-    }"
-    >
-      pdf
     </a>
+  <h3 class="text-2xl font-bold">Audiencia de pruebas</h3>
 
-    }
-    <div class="flex flex-1 mx-1 mt-5 justify-end space-x-1">
-      <app-button-submit
-        type="button"
-        label="Cancelar"
-        color="cancelar"
-        (clicked)="cancelar()"
-      >
-      </app-button-submit>
-       <app-button-submit
-    type="button"
-    label="Editar"
-    color="afirmar"
-    (clicked)="updateAudiencia()"
-     [disabled]="editarDisabled"
+</div>
+<hr class="border-yellow-300 border-1" />
+<!--tabs-->
+<app-nav-formulario
+  [tabs]="tabsConfig"
+  [actions]="actionsConfig"
+  [currentTab]="currentTab"
+  (tabChanged)="cambiarTab($event)"
+  (actionClicked)="handleAction($event)"
+></app-nav-formulario>
 
 
-    >
-
-    </app-button-submit>
-      <app-button-submit type="button"
-       label="Guardar"
-        color="submit"
-        (clicked)="submitAudienciaPrueba()"
-      [disabled]="guardarDisabled"
-      >
-      </app-button-submit>
-      <app-button-submit
-    type="button"
-    label="GenerarPDF"
-    color="submit"
-    [disabled]="pdfDisabled"
-    (clicked)="generarPdf()"
-
-
-    >
-
-    </app-button-submit>
-
-
-    </div>
-
-
-  </nav>
   <form [formGroup]="audienciaPruebaForm" class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]" >
-  <app-card-Form [hidden]="currentTab!='0'">
-    <app-card-Form [titulo]="'inicio'" >
-      <div class="grid grid-cols-3 md:grid-cols-3 gap-6 mb-4">
+  <div [hidden]="currentTab!=0">
+    <app-card-Form [titulo]="'Inicio'" >
+      <div class="bg-white rounded-xl shadow-md p-4 border  ">
+        <div class="grid grid-cols-3 md:grid-cols-3 gap-6 mb-4">
         <!-- Fecha -->
     <div>
       <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha</label>
@@ -151,71 +53,57 @@
 
 
    </div>
-<div class="mt-6 flex justify-between gap-6 text-center text-gray-800">
+   <div class="flex flex-wrap items-center gap-2 mt-2">
+  <p class="whitespace-nowrap">se Instala la Audiencia de contestación prevista en</p>
+  <select formControlName="instalacionAudiencia" class="min-w-0 flex-shrink rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none px-3 py-1">
+    <option value="" disabled selected hidden>Seleccione...</option>
+    <option value="Art 205 del Código de la Niñez y Adolescencia">Art 205 del Código de la Niñez y Adolescencia</option>
+    <option value="Art 206 del Código de la Niñez y Adolescencia">Art 206 del Código de la Niñez y Adolescencia</option>
+    <option value="Art 206 del Código de la Niñez y Adolescencia y Art 205 del Código de la Niñez y Adolescencia ">Art 206  y Art 205 del Código de la Niñez y Adolescencia</option>
 
-  <!-- Miembro 1 -->
-  <div class="flex-1">
-    <p class="underline decoration-dotted decoration-gray-400 min-h-[1.5rem]">__________________________</p>
-    <p class="mt-1 font-semibold uppercase text-sm">Miembro-a Principal</p>
-  </div>
-
-  <!-- Miembro 2 -->
-  <div class="flex-1">
-    <p class="underline decoration-dotted decoration-gray-400 min-h-[1.5rem]">__________________________</p>
-    <p class="mt-1 font-semibold uppercase text-sm">Miembro-a Principal</p>
-  </div>
-
-  <!-- Miembro 3 -->
-  <div class="flex-1">
-    <p class="underline decoration-dotted decoration-gray-400 min-h-[1.5rem]">__________________________</p>
-    <p class="mt-1 font-semibold uppercase text-sm">Miembro-a Principal</p>
-  </div>
-
+  </select>
+  <span>.</span>
 </div>
-<p class="mt-2">se Instala la Audiencia de contestación prevista en</p>
-      <div>
-         <select formControlName="instalacionAudiencia" class="mt-1  inline-block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
-          <option value=""  disabled selected hidden >Seleccione...</option>
-          <option value="Art 205 del  Código de la Niñez y Adolescencia">Art 205 del  Código de la Niñez y Adolescencia</option>
-          <option value="Art 206 del  Código de la Niñez y Adolescencia">Art 206 del  Código de la Niñez y Adolescencia</option>
-        </select>.
+
       </div>
+
+
+
 
 
 
     </app-card-Form>
     <app-card-Form [titulo]="'Participantes'">
-       <app-tablaEdit
-      [encabezados]="['nombres','apellidos','Cedula','Tipo']"
-        [columnas]="['nombres','apellidos','cedula','tipoParticipante']"
-        [datos]="participantesTabla"
-        [acciones]="true"
-        [mostrarEditar]="true"
-        [editar]="editarParticipante.bind(this)"
-        [eliminar]="eliminarParticipante.bind(this)"
-      >
-
-      </app-tablaEdit>
-      <h2 class="mt-1 text-xl text-blue-500 font-semibold mb-4">Agregar Participante</h2>
-
       <div class="bg-white rounded-xl shadow-md p-4 border">
 
-        <form [formGroup]="participantesForm" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+        <form [formGroup]="participantesForm" class="grid grid-cols-4  gap-4">
+          <div class="grid grid-cols-2 col-span-3 gap-1">
+             <app-inputs
+          label="Nombres"
+          type="text"
+          placeholder="Ingrese los nombres"
+          [formGroup]="participantesForm"
+          [control]="$any(participantesForm.get('nombres')!)"
+        >
+        </app-inputs>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Nombres</label>
-          <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
-        </div>
+        <app-inputs
+          label="Apellidos"
+          type="text"
+          placeholder="Ingrese los apellidos"
+          [formGroup]="participantesForm"
+          [control]="$any(participantesForm.get('apellidos')!)"
+        >
+        </app-inputs>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Apellidos</label>
-          <input type="text" formControlName="apellidos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
-        </div>
-
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Cédula</label>
-          <input type="text" formControlName="cedula" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
-        </div>
+        <app-inputs
+          label="Cedula"
+          type="text"
+          placeholder="Ingrese la cédula"
+          [formGroup]="participantesForm"
+          [control]="$any(participantesForm.get('cedula')!)"
+        >
+        </app-inputs>
 
         <div>
           <label class="block text-sm font-medium text-gray-700">Tipo</label>
@@ -229,96 +117,131 @@
           </select>
         </div>
 
-        <!-- Botones condicionales -->
-        <div class="flex items-end gap-2">
-          <!-- Modo normal: Botón Agregar -->
+          </div>
+           <!-- Botones condicionales -->
+        <div class="ml-8 grid grid-cols-1 gap-1">
+          <!-- Botón principal: Agregar o Actualizar según el modo -->
           <app-button-submit
-            *ngIf="!modoEdicionParticipante"
-            label="Agregar"
             type="button"
-            color="afirmar"
-            [disabled]="!participantesForm.valid"
-            (clicked)="onSubmitParticipante()">
+            [label]="isActivateModoEdicionParticipante ? 'Actualizar' : 'Agregar'"
+            [color]="isActivateModoEdicionParticipante ? 'afirmar' : 'submit'"
+            [icon]="isActivateModoEdicionParticipante ? 'edit' : 'plus'"
+
+            (clicked)="isActivateModoEdicionParticipante ? actualizarParticipante() : onSubmitParticipante()">
           </app-button-submit>
 
-          <!-- Modo edición: Botones Actualizar y Cancelar -->
-          <ng-container *ngIf="modoEdicionParticipante">
-            <app-button-submit
-              label="Actualizar"
-              type="button"
-              color="afirmar"
-              [disabled]="!participantesForm.valid"
-              (clicked)="actualizarParticipante()">
-            </app-button-submit>
-
-            <app-button-submit
-              label="Cancelar"
-              type="button"
-              color="cancelar"
-              (clicked)="cancelarEdicionParticipante()">
-            </app-button-submit>
-          </ng-container>
+          <!-- Botón Cancelar: Solo visible en modo edición -->
+          <app-button-submit
+            *ngIf="isActivateModoEdicionParticipante"
+            label="Cancelar"
+            type="button"
+            color="cancelar"
+            (clicked)="cancelarEdicionParticipante()">
+          </app-button-submit>
         </div>
+
+
       </form>
 
       </div>
+      <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
+            <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Participantes registrados</h3>
+       <app-tablaEdit
+      [encabezados]="['nombres','apellidos','Cedula','Tipo']"
+        [columnas]="['nombres','apellidos','cedula','tipoParticipante']"
+        [datos]="participantesTabla"
+        [acciones]="(isEditAudienciaPruebasActivate || !editMode)"
+        [mostrarEditar]="true"
+        [editar]="editarParticipante.bind(this)"
+        [eliminar]="eliminarParticipante.bind(this)"
+      >
+
+      </app-tablaEdit>
+      </div>
+
+
+
 
     </app-card-Form>
-  </app-card-Form>
+  </div>
 
-  <app-card-Form [hidden]="currentTab!='1'">
+  <div [hidden]="currentTab!=1">
 
-    <app-card-Form [titulo]="'pruebas '">
+    <app-card-Form [titulo]="'Pruebas '">
       <form [formGroup]="pruebasForm">
-         <div class=" text-gray-800 text-justify leading-relaxed">
-  <!-- Párrafo formal -->
-  <p class="mb-4">
-    En cumplimiento a lo que determina la Constitución de la República Art.
-    <span class="underline decoration-dotted decoration-gray-400">…………………</span>,
-    se recepta la intervención de la Abogada
-    <span class="underline decoration-dotted decoration-gray-400"><select formControlName="participanteIndex" class="block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Seleccione</option>
-                    <option *ngFor="let p of participantesNoAfectados" [value]="p.idx">{{p.nombres}} {{p.apellidos}}</option>
-                  </select></span>
-    en representación de la parte <select formControlName="parte" class="block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
-                    <option value="">Seleccione parte</option>
-                    <option value="Actora">Actora</option>
-                    <option value="Accionada">Accionada</option>
+         <div class="bg-white rounded-xl shadow-md p-4 border  ">
 
-                  </select>; quien manifiesta que las pruebas testimoniales son:
-  </p>
+<div class="space-y-4">
+      <!-- Artículo - Arriba -->
+      <div>
+        <app-inputs
+          label="En cumplimiento a lo que determina la Constitución de la República Art."
+          type="text"
+          placeholder="77,78,etc"
+          [formGroup]="audienciaPruebaForm"
+          [control]="$any(audienciaPruebaForm.get('articulo')!)"
+        ></app-inputs>
+      </div>
 
-  <!-- Input para escribir las pruebas -->
-  <textarea
-    type="text"
-    formControlName="pruebas"
-    placeholder="Describa las pruebas testimoniales aquí..."
-    class="w-full border border-gray-300 rounded-md px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-  ></textarea>
+      <!-- Participante y Parte - Lado a lado -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Se recepta la intervención de la Abogada</label>
+          <select
+            formControlName="participanteIndex"
+            class="w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none px-3 py-2"
+          >
+            <option value="">Seleccione</option>
+            <option *ngFor="let p of participantesNoAfectados" [value]="p.idx">{{p.nombres}} {{p.apellidos}}</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">en representación de la parte</label>
+          <select
+            formControlName="parte"
+            class="w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none px-3 py-2"
+          >
+            <option value="">Seleccione parte</option>
+            <option value="Actora">Actora</option>
+            <option value="Accionada">Accionada</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Pruebas - Abajo -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-2">quien manifiesta que las pruebas testimoniales son:</label>
+        <textarea
+          formControlName="pruebas"
+          placeholder="Describa las pruebas testimoniales aquí..."
+          rows="4"
+          class="w-full border border-gray-300 rounded-md px-4 py-2  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        ></textarea>
+      </div>
 </div>
-              <div class="flex items-end gap-2">
-                @if (modoEdicionPruebas) {
-                  <app-button-submit
-                    type="button"
-                    label="Actualizar"
-                    color="submit"
-                    (clicked)="agregarPruebasParticipante()"
-                  ></app-button-submit>
-                  <app-button-submit
-                    type="button"
-                    label="Cancelar"
-                    color="cancelar"
-                    (clicked)="cancelarEdicionPruebas()"
-                  ></app-button-submit>
-                } @else {
-                  <app-button-submit
-                    type="button"
-                    label="Agregar"
-                    color="accion"
-                    (clicked)="agregarPruebasParticipante()"
-                  ></app-button-submit>
-                }
-              </div>      </form>
+
+  <div class="flex items-end gap-2">
+          <!-- Botón principal: Agregar o Actualizar según el modo -->
+          <app-button-submit
+            type="button"
+            [label]="modoEdicionPruebas ? 'Actualizar' : 'Agregar'"
+            [color]="'submit' "
+            [icon]="modoEdicionPruebas ? 'edit' : 'plus'"
+            (clicked)="agregarPruebasParticipante()">
+          </app-button-submit>
+
+          <!-- Botón Cancelar: Solo visible en modo edición -->
+          <app-button-submit
+            *ngIf="modoEdicionPruebas"
+            label="Cancelar"
+            type="button"
+            color="cancelar"
+            (clicked)="cancelarEdicionPruebas()">
+          </app-button-submit>
+        </div>
+</div>
+                   </form>
       <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
             <h3 class="font-bold mb-4 text-blue-700 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Manifestaciones registradas</h3>
             <app-tablaEdit
@@ -332,31 +255,25 @@
             >
             </app-tablaEdit>
           </div>
-
-
-
     </app-card-Form>
+  </div>
 
-
-  </app-card-Form>
-
-  <app-card-Form [hidden]="currentTab!='2'" >
-    <app-card-Form [titulo]="'testimonios '">
-      <div class="space-y-8">
-
+<!-- Testimonios -->
+  <div [hidden]="currentTab!=2" >
+    <app-card-Form [titulo]="'Testimonios '">
           <div class="bg-white rounded-xl shadow-md p-6 border flex flex-col md:flex-row md:items-end gap-4">
             <form [formGroup]="testimoniosForm" class="flex flex-col w-full gap-4">
               <div class="w-full md:w-1/3 flex gap-2 items-end">
                 <div class="flex-1">
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Se concede la palabra a</label>
-                  <select formControlName="participanteIndex" class="block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                  <select formControlName="participanteIndex" class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
                     <option value="">Seleccione</option>
                     <option *ngFor="let p of participantesNoAfectados" [value]="p.idx">{{p.nombres}} {{p.apellidos}}</option>
                   </select>
                 </div>
                 <div class="flex-1">
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Parte</label>
-                  <select formControlName="parte" class="block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500">
+                  <select formControlName="parte" class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
                     <option value="">Seleccione parte</option>
                     <option value="Actora">Actora</option>
                     <option value="Accionada">Accionada</option>
@@ -366,30 +283,26 @@
               </div>
               <div class="flex-1">
                 <label class="block text-sm font-semibold text-gray-700 mb-1">Manifiesta</label>
-                <textarea formControlName="testimonio" rows="3" placeholder="Escriba aquí la intervención..." class="w-full  border border-dotted border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 font-mono"></textarea>
+                <textarea formControlName="testimonio" rows="3" placeholder="Escriba aquí la intervención..." class="w-full  border border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 "></textarea>
               </div>
               <div class="flex items-end gap-2">
-                @if (modoEdicionTestimonios) {
-                  <app-button-submit
-                    type="button"
-                    label="Actualizar"
-                    color="submit"
-                    (clicked)="agregarTestimoniosParticipante()"
-                  ></app-button-submit>
-                  <app-button-submit
-                    type="button"
-                    label="Cancelar"
-                    color="cancelar"
-                    (clicked)="cancelarEdicionTestimonios()"
-                  ></app-button-submit>
-                } @else {
-                  <app-button-submit
-                    type="button"
-                    label="Agregar"
-                    color="accion"
-                    (clicked)="agregarTestimoniosParticipante()"
-                  ></app-button-submit>
-                }
+                <!-- Botón principal: Agregar o Actualizar según el modo -->
+                <app-button-submit
+                  type="button"
+                  [label]="modoEdicionTestimonios ? 'Actualizar' : 'Agregar'"
+                  [color]="'submit' "
+                  [icon]="modoEdicionTestimonios ? 'edit' : 'plus'"
+                  (clicked)="agregarTestimoniosParticipante()">
+                </app-button-submit>
+
+                <!-- Botón Cancelar: Solo visible en modo edición -->
+                <app-button-submit
+                  *ngIf="modoEdicionTestimonios"
+                  label="Cancelar"
+                  type="button"
+                  color="cancelar"
+                  (clicked)="cancelarEdicionTestimonios()">
+                </app-button-submit>
               </div>
             </form>
           </div>
@@ -406,16 +319,17 @@
             >
             </app-tablaEdit>
           </div>
-        </div>
+
 
 
     </app-card-Form>
 
-  </app-card-Form>
+  </div>
 
-  <app-card-Form [hidden]="currentTab!='3'" >
+  <!-- Audiencia reservada -->
+  <div [hidden]="currentTab!=3" >
 
-    <app-card-Form [titulo]="'audiencia'">
+    <app-card-Form [titulo]="'Audiencia'">
       <div class=" text-gray-800 text-justify leading-relaxed">
   <!-- Párrafo formal -->
   <p class="mb-4">
@@ -442,10 +356,10 @@
 
     </app-card-Form>
 
-  </app-card-Form>
-  <app-card-Form [hidden]="currentTab!='4'" >
+  </div>
+  <div [hidden]="currentTab!=4" >
      <app-card-Form [titulo]="'Vulneraciones'">
-      <form  [formGroup]="vulneracionesIdentificadasForm" >
+      <form  [formGroup]="vulneracionesIdentificadasForm" class="bg-white rounded-xl shadow-md p-4 border  " >
   <!-- Párrafo formal -->
   <p class="mb-4">
      Se trata de una vulneración:</p>
@@ -540,44 +454,49 @@
           </div>
 
            </div>
-          <div class="mt-2">
-            <button
+          <div class="flex gap-2 mt-2">
+            <!-- Botón principal: Agregar o Actualizar según el modo -->
+            <app-button-submit
               type="button"
-              (click)="agregarVulneracionIdentificada()"
+              [label]="modoEdicionVulneraciones ? 'Actualizar' : 'Agregar'"
+              [color]="'submit' "
+              [icon]="modoEdicionVulneraciones ? 'edit' : 'plus'"
+              (clicked)="modoEdicionVulneraciones ? actualizarVulneracionIdentificada() : agregarVulneracionIdentificada()">
+            </app-button-submit>
 
-              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Guardar
-            </button>
+            <!-- Botón Cancelar: Solo visible en modo edición -->
+            <app-button-submit
+              *ngIf="modoEdicionVulneraciones"
+              label="Cancelar"
+              type="button"
+              color="cancelar"
+              (clicked)="cancelarEdicionVulneraciones()">
+            </app-button-submit>
           </div>
 
-
-     <div
-
-
-          class="mt-4 bg-white rounded shadow"
+</form>
+<div
+          class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2"
         >
+        <h3 class="font-bold mb-4 text-blue-700 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Vulneraciones registradas</h3>
           <app-tablaEdit
             [encabezados]="['Afectado','vulneracion','detalles']"
             [columnas]="['nombres', 'vulneracion', 'detalles']"
             [datos]="vulneracionesIdentificadas"
              [acciones]="true"
+             [mostrarEditar]="true"
             [eliminar]="eliminarVulneracionIdentificada.bind(this)"
+            [editar]="SeleccionarParaEditarVulneracion.bind(this)"
           ></app-tablaEdit>
         </div>
 
-
-
-</form>
-
     </app-card-Form>
 
-    <app-card-Form [titulo]="'medidas'">
+    <app-card-Form [titulo]="'Medidas'">
 
   <!-- Párrafo formal -->
-
  <!-- Formulario para agregar medida -->
-        <form [formGroup]="medidasDefinitivasForm" class="">
+        <form [formGroup]="medidasDefinitivasForm" class="bg-white rounded-xl shadow-md p-4 border  ">
           <p >
     Se establecen las siguientes medidas de protección:
 </p>
@@ -697,33 +616,34 @@
           </div>
 
            </div>
-          <div class="mt-2">
-            @if (editMediasMode ) {
-              <button
+          <div class="flex gap-2 mt-2">
+            <!-- Botón principal: Agregar o Actualizar según el modo -->
+            <app-button-submit
               type="button"
-              (click)="actualizarMedida()"
-              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Actualizar
-            </button>
+              [label]="editMedidasMode ? 'Actualizar' : 'Agregar'"
+              [color]="'submit' "
+              [icon]="editMedidasMode ? 'edit' : 'plus'"
+              (clicked)="editMedidasMode ? actualizarMedida() : agregarMedida(medidasDefinitivasForm)">
+            </app-button-submit>
 
-            }@else {
-              <button
+            <!-- Botón Cancelar: Solo visible en modo edición -->
+
+            <app-button-submit
+              *ngIf="editMedidasMode"
+              label="Cancelar"
               type="button"
-              (click)="agregarMedida(medidasDefinitivasForm)"
-              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Guardar
-            </button>
-
-            }
-
+              color="cancelar"
+              (clicked)="cancelarEdicionMedidas()"
+              >
+            </app-button-submit>
           </div>
         </form>
-        <div
-          formArrayName="medidasDefinitivas"
-          class="mt-4 bg-white rounded shadow"
+
+<div
+
+          class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2"
         >
+        <h3 class="font-bold mb-4 text-blue-700 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Medidas registradas</h3>
           <app-tablaEdit
             [encabezados]="['ID', 'Medida ', 'Periodo', 'Observaciones']"
             [columnas]="['idMedida', 'medida', 'periodo', 'observaciones']"
@@ -734,12 +654,12 @@
             [editar]="SeleccionarParaEditar.bind(this)"
           ></app-tablaEdit>
         </div>
-
     </app-card-Form>
 
-  </app-card-Form>
+
+  </div>
   @if (pdfSrc) {
-        <div class="pdf-container" [hidden]="currentTab !== '5'">
+        <div class="pdf-container " [hidden]="currentTab !== 5" >
           <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
         </div>
       }

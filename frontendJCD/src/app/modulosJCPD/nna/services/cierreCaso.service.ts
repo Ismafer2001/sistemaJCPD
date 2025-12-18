@@ -20,6 +20,15 @@ export class CierreCasoService {
   obtenerDatosParaCierreCaso(id: number): Observable<any> {
     return this.http.get(`${this.apiUrl}/datos/${id}`);
   }
+   crearpdfBlob(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/crearpdf/${id}`, { responseType: 'blob' });
+  }
+   getCierreCasoEditMode(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/cierre-caso-completa/${id}`);
+  }
+  actualizarCierreCaso(id: number, cierreCaso: Partial<any>): Observable<{ success: boolean; message: string }> {
+      return this.http.put<any>(`${this.apiUrl}/${id}`, cierreCaso);
+    }
 
 
 

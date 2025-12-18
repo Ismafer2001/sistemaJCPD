@@ -15,7 +15,7 @@ export class ButtonSubmitComponent  {
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() color: 'submit' | 'afirmar' | 'cancelar'|'accion' |'error' = 'submit';
   @Input() icon: string = ''; // Nuevo input para el icono
-  
+
   @Input() loading: boolean = false; // Para estado de carga
 
   @Input() disabled: boolean = false;
@@ -28,7 +28,7 @@ export class ButtonSubmitComponent  {
   }
 
   getColorClasses() {
-    const baseClasses = 'w-30 h-10 px-3 font-medium rounded-md text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center  disabled:opacity-50 disabled:cursor-not-allowed';
+    const baseClasses = 'w-30 h-10 px-3 font-medium rounded-md text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center  disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed';
 
     switch (this.color) {
       case 'submit':

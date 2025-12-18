@@ -7,6 +7,7 @@ import htmlToPdfmake from "html-to-pdfmake";
 import { JSDOM } from "jsdom";
 
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
+import { text } from "stream/consumers";
 
 // Asegurar vfs para pdfMake
 // @ts-ignore
@@ -27,7 +28,7 @@ export async function crearPdfavocatoriaNNA(res: Response, idAvocatoria: any): P
 			const horaTexto = `${fecha.getHours()} horas con ${fecha.getMinutes()}`;
 			const articulos =data.articulo
 			const tipoDenuncia = data.denuncia?.tipoDenuncia || '—';
-			const partePolicial = tipoDenuncia === 'oficio' ? `Oficio` : tipoDenuncia === 'denuncia' ? 'Denuncia' : '—';
+			const partePolicial = tipoDenuncia === 'oficio' ? `Oficio` : tipoDenuncia === 'externa' ? 'Denuncia' : '—';
 			const fechaRecibido = fechaTexto;
 			const denunciante: any = data.denuncia?.denunciante?.[0] || {};
 			const nombreDenunciante = `${denunciante.nombres || ''} ${denunciante.apellidos || ''}`.trim();
@@ -74,19 +75,20 @@ export async function crearPdfavocatoriaNNA(res: Response, idAvocatoria: any): P
 					const contentBlocks: any[] = [
 						{ text: 'AVOCATORIA DE CONOCIMIENTO', style: 'title', alignment: 'center', margin: [0, 0, 0, 10] },
 						{ text: `Trámite administrativo ${tramite}`, style: 'section' },
-						{ text: `Niña. ${nombreAfectado} (${edadAfectado} años)`, style: 'section' },
+						{ text: `afectado. ${nombreAfectado} (${edadAfectado} años)`, style: 'section' },
 						{ text: `Junta Cantonal de Protección de derechos del cantón ${canton}`, style: 'section' },
-						{ text: `En el cantón ${canton}, a los ${fecha.getDate()} días del mes de ${fecha.toLocaleString('es-ES', { month: 'long' })} del año ${fecha.getFullYear()}, siendo los ${horaTexto}, en uso de las atribuciones que le confieren:`, margin: [0, 10, 0, 0] },
-						articulos,
-						{ text: 'AVOCA CONOCIMIENTO del:', style: 'section', margin: [0, 10, 0, 0] },
-						{ text: `-parte policial N.-XXXXXX`, margin: [0, 0, 0, 0] },
-						{ text: `-${partePolicial}`, margin: [0, 0, 0, 0] },
-						{ text: `recibido en este organismo con fecha ${fechaRecibido}`, margin: [0, 0, 0, 0] },
-						{ text: `por ${nombreDenunciante}`, margin: [0, 0, 0, 0] },
-						{ text: 'En contra de', style: 'section', margin: [0, 10, 0, 0] },
-						{ text: nombreDenunciado, margin: [0, 0, 0, 0] },
-						{ text: 'quien hace conocer los hechos', margin: [0, 10, 0, 0] },
-						{ text: hechos, margin: [0, 0, 0, 0] },
+						{ text: `En el cantón ${canton}, a los ${fecha.getDate()} días del mes de ${fecha.toLocaleString('es-ES', { month: 'long' })} del año ${fecha.getFullYear()}, siendo los ${horaTexto}, en uso de las atribuciones que le confieren: ${articulos}.` },
+						{ text: [{text:`AVOCA CONOCIMIENTO `,bold:true},
+							`del: ${partePolicial} `,
+							{text:`${tramite} `,bold:true},
+							`recibido en este organismo con fecha`,
+							{text:` ${fechaRecibido} `,bold:true},
+							`por `,
+							{text:`${nombreDenunciante} `,bold:true},
+							`En contra de`,
+							{text:` ${nombreDenunciado} `,bold:true},
+							`quien hace conocer los hechos.`], margin: [0, 10, 0, 0] },
+						{ text: hechos,bold:true, margin: [0, 10, 0, 0] },
 						{ text: 'Lo que se constituye una vulneración:', margin: [0, 10, 0, 0] },
 						...vulneracionesTables,
 						{ text: 'Por lo que esta Junta Cantonal de Protección de Derechos DISPONE:', style: 'section', margin: [0, 16, 0, 4] },
@@ -161,9 +163,9 @@ export async function crearPdfavocatoriaNNA(res: Response, idAvocatoria: any): P
 						{ text: `${miembros[2].nombres || ''} ${miembros[2].apellidos || ''}`, alignment: 'center', fontSize: 11 }
 					]);
 					tableFirmas.push([
-						{ text: miembros[0].cargo || '', alignment: 'center', fontSize: 10, italics: true },
-						{ text: miembros[1].cargo || '', alignment: 'center', fontSize: 10, italics: true },
-						{ text: miembros[2].cargo || '', alignment: 'center', fontSize: 10, italics: true }
+						{ text: 'MIEMBRO-A PRINCIPAL', alignment: 'center', fontSize: 10, italics: true },
+						{ text: 'MIEMBRO-A PRINCIPAL', alignment: 'center', fontSize: 10, italics: true },
+						{ text: 'MIEMBRO-A PRINCIPAL', alignment: 'center', fontSize: 10, italics: true }
 					]);
 					contentBlocks.push({
 						table: {
@@ -176,11 +178,11 @@ export async function crearPdfavocatoriaNNA(res: Response, idAvocatoria: any): P
 					const docDefinition: any = {
 						content: contentBlocks,
 						styles: {
-							title: { fontSize: 16, bold: true },
+							title: { fontSize: 14, bold: true },
 							section: { fontSize: 12, bold: true, margin: [0, 8, 0, 4] },
-							subLabel: { fontSize: 11, italics: true }
+							subLabel: { fontSize: 12, italics: true }
 						},
-						defaultStyle: { fontSize: 10 }
+						defaultStyle: { fontSize: 12 }
 					};
 
 		// Crear el pdf y enviar buffer

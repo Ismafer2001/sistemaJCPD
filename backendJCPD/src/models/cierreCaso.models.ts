@@ -1,6 +1,7 @@
 import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
 import { Denuncia } from './denuncia.models';
+import { InformesPresentados } from './informes_presentados.models';
 
 interface CierreCasoAttributes {
     id: number;
@@ -20,6 +21,8 @@ export class CierreCaso extends Model<CierreCasoAttributes, CierreCasoCreationAt
     declare conclusion: string;
     declare secretariaAuxiliar: string;
     declare  estatus: "pendiente"|"en_proceso"|"completada";
+    declare informesPresentados?: InformesPresentados[];
+    declare DenunciaCierre?: Denuncia;
 }
 
 CierreCaso.init({

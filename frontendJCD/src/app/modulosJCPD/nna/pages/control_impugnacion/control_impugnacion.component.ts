@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { ControlImpugnacionService } from '@nna/services/controlImpugnacion.service';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
@@ -9,7 +9,11 @@ import { toast } from 'ngx-sonner';
 @Component({
   selector: 'app-control_impugnacion',
   templateUrl: './control_impugnacion.component.html',
-  imports: [CardFormComponent, FormsModule, ButtonSubmitComponent, ReactiveFormsModule],
+  imports: [CardFormComponent,
+     FormsModule,
+      ButtonSubmitComponent,
+       ReactiveFormsModule,
+      RouterLink],
 
 })
 export class Control_impugnacionComponent implements OnInit {

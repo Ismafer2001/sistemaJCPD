@@ -227,7 +227,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
       codigoTramite: denuncia.codigoTramite,
       canton: denuncia.canton?.canton || null,
       descripcion_hechos: denuncia.descripcion_hechos,
-      tipoDenuncia: denuncia.tipo_denuncia === 'oficio' ? 'oficio' : 'denuncia',
+      tipoDenuncia: denuncia.tipo_denuncia === 'oficio' ? 'oficio' : 'externa',
       afectados: (denuncia.afectados || []).map((af: any) => ({
         id: af.id,
         nombres: af.nombres,

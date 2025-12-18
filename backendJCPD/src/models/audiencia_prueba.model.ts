@@ -12,6 +12,7 @@ import { Canton } from './cantones.models';
  pdf_audiencia_pruebas: string;
  idDenuncia: number;
  afectadoManifiesta?: string;
+ articulo: string;
   estatus?: "pendiente"|"en_proceso"|"completada";
   }
   
@@ -29,6 +30,7 @@ interface AudienciaPruebasCreationAttributes extends Optional<AudienciaPruebasAt
     declare pdf_audiencia_pruebas: string;
     declare idDenuncia: number;
     declare afectadoManifiesta?: string;
+    declare articulo: string;
     declare  estatus: "pendiente"|"en_proceso"|"completada";
      
 
@@ -43,6 +45,7 @@ interface AudienciaPruebasCreationAttributes extends Optional<AudienciaPruebasAt
     instalacionAudiencia: { type: DataTypes.STRING },
     pdf_audiencia_pruebas: { type: DataTypes.STRING },
     afectadoManifiesta: { type: DataTypes.STRING },
+    articulo: { type: DataTypes.STRING },
     idDenuncia:{type: DataTypes.INTEGER},
      estatus: {
     type: DataTypes.STRING,

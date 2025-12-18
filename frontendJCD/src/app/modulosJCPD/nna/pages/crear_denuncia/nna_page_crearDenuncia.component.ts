@@ -10,7 +10,7 @@ import {
 import { DenunciaService } from '../../services/denuncia.service';
 import { VulneracionService, Vulneracion } from '../../services/vulneracion.service';
 import { MedidasService, ArticuloMedidas, Medida } from '../../services/medidas.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Nna_creardenuncia_denuncianteComponent } from './componentes/denunciante/nna_creardenuncia_denunciante.component';
 import { Nna_creardenuncia_afectadoComponent } from './componentes/afectado/nna_creardenuncia_afectado.component';
 import { Nna_creardenuncia_denunciadoComponent } from './componentes/denunciado/nna_creardenuncia_denunciado.component';
@@ -40,7 +40,7 @@ import { requiredWhen } from '@shared/validators/validacionOpcional.validators';
     Nna_creardenuncia_vulneracionesComponent,
     Crear_denuncia_medidasComponent,
     CardFormComponent, ButtonSubmitComponent,
-    NavFormularioComponent
+    NavFormularioComponent,RouterLink
   ],
 })
 export class NnaPageCrearDenunciaComponent implements OnInit {
@@ -150,6 +150,8 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         console.error('Error al cargar medidas:', err);
       }
     });
+    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
+    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
     this.denunciaFormulario();
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -159,13 +161,13 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       }
 
     })
-    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
     this.route.params.subscribe(params => {
 
       if (params['modo']==='editar') {
         this.editMode = true;
         this.denunciaForm.disable();
+
 
 
         // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
@@ -179,11 +181,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
       };
 
-
-
     });
-
-
 
     this.AuthService.getUsuarioActual().subscribe((user) => {
       this.denunciaForm.get('id_canton')?.setValue(user.id_canton);
@@ -595,6 +593,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
   GuardarDenuncia(): void {
 
+
     if (this.denunciaForm.invalid) {
       this.denunciaForm.markAllAsTouched();
 
@@ -605,10 +604,6 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         });
       return;
     }
-    // Construir el código de trámite
-    //const sufijo = this.grupo === 'nna' ? 'NIÑOS' : 'AM';
-    //const numTramite = this.denunciaForm.get('num_tramite')?.value;
-    //const codigoTramite = `${numTramite}-JCPD-${this.canton}-${this.anioActual}-${sufijo}`;
 
     // Construir el objeto final
     const body = {

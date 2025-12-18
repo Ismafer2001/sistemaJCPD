@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AuthService } from '@auth/services/auth.service';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'globla-header',
@@ -17,7 +18,7 @@ export class headerComponent implements OnInit {
   nombreUsuario: string = '';
   rolUsuario: string = '';
   cantonUsuario: string = '';
-
+  private destroy$ = new Subject<void>();
   mostrarMenuUsuario = false;
   nombreModulo: string = "";
   constructor(private AuthService: AuthService, private route: ActivatedRoute) {}

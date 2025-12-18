@@ -39,8 +39,9 @@
        <div class="mt-4 flex gap-4">
     <app-button-submit
       type="button"
-      [label]="modoEdicion ? 'Actualizar Medidas' : 'Agregar Medidas'"
-      color="afirmar"
+      [label]="modoEdicion ? 'Actualizar' : 'Agregar'"
+      [color]="modoEdicion ? 'afirmar' : 'submit'"
+      [icon]="modoEdicion ? 'edit' : 'plus'"
       (clicked)="agregarMedida()"
     >
     </app-button-submit>
@@ -48,7 +49,7 @@
     <app-button-submit
       *ngIf="modoEdicion"
       type="button"
-      label="Cancelar Edición"
+      label="Cancelar"
       color="cancelar"
       (clicked)="cancelarEdicion()"
     >
@@ -92,7 +93,8 @@
   </div>
 
 
-  <div class=" overflow-x-auto rounded-xl bg-white shadow-xl md:col-span-2">
+  <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
+      <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Medidas registradas</h3>
       <app-tablaEdit
       [encabezados]="['afectado','medidas ']"
       [columnas]="['idAfectado', 'medidasPorArticulo']"

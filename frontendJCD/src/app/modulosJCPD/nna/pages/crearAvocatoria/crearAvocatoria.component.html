@@ -1,5 +1,16 @@
-<div class="pl-2 py-2 mb-1">
-  <h1 class="text-2xl font-bold">Crear avocatoria</h1>
+<div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <a
+    [routerLink]="[`../../../fases/${denunciaId}`]"
+
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
+
+    </a>
+  <h3 class="text-2xl font-bold">Avocatoria</h3>
+
 </div>
 
 <hr class="border-yellow-300 border-1" />
@@ -28,305 +39,224 @@
   </h1>
 </app-card-Form>
 
-  <!--tabs-->
-  <nav class="flex mb-0 gap-3" id="tabs">
-    <a
-
-      class="rounded-t-2xl p-2"
-      [ngClass]="{
-        'bg-blue-500 text-white': currentTab === 0,
-        'bg-gray-100': currentTab !== 0
-      }"
-      (click)="cambiarTab(0)"
-    >
-      Detalles
-    </a>
-    <a
-
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab(1)"
-      [ngClass]="{
-        'bg-blue-500 text-white': currentTab === 1,
-        'bg-gray-100': currentTab !== 1
-      }"
-    >
-      Resoluciones
-    </a>
-
-    <a
-
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab(2)"
-      [ngClass]="{
-        
-      'bg-blue-500 text-white': currentTab === 2,
-      'bg-gray-100': currentTab !== 2
-    }"
-    >
-      Medidas
-    </a>
-    @if (currentTab===3) {
-      <a
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab(3)"
-
-
-      [ngClass]="{
-
-      'bg-blue-500 text-white': currentTab === 3,
-      'bg-gray-100': currentTab !== 3
-    }"
-    >
-      pdf
-    </a>
-
-    }
-    <div class="flex flex-1 m-1 justify-end space-x-4">
-      <app-button-submit
-        type="button"
-        label="Regresar"
-        color="cancelar"
-        (clicked)="regresar()"
-      >
-      </app-button-submit>
-       <app-button-submit
-    type="button"
-    label="Editar"
-    color="afirmar"
-    (clicked)="updateAvocatoria()"
-     [disabled]="editarDisabled"
-
-
-    >
-
-    </app-button-submit>
-      <app-button-submit type="button" label="Guardar" color="submit" (clicked)="submitAvocatoria()"
-      [disabled]="guardarDisabled"
-      >
-      </app-button-submit>
-      <app-button-submit
-    type="button"
-    label="GenerarPDF"
-    color="submit"
-    [disabled]="pdfDisabled"
-    (clicked)="generarPdf()"
-
-
-    >
-
-    </app-button-submit>
-
-
-    </div>
-  </nav>
-  <form
+<!--tabs-->
+<app-nav-formulario
+  [tabs]="tabsConfig"
+  [actions]="actionsConfig"
+  [currentTab]="currentTab"
+  (tabChanged)="cambiarTab($event)"
+  (actionClicked)="handleActionButton($event)"
+></app-nav-formulario>
+<form
   [formGroup]="avocatoriaForm"
+  class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]"
+  #formContainer
 
-  class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]" #formContainer
 >
-    <!--avocatoria inicial-->
-    <app-card-Form
-      [titulo]="'Avocatoria'"
-      [hidden]="currentTab != 0"
-      id="detalles"
-    >
-      <p class="leading-loose text-lg text-justify">
-        En el cantón
-        <span class="font-bold inline-block">
-          {{ denunciaAvocatoria?.canton || "—" }}
-        </span>
-        a los
-        <span class="font-bold inline-block">
-          {{
-            fechaHoraActual ? (fechaHoraActual | date : "dd" : "" : "es") : "00"
-          }}
-        </span>
-        días del mes de
-        <span class="font-bold inline-block">
-          {{
-            fechaHoraActual
-              ? (fechaHoraActual | date : "MMMM" : "" : "es")
-              : "—"
-          }}
-        </span>
-        del año
-        <span class="font-bold inline-block">
-          {{
-            fechaHoraActual
-              ? (fechaHoraActual | date : "yyyy" : "" : "es")
-              : "----"
-          }}
-        </span>
-        siendo las
-        <span class="font-bold inline-block">
-          {{
-            fechaHoraActual ? (fechaHoraActual | date : "HH" : "" : "es") : "00"
-          }}
-        </span>
-        horas con
-        <span class="font-bold inline-block">
-          {{
-            fechaHoraActual ? (fechaHoraActual | date : "mm" : "" : "es") : "00"
-          }} </span
-        >, en uso de las atribuciones que le confieren
-      </p>
-      <div>
-        <select formControlName="articulo" class="m-1 p-1 block w-full rounded-md border-2  border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+  <!--avocatoria inicial-->
+  <app-card-Form
+    [titulo]="'Avocatoria'"
+    [hidden]="currentTab != 0"
+    id="detalles"
+    [class]="((existeNotificacion && !isEditAvocatoriaActivate) || (!isEditAvocatoriaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')"
+  >
+  <div class="bg-white rounded-xl shadow-md p-4 border  ">
+    <p class="leading-loose text-base text-justify">
+      En el cantón
+      <span class="font-bold inline-block">
+        {{ denunciaAvocatoria?.canton || "—" }}
+      </span>
+      a los
+      <span class="font-bold inline-block">
+        {{
+          fechaHoraActual ? (fechaHoraActual | date : "dd" : "" : "es") : "00"
+        }}
+      </span>
+      días del mes de
+      <span class="font-bold inline-block">
+        {{
+          fechaHoraActual ? (fechaHoraActual | date : "MMMM" : "" : "es") : "—"
+        }}
+      </span>
+      del año
+      <span class="font-bold inline-block">
+        {{
+          fechaHoraActual
+            ? (fechaHoraActual | date : "yyyy" : "" : "es")
+            : "----"
+        }}
+      </span>
+      siendo las
+      <span class="font-bold inline-block">
+        {{
+          fechaHoraActual ? (fechaHoraActual | date : "HH" : "" : "es") : "00"
+        }}
+      </span>
+      horas con
+      <span class="font-bold inline-block">
+        {{
+          fechaHoraActual ? (fechaHoraActual | date : "mm" : "" : "es") : "00"
+        }} </span
+      >, en uso de las atribuciones que le confieren
+    </p>
+    <div>
+      <select
+        formControlName="articulo"
+        class="my-1 p-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
         [ngClass]="{
-          ' border-1 border-red-500': avocatoriaForm.get('articulo')?.invalid && avocatoriaForm.get('articulo')?.touched
-        }">
-          <option value="" disabled selected hidden>Seleccioná una opción</option>
-          <option value="Art 205 del  Código de la Niñez y Adolescencia">
-            Art 205 del Código de la Niñez y Adolescencia
-          </option>
-          <option value="Art 206 del  Código de la Niñez y Adolescencia">
-            Art 206 del Código de la Niñez y Adolescencia
-          </option>
-          <option  value="Art 206 del  Código de la Niñez y Adolescencia">
-            <p> Art 205 del Código de la Niñez y Adolescencia y</p>
-            <p> Art 206 del Código de la Niñez y Adolescencia</p>
-
-          </option>
-        </select>
-        <div
-      *ngIf="
-        avocatoriaForm.get('articulo')?.invalid && avocatoriaForm.get('articulo')?.touched
-      "
-      class="text-red-500 text-sm mt-1"
-    >
-      <span *ngIf="avocatoriaForm.get('articulo')?.errors?.['required']"
-        >El artículo es requerido</span>
-    </div>
-      </div>
-      <p class="leading-loose text-lg">
-        AVOCA CONOCIMIENTO de <span >{{
-          denunciaAvocatoria?.tipoDenuncia
-        }}</span
-        >: <span class="font-bold">{{
-          denunciaAvocatoria?.codigoTramite
-        }}</span
-        >,
-      </p>
-      <p class="leading-loose text-lg text-justify">
-        recibido en este organismo con fecha
-        <span class="font-bold">{{
-          denunciaAvocatoria?.fechaCreado | date : "dd/MM/yyyy"
-        }}</span
-        >. por
-        <span class="font-bold"
-          >{{ denunciaAvocatoria?.denunciante?.[0]?.nombres }}
-          {{ denunciaAvocatoria?.denunciante?.[0]?.apellidos }}</span
-        >. En contra de
-        <span class="font-bold"
-          >{{ denunciaAvocatoria?.denunciados?.[0]?.nombres }}
-          {{ denunciaAvocatoria?.denunciados?.[0]?.apellidos }}</span
-        >. quien hace conocer los hechos
-      </p>
-      <div
-        class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"
-      >
-        <p class="leading-loose text-lg text-justify">
-          {{ denunciaAvocatoria?.descripcion_hechos }}
-        </p>
-      </div>
-      <p class="leading-loose text-lg text-justify">
-        Lo que se constituye una vulneración:
-      </p>
-      <div
-        class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"
-      >
-        <ng-container *ngFor="let af of denunciaAvocatoria?.afectados">
-          <div class="leading-loose text-lg text-justify">
-            <span class="text-blue-700"
-              >{{ af.nombres }} {{ af.apellidos }}:</span
-            >
-            <ng-container
-              *ngIf="af.vulneraciones?.length > 0; else sinVulneraciones"
-            >
-              <div class="mt-2">
-                <ng-container *ngFor="let v of af.vulneraciones">
-                  <div class="mt-1">- {{ v.vulneracion }}</div>
-                </ng-container>
-              </div>
-            </ng-container>
-            <ng-template #sinVulneraciones>
-              <span class="text-gray-500">Sin vulneraciones registradas</span>
-            </ng-template>
-          </div>
-        </ng-container>
-      </div>
-    </app-card-Form>
-
-    <app-card-Form
-      [titulo]="'Resoluciones'"
-      [hidden]="currentTab != 1"
-      id="resoluciones"
-    >
-      <div>
-        <div
-      *ngIf="
-        avocatoriaForm.get('dispocisiones')?.invalid && avocatoriaForm.get('dispocisiones')?.touched
-      "
-      class="text-red-500 text-sm mt-1"
-    >
-      <span *ngIf="avocatoriaForm.get('dispocisiones')?.errors?.['required']"
-        >el campo es requerido</span>
-    </div>
-        <quill-editor
-          [modules]="modules"
-          formControlName="dispocisiones"
-          class="w-full h-50"
-          [ngClass]="{
-          ' border-1 border-red-500': avocatoriaForm.get('dispocisiones')?.invalid && avocatoriaForm.get('dispocisiones')?.touched
+          ' border-1 border-red-500':
+            avocatoriaForm.get('articulo')?.invalid &&
+            avocatoriaForm.get('articulo')?.touched
         }"
+      >
+        <option value="" disabled selected hidden>Seleccioná una opción</option>
+        <option value="Art 205 del  Código de la Niñez y Adolescencia">
+          Art 205 del Código de la Niñez y Adolescencia
+        </option>
+        <option value="Art 206 del  Código de la Niñez y Adolescencia">
+          Art 206 del Código de la Niñez y Adolescencia
+        </option>
+        <option value="Art 206 del  Código de la Niñez y Adolescencia">
+          <p>Art 205 del Código de la Niñez y Adolescencia y</p>
+          <p>Art 206 del Código de la Niñez y Adolescencia</p>
+        </option>
+      </select>
+      <div
+        *ngIf="
+          avocatoriaForm.get('articulo')?.invalid &&
+          avocatoriaForm.get('articulo')?.touched
+        "
+        class="text-red-500 text-sm mt-1"
+      >
+        <span *ngIf="avocatoriaForm.get('articulo')?.errors?.['required']"
+          >El artículo es requerido</span
         >
-        </quill-editor>
       </div>
-    </app-card-Form>
-
-    <!-----------------------asignar medidas---------->
-
-    <app-card-Form [titulo]="'Medidas'" [hidden]="currentTab != 2" id="medidas">
-
-
-        <!-- Formulario para agregar medida -->
-        <form [formGroup]="medidasEmergentesForm" class="">
-
-
-          <p>Así mismo se disponen las medidas de protección:</p>
-          <!-- Selector de afectados -->
-           <div class="grid grid-cols-3 gap-2">
-            <div class="h-full">
-            <label
-              for="afectados"
-              class="block text-sm font-medium text-gray-700 "
-              >Seleccionar afectado</label
-            >
-            <select
-              (change)="medidasEmergentes($event)"
-              id="afectados"
-              formControlName="idAfectado"
-              class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
-              [ngClass]="{
-          ' border-1 border-red-500': medidasEmergentesForm.get('idAfectado')?.invalid && medidasEmergentesForm.get('idAfectado')?.touched
-        }"
-              >
-              <option value=""  disabled selected hidden >Seleccione...</option>
-              @for (item of afectados; track $index) {
-              <option [value]="item.id">{{ item.nombres }}</option>
-              }
-            </select>
-            <div
-      *ngIf="
-        medidasEmergentesForm.get('idAfectado')?.invalid && medidasEmergentesForm.get('idAfectado')?.touched
-      "
-      class="text-red-500 text-sm mt-1"
-    >
-      <span *ngIf="medidasEmergentesForm.get('idAfectado')?.errors?.['required']"
-        >Debe seleccionar un afectado</span>
     </div>
+    <p class="leading-loose text-base">
+      AVOCA CONOCIMIENTO de <span>{{ denunciaAvocatoria?.tipoDenuncia }}</span
+      >: <span class="font-bold">{{ denunciaAvocatoria?.codigoTramite }}</span
+      >,recibido en este organismo con fecha
+      <span class="font-bold">{{
+        denunciaAvocatoria?.fechaCreado | date : "dd/MM/yyyy"
+      }}</span
+      >. por
+      <span class="font-bold"
+        >{{ denunciaAvocatoria?.denunciante?.[0]?.nombres }}
+        {{ denunciaAvocatoria?.denunciante?.[0]?.apellidos }}</span
+      >. En contra de
+      <span class="font-bold"
+        >{{ denunciaAvocatoria?.denunciados?.[0]?.nombres }}
+        {{ denunciaAvocatoria?.denunciados?.[0]?.apellidos }}</span
+      >. quien hace conocer los hechos
+    </p>
+    <p class="leading-loose text-base text-justify"></p>
+    <div class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">
+      <p class="leading-loose text-base text-justify">
+        {{ denunciaAvocatoria?.descripcion_hechos }}
+      </p>
+    </div>
+    <p class="leading-loose text-base text-justify">
+      Lo que se constituye una vulneración:
+    </p>
+    <div class="p-1 border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">
+      <ng-container *ngFor="let af of denunciaAvocatoria?.afectados">
+        <div class="leading-relaxed text-base text-justify">
+          <span class="text-blue-700"
+            >{{ af.nombres }} {{ af.apellidos }}:</span
+          >
+          <ng-container
+            *ngIf="af.vulneraciones?.length > 0; else sinVulneraciones"
+          >
+            <div class="">
+              <ng-container *ngFor="let v of af.vulneraciones">
+                <div class="">- {{ v.vulneracion }}</div>
+              </ng-container>
+            </div>
+          </ng-container>
+          <ng-template #sinVulneraciones>
+            <span class="text-gray-500">Sin vulneraciones registradas</span>
+          </ng-template>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+  </app-card-Form>
 
-            <div>
+  <app-card-Form
+    [titulo]="'Resoluciones'"
+    [hidden]="currentTab != 1"
+    id="resoluciones"
+    [class]="((existeNotificacion && !isEditAvocatoriaActivate) || (!isEditAvocatoriaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')"
+  >
+    <div>
+      <div
+        *ngIf="
+          avocatoriaForm.get('dispocisiones')?.invalid &&
+          avocatoriaForm.get('dispocisiones')?.touched
+        "
+        class="text-red-500 text-sm mt-1"
+      >
+        <span *ngIf="avocatoriaForm.get('dispocisiones')?.errors?.['required']"
+          >el campo es requerido</span
+        >
+      </div>
+      <quill-editor
+        [modules]="modules"
+        formControlName="dispocisiones"
+        class="w-full h-50"
+        [ngClass]="{
+          ' border-1 border-red-500':
+            avocatoriaForm.get('dispocisiones')?.invalid &&
+            avocatoriaForm.get('dispocisiones')?.touched
+        }"
+      >
+      </quill-editor>
+    </div>
+  </app-card-Form>
+
+  <!---ASIGNAR MEDIDAS-------------------------------------->
+
+  <app-card-Form [titulo]="'Medidas'" [hidden]="currentTab != 2" id="medidas"[class]="((existeNotificacion && !isEditAvocatoriaActivate) || (!isEditAvocatoriaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
+    <!-- Formulario para agregar medida -------->
+    <form [formGroup]="medidasEmergentesForm" class="bg-white rounded-xl shadow-md p-4 border  ">
+      <p>Así mismo se disponen las medidas de protección:</p>
+      <!-- Selector de afectados ----------->
+      <div class="grid grid-cols-3 gap-2">
+        <div class="h-full">
+          <label for="afectados" class="block text-sm font-medium text-gray-700"
+            >Seleccionar afectado</label
+          >
+          <select
+            (change)="onAfectadoSeleccionado($event)"
+            id="afectados"
+            formControlName="idAfectado"
+            class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+            [ngClass]="{
+              ' border-1 border-red-500':
+                medidasEmergentesForm.get('idAfectado')?.invalid &&
+                medidasEmergentesForm.get('idAfectado')?.touched
+            }"
+          >
+            <option value="" disabled selected hidden>Seleccione...</option>
+            @for (item of afectados; track $index) {
+            <option [value]="item.id">{{ item.nombres }}</option>
+            }
+          </select>
+          <div
+            *ngIf="
+              medidasEmergentesForm.get('idAfectado')?.invalid &&
+              medidasEmergentesForm.get('idAfectado')?.touched
+            "
+            class="text-red-500 text-sm mt-1"
+          >
+            <span
+              *ngIf="medidasEmergentesForm.get('idAfectado')?.errors?.['required']"
+              >Debe seleccionar un afectado</span
+            >
+          </div>
+          <!-- Selector de medidas -------->
+          <div>
             <label
               for="medida"
               class="block text-sm font-medium text-gray-700 mb-1"
@@ -342,20 +272,25 @@
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
               placeholder="medida"
               [ngClass]="{
-          ' border-1 border-red-500': medidasEmergentesForm.get('idAfectado')?.invalid && medidasEmergentesForm.get('idAfectado')?.touched
-        }"
+                ' border-1 border-red-500':
+                  medidasEmergentesForm.get('idAfectado')?.invalid &&
+                  medidasEmergentesForm.get('idAfectado')?.touched
+              }"
             />
             <div
-      *ngIf="
-        medidasEmergentesForm.get('idMedida')?.invalid && medidasEmergentesForm.get('idMedida')?.touched
-      "
-      class="text-red-500 text-sm mt-1"
-    >
-      <span *ngIf="medidasEmergentesForm.get('idMedida')?.errors?.['required']"
-        >Debe seleccionar una medida</span>
-    </div>
-
+              *ngIf="
+                medidasEmergentesForm.get('idMedida')?.invalid &&
+                medidasEmergentesForm.get('idMedida')?.touched
+              "
+              class="text-red-500 text-sm mt-1"
+            >
+              <span
+                *ngIf="medidasEmergentesForm.get('idMedida')?.errors?.['required']"
+                >Debe seleccionar una medida</span
+              >
+            </div>
           </div>
+          <!--  PERIodo -------->
           <div>
             <label
               for="periodo"
@@ -370,19 +305,25 @@
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
               placeholder="Ej: Julio - Septiembre"
               [ngClass]="{
-          ' border-1 border-red-500': medidasEmergentesForm.get('periodo')?.invalid && medidasEmergentesForm.get('periodo')?.touched
-        }"
+                ' border-1 border-red-500':
+                  medidasEmergentesForm.get('periodo')?.invalid &&
+                  medidasEmergentesForm.get('periodo')?.touched
+              }"
             />
             <div
-      *ngIf="
-        medidasEmergentesForm.get('idMedida')?.invalid && medidasEmergentesForm.get('idMedida')?.touched
-      "
-      class="text-red-500 text-sm mt-1"
-    >
-      <span *ngIf="medidasEmergentesForm.get('periodo')?.errors?.['required']"
-        >Debe introducir el periodo</span>
-    </div>
+              *ngIf="
+                medidasEmergentesForm.get('idMedida')?.invalid &&
+                medidasEmergentesForm.get('idMedida')?.touched
+              "
+              class="text-red-500 text-sm mt-1"
+            >
+              <span
+                *ngIf="medidasEmergentesForm.get('periodo')?.errors?.['required']"
+                >Debe introducir el periodo</span
+              >
+            </div>
           </div>
+          <!-- observaciones -------->
           <div>
             <label
               for="observaciones"
@@ -397,114 +338,116 @@
               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
               placeholder="Escriba sus observaciones..."
               [ngClass]="{
-          ' border-1 border-red-500': medidasEmergentesForm.get('periodo')?.invalid && medidasEmergentesForm.get('periodo')?.touched
-        }"
+                ' border-1 border-red-500':
+                  medidasEmergentesForm.get('periodo')?.invalid &&
+                  medidasEmergentesForm.get('periodo')?.touched
+              }"
             ></textarea>
-          </div>
-          <div
-      *ngIf="
-        medidasEmergentesForm.get('observaciones')?.invalid && medidasEmergentesForm.get('observaciones')?.touched
-      "
-      class="text-red-500 text-sm mt-1"
-    >
-      <span *ngIf="medidasEmergentesForm.get('observaciones')?.errors?.['required']"
-        >Debe introducir observaciones</span>
-    </div>
-
-          </div>
-
-          <!-- Tabla de medidas -->
-          <!-- Tabla de medidas emergentes -->
-
-          <!-- Lista de medidas por artículo -->
-          <div class="flex col-span-2 my-4 gap-2 h-60 ">
-            @for (articulo of medidasPorArticulo; track $index) {
-
             <div
-              class="bg-white ring-1 ring-blue-200 rounded-lg shadow-md pt-0 p-1  overflow-auto"
+              *ngIf="
+                medidasEmergentesForm.get('observaciones')?.invalid &&
+                medidasEmergentesForm.get('observaciones')?.touched
+              "
+              class="text-red-500 text-sm mt-1"
             >
-              <h3
-                class="bg-white sticky top-0 text-lg font-semibold text-gray-800 mb-1 h-8"
+              <span
+                *ngIf="medidasEmergentesForm.get('observaciones')?.errors?.['required']"
+                >Debe introducir observaciones</span
               >
-                {{ articulo.articulo }}
-              </h3>
+            </div>
+          </div>
+        </div>
+        <!-- Lista de medidas por artículo ----------------->
+        <div class="flex col-span-2 mt-4 gap-2 h-60">
+          @for (articulo of medidasPorArticulo; track $index) {
 
-              <div class="space-y-3">
-                <div
-                  *ngFor="let medida of articulo.medidas"
-                  class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 cursor-pointer flex items-start"
-                >
-                  <div class="flex items-center h-5">
-                    <input
-                      type="radio"
-                      [value]="medida.id"
-                      [formControlName]="'idMedida'"
-                      [id]="'medida-' + medida.id"
-                      class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                  </div>
-                  <div class="ml-3">
-                    <label
-                      [for]="'medida-' + medida.id"
-                      class="text-sm text-gray-700"
-                    >
-                      {{ medida.medida }}
-                    </label>
-                  </div>
+          <div
+            class="bg-white ring-1 ring-blue-200 rounded-lg shadow-md pt-0 p-1 overflow-auto"
+          >
+            <h3
+              class="bg-white sticky top-0 text-lg font-semibold text-gray-800 mb-1 h-8"
+            >
+              {{ articulo.articulo }}
+            </h3>
+
+            <div class="space-y-3">
+              <div
+                *ngFor="let medida of articulo.medidas"
+                class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 cursor-pointer flex items-start"
+              >
+                <div class="flex items-center h-5">
+                  <input
+                    type="radio"
+                    [value]="medida.id"
+                    [formControlName]="'idMedida'"
+                    [id]="'medida-' + medida.id"
+                    class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                </div>
+                <div class="ml-3">
+                  <label
+                    [for]="'medida-' + medida.id"
+                    class="text-sm text-gray-700"
+                  >
+                    {{ medida.medida }}
+                  </label>
                 </div>
               </div>
             </div>
-
-            }
           </div>
 
-           </div>
+          }
+        </div>
+      </div>
 
-
-
-          <div class="mt-2">
-            @if (editMediasMode ) {
-              <button
-              type="button"
-              (click)="actualizarMedida()"
-              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Actualizar
-            </button>
-
-            }@else {
-              <button
-              type="button"
-              (click)="agregarMedida(medidasEmergentesForm)"
-              class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              Guardar
-            </button>
-
-            }
-
-          </div>
-        </form>
-        <div
-
-          class="mt-4 bg-white rounded shadow"
+      <div >
+        @if (editMediasMode ) {
+        <button
+          type="button"
+          (click)="actualizarMedida()"
+          class="bg-blue-600 text-white text-sm px-5 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
-          <app-tablaEdit
-            [encabezados]="['ID', 'Medida ', 'Periodo', 'Observaciones']"
-            [columnas]="['idMedida', 'medida', 'periodo', 'observaciones']"
-            [datos]="medidasEmergentesArray"
-            [acciones]="true"
-            [mostrarEditar]="true"
-            [eliminar]="eliminarMedida.bind(this)"
-            [editar]="SeleccionarParaEditar.bind(this)"
-          ></app-tablaEdit>
-        </div>
+          Actualizar
+        </button>
 
-    </app-card-Form>
-    @if (pdfSrc) {
-        <div class="pdf-container" [hidden]="currentTab !== 3">
-          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
-        </div>
-      }
+        }@else {
+           <app-button-submit
+      type="button"
+      [label]="'Agregar'"
+      color="submit"
+      icon="plus"
+      (clicked)="agregarMedida(medidasEmergentesForm)"
+      [disabled]="isBotonDesactivated"
+    >
+    </app-button-submit>
 
+
+        }
+      </div>
+    </form>
+   <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
+            <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Medidas registradas</h3>
+      <app-tablaEdit
+        [encabezados]="['ID', 'Medida ', 'Periodo', 'Observaciones']"
+        [columnas]="['idMedida', 'medida', 'periodo', 'observaciones']"
+        [datos]="medidasEmergentesArray"
+        [acciones]="true"
+        [mostrarEditar]="true"
+        [eliminar]="eliminarMedida.bind(this)"
+        [editar]="SeleccionarParaEditarMedida.bind(this)"
+      ></app-tablaEdit>
+    </div>
+  </app-card-Form>
+  <!--VISTA PREVIA PDF-->
+
+  @if (pdfSrc) {
+  <div class="pdf-container" [hidden]="currentTab !== 3">
+    @if (!pdfSrc) {
+      <p>nada que mostrar</p>
+
+    }
+    <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+
+  </div>
+  }
 </form>

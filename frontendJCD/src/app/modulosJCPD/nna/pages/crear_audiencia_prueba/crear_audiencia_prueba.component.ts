@@ -6,15 +6,17 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
+import { InputsComponent } from '@shared/components/inputs/inputs.component';
 import { TablaParticipantesComponent } from '../crear_audiencia_contestacion/tablaParticipantes/tablaParticipantes.component';
 import { AudienciaPruebasService } from '@nna/services/audienciaPruebas.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UserService } from '@admin/services/user.service';
 import { toast } from 'ngx-sonner';
 import { ArticuloMedidas, MedidasService } from '@nna/services/medidas.service';
 import { AvocatoriaService } from '@nna/services/avocatoria.service';
 import { Vulneracion, VulneracionService } from '@nna/services/vulneracion.service';
 import { catchError, finalize, forkJoin, Observable, of } from 'rxjs';
+import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Formulario.component';
 
 interface involucrados{
   nombres: string,
@@ -39,19 +41,83 @@ interface vulneracionesIdentificadas{
     TablaEditComponent,
   ButtonSubmitComponent,
   ReactiveFormsModule,
+  NavFormularioComponent,
+  InputsComponent,
+  RouterLink
 
 ]
 
 })
 export class Crear_audiencia_pruebaComponent implements OnInit {
-   currentTab:string ='0'
-
+  //--- Configuración de tabs------//
+  tabsConfig: any[] = [
+    {
+      id: 0,
+      label: 'Inicio'
+    },
+    {
+      id: 1,
+      label: 'Pruebas'
+    },
+    {
+      id: 2,
+      label: 'Testimonios'
+    },
+    {
+      id: 3,
+      label: 'Audiencia reservada'
+    },
+    {
+      id: 4,
+      label: 'Vulneraciones/ medidas'
+    },
+    {
+      id: 5,
+      label: 'Pdf'
+    }
+  ];
+  currentTab = 0; //variable para cambiar pestañas del formulario
+// Configuración de botones de acción
+  actionsConfig: any[] = [
+    {
+      id: 'update',
+      type: 'button',
+      icon: `<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+      <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />`,
+      tooltip: 'Actualizar denuncia',
+      hoverClass: 'hover:bg-blue-700 hover:text-white',
+      disabled: true
+    },
+    {
+      id: 'save',
+      type: 'button',
+      icon: `<path fill-rule="evenodd" d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875h11.47c.497 0 .974.197 1.326.548l2.905 2.905c.351.352.549.829.549 1.326V20.25c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm14.625-.375v4.5c0 .621-.504 1.125-1.125 1.125h-10.5A1.125 1.125 0 0 1 5.625 7.5V3h12.75Zm-12.75 9.75c0-.621.504-1.125 1.125-1.125h10.5c.621 0 1.125.504 1.125 1.125v5.625c0 .621-.504 1.125-1.125 1.125H6.75a1.125 1.125 0 0 1-1.125-1.125v-5.625Z" clip-rule="evenodd"/>
+<path d="M15.75 3h1.5v3.75h-1.5V3Z" fill="currentColor"/>
+<path d="M8.25 15h7.5v1.5h-7.5V15Zm0 2.25h7.5v1.5h-7.5v-1.5Z" fill="currentColor"/>`,
+      tooltip: 'Guardar denuncia',
+      hoverClass: 'hover:bg-green-600 hover:text-white',
+      disabled: false
+    },
+    {
+      id: 'pdf',
+      type: 'button',
+      icon: `<path d="M14.25 1.5v4.875c0 .621.504 1.125 1.125 1.125h4.875M9 1.5H5.625c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V7.5L14.25 1.5H9Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<rect x="6" y="9" width="12" height="5" rx="0.5" fill="currentColor"/>
+<path d="M7.5 10.5h1.2c.5 0 .8.3.8.8s-.3.8-.8.8h-.7v1h-.5v-2.6Zm.5.5v.8h.7c.2 0 .3-.1.3-.4s-.1-.4-.3-.4h-.7ZM10.5 10.5h1c.8 0 1.3.5 1.3 1.3s-.5 1.3-1.3 1.3h-1v-2.6Zm.5.5v1.6h.5c.4 0 .8-.2.8-.8s-.4-.8-.8-.8h-.5ZM14 10.5h2v.5h-1.5v.5h1.2v.5h-1.2v1h-.5v-2.5Z" fill="white"/>
+<path d="M12 16v5m0 0l-2.5-2.5M12 21l2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+      tooltip: 'Generar PDF',
+      hoverClass: 'hover:bg-green-600 hover:text-white',
+      disabled: true
+    }
+  ];
   denunciaId = 0;
-
-  editMediasMode: boolean = false;
-  modoEdicionParticipante: boolean = false;
+  grupo: string = '';
+  isEditAudienciaPruebasActivate: boolean = false;
+  editMedidasMode: boolean = false;
+  isActivateModoEdicionParticipante: boolean = false;
   modoEdicionPruebas: boolean = false;
   modoEdicionTestimonios: boolean = false;
+  modoEdicionVulneraciones: boolean = false;
   indexParticipanteEditando: number | null = null;
   indexPruebasEditando: number | null = null;
   indexTestimoniosEditando: number | null = null;
@@ -78,35 +144,8 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
   datosAudienciaPrueba: any;
   miembrosPrincipales: any[] = [];
   pdfSrc: SafeResourceUrl | null = null;
-  // Estados internos para los botones (sin la lógica de resolución)
-  private _pdfDisabled: boolean = true;
-  private _guardarDisabled: boolean = false;
-  private _editarDisabled: boolean = true;
-  private cargandoDatosEdicion = false; // Flag para ignorar cambios durante carga
-
-  // Estados para los botones que se calculan explícitamente
-  pdfDisabled: boolean = true;
-  guardarDisabled: boolean = false;
-  editarDisabled: boolean = true;
-
-  // Método para actualizar los estados de los botones
-  private actualizarEstadoBotones(): void {
-    const tieneResolucion = this.existeResolucion !== null && this.existeResolucion !== undefined;
-
-    // PDF: Si existe resolución, siempre activo. Si no, respeta el estado manual
-    this.pdfDisabled = tieneResolucion ? false : this._pdfDisabled;
-
-    // Guardar: Si existe resolución, siempre deshabilitado. Si no, respeta el estado manual
-    this.guardarDisabled = tieneResolucion ? true : this._guardarDisabled;
-
-    // Editar: Si existe resolución, siempre deshabilitado. Si no, respeta el estado manual
-    this.editarDisabled = tieneResolucion ? true : this._editarDisabled;
-  }
-
   idAudienciaP!: number;
-
   editMode: boolean = false;
-  ignoreFirstValueChangeAvocatoria: boolean = false;
   existeResolucion: any = null;
 
   constructor(private router: Router,
@@ -119,23 +158,30 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
     private vulneracionService: VulneracionService,
     private sanitizer: DomSanitizer) { }
 
-
-
-  //inicializa el componente//
-  ngOnInit() {
+    //suscribir a los parámetros de la ruta para determinar el modo (crear/editar) y estableer el estado de los botones iniciales
+  private configureEditCreateMode(): void {
+  const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
+    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
 
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
+
       if (params['modo'] === 'editar') {
+        console.log('Modo editar activado '+ this.denunciaId);
         this.editMode = true;
-        // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
-        this._guardarDisabled = true;
-        this._pdfDisabled = false;
-        this._editarDisabled = true;
-        this.actualizarEstadoBotones();
-        this.ignoreFirstValueChangeAvocatoria = true;
-      }
-      // Cargar afectados y dirigidoA cuando tengamos el idDenuncia
+        this.audienciaPruebaForm.disable();
+        this.participantesForm.disable();
+         // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
+         this.actionsConfig[1].disabled = true
+       this.actionsConfig[2].disabled = false // PDF habilitado
+        this.actionsConfig[0].disabled = false; // Editar deshabilitado hasta que haya cambios
+      }else{
+        this.actionsConfig[1].disabled = false
+        this.actionsConfig[2].disabled = true
+
+      };
+
+     // Cargar afectados y dirigidoA cuando tengamos el idDenuncia
        if(!this.editMode){
         this.cargarAfectadosYDirigidoA();
 
@@ -143,19 +189,25 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
 
       this.cargarDatosAudiencia(this.denunciaId)
       this.LoadAfectados(this.denunciaId)
-
+      this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
 
     });
-    this.formulariopruebas();
+}
+  //inicializa el componente//
+  ngOnInit() {
+     this.formulariopruebas();
     this.formularioTestimonios();
 
     this.principalesActivos();
     // Inicializar formulario de audiencia
     this.formularioAudienciaPrueba();
-    this.actualizarEstadoBotones();
+
     this.formularioParticipantes()
     this.formularioMedidasDefinitivas()
     this.formularioVulneracionesIdentificadas()
+
+    this.configureEditCreateMode()
+
     //inicialiar carga de datos
 
     this.cargarMedidas();
@@ -165,14 +217,12 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
     this.seleccionarVulneracion();
 
 
-    this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+
 
     // Suscripción inteligente a cambios del formulario
     this.audienciaPruebaForm.valueChanges.subscribe(value => {
       console.log('Audiencia Form Value Changes:', value);
-      if (!this.cargandoDatosEdicion) {
-        this.actualizarEstadoBotones();
-      }
+
     });
     this.participantesForm.valueChanges.subscribe(value => {
       console.log('Participantes Form Value Changes:', value);
@@ -191,6 +241,7 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
       idVulneracion: ['', Validators.required],
       vulneracion: ['', Validators.required],
       detalles: ['', Validators.required],
+      id: [],
     });
   }
 
@@ -259,6 +310,52 @@ eliminarVulneracionIdentificada(vulneracion: vulneracionesIdentificadas) {
 
 }
 
+ SeleccionarParaEditarVulneracion(registro: any): void {
+
+
+
+    // Cargar los datos del item en el formulario de edición
+    this.vulneracionesIdentificadasForm.patchValue({
+      idAfectado: registro.idAfectado || registro.id_afectado,
+      idVulneracion: registro.idVulneracion || registro.id_vulneracion,
+      vulneracion: registro.vulneracion || registro.descripcion,
+      detalles: registro.detalles,
+      id: registro.id
+    });
+
+    console.log('id elegido:', registro.id);
+
+    this.modoEdicionVulneraciones = true;
+    // Scroll the form container to top so the editor is visible to the user
+
+
+  }
+ actualizarVulneracionIdentificada(){
+    const fg = this.vulneracionesIdentificadasForm;
+  if (fg.invalid) {
+    fg.markAllAsTouched();
+    return;
+  }
+      this.audienciaPruebasService.actualizarVulneracionIdentificada(this.vulneracionesIdentificadasForm.get('id')?.value, this.vulneracionesIdentificadasForm.value).subscribe({
+      next: () => {
+        toast.success('Medida actualizada con éxito', {
+          duration: 3000,
+        });
+        this.resetEditor();
+        this.modoEdicionVulneraciones = false;
+
+
+        this.loadVulneracionesIdentificadas(this.vulneracionesIdentificadasForm.get('idAfectado')?.value);
+      },
+      error: (err) => {
+        toast.error('Error al actualizar medida', {
+          duration: 3000,
+          description: err
+        });
+      }
+    });
+  }
+
 //---SECCION MEDIDAS DE PROTECCION------//
  //formulario medidas definitivas
     formularioMedidasDefinitivas() {
@@ -309,8 +406,6 @@ seleccionarMEdida() {
     });
 
 }
-
-
 
   cargarMedidas() {
     this.medidasService.getAllMedidas().subscribe({
@@ -536,7 +631,7 @@ seleccionarMEdida() {
 
     console.log('id elegido:', registro.id);
 
-    this.editMediasMode = true;
+    this.editMedidasMode = true;
     // Scroll the form container to top so the editor is visible to the user
 
 
@@ -553,7 +648,7 @@ seleccionarMEdida() {
           duration: 3000,
         });
         this.resetEditor();
-        this.editMediasMode = false;
+        this.editMedidasMode = false;
 
 
         this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
@@ -566,14 +661,6 @@ seleccionarMEdida() {
       }
     });
   }
-
-
-
-
-
-
-
-
 //--------------------------/////
 resetEditor() {
   const afectado = this.medidasDefinitivasForm.get('idAfectado')?.value;
@@ -589,13 +676,7 @@ resetEditor() {
  // -----------Eliminar una medida aceptando índice o item (flexible)
 
 
-
-
   //-----SECCION PARTICIPANTES-----//
-
-
-
-
 
    //-------------Formularios----------------------//
   formularioAudienciaPrueba() {
@@ -603,14 +684,15 @@ resetEditor() {
     const horaActual = now.toTimeString().slice(0,5); // 'HH:mm'
     const fechaActual = now.toISOString().substring(0,10); // 'YYYY-MM-DD'
     this.audienciaPruebaForm = this.fb.group({
-      idDenuncia: [this.denunciaId || 0],
-      codigoTramite: [''],
+      idDenuncia: [this.denunciaId || 0, Validators.required],
+      codigoTramite: ['', Validators.required],
       hora: [horaActual],
       fecha: [fechaActual],
-      instalacionAudiencia: [''],
-      afectadoManifiesta: [''],
+      instalacionAudiencia: ['', Validators.required],
+      articulo:['', Validators.required],
+      afectadoManifiesta: ['', Validators.required],
       participantes: this.fb.array([]),
-      
+
     });
   }
 
@@ -639,12 +721,7 @@ resetEditor() {
       parte: ['']
     });
   }
-
-
-
   //----------------------------------------////
-
-
       //------GETTER FORMULARIOS-------------------//
 get participantesArray(): FormArray {
     if (!this.audienciaPruebaForm) {
@@ -973,10 +1050,17 @@ get participantesArray(): FormArray {
     }
   }
 
+  // Cancelar edición vulneraciones
+  cancelarEdicionVulneraciones(): void {
+    this.modoEdicionVulneraciones = false;
+    this.vulneracionesIdentificadasForm.reset();
+  }
 
-
-
-
+  // Cancelar edición medidas
+  cancelarEdicionMedidas(): void {
+    this.editMedidasMode = false;
+    this.medidasDefinitivasForm.reset();
+  }
 
    //------------CARGA DE DATOS-----------------////
    LoadAfectados(id: number) {
@@ -1019,6 +1103,7 @@ get participantesArray(): FormArray {
     });
   }
   cargarDatosAudiencia(id: number) {
+    console.log('Cargando datos de audiencia para ID:', this.denunciaId)
     if (!this.denunciaId) return;
     this.audienciaPruebasService.getDatosAudiencia(id).subscribe(data => {
       this.datosAudienciaPrueba = data;
@@ -1030,25 +1115,27 @@ get participantesArray(): FormArray {
       }
       this.audienciaPruebaForm.patchValue({
         codigoTramite: this.datosAudienciaPrueba.codigoTramite,
+        idDenuncia: this.denunciaId || 0,
         // ...otros campos si es necesario
       });
 
 
     });
   }
-  audienciaPruebasEditMode(id: number){
-    this.cargandoDatosEdicion = true;
-    this.audienciaPruebasService.getAudienciaPruebaEditMode(id).subscribe(data => {
+  audienciaPruebasEditMode(idDenuncia: number){
+
+    this.audienciaPruebasService.getAudienciaPruebaEditMode(idDenuncia).subscribe(data => {
       console.log('Datos de audiencia para editar cargados', data);
       if (!data) return;
 
       this.existeResolucion = data?.idResolucion ?? null;
-      this.actualizarEstadoBotones(); // Actualizar estados después de cargar resolución
+       // Actualizar estados después de cargar resolución
 
       // Mostrar toast si existe resolución
       if(this.existeResolucion){
+        this.actionsConfig[0].disabled = true
         this.audienciaPruebaForm.disable();
-        this.actualizarEstadoBotones();
+
         toast.warning('No puedes editar esta audiencia de prueba', {
           duration: 10000,
           description: 'Ya existe una resolución asociada a esta audiencia de prueba',
@@ -1075,21 +1162,9 @@ get participantesArray(): FormArray {
         fecha: fecha,
         instalacionAudiencia: data?.instalacionAudiencia ?? '',
         afectadoManifiesta: data?.afectadoManifiesta ?? '',
+        idDenuncia: this.denunciaId || 0
       }, { emitEvent: false });
 
-      // Ensure initial button state for edit mode: PDF enabled, Edit disabled
-      if (this.editMode) {
-        this._pdfDisabled = false;
-        this._editarDisabled = true;
-        this.actualizarEstadoBotones();
-      }
-      // Clear the ignore flag on the next tick so the first real user change is handled
-      setTimeout(() => { this.ignoreFirstValueChangeAvocatoria = false; }, 0);
-
-      // Marcar que terminó la carga de datos para permitir detectar cambios reales del usuario
-      setTimeout(() => {
-        this.cargandoDatosEdicion = false;
-      }, 100); // Pequeño delay para asegurar que todos los patchValue hayan terminado
 
       // Populate participantes FormArray if provided
       const posibles = data?.participantes ?? data?.asistentes ?? data?.participantesRegistrados ?? [];
@@ -1166,7 +1241,37 @@ get participantesArray(): FormArray {
   }
 
   //---------------------------OTROS-------------------//
-   cambiarTab(tab: string) {
+   habilitarEdicion(){
+    this.isEditAudienciaPruebasActivate=true;
+    this.audienciaPruebaForm.enable();
+    this.participantesForm.enable();
+    this.actionsConfig[1].disabled = false
+    this.actionsConfig[2].disabled = true
+    this.actionsConfig[0].disabled = true;
+
+  }
+   handleAction(actionId: string) {
+    switch (actionId) {
+      case 'update':
+        this.habilitarEdicion();
+
+        break;
+      case 'save':
+        if (this.editMode) {
+          this.updateAudiencia();
+
+        }else{
+          this.submitAudienciaPrueba();
+
+        }
+
+        break;
+      case 'pdf':
+        this.generarPdf();
+        break;
+    }
+  }
+   cambiarTab(tab: number) {
     this.currentTab = tab;
   }
  cancelar(): void {
@@ -1174,26 +1279,21 @@ get participantesArray(): FormArray {
   }
    //--editar
       updateAudiencia() {
-      // Prepare body from form value (use getRawValue if available to include all controls)
-      const raw: any = typeof this.audienciaPruebaForm.getRawValue === 'function'
-        ? this.audienciaPruebaForm.getRawValue()
-        : { ...this.audienciaPruebaForm.value };
-
-      // If we are in edit mode, force medidasDefinitivas to be an empty array
-      // so backend receives medidasDefinitivas: [] as requested.
-      if (this.editMode) {
-        raw.medidasDefinitivas = [];
-      }
-
-      const body = raw;
+      const body ={
+      ...this.audienciaPruebaForm.value,idDenuncia: this.denunciaId
+    }
       this.audienciaPruebasService.actualizarAudienciaPrueba(this.idAudienciaP, body).subscribe({
         next: () => {
           toast.success('Audiencia Actualizada con Éxito', {
             duration: 3000,
           });
-          this._pdfDisabled = false;
-          this._editarDisabled = true;
-          this.actualizarEstadoBotones();
+          this.actionsConfig[1].disabled = true
+    this.actionsConfig[2].disabled = false
+    this.actionsConfig[0].disabled = false;
+    this.isEditAudienciaPruebasActivate=false;
+    this.audienciaPruebaForm.disable();
+    this.participantesForm.disable();
+
 
         },
         error: (err) => {
@@ -1225,10 +1325,9 @@ get participantesArray(): FormArray {
       toast.success('Audiencia Guardada con Éxito', {
                 duration: 3000,
               });
-              this.editMode = true;
-      this._pdfDisabled = false;
-        this._guardarDisabled = true;
-        this.actualizarEstadoBotones();
+
+              this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
+
 
     },
     error(err) {
@@ -1243,7 +1342,7 @@ get participantesArray(): FormArray {
 }
 //------------SUBMIT PARTICIPANTES---///
   onSubmitParticipante(): void {
-    if (this.modoEdicionParticipante && this.indexParticipanteEditando !== null) {
+    if (this.isActivateModoEdicionParticipante && this.indexParticipanteEditando !== null) {
       this.actualizarParticipante();
     } else {
       const body = {
@@ -1307,7 +1406,7 @@ get participantesArray(): FormArray {
 
     const participante = participanteControl.value;
     this.participantesForm.patchValue(participante);
-    this.modoEdicionParticipante = true;
+    this.isActivateModoEdicionParticipante = true;
     this.indexParticipanteEditando = index;
   }
 
@@ -1324,7 +1423,7 @@ get participantesArray(): FormArray {
 
   // Cancelar edición participante
   cancelarEdicionParticipante(): void {
-    this.modoEdicionParticipante = false;
+    this.isActivateModoEdicionParticipante = false;
     this.indexParticipanteEditando = null;
     this.participantesForm.reset();
     this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
@@ -1374,12 +1473,14 @@ get participantesArray(): FormArray {
   }
   //-----------PDF------------------//
   generarPdf(){
+    this.actionsConfig[2].disabled = true
 
     this.audienciaPruebasService.crearpdfBlob(this.idAudienciaP).subscribe((res: Blob) => {
       const url = URL.createObjectURL(res);
       this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      this.actionsConfig[2].disabled = false
     });
-    this.cambiarTab("5");
+    this.cambiarTab(5);
   }
 
 

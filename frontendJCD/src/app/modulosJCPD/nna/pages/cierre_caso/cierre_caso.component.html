@@ -1,178 +1,136 @@
-<h1 class="text-2xl font-bold mb-4">cierre de caso</h1>
-<hr class="border-blue-200 border-1" />
+<div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <a
+    [routerLink]="[`../../../fases/${denunciaId}`]"
 
-<nav class="flex  mb-0 gap-3 " id="tabs">
-    <button type="button" class="rounded-t-2xl p-2"
-       [ngClass]="{
-      'bg-blue-500 text-white': currentTab === '0',
-      'bg-gray-100': currentTab !== '0'
-    }"
-      (click)="cambiarTab('0')"
-
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
     >
-      Informes prensentados
-    </button>
-    <button type="button"
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('1')"
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
 
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab  != '0',
+    </a>
+  <h3 class="text-2xl font-bold">Cierre de caso</h3>
 
-    }"
-    >
-     informes citados
-    </button>
-    <div class="flex flex-1 m-1 justify-end space-x-4">
-      <app-button-submit
-        type="button"
-        label="Volver"
-        color="cancelar"
+</div>
+<hr class="border-yellow-300 border-1" />
 
-      >
-      </app-button-submit>
-       <app-button-submit
-    type="button"
-    label="Editar"
-    color="afirmar"
-
-
-
-    >
-
-    </app-button-submit>
-      <app-button-submit type="button" label="Guardar" color="submit" (clicked)="submitCierreCaso()"
-
-      >
-      </app-button-submit>
-      <app-button-submit
-    type="button"
-    label="GenerarPDF"
-    color="submit"
-
-
-
-    >
-
-    </app-button-submit>
-
-
-    </div>
-
-  </nav>
+<app-nav-formulario
+  [tabs]="tabsConfig"
+  [actions]="actionsConfig"
+  [currentTab]="currentTab"
+  (tabChanged)="cambiarTab($event)"
+  (actionClicked)="handleActionButton($event)"
+></app-nav-formulario>
 
   <form [formGroup]="CierreCasoForm" class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
-     <app-card-Form [titulo]="'informes presentados'"  [hidden]="currentTab!='0'">
+     <app-card-Form [titulo]="'informes presentados'"  [hidden]="currentTab!=0">
 
   <!-- Texto editable como formulario -->
-   <form [formGroup]="informesPresentadosForm" class="space-y-6">
+   <form [formGroup]="informesPresentadosForm" class="bg-white rounded-xl shadow-md p-4 border">
+     <!-- Primera fila -->
+     <div class="grid grid-cols-2 gap-4 mb-4 items-end">
+       <!-- Selección de Informe -->
+       <div class="space-y-2">
+         <label class="block text-sm font-medium text-gray-700 h-5 flex items-center">
+           Informe presentado <span class="text-red-500">*</span>
+         </label>
+         <select formControlName="informe"
+           class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none transition-colors"
+           [ngClass]="{
+             'border-red-500 focus:border-red-500': informesPresentadosForm.get('informe')?.invalid && informesPresentadosForm.get('informe')?.touched
+           }">
+           <option value=""  disabled selected hidden >Seleccione...</option>
+           <option *ngFor="let informe of DatosCierreCaso?.informesAnexados" [value]="informe">
+             {{ informe }}
+           </option>
+         </select>
+       </div>
 
-    <!-- Sección Principal -->
-    <div class="bg-white p-6 rounded-lg border border-gray-200 shadow-sm space-y-4">
+       <!-- Técnico o Institución -->
+       <div class="flex flex-col">
+         <app-inputs
+           label="Presentado por (Técnico o Institución)"
+           type="text"
+           placeholder="Ej: Dr. Juan Pérez - MIES"
+           [control]="$any(informesPresentadosForm.get('nombreTecnico')!)"
+         ></app-inputs>
+       </div>
+     </div>
 
-      <!-- Selección de Informe -->
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700">
-          Informe presentado <span class="text-red-500">*</span>
-        </label>
-        <select formControlName="informe"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none transition-colors"
-          [ngClass]="{
-            'border-red-500 focus:border-red-500': informesPresentadosForm.get('informe')?.invalid && informesPresentadosForm.get('informe')?.touched
-          }">
-          <option value=""  disabled selected hidden >Seleccione...</option>
-          <option *ngFor="let informe of DatosCierreCaso?.informesAnexados" [value]="informe">
-            {{ informe }}
-          </option>
-        </select>
-      </div>
+     <!-- Segunda fila -->
+     <div class="grid grid-cols-3 gap-4 mb-4 items-end">
+       <!-- Fecha -->
+       <div class="flex flex-col">
+         <app-inputs
+           label="Fecha del informe"
+           type="date"
+           [control]="$any(informesPresentadosForm.get('fecha')!)"
+         ></app-inputs>
+       </div>
 
+       <!-- Lugar de seguimiento -->
+       <div class="flex flex-col">
+         <app-inputs
+           label="Lugar o persona objeto de seguimiento"
+           type="text"
+           placeholder="Ej: Domicilio familiar, Centro de acogida, etc."
+           [control]="$any(informesPresentadosForm.get('lugar')!)"
+         ></app-inputs>
+       </div>
 
-      <!-- Técnico o Institución -->
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700">
-          Presentado por (Técnico o Institución) <span class="text-red-500">*</span>
-        </label>
-        <input type="text"
-          placeholder="Ej: Dr. Juan Pérez - MIES"
-          formControlName="nombreTecnico"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75 transition-colors"
-          [ngClass]="{
-            'border-red-500 focus:border-red-500': informesPresentadosForm.get('nombreTecnico')?.invalid && informesPresentadosForm.get('nombreTecnico')?.touched
-          }"/>
-      </div>
-      <!-- Fecha -->
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700">
-          Fecha del informe <span class="text-red-500">*</span>
-        </label>
-        <input type="date"
-          formControlName="fecha"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75 transition-colors"
-          [ngClass]="{
-            'border-red-500 focus:border-red-500': informesPresentadosForm.get('fecha')?.invalid && informesPresentadosForm.get('fecha')?.touched
-          }"/>
-      </div>
-      <!-- Lugar de seguimiento -->
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700">
-          Lugar o persona objeto de seguimiento <span class="text-red-500">*</span>
-        </label>
-        <input type="text"
-          placeholder="Ej: Domicilio familiar, Centro de acogida, etc."
-          formControlName="lugar"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75 transition-colors transition-colors"
-          [ngClass]="{
-            'border-red-500 focus:border-red-500': informesPresentadosForm.get('lugar')?.invalid && informesPresentadosForm.get('lugar')?.touched
-          }"/>
-      </div>
-      <!-- Persona evaluada -->
-      <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700">
-          Persona evaluada <span class="text-red-500">*</span>
-        </label>
-        <input type="text"
-          placeholder="Nombre del niño, niña o adolescente"
-          formControlName="personaEvaluada"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75 transition-colors"
-          [ngClass]="{
-            'border-red-500 focus:border-red-500': informesPresentadosForm.get('personaEvaluada')?.invalid && informesPresentadosForm.get('personaEvaluada')?.touched
-          }"/>
-      </div>
+       <!-- Persona evaluada -->
+       <div class="flex flex-col">
+         <app-inputs
+           label="Persona evaluada"
+           type="text"
+           placeholder="Nombre del niño, niña o adolescente"
+           [control]="$any(informesPresentadosForm.get('personaEvaluada')!)"
+         ></app-inputs>
+       </div>
+     </div>
 
+     <!-- Botones abajo a la izquierda -->
+     <div class="flex gap-2">
+       <!-- Botón principal: Agregar o Actualizar según el modo -->
+       <app-button-submit
+         type="button"
+         [label]="modoEdicionInforme ? 'Actualizar' : 'Agregar'"
+         [color]="modoEdicionInforme ? 'afirmar' : 'submit'"
+         [icon]="modoEdicionInforme ? 'edit' : 'plus'"
+         [disabled]="informesPresentadosForm.invalid"
+         (clicked)="agregarInforme()">
+       </app-button-submit>
 
-    </div>
-
-  <!-- Botón añadir -->
-  <div class="text-right">
-    <button
-      type="button"
-      (click)="agregarInforme()"
-      class="bg-green-600 text-white px-6 py-2 rounded-md hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-      [disabled]="informesPresentadosForm.invalid"
-    >
-      Añadir Informe
-    </button>
-  </div>
-
-  <!-- Tabla de informes agregados -->
-  <div *ngIf="informesPresentadosData.length > 0" class="mt-6">
+       <!-- Botón Cancelar: Solo visible en modo edición -->
+       <app-button-submit
+         *ngIf="modoEdicionInforme"
+         label="Cancelar"
+         type="button"
+         color="cancelar"
+         (clicked)="cancelarEdicionInforme()">
+       </app-button-submit>
+     </div>
+   </form>
+   <!-- Tabla de informes agregados -->
+  <div *ngIf="informesPresentadosData.length > 0" class=" bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
     <h3 class="text-lg font-medium text-gray-900 mb-4">Informes Agregados</h3>
     <app-tablaEdit
       [encabezados]="encabezadosInformes"
       [columnas]="columnasInformes"
       [datos]="informesPresentadosData"
+      [acciones]="true"
+      [mostrarEditar]="true"
+      [editar]="editarInforme.bind(this)"
+      [eliminar]="eliminarInforme.bind(this)"
     >
     </app-tablaEdit>
 
 
   </div>
 
-  </form>
-
 
   </app-card-Form>
-  <app-card-Form [hidden]="currentTab!='1'" [titulo]="'Informes citados'" >
+  <app-card-Form [hidden]="currentTab!=1" [titulo]="'Informes citados'" >
     <div>
         <div
       *ngIf="
@@ -209,44 +167,20 @@
         </select>
       </div>
 
-
-
-
-
-  <p class="text-gray-800">
-    De los informes citados y revisando el expediente, la Junta considera que: las disposiciones número
-    <input
-      type="text"
-      placeholder="N° de disposiciones"
-      class="border-b border-gray-400 w-64 focus:outline-none focus:border-blue-500 mx-1"
-    />
-    de la Resolución
-    <input
-      type="text"
-      placeholder="Código o referencia de la resolución"
-      class="border-b border-gray-400 w-72 focus:outline-none focus:border-blue-500 mx-1"
-    />
-    han sido cumplidos
-    <input
-      type="text"
-      placeholder="Detalle del cumplimiento"
-      class="border-b border-gray-400 w-full focus:outline-none focus:border-blue-500 mt-2"
-    />
-    , que el/la afectada
-    <input
-      type="text"
-      placeholder="Nombre de la persona afectada"
-      class="border-b border-gray-400 w-64 focus:outline-none focus:border-blue-500 mx-1"
-    />
-    ha superado la situación de vulneración/riesgo
-    <input
-      type="text"
-      placeholder="Explicación o conclusión"
-      class="border-b border-gray-400 w-full focus:outline-none focus:border-blue-500 mt-2"
-    />
-  </p>
-
   </app-card-Form>
+
+  <!--VISTA PREVIA PDF-->
+
+  @if (pdfSrc) {
+  <div class="pdf-container" [hidden]="currentTab !== 2">
+    @if (!pdfSrc) {
+      <p>nada que mostrar</p>
+
+    }
+    <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+
+  </div>
+  }
 
 
 

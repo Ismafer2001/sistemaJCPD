@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import  TablaNavigatorComponent from '@shared/components/tabla/tablaNavigator/tabla.component';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router} from '@angular/router';
+import { ActivatedRoute, Router, RouterLink} from '@angular/router';
 import { CitacionesService } from '@nna/services/citaciones.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toast } from 'ngx-sonner';
@@ -23,7 +23,12 @@ interface notificacion{
 @Component({
   selector: 'app-crear-citaciones',
   templateUrl: './crear-citaciones.component.html',
-  imports:[TablaNavigatorComponent,CardFormComponent,CommonModule,ReactiveFormsModule, ButtonSubmitComponent]
+  imports:[TablaNavigatorComponent,
+    CardFormComponent,
+    CommonModule,
+    ReactiveFormsModule,
+    ButtonSubmitComponent,
+  RouterLink]
 
 })
 export class CrearCitacionesComponent implements OnInit {

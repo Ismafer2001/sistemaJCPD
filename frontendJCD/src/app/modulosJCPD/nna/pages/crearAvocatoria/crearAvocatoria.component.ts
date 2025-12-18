@@ -1,11 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ElementRef, ViewChild } from '@angular/core';
 import { AvocatoriaService } from '../../services/avocatoria.service';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
-
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { QuillModule } from 'ngx-quill';
-
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ArticuloMedidas, MedidasService } from '@nna/services/medidas.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
@@ -13,7 +11,7 @@ import ButtonSubmitComponent from '@shared/components/button-submit/button-submi
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toast } from 'ngx-sonner';
-import { forkJoin, Observable, of } from 'rxjs';
+import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Formulario.component';
 
@@ -26,16 +24,20 @@ import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Fo
       CardFormComponent,
       ButtonSubmitComponent,
       TablaEditComponent,
-    NavFormularioComponent],
+    NavFormularioComponent,
+  RouterLink],
 })
-export class CrearAvocatoriaComponent implements OnInit {
+export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
   @ViewChild('formContainer', { static: false }) formContainerRef?: ElementRef<HTMLElement>;
+  private destroy$ = new Subject<void>();
   //variables formulario//----------
     avocatoriaForm!: FormGroup;
     existeNotificacion: any = null;
+
   medidasEmergentesForm!: FormGroup;
   editMode: boolean = false;
   editMediasMode: boolean = false;
+  isBotonDesactivated: boolean = false;
    medidasEmergentesArray: any[] = [];
   //------------------------------------
   denunciaAvocatoria: any = null;
@@ -43,41 +45,69 @@ export class CrearAvocatoriaComponent implements OnInit {
   medidasPorArticulo: ArticuloMedidas[] = [];
   afectados: any[] = [{id: 0, nombres: ''}];
 
-  // Guarda las medidas que el usuario eliminó localmente por afectado
-
-
   denunciaId: number = 0;
-  currentTab = 0;
+  //--- Configuración de tabs------//
+  tabsConfig: any[] = [
+    {
+      id: 0,
+      label: 'Detalles'
+    },
+    {
+      id: 1,
+      label: 'Resoluciones'
+    },
+    {
+      id: 2,
+      label: 'Medidas'
+    },
+    {
+      id: 3,
+      label: 'pdf'
+    }
+  ];
+  currentTab = 0; //variable para cambiar pestañas del formulario
+// Configuración de botones de acción
+  actionsConfig: any[] = [
+    {
+      id: 'update',
+      type: 'button',
+      icon: `<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+      <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />`,
+      tooltip: 'Actualizar denuncia',
+      hoverClass: 'hover:bg-blue-700 hover:text-white',
+      disabled: true
+    },
+    {
+      id: 'save',
+      type: 'button',
+      icon: `<path fill-rule="evenodd" d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875h11.47c.497 0 .974.197 1.326.548l2.905 2.905c.351.352.549.829.549 1.326V20.25c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm14.625-.375v4.5c0 .621-.504 1.125-1.125 1.125h-10.5A1.125 1.125 0 0 1 5.625 7.5V3h12.75Zm-12.75 9.75c0-.621.504-1.125 1.125-1.125h10.5c.621 0 1.125.504 1.125 1.125v5.625c0 .621-.504 1.125-1.125 1.125H6.75a1.125 1.125 0 0 1-1.125-1.125v-5.625Z" clip-rule="evenodd"/>
+<path d="M15.75 3h1.5v3.75h-1.5V3Z" fill="currentColor"/>
+<path d="M8.25 15h7.5v1.5h-7.5V15Zm0 2.25h7.5v1.5h-7.5v-1.5Z" fill="currentColor"/>`,
+      tooltip: 'Guardar denuncia',
+      hoverClass: 'hover:bg-green-600 hover:text-white',
+      disabled: false
+    },
+    {
+      id: 'pdf',
+      type: 'button',
+      icon: `<path d="M14.25 1.5v4.875c0 .621.504 1.125 1.125 1.125h4.875M9 1.5H5.625c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V7.5L14.25 1.5H9Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<rect x="6" y="9" width="12" height="5" rx="0.5" fill="currentColor"/>
+<path d="M7.5 10.5h1.2c.5 0 .8.3.8.8s-.3.8-.8.8h-.7v1h-.5v-2.6Zm.5.5v.8h.7c.2 0 .3-.1.3-.4s-.1-.4-.3-.4h-.7ZM10.5 10.5h1c.8 0 1.3.5 1.3 1.3s-.5 1.3-1.3 1.3h-1v-2.6Zm.5.5v1.6h.5c.4 0 .8-.2.8-.8s-.4-.8-.8-.8h-.5ZM14 10.5h2v.5h-1.5v.5h1.2v.5h-1.2v1h-.5v-2.5Z" fill="white"/>
+<path d="M12 16v5m0 0l-2.5-2.5M12 21l2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+      tooltip: 'Generar PDF',
+      hoverClass: 'hover:bg-green-600 hover:text-white',
+      disabled: true
+    }
+  ];
+  grupo: string = '';
   fechaHoraActual: Date = new Date();
-   pdfSrc: SafeResourceUrl | null = null;
+  pdfSrc: SafeResourceUrl | null = null;
 
-//variables para controlar los botones//
-  // Estados internos para los botones (sin la lógica de notificación)
-  private _pdfDisabled: boolean = true;
-  private _guardarDisabled: boolean = false;
-  private _editarDisabled: boolean = true;
   private cargandoDatosEdicion = false; // Flag para ignorar cambios durante carga
 
-  // Estados para los botones que se calculan explícitamente
-  pdfDisabled: boolean = true;
-  guardarDisabled: boolean = false;
-  editarDisabled: boolean = true;
-
-  // Método para actualizar los estados de los botones
-  private actualizarEstadoBotones(): void {
-    // PDF: Si existe notificación, siempre activo. Si no, respeta el estado manual
-    this.pdfDisabled = this.existeNotificacion ? false : this._pdfDisabled;
-
-    // Guardar: Si existe notificación, siempre deshabilitado. Si no, respeta el estado manual
-    this.guardarDisabled = this.existeNotificacion ? true : this._guardarDisabled;
-
-    // Editar: Si existe notificación, siempre deshabilitado. Si no, respeta el estado manual
-    this.editarDisabled = this.existeNotificacion ? true : this._editarDisabled;
-  }
-  private ignoreFirstValueChangeAvocatoria = false;
   idAvocatoria!: number;
-  //------------------------------------
-  //
+  isEditAvocatoriaActivate:boolean=false;
+
 //quillModule//
   modules = {
   toolbar: [
@@ -99,7 +129,6 @@ export class CrearAvocatoriaComponent implements OnInit {
   ]
 };
 
-
   constructor(private avocatoriaService: AvocatoriaService,
      private route: ActivatedRoute,
       private medidasService: MedidasService,
@@ -111,16 +140,27 @@ export class CrearAvocatoriaComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.formularioAvocatoria();
+    this.formularioMedidasEmergentes();
+    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
+    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
       if (params['modo'] === 'editar') {
         this.editMode = true;
+        this.avocatoriaForm.disable()
+        this.medidasEmergentesForm.disable()
+        this.isBotonDesactivated=true;
+
+
         // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
-        this._guardarDisabled = true;
-        this._pdfDisabled = false;
-        this._editarDisabled = true;
-        this.actualizarEstadoBotones();
-        this.ignoreFirstValueChangeAvocatoria = true;
+         this.actionsConfig[1].disabled = true
+       this.actionsConfig[2].disabled = false // PDF habilitado
+        this.actionsConfig[0].disabled = false; // Editar deshabilitado hasta que haya cambios
+      }else{
+         this.actionsConfig[1].disabled = false
+        this.actionsConfig[2].disabled = true
+
       }
 
       this.loadDenunciaParaAvocatoria(this.denunciaId)
@@ -132,8 +172,7 @@ export class CrearAvocatoriaComponent implements OnInit {
 
 
     this.cargarListaDeMedidas();
-    this.formularioAvocatoria();
-    this.formularioMedidasEmergentes();
+
     this.seleccionarMedida();
 
 
@@ -144,33 +183,31 @@ export class CrearAvocatoriaComponent implements OnInit {
         // In edit mode: ignore the first change caused by patchValue, then
         // when the user modifies the form enable 'Editar' and disable PDF
         if (this.editMode) {
-          if (this.ignoreFirstValueChangeAvocatoria) {
-            this.ignoreFirstValueChangeAvocatoria = false;
-            return;
-          }
+
 
           // Ignorar cambios mientras estamos cargando datos de edición
           if (this.cargandoDatosEdicion) {
             return;
           }
 
-          // Cuando hay cambios reales del usuario, deshabilitar PDF y habilitar editar
-          this._pdfDisabled = true;
-          this._editarDisabled = false;
-          this.actualizarEstadoBotones();
+
+
           return;
         }
-        // Creation mode: keep previous behavior (only toggle after saved)
-        if (!this.guardarDisabled) return; // Solo si ya se guardó
-        this._pdfDisabled = true;
-        this._editarDisabled = false;
-        this.actualizarEstadoBotones();
+
+
+
     });
     this.medidasEmergentesForm.valueChanges.subscribe((data) => {
       console.log( data);
     });
 
 
+  }
+   ngOnDestroy() {
+    console.log('✅ Limpiando todas las suscripciones');
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   //--------CREAcion de FORMULARIO DE AVOCATORIA-----------------//
@@ -223,18 +260,6 @@ CUARTO.-<p>`,
   }
 
 
-
-  //-------getters de formulario-----------------//
-
-
-
-
-
-  //---------------llenar formulario-----------------//
-
-
-
-
   //--------------carga de datos---------//
 
   avocaroriaEditMode(idAvocatoria: number){
@@ -243,13 +268,14 @@ CUARTO.-<p>`,
       this.avocatoriacargada = data;
       this.fechaHoraActual= new Date(this.avocatoriacargada.fechaCreado),
       this.existeNotificacion = this.avocatoriacargada.notificacion;
-      this.actualizarEstadoBotones(); // Actualizar estados después de cargar notificación
+       // Actualizar estados después de cargar notificación
 
       // Mostrar toast si existe notificación
       if(this.existeNotificacion){
-        //this.avocatoriaForm.disable();
+        this.actionsConfig[0].disabled = true
+        this.avocatoriaForm.disable();
         this.medidasEmergentesForm.disable();
-        this.actualizarEstadoBotones();
+
         toast.warning('No puedes editar esta avocatoria', {
           duration: 10000,
           description: 'Ya existe una notificación asociada a esta avocatoria',
@@ -287,12 +313,10 @@ CUARTO.-<p>`,
          }, { emitEvent: false });
         // Ensure initial button state for edit mode: PDF enabled, Edit disabled
         if (this.editMode) {
-          this._pdfDisabled = false;
-          this._editarDisabled = true;
-          this.actualizarEstadoBotones();
+
+
         }
-        // Clear the ignore flag on the next tick so the first real user change is handled
-        setTimeout(() => { this.ignoreFirstValueChangeAvocatoria = false; }, 0);
+
 
 
       }
@@ -307,10 +331,12 @@ CUARTO.-<p>`,
   }
 
   loadDenunciaParaAvocatoria(id: number) {
+    console.log('Cargando denuncia para avocatoria con ID:', id);
     this.avocatoriaService.obtenerDenunciaParaAvocatoria(id).subscribe({
       next: (data) => {
         this.denunciaAvocatoria = data;
         this.idAvocatoria=data.idAvocatoria;
+        console.log('Denuncia para avocatoria cargada:', this.idAvocatoria);
         if(this.editMode){
           this.avocaroriaEditMode(this.idAvocatoria);
 
@@ -377,88 +403,69 @@ CUARTO.-<p>`,
     });
   }
 
-   medidasEmergentes(event: Event) {
+   onAfectadoSeleccionado(event: Event) {
     const target = event.target as HTMLSelectElement;
 
     const afectadoId = parseInt(target.value, 10);
     if (!afectadoId) return;
   // reset editor to avoid leftover selection from other afectado
-    this.resetEditor();
+    this.resetEditorMedida();
 
-    this.loadMedidasporAfectado(afectadoId);
+    this.consolidateMedidasLoading(afectadoId);
 
   }
+
   /**
-   * Obtiene las medidas emergentes por afectado y las almacena en el array
+   * Método consolidado para manejar la carga de medidas emergentes
+   * Verifica si existen medidas emergentes, si no las hay, carga e integra las medidas identificadas
    */
-  obtenerMedidasEmergentesPorAfectado(afectadoId: number): void {
+  private consolidateMedidasLoading(afectadoId: number): void {
     if (!afectadoId) {
-      console.warn('No se puede obtener medidas emergentes: ID de afectado no disponible');
+      console.warn('No se puede cargar medidas: ID de afectado no disponible');
       this.medidasEmergentesArray = [];
       return;
     }
 
-    console.log('Actualizando medidas emergentes para afectado:', afectadoId);
+    console.log('Cargando medidas para afectado:', afectadoId);
 
-    this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
-      next: (response: any) => {
-        if (response && Array.isArray(response.afectado)) {
-          this.medidasEmergentesArray = response.afectado;
-          console.log('Medidas emergentes actualizadas:', this.medidasEmergentesArray);
-        } else {
-          console.warn('Respuesta inesperada del servicio:', response);
-          this.medidasEmergentesArray = [];
-        }
-      },
-      error: (error: any) => {
-        console.error('Error al obtener medidas emergentes por afectado:', error);
-        this.medidasEmergentesArray = [];
-      }
-    });
-  }
-
-  loadMedidasporAfectado(afectadoId: number) {
-    if (!afectadoId) return;
-
-    // PRIMERO: Verificar si ya existen medidas emergentes para este afectado
+    // Verificar primero si ya existen medidas emergentes
     this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
       next: (responseMedidasEmergentes: any) => {
-        const medidasEmergentesExistentes = Array.isArray(responseMedidasEmergentes.afectado) ? responseMedidasEmergentes.afectado : [];
+        const medidasEmergentesExistentes = Array.isArray(responseMedidasEmergentes.afectado)
+          ? responseMedidasEmergentes.afectado
+          : [];
 
         if (medidasEmergentesExistentes.length > 0) {
-          // Si ya existen medidas emergentes, solo cargarlas y mostrarlas
-          console.log('Ya existen medidas emergentes para este afectado, cargando existentes...');
+          // Si ya existen medidas emergentes, cargarlas directamente
+          console.log('Medidas emergentes existentes encontradas:', medidasEmergentesExistentes.length);
           this.medidasEmergentesArray = medidasEmergentesExistentes;
-          console.log('Medidas emergentes existentes cargadas:', this.medidasEmergentesArray);
         } else {
-          // Si NO existen medidas emergentes, entonces cargar y agregar las medidas identificadas
-          console.log('No existen medidas emergentes, procediendo a cargar medidas identificadas...');
-          this.cargarYAgregarMedidasIdentificadas(afectadoId);
+          // Si no existen, procesar medidas identificadas
+          console.log('No hay medidas emergentes, procesando medidas identificadas...');
+          this.procesarMedidasIdentificadas(afectadoId);
         }
       },
       error: (error: any) => {
-        console.error('Error al verificar medidas emergentes existentes:', error);
-        // En caso de error, intentar cargar medidas identificadas como fallback
-        this.cargarYAgregarMedidasIdentificadas(afectadoId);
+        console.error('Error al verificar medidas emergentes:', error);
+        // Como fallback, intentar procesar medidas identificadas
+        this.procesarMedidasIdentificadas(afectadoId);
       }
     });
   }
 
-  private cargarYAgregarMedidasIdentificadas(afectadoId: number) {
-    // Consumir API de medidas identificadas
+  /**
+   * Procesa las medidas identificadas y las convierte en medidas emergentes
+   */
+  private procesarMedidasIdentificadas(afectadoId: number): void {
     this.medidasService.getMedidasidentificadas(afectadoId).subscribe({
       next: (response: any) => {
-        console.log('Medidas identificadas obtenidas:', response);
-
-        // Obtener la lista de medidas del afectado
         const medidasIdentificadas = Array.isArray(response?.afectado) ? response.afectado : [];
 
         if (medidasIdentificadas.length > 0) {
-          // Agregar cada medida una por una como medida emergente
-          this.agregarMedidasEmergentesIndividualmente(medidasIdentificadas, afectadoId);
+          console.log(`Procesando ${medidasIdentificadas.length} medidas identificadas`);
+          this.convertirMedidasIdentificadasAEmergentes(medidasIdentificadas, afectadoId);
         } else {
-          console.log('No se encontraron medidas identificadas para este afectado');
-          // Asegurar que el array esté vacío si no hay medidas
+          console.log('No se encontraron medidas identificadas');
           this.medidasEmergentesArray = [];
         }
       },
@@ -469,65 +476,71 @@ CUARTO.-<p>`,
     });
   }
 
-  private agregarMedidasEmergentesIndividualmente(medidas: any[], afectadoId: number) {
-    if (medidas.length === 0) {
-      console.log('No hay medidas identificadas para procesar');
-      this.medidasEmergentesArray = [];
-      return;
-    }
-
-    console.log(`Procesando ${medidas.length} medidas identificadas para agregar como medidas emergentes`);
-
-    // Crear array de observables para todas las operaciones
-    const requests: Observable<any>[] = medidas.map((medida, index) => {
+  /**
+   * Convierte medidas identificadas en medidas emergentes usando forkJoin
+   */
+  private convertirMedidasIdentificadasAEmergentes(medidas: any[], afectadoId: number): void {
+    const requests: Observable<any>[] = medidas.map((medida) => {
       const medidaEmergente = {
         idAfectado: afectadoId,
         idMedida: medida.idMedida || medida.id || null,
         medida: medida.medida || medida.descripcion || '',
-        periodo: medida.periodo || '', // Se puede dejar vacío para que el usuario lo complete
+        periodo: medida.periodo || '',
         observaciones: medida.observaciones || 'Medida agregada automáticamente desde medidas identificadas'
       };
 
-      // Retornar observable con manejo de errores individual
       return this.medidasService.agregarMedidasEmergentes(medidaEmergente).pipe(
         catchError((error) => {
-          console.error(`Error al agregar medida emergente ${index + 1}:`, error);
-          // Retornar un observable con error controlado para que forkJoin no se detenga
+          console.error('Error al agregar medida emergente:', error);
           return of({ error: true, medida: medidaEmergente, errorDetails: error });
         })
       );
     });
 
-    // Usar forkJoin para esperar a que TODAS las operaciones terminen
     forkJoin(requests).pipe(
-      finalize(() => {
-        console.log('Todas las operaciones de medidas emergentes han finalizado');
-      })
+      finalize(() => console.log('Procesamiento de medidas emergentes completado'))
     ).subscribe({
       next: (responses) => {
-        // Contar éxitos y errores
         const exitosos = responses.filter(r => !r.error).length;
         const errores = responses.filter(r => r.error).length;
 
-        console.log(`✅ Medidas procesadas: ${exitosos} exitosas, ${errores} con errores`);
+        console.log(`✅ Resultado: ${exitosos} exitosas, ${errores} con errores`);
 
         if (exitosos > 0) {
-          console.log('Actualizando lista de medidas emergentes...');
-          // Ahora SÍ actualizar la lista porque sabemos que las operaciones terminaron
-          this.obtenerMedidasEmergentesPorAfectado(afectadoId);
+          // Recargar la lista actualizada desde el servidor
+          this.recargarMedidasEmergentes(afectadoId);
         } else {
           console.warn('Ninguna medida fue agregada exitosamente');
           this.medidasEmergentesArray = [];
         }
       },
       error: (error) => {
-        console.error('Error crítico en el procesamiento de medidas:', error);
-        // En caso de error crítico, intentar cargar las medidas existentes
-        this.obtenerMedidasEmergentesPorAfectado(afectadoId);
+        console.error('Error crítico en procesamiento:', error);
+        this.recargarMedidasEmergentes(afectadoId);
       }
     });
   }
 
+  /**
+   * Recarga las medidas emergentes desde el servidor
+   */
+  private recargarMedidasEmergentes(afectadoId: number): void {
+    this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
+      next: (response: any) => {
+        if (response && Array.isArray(response.afectado)) {
+          this.medidasEmergentesArray = response.afectado;
+          console.log('Lista de medidas emergentes actualizada:', this.medidasEmergentesArray.length);
+        } else {
+          console.warn('Respuesta inesperada al recargar:', response);
+          this.medidasEmergentesArray = [];
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al recargar medidas emergentes:', error);
+        this.medidasEmergentesArray = [];
+      }
+    });
+  }
 
 agregarMedida(fg: FormGroup){
 
@@ -535,8 +548,8 @@ agregarMedida(fg: FormGroup){
   this.medidasService.agregarMedidasEmergentes(body).subscribe({
     next: () => {
 
-      this.obtenerMedidasEmergentesPorAfectado(this.medidasEmergentesForm.get('idAfectado')?.value);
-      this.resetEditor();
+      this.recargarMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
+      this.resetEditorMedida();
       toast.success('Medida agregada con éxito', {
           duration: 3000,
           description: 'La medida se agregó correctamente.',
@@ -562,7 +575,7 @@ agregarMedida(fg: FormGroup){
   });
 }
 
-resetEditor() {
+resetEditorMedida() {
   const afectado = this.medidasEmergentesForm.get('idAfectado')?.value;
   this.medidasEmergentesForm.reset({
     idAfectado: afectado,
@@ -583,7 +596,7 @@ resetEditor() {
         toast.success('Medida eliminada con éxito', {
           duration: 3000,
         });
-        this.obtenerMedidasEmergentesPorAfectado(this.medidasEmergentesForm.get('idAfectado')?.value);
+        this.recargarMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
       },
       error: (err) => {
         toast.error('Error al eliminar medida', {
@@ -598,7 +611,7 @@ resetEditor() {
 
   // Editar una medida: carga la fila seleccionada en el formulario para editar
 
-  SeleccionarParaEditar(registro: any): void {
+  SeleccionarParaEditarMedida(registro: any): void {
 
     if (!this.medidasEmergentesArray || this.medidasEmergentesArray.length === 0) return;
 
@@ -652,11 +665,11 @@ resetEditor() {
         toast.success('Medida actualizada con éxito', {
           duration: 3000,
         });
-        this.resetEditor();
+        this.resetEditorMedida();
         this.editMediasMode = false;
 
 
-        this.obtenerMedidasEmergentesPorAfectado(this.medidasEmergentesForm.get('idAfectado')?.value);
+        this.recargarMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
       },
       error: (err) => {
         toast.error('Error al actualizar medida', {
@@ -672,14 +685,40 @@ resetEditor() {
     this.currentTab = tab;
   }
 regresar(): void {
-    this.router.navigate(['/nna/fases/'+ this.denunciaAvocatoria?.id]);
+    this.router.navigate([`/${this.grupo}/fases/`+ this.denunciaAvocatoria?.id]);
   }
 
+   handleActionButton(actionId: string) {
+    switch (actionId) {
+      case 'update':
+        this.habilitarEdicion();
+        break;
+      case 'save':
+        if (this.editMode) {
+          this.updateAvocatoria();
+        }else{
+          this.submitAvocatoria();
+        }
+
+        break;
+      case 'pdf':
+        this.generarPdf();
+        break;
+    }
+  }
+  habilitarEdicion(){
+    this.isEditAvocatoriaActivate=true;
+    this.avocatoriaForm.enable();
+    this.medidasEmergentesForm.enable();
+    this.isBotonDesactivated=false;
+    this.actionsConfig[1].disabled = false
+    this.actionsConfig[2].disabled = true
+    this.actionsConfig[0].disabled = true;
+  }
   //--editar
   updateAvocatoria() {
   const body ={
     ...this.avocatoriaForm.value,
-
 
   }
   this.avocatoriaService.actualizarAvocatoria(this.idAvocatoria, body).subscribe({
@@ -687,10 +726,12 @@ regresar(): void {
       toast.success('avocatoria Actualizada con Éxito', {
                 duration: 3000,
               });
-        this._pdfDisabled = false;
-        this._editarDisabled = true;
-        this.actualizarEstadoBotones();
-
+              this.actionsConfig[1].disabled = true
+    this.actionsConfig[2].disabled = false
+    this.actionsConfig[0].disabled = false;
+    this.isEditAvocatoriaActivate=false;
+    this.avocatoriaForm.disable();
+    this.medidasEmergentesForm.disable();
     },
     error: (err) => {
       toast.error('Error al actualizar la avocatoria', {
@@ -704,6 +745,7 @@ regresar(): void {
 
 //------------submit-----//
 submitAvocatoria() {
+
   if (this.avocatoriaForm.invalid) {
     this.avocatoriaForm.markAllAsTouched();
     toast.error('Formulario inválido', {
@@ -712,6 +754,7 @@ submitAvocatoria() {
     });
     return;
   }
+  this.actionsConfig[1].disabled = true
   const body ={
     ...this.avocatoriaForm.value,
 
@@ -720,15 +763,11 @@ submitAvocatoria() {
   this.avocatoriaService.postAvocatoria(body).subscribe({
     next: (body) => {
       this.idAvocatoria = body.id;
-      console.log('ID de avocatoria guardada:', body)
+
+       this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
       toast.success('avocatoria Guardada con Éxito', {
                 duration: 3000,
               });
-              this.editMode = true
-      this._pdfDisabled = false;
-        this._guardarDisabled = true;
-        this.actualizarEstadoBotones();
-        this.router.navigate(['/nna/avocatoria/editar/'+ this.denunciaAvocatoria?.id]);
 
     },
     error(err) {
@@ -741,13 +780,15 @@ submitAvocatoria() {
   }})
 
 }
-generarPdf(){
 
-    this.avocatoriaService.crearpdfBlob(this.idAvocatoria).subscribe((res: Blob) => {
-      const url = URL.createObjectURL(res);
-      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-    });
-    this.cambiarTab(3);
+generarPdf(){
+  this.actionsConfig[2].disabled = true
+  this.avocatoriaService.crearpdfBlob(this.idAvocatoria).subscribe((res: Blob) => {
+    const url = URL.createObjectURL(res);
+    this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    this.actionsConfig[2].disabled = false
+  });
+  this.cambiarTab(3);
   }
 }
 export default CrearAvocatoriaComponent

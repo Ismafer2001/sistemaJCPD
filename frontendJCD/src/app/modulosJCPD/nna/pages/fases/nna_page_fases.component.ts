@@ -1,10 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DenunciaService } from '@nna/services/denuncia.service';
 import { FasesService } from '@nna/services/fases.service';
 import FasesCardComponent from './componentes/fases-card/fases-card.component';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subject } from 'rxjs';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 
 interface Estatus {
@@ -18,7 +18,8 @@ interface Estatus {
 
   imports: [CommonModule, RouterLink, FasesCardComponent,ButtonSubmitComponent]
 })
-export class NnaPageFasesComponent implements OnInit {
+export class NnaPageFasesComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
   denunciaId: number = 0;
   denuncia:any =null
   grupo:string =''
@@ -67,6 +68,11 @@ ngOnInit() {
     });
   });
 }
+ngOnDestroy() {
+    console.log('✅ Limpiando todas las suscripciones');
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
 
   //-----------armar array de fases---------///

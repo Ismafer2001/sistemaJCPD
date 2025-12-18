@@ -28,6 +28,7 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
   const fecha = datos.fecha || '';
   const canton = datos.canton || '';
   const hora = datos.hora || '';
+  console.log('horaaaa'+hora)
 
   // Extraer nombres de participantes por tipo
     const getNombresPorTipo = (tipo: string) => {
@@ -107,7 +108,7 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
             body: [
               [ { text: 'Fecha', bold: true }, fecha ? new Date(fecha).toLocaleDateString() : '' ],
               [ { text: 'Cantón', bold: true }, canton ],
-              [ { text: 'Hora', bold: true }, hora ? new Date(hora).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '' ]
+              [ { text: 'Hora', bold: true }, hora ? hora.toString().substring(0, 5) : '' ]
             ]
           },
           layout: 'box',

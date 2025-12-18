@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder,
    FormGroup,
     Validators,
@@ -14,6 +14,8 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toast } from 'ngx-sonner';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import { TablaParticipantesComponent } from './tablaParticipantes/tablaParticipantes.component';
+import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Formulario.component';
+import InputsComponent from '@shared/components/inputs/inputs.component';
 
 interface involucrados{
   nombres: string,
@@ -30,17 +32,71 @@ interface involucrados{
       TablaEditComponent,
       ReactiveFormsModule,
       ButtonSubmitComponent,
-      TablaParticipantesComponent]
+      TablaParticipantesComponent,
+    NavFormularioComponent,
+  InputsComponent,
+RouterLink]
 
 
 })
 export class Crear_audienciaComponent implements OnInit {
-
-
+//--- Configuración de tabs------//
+  tabsConfig: any[] = [
+    {
+      id: 0,
+      label: 'Inicio'
+    },
+    {
+      id: 1,
+      label: 'Participantes'
+    },
+    {
+      id: 2,
+      label: 'Manifiestaciones'
+    },
+    {
+      id: 3,
+      label: 'Pdf'
+    }
+  ];
+  currentTab = 0; //variable para cambiar pestañas del formulario
+// Configuración de botones de acción
+  actionsConfig: any[] = [
+    {
+      id: 'update',
+      type: 'button',
+      icon: `<path d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z" />
+      <path d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z" />`,
+      tooltip: 'Actualizar denuncia',
+      hoverClass: 'hover:bg-blue-700 hover:text-white',
+      disabled: true
+    },
+    {
+      id: 'save',
+      type: 'button',
+      icon: `<path fill-rule="evenodd" d="M3.75 3.375c0-1.036.84-1.875 1.875-1.875h11.47c.497 0 .974.197 1.326.548l2.905 2.905c.351.352.549.829.549 1.326V20.25c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375Zm14.625-.375v4.5c0 .621-.504 1.125-1.125 1.125h-10.5A1.125 1.125 0 0 1 5.625 7.5V3h12.75Zm-12.75 9.75c0-.621.504-1.125 1.125-1.125h10.5c.621 0 1.125.504 1.125 1.125v5.625c0 .621-.504 1.125-1.125 1.125H6.75a1.125 1.125 0 0 1-1.125-1.125v-5.625Z" clip-rule="evenodd"/>
+<path d="M15.75 3h1.5v3.75h-1.5V3Z" fill="currentColor"/>
+<path d="M8.25 15h7.5v1.5h-7.5V15Zm0 2.25h7.5v1.5h-7.5v-1.5Z" fill="currentColor"/>`,
+      tooltip: 'Guardar denuncia',
+      hoverClass: 'hover:bg-green-600 hover:text-white',
+      disabled: false
+    },
+    {
+      id: 'pdf',
+      type: 'button',
+      icon: `<path d="M14.25 1.5v4.875c0 .621.504 1.125 1.125 1.125h4.875M9 1.5H5.625c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V7.5L14.25 1.5H9Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+<rect x="6" y="9" width="12" height="5" rx="0.5" fill="currentColor"/>
+<path d="M7.5 10.5h1.2c.5 0 .8.3.8.8s-.3.8-.8.8h-.7v1h-.5v-2.6Zm.5.5v.8h.7c.2 0 .3-.1.3-.4s-.1-.4-.3-.4h-.7ZM10.5 10.5h1c.8 0 1.3.5 1.3 1.3s-.5 1.3-1.3 1.3h-1v-2.6Zm.5.5v1.6h.5c.4 0 .8-.2.8-.8s-.4-.8-.8-.8h-.5ZM14 10.5h2v.5h-1.5v.5h1.2v.5h-1.2v1h-.5v-2.5Z" fill="white"/>
+<path d="M12 16v5m0 0l-2.5-2.5M12 21l2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>`,
+      tooltip: 'Generar PDF',
+      hoverClass: 'hover:bg-green-600 hover:text-white',
+      disabled: true
+    }
+  ];
 
   // Formulario para agregar manifestación a un participante
   formManifestacion!: FormGroup;
-  currentTab: string = '0';
+  grupo: string = '';
   denunciaId = 0;
   audienciaForm!: FormGroup;
   participantesForm!: FormGroup;
@@ -48,45 +104,19 @@ export class Crear_audienciaComponent implements OnInit {
   datosAudiencia: any;
   miembrosPrincipales: any[] = [];
   pdfSrc: SafeResourceUrl | null = null;
-
-  // Estados internos para los botones (sin la lógica de audiencia pruebas)
-  private _pdfDisabled: boolean = true;
-  private _guardarDisabled: boolean = false;
-  private _editarDisabled: boolean = true;
-  private cargandoDatosEdicion = false; // Flag para ignorar cambios durante carga
-
-  // Estados para los botones que se calculan explícitamente
-  pdfDisabled: boolean = true;
-  guardarDisabled: boolean = false;
-  editarDisabled: boolean = true;
-
   idAudienciaC!: number;
   existeAudienciaPrueba: any = null;
+  isEditAudienciaActivate:boolean=false;
 
   editMode: boolean = false;
-  ignoreFirstValueChangeAvocatoria: boolean = false;
+
   audienciaContestacionCargada:any=null
-  // snapshot of the form after loading in edit mode
-  private initialAudienciaSnapshot: any = null;
+
 
   // Nuevas propiedades para el modo edición de participantes
   modoEdicionParticipante: boolean = false;
   participanteEnEdicionIndex: number = -1;
   datosOriginalesParticipante: any = null;
-
-  // Método para actualizar los estados de los botones
-  private actualizarEstadoBotones(): void {
-    const tieneAudienciaPrueba = this.existeAudienciaPrueba !== null && this.existeAudienciaPrueba !== undefined;
-
-    // PDF: Si existe audiencia prueba, siempre activo. Si no, respeta el estado manual
-    this.pdfDisabled = tieneAudienciaPrueba ? false : this._pdfDisabled;
-
-    // Guardar: Si existe audiencia prueba, siempre deshabilitado. Si no, respeta el estado manual
-    this.guardarDisabled = tieneAudienciaPrueba ? true : this._guardarDisabled;
-
-    // Editar: Si existe audiencia prueba, siempre deshabilitado. Si no, respeta el estado manual
-    this.editarDisabled = tieneAudienciaPrueba ? true : this._editarDisabled;
-  }
 
   constructor(
     private router: Router,
@@ -102,23 +132,26 @@ export class Crear_audienciaComponent implements OnInit {
       manifiesta: ['']
     });
   }
-
-  ngOnInit() {
-    // Inicializar formularios primero (para que patchValue y valueChanges funcionen)
-    this.formularioAudienciaContestacion();
-    this.formularioParticipantes();
+//suscribir a los parámetros de la ruta para determinar el modo (crear/editar) y estableer el estado de los botones iniciales
+  private configureEditCreateMode(): void {
+  const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
+    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
 
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
       if (params['modo'] === 'editar') {
         this.editMode = true;
-        // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
-        this._guardarDisabled = true;
-        this._pdfDisabled = false;
-        this._editarDisabled = true;
-        this.actualizarEstadoBotones();
-        this.ignoreFirstValueChangeAvocatoria = true;
-      }
+        this.audienciaForm.disable();
+        this.participantesForm.disable();
+         // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
+         this.actionsConfig[1].disabled = true
+       this.actionsConfig[2].disabled = false // PDF habilitado
+        this.actionsConfig[0].disabled = false; // Editar deshabilitado hasta que haya cambios
+      }else{
+        this.actionsConfig[1].disabled = false
+        this.actionsConfig[2].disabled = true
+
+      };
 
       // Cargar afectados y datos solo después de inicializar formularios
       if(!this.editMode){
@@ -131,43 +164,27 @@ export class Crear_audienciaComponent implements OnInit {
       // asignar idDenuncia en el form de participantes
       this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
     });
+}
 
-    this.principalesActivos();
-    this.actualizarEstadoBotones();
 
-    this.audienciaForm.valueChanges.subscribe(() => {
-      // In edit mode: ignore the first change caused by patchValue, then
-      // when the user modifies the form enable 'Editar' and disable PDF
-      if (this.editMode) {
-        if (this.ignoreFirstValueChangeAvocatoria) {
-          this.ignoreFirstValueChangeAvocatoria = false;
-          return;
-        }
+  ngOnInit() {
+    // Inicializar formularios primero (para que patchValue y valueChanges funcionen)
+    this.formularioAudienciaContestacion();
+    this.formularioParticipantes();
+    this.configureEditCreateMode();
 
-        // Ignorar cambios mientras estamos cargando datos de edición
-        if (this.cargandoDatosEdicion) {
-          return;
-        }
 
-        // Cuando hay cambios reales del usuario, deshabilitar PDF y habilitar editar
-        this._pdfDisabled = true;
-        this._editarDisabled = false;
-        this.actualizarEstadoBotones();
-        return;
-      }
-      // Creation mode: keep previous behavior (only toggle after saved)
-      if (!this.guardarDisabled) return; // Solo si ya se guardó
-      this._pdfDisabled = true;
-      this._editarDisabled = false;
-      this.actualizarEstadoBotones();
+    this.loadPrincipalesActivos();
+
+
+    this.audienciaForm.valueChanges.subscribe((value) => {
+      console.log('Audiencia Form Value Changes:', value);
     });
-    this.participantesForm.valueChanges.subscribe(value => {
+    this.participantesForm.valueChanges.subscribe((value) => {
       console.log('Participantes Form Value Changes:', value);
     });
 
   }
-
-
 
   // Maneja el cambio del checkbox de asistencia en la tabla
   onAsistioChange(event: {item: any, index: number, value: boolean}) {
@@ -297,10 +314,6 @@ export class Crear_audienciaComponent implements OnInit {
 get participantesArray(): FormArray {
     return this.audienciaForm.get('participantes') as FormArray;
   }
-
-
-
-
   //------------CARGA DE DATOS-----------------////
 
   cargarAfectadosYDirigidoA() {
@@ -355,33 +368,31 @@ get participantesArray(): FormArray {
         // ...otros campos si es necesario
       });
 
-      // If we're in edit mode we might have set ignoreFirstValueChangeAvocatoria earlier; clear it on next tick
-      if (this.editMode) {
-        setTimeout(() => { this.ignoreFirstValueChangeAvocatoria = false; }, 0);
-      }
+
 
 
     });
   }
-   principalesActivos(){
+   loadPrincipalesActivos(){
     this.UserService.usuariosActivos().subscribe(n=>{
       this.miembrosPrincipales=n;
-      console.log('Miembros principales:', this.miembrosPrincipales);
+
     })
   }
 
 audienciaContestacionEditMode()
 {
-  this.cargandoDatosEdicion = true;
+
   this.audienciaContestacionService.getAudienciaContestacionEditMode(this.idAudienciaC).subscribe(data => {
       this.audienciaContestacionCargada = data;
       this.existeAudienciaPrueba = data?.idAudienciaPruebas ?? null;
-      this.actualizarEstadoBotones(); // Actualizar estados después de cargar audiencia prueba
+       // Actualizar estados después de cargar audiencia prueba
 
       // Mostrar toast si existe audiencia prueba
       if(this.existeAudienciaPrueba){
+        this.actionsConfig[0].disabled = true
         this.audienciaForm.disable();
-        this.actualizarEstadoBotones();
+
         toast.warning('No puedes editar esta audiencia de contestación', {
           duration: 10000,
           description: 'Ya existe una audiencia de prueba asociada a esta audiencia de contestación',
@@ -439,32 +450,12 @@ console.log('audiencia cargada', this.audienciaContestacionCargada);
       // sync local copy
       this.participantes = this.participantesArray.getRawValue();
 
-      // Ensure initial button state for edit mode: PDF enabled, Edit disabled
-      if (this.editMode) {
-        this._pdfDisabled = false;
-        this._editarDisabled = true;
-        this.actualizarEstadoBotones();
-      }
 
-      // take a snapshot of the loaded form so we can detect real user changes
-      try {
-        this.initialAudienciaSnapshot = JSON.parse(JSON.stringify(this.audienciaForm.getRawValue()));
-      } catch (e) {
-        this.initialAudienciaSnapshot = this.audienciaForm.getRawValue();
-      }
-
-      // clear the ignore flag on next tick so the first user change toggles buttons
-      setTimeout(() => { this.ignoreFirstValueChangeAvocatoria = false; }, 0);
-
-      // Marcar que terminó la carga de datos para permitir detectar cambios reales del usuario
-      setTimeout(() => {
-        this.cargandoDatosEdicion = false;
-      }, 100); // Pequeño delay para asegurar que todos los patchValue hayan terminado
     });
 }
 
 //---------------------------OTROS-------------------//
-   cambiarTab(tab: string) {
+  cambiarTab(tab: number) {
     this.currentTab = tab;
   }
 
@@ -480,8 +471,35 @@ console.log('audiencia cargada', this.audienciaContestacionCargada);
   }
 
   //---------cancelar-------------------//
-cancelar(): void {
+regresar(): void {
     this.router.navigate(['/nna/fases/'+ this.datosAudiencia?.id]);
+  }
+   handleAction(actionId: string) {
+    switch (actionId) {
+      case 'update':
+        this.habilitarEdicion();
+        break;
+      case 'save':
+        if (this.editMode) {
+          this.updateAudiencia();
+        }else{
+          this.submitAudienciaContestacion();
+        }
+
+        break;
+      case 'pdf':
+        this.generarPdf();
+        break;
+    }
+  }
+   habilitarEdicion(){
+    this.isEditAudienciaActivate=true;
+    this.audienciaForm.enable();
+    this.participantesForm.enable();
+    this.actionsConfig[1].disabled = false
+    this.actionsConfig[2].disabled = true
+    this.actionsConfig[0].disabled = true;
+
   }
 
    //--editar
@@ -494,9 +512,12 @@ cancelar(): void {
         toast.success('Audiencia Actualizada con Éxito', {
           duration: 3000,
         });
-        this._pdfDisabled = false;
-        this._editarDisabled = true;
-        this.actualizarEstadoBotones();
+         this.actionsConfig[1].disabled = true
+    this.actionsConfig[2].disabled = false
+    this.actionsConfig[0].disabled = false;
+    this.isEditAudienciaActivate=false;
+    this.audienciaForm.disable();
+    this.participantesForm.disable();
 
       },
       error: (err) => {
@@ -530,10 +551,11 @@ cancelar(): void {
       toast.success('Audiencia Guardada con Éxito', {
                 duration: 3000,
               });
-              this.editMode = true;
-      this._pdfDisabled = false;
-      this._guardarDisabled = true;
-      this.actualizarEstadoBotones();
+
+              this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
+
+
+
 
     },
     error(err) {
@@ -717,15 +739,15 @@ cancelar(): void {
   }
   //-----------PDF------------------//
   generarPdf(){
+    this.actionsConfig[2].disabled = true
 
     this.audienciaContestacionService.crearpdfBlob(this.idAudienciaC).subscribe((res: Blob) => {
       const url = URL.createObjectURL(res);
       this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+      this.actionsConfig[2].disabled = false
     });
-    this.cambiarTab("3");
+    this.cambiarTab(3);
   }
-
-
 
 }
 

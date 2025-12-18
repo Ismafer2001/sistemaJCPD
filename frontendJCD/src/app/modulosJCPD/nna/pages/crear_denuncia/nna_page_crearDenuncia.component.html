@@ -1,22 +1,20 @@
 
 <div class="">
-  <div class="   pl-2 py-2  mb-1 " id="tituloDenuncia">
+  <div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <a
+    [routerLink]="editMode ? [`../../../fases/${idDenuncia}`] : [`/${grupo}`]"
 
- <app-button-submit
-    type="button"
-    label="Volver"
-    color="cancelar"
-    (clicked)="cancelar()"
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
     >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
 
-    </app-button-submit>
-  <h2 class="text-2xl font-bold flex items-center gap-2 ">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-9 text-yellow-500">
-  <path fill-rule="evenodd" d="M5.625 1.5H9a3.75 3.75 0 0 1 3.75 3.75v1.875c0 1.036.84 1.875 1.875 1.875H16.5a3.75 3.75 0 0 1 3.75 3.75v7.875c0 1.035-.84 1.875-1.875 1.875H5.625a1.875 1.875 0 0 1-1.875-1.875V3.375c0-1.036.84-1.875 1.875-1.875ZM12.75 12a.75.75 0 0 0-1.5 0v2.25H9a.75.75 0 0 0 0 1.5h2.25V18a.75.75 0 0 0 1.5 0v-2.25H15a.75.75 0 0 0 0-1.5h-2.25V12Z" clip-rule="evenodd" />
-  <path d="M14.25 5.25a5.23 5.23 0 0 0-1.279-3.434 9.768 9.768 0 0 1 6.963 6.963A5.23 5.23 0 0 0 16.5 7.5h-1.875a.375.375 0 0 1-.375-.375V5.25Z" />
-</svg>Crear Nueva Denuncia</h2>
+    </a>
+  <h3 class="text-2xl font-bold">Denuncia</h3>
 
 </div>
+<hr class="border-yellow-300 border-1" />
 
 <hr class="border-yellow-300 border-1">
 <form [formGroup]="denunciaForm"  class="space-y-6">
@@ -148,9 +146,9 @@
   <section  class="bg-gray-50 p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)] ">
      <!--------------- Sección del Denunciante------------- -->
 
-    <app-card-Form [titulo]="'Datos del Denunciante'" [hidden]="currentTab !== 0" id="datosGenerales" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
+    <app-card-Form [titulo]="'Datos del Denunciante'" [hidden]="currentTab !== 0" id="datosGenerales" [class]="((existeAvocatoria && !isEditDenunciaActivate ) || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
 
-      <div class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
+      <div class="bg-white rounded-xl shadow-md p-4 border  ">
          <nna_creardenuncia_denunciante
       [formGroup]="denuncianteForm"
       ></nna_creardenuncia_denunciante>
@@ -159,14 +157,12 @@
 
 
     </app-card-Form>
-
-
     <!-- Sección de Afectados -->
 
-      <app-card-Form [titulo]="'Datos de los Afectados'" [hidden]="currentTab !== 0" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')"
+      <app-card-Form [titulo]="'Datos de los Afectados'" [hidden]="currentTab !== 0" [class]="((existeAvocatoria && !isEditDenunciaActivate ) || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')"
       >
-      <div formArrayName="afectados"
-       class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+      <div
+       class="bg-white rounded-xl shadow-md p-4 border  "
        [ngClass]="{
           ' border-1 border-red-500': denunciaForm.get('afectados')?.invalid && denunciaForm.get('afectados')?.touched
         }">
@@ -190,9 +186,9 @@
 
     <!------------------------- Sección de Denunciados------------------ -->
 
-      <app-card-Form [titulo]="'Datos de los Denunciados'" [hidden]="currentTab !== 0" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')" >
-        <div class="" formArrayName="denunciados"
-        class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+      <app-card-Form [titulo]="'Datos de los Denunciados'" [hidden]="currentTab !== 0" [class]="((existeAvocatoria && !isEditDenunciaActivate ) || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')" >
+        <div
+        class="bg-white rounded-xl shadow-md p-4 border  "
        [ngClass]="{
           ' border-1 border-red-500': denunciaForm.get('denunciados')?.invalid && denunciaForm.get('denunciados')?.touched
         }">
@@ -217,7 +213,7 @@
 
     <!--------------- Sección de Hechos --------------------->
 
-      <app-card-Form [titulo]="'Hechos'" [hidden]="currentTab !== 1" id="hechos" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
+      <app-card-Form [titulo]="'Hechos'" [hidden]="currentTab !== 1" id="hechos" [class]="((existeAvocatoria && !isEditDenunciaActivate ) || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
          <!-- Descripción de Hechos -->
       <div class="mb-6">
         <label
@@ -260,7 +256,7 @@
 
       <!-- Sección de Vulneraciones -->
 
-      <app-card-Form [titulo]="'Vulneraciones'" [hidden]="currentTab !== 1" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
+      <app-card-Form [titulo]="'Vulneraciones'" [hidden]="currentTab !== 1" [class]="((existeAvocatoria && !isEditDenunciaActivate ) || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
 
         @if (denunciaForm.get('vulneraciones')?.errors?.['required'] && denunciaForm.get('vulneraciones')?.touched) {
             <div
@@ -271,7 +267,7 @@
         </div>
 
         }
-        <div class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+        <div class="bg-white rounded-xl shadow-md p-4 border  "
        [ngClass]="{
           ' border-1 border-red-500': denunciaForm.get('vulneraciones')?.invalid && denunciaForm.get('vulneraciones')?.touched
         }">
@@ -283,17 +279,10 @@
 
         </div>
 
-
-
       </app-card-Form>
 
-
-
-    <!-- solicitud -->
-
        <!-- Descripción de solicitud -->
-
-      <app-card-Form [titulo]="'Solicitud'" [hidden]="currentTab !== 1" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
+      <app-card-Form [titulo]="'Solicitud'" [hidden]="currentTab !== 1" [class]="((existeAvocatoria && !isEditDenunciaActivate ) || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
         <label
           for="descripcion_solicitud"
           class="block text-sm font-medium text-gray-700"
@@ -325,7 +314,7 @@
 
       </app-card-Form>
  <!--  ----------------------Lista de Medidas --------------->
-      <app-card-Form [titulo]="'Medidas de Protección'" [hidden]="currentTab !== 1" [class]="(existeAvocatoria || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
+      <app-card-Form [titulo]="'Medidas de Protección'" [hidden]="currentTab !== 1" [class]="((existeAvocatoria && !isEditDenunciaActivate ) || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
        @if (denunciaForm.get('vulneraciones')?.errors?.['required'] && denunciaForm.get('vulneraciones')?.touched) {
             <div
 
@@ -335,7 +324,7 @@
         </div>
 
         }
-        <div class="w-full border  rounded-lg px-4 py-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
+        <div class="bg-white rounded-xl shadow-md p-4 border  "
        [ngClass]="{
           ' border-1 border-red-500': denunciaForm.get('medidas')?.invalid && denunciaForm.get('medidas')?.touched
         }">

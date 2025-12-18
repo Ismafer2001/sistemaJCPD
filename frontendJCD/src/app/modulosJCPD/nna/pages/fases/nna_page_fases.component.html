@@ -1,18 +1,21 @@
-<div class=" mx-auto bg-white p-6 rounded shadow space-y-6 w-full ">
+
 
   <!-- Encabezado: Código de Trámite -->
-  <div class="flex items-center justify-between">
-    <h1 class="text-2xl font-bold">Trámite administrativo: <span class="text-xl text-gray-500">#{{denuncia?.codigoTramite}}</span></h1>
+  <div class=" pl-2 py-2 mb-1 flex items-center gap-2 ">
+    <a
+    [routerLink]="[`/${grupo}`]"
 
-    <app-button-submit
-      label="volver"
-      color="cancelar"
-      [routerLink]="['/nna']"
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
     >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
 
-    </app-button-submit>
-
+    </a>
+    <h1 class="text-2xl font-bold">Trámite administrativo: <span class="text-xl text-gray-500">#{{denuncia?.codigoTramite}}</span></h1>
   </div>
+  <hr class="border-yellow-300 border-1" />
+  <div class=" mx-auto bg-white p-6 rounded shadow space-y-6 w-full ">
   <h1 class="text-2xl font-bold">Niño: <span class="text-xl text-gray-500">{{denuncia?.afectados}}</span></h1>
 
 

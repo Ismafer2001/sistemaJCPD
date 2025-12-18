@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AnexarSeguimientoMedidasService } from '@nna/services/anexarSeguimientoMedidas.service';
 import { DenunciaService } from '@nna/services/denuncia.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
@@ -15,7 +15,8 @@ import { CumpleMedidasTablaComponent } from './cumpleMedidasTabla/cumpleMedidasT
      CommonModule,
       ReactiveFormsModule,
 
-    CumpleMedidasTablaComponent]
+    CumpleMedidasTablaComponent,
+  RouterLink]
 
 })
 export class Anexar_seguimientoComponent implements OnInit {
@@ -138,7 +139,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       error: (err) => {
         console.error('Error al cargar medidas cumplidas:', err);
         // Fallback a datos de prueba si hay error
-        
+
       }
     });
   }
