@@ -10,7 +10,7 @@ interface usuarioAttributes {
   apellidos: string;
   correo?: string;
   contrasena: string;
-  rol: 'admin' | 'principal' | 'secretari@' | 'suplente';
+  rol: 'admin' | 'principal' | 'secretaria' | 'suplente';
   isactivo: boolean;
   id_canton: number;
   
@@ -27,7 +27,7 @@ declare  nombres: string;
 declare  apellidos: string;
 declare  correo: string;
 declare  contrasena: string;
-  declare rol: 'admin' | 'principal' | 'secretari@' | 'suplente';
+  declare rol: 'admin' | 'principal' | 'secretaria' | 'suplente';
 declare  isactivo: boolean;
 declare  id_canton: number;
 
@@ -42,7 +42,7 @@ usuarios.init({
   apellidos: { type: DataTypes.STRING, allowNull: false },
   correo: { type: DataTypes.STRING,unique: true },
   contrasena: { type: DataTypes.STRING, allowNull: false },
-  rol: { type: DataTypes.ENUM('admin', 'principal', 'secretari@', 'suplente'), allowNull: false },
+  rol: { type: DataTypes.ENUM('admin', 'principal', 'secretaria', 'suplente'), allowNull: false },
   isactivo: { type: DataTypes.BOOLEAN, defaultValue: true },
   id_canton: { type: DataTypes.INTEGER, allowNull: false, references: { model: Canton, key: 'id' } },
   

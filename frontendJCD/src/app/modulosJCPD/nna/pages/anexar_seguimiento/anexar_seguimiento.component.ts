@@ -86,6 +86,9 @@ export class Anexar_seguimientoComponent implements OnInit {
       codigoTramite: ['', Validators.required],
       tipoCarpeta: ['seguimiento', Validators.required],
       idAfectado: ['', Validators.required], // Añadido para el afectado seleccionado
+      responsable: ['', Validators.required], // Nuevo campo
+      razon: ['', Validators.required], // Nuevo campo
+      sancion: ['', Validators.required], // Nuevo campo
       medidas: this.fb.array([]) // FormArray para las medidas dinámicas
     });
   }
@@ -169,6 +172,9 @@ export class Anexar_seguimientoComponent implements OnInit {
         id: item.id || index + 1,
         n: index + 1,
         archivo: 'Descargar PDF',
+        responsable: archivo.responsable || 'No especificado',
+        razon: archivo.razon || 'No especificada',
+        sancion: archivo.sancion || 'No especificada',
         medidasCumplidas: medidasCumplidas,
         medidasNoCumplidas: medidasNoCumplidas,
         fechaCreacion: fechaFormateada,
@@ -283,12 +289,18 @@ export class Anexar_seguimientoComponent implements OnInit {
     formData.append('archivo', this.archivo);
     formData.append('codigoTramite', formValue.codigoTramite);
     formData.append('tipoCarpeta', formValue.tipoCarpeta);
+    formData.append('responsable', formValue.responsable);
+    formData.append('razon', formValue.razon);
+    formData.append('sancion', formValue.sancion);
     formData.append('medidas', JSON.stringify(medidasParaEnviar));
 
     console.log('FormData preparado:', {
       archivo: this.archivo.name,
       codigoTramite: formValue.codigoTramite,
       tipoCarpeta: formValue.tipoCarpeta,
+      responsable: formValue.responsable,
+      razon: formValue.razon,
+      sancion: formValue.sancion,
       medidas: medidasParaEnviar
     });
 
@@ -338,6 +350,9 @@ export class Anexar_seguimientoComponent implements OnInit {
         id: informe.id || index,
         n: index + 1,
         archivo: `Descargar PDF`,
+        responsable: informe.responsable || 'No especificado',
+        razon: informe.razon || 'No especificada',
+        sancion: informe.sancion || 'No especificada',
         medidasCumplidas: medidasCumplidas,
         medidasNoCumplidas: medidasNoCumplidas,
         fechaCreacion: fechaFormateada,
@@ -401,8 +416,26 @@ export class Anexar_seguimientoComponent implements OnInit {
     const downloadUrl = `${baseUrl}/files/${this.codigoTramite}/seguimiento/${nombreArchivo}`;
     console.log('Iniciando descarga desde URL:', downloadUrl);
 
-    // Abrir en nueva pestaña
-    window.open(downloadUrl, '_blank');
+   this.anexarSeguimientoMedidasService.descargarArchivoSeguro(this.codigoTramite, nombreArchivo).subscribe({
+
+    next: (blob: Blob) => {
+      const fileBlob = new Blob([blob], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(fileBlob);
+
+      // Abrimos la pestaña
+      const nuevaVentana = window.open(fileURL, '_blank');
+
+      // Intentamos cambiar el título de la pestaña para que al descargar sugiera ese nombre
+      if (nuevaVentana) {
+        nuevaVentana.document.title = nombreArchivo;
+      }
+
+    },
+    error: (err) => {
+      console.error('Error al descargar: Posible falta de permisos o archivo inexistente', err);
+      console.log(this.codigoTramite, nombreArchivo)
+    }
+  });
   }
 
   // Resetear formulario después de envío exitoso
@@ -415,7 +448,10 @@ export class Anexar_seguimientoComponent implements OnInit {
     this.seguimientoMedidasForm.reset({
       archivo: null,
       tipoCarpeta: 'seguimiento',
-      idAfectado: ''
+      idAfectado: '',
+      responsable: '',
+      razon: '',
+      sancion: ''
     });
   }
 

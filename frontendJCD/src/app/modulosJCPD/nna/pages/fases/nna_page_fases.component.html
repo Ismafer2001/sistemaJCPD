@@ -16,21 +16,72 @@
   </div>
   <hr class="border-yellow-300 border-1" />
   <div class=" mx-auto bg-white p-6 rounded shadow space-y-6 w-full ">
-  <h1 class="text-2xl font-bold">Niño: <span class="text-xl text-gray-500">{{denuncia?.afectados}}</span></h1>
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold">Niño: <span class="text-xl text-gray-500">{{denuncia?.afectados}}</span></h1>
+
+    <!-- Dropdown Menu -->
+    <div class="relative">
+      <button
+        (click)="toggleDropdown()"
+        class="flex items-center justify-center w-8 h-8 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="w-5 h-5"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 12.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5ZM12 18.75a.75.75 0 1 1 0-1.5.75.75 0 0 1 0 1.5Z" />
+        </svg>
+      </button>
+
+      <!-- Dropdown Content -->
+      <div
+        *ngIf="isDropdownOpen"
+        class="absolute top-10 right-0 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 py-1"
+      >
+        <button
+          (click)="onInhibirse()"
+          class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+        >
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636" />
+            </svg>
+            Inhibirse
+          </div>
+        </button>
+
+        <button
+          (click)="onCrearOficio()"
+          class="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150"
+        >
+          <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0-1.125.504-1.125 1.125V11.25a9 9 0 0 0-9-9Z" />
+            </svg>
+            Crear Oficio
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
 
 
 
   <!-- Scroll horizontal de fases -->
   <div class=" overflow-x-auto scroll-smooth bg-white p-4 rounded shadow border w-full">
     <div class="flex space-x-4">
-      @for (item of tarjetasAvocatoria; track $index) {
+      @for (item of tarjetasFases; track $index) {
         <app-fases-card
         [titulo]="item.titulo"
         [estatus]="item.estatus"
         [idDenuncia]="item.idDenuncia"
         [link]="item.link"
         [linkDetalles]="item.linkDetalles"
-        [noParams]="item.noParams"
+        [queryParams]="item.isQueryParams"
         [estatusFaseAnterior]="item.faseAnterior"
       >
 

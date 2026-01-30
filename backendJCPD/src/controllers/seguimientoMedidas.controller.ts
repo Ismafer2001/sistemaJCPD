@@ -33,7 +33,10 @@ export const postAgregarCumplimientoMedidas = async (req: Request, res: Response
     const payload = {
       file: { 
         path: req.file.path,
-        fileName: req.file.filename
+        fileName: req.file.filename,
+        responsable: req.body.responsable,
+        razon: req.body.razon,
+        sancion: req.body.sancion
       },
       medidas: req.body.medidas ? JSON.parse(req.body.medidas) : []
     };

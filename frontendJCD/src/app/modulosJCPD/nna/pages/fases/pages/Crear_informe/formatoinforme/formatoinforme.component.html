@@ -1,0 +1,96 @@
+<div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <a
+    [routerLink]="editMode ? [`../../../${denunciaId}`] : [`../../${denunciaId}`]"
+
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
+
+    </a>
+  <h3 class="text-2xl font-bold">Informes</h3>
+
+</div>
+  <!-----------------------tabs----------------------->
+  <app-nav-formulario
+  [tabs]="tabsConfig"
+  [actions]="actionsConfig"
+  [currentTab]="currentTab"
+  (tabChanged)="cambiarTab($event)"
+  (actionClicked)="handleAction($event)"
+></app-nav-formulario>
+
+<hr class="border-yellow-300 border-1" />
+
+ <div class="bg-gray-50 b p-4 shadow-lg overflow-y-scroll h-[calc(100vh-8rem)]">
+
+
+  <app-card-Form [hidden]=" currentTab!=0" [titulo]="'Crear Informe'"  >
+    <form [formGroup]="informeForm" >
+      <p>Trámite Administrativo N° <span class="font-bold">{{informeForm.get('codigoTramite')?.value}}</span></p>
+      <p class="font-bold">{{ fechaHoraActual | date:'dd' }} de {{ fechaHoraActual | date:'MMMM':'':'es' }} del {{ fechaHoraActual | date:'yyyy' }}</p>
+
+      <div class="w-50">
+        <app-inputs
+          label="Oficio N°"
+          type="text"
+          placeholder="Número de Oficio"
+          [formGroup]="informeForm"
+          [control]="$any(informeForm.get('numeroOficio')!)"
+        >
+          <span *ngIf="informeForm.get('numeroOficio')?.errors?.['required']">El número de oficio es requerido</span>
+        </app-inputs>
+      </div>
+
+      <div class="w-100 my-4">
+        <app-inputs
+          label="señor/"
+          type="text"
+          placeholder="Ingrese el nombre del informe"
+          [formGroup]="informeForm"
+          [control]="$any(informeForm.get('nombre')!)"
+        >
+          <span *ngIf="informeForm.get('nombre')?.errors?.['required']">El nombre del informe es requerido</span>
+        </app-inputs>
+      </div>
+
+
+      <div class="w-100">
+        <app-inputs
+          label="cargo/institucion"
+          type="text"
+          placeholder="Ingrese a quién va dirigido el informe"
+          [formGroup]="informeForm"
+          [control]="$any(informeForm.get('dirigidoA')!)"
+        >
+          <span *ngIf="informeForm.get('dirigidoA')?.errors?.['required']">Este campo es requerido</span>
+        </app-inputs>
+      </div>
+
+
+
+      <p>Por medio del presente le hacemos conocer las medidas de protección dispuestas en la AVOCATORIA DE CONOCIMIENTO, de fecha 18 de noviembre del 2025 para el presente trámite, misma que se transcribe a continuación:</p>
+
+      <div class="w-full my-4">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Transcripción del Informe</label>
+        <textarea
+          formControlName="transcripcion"
+          placeholder="Ingrese la transcripción completa del informe"
+          rows="8"
+          class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-vertical min-h-[200px] block"
+        ></textarea>
+        <span *ngIf="informeForm.get('transcripcion')?.errors?.['required']" class="text-red-500 text-sm mt-1 block">La transcripción es requerida</span>
+      </div>
+
+
+    </form>
+
+  </app-card-Form>
+  @if (pdfSrc) {
+        <div class="pdf-container" [hidden]="currentTab !== 1">
+          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+        </div>
+      }
+</div>
+

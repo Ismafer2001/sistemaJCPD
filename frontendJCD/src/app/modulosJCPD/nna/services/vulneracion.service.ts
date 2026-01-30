@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 export interface Vulneracion {
   id: number;
   vulneracion: string;
-
+  cuerpoLegal?: string | number; // Agregar propiedad para cuerpo legal
 }
 
 @Injectable({

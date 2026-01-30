@@ -9,11 +9,11 @@
         </svg>
 
     </a>
-  <h3 class="text-2xl font-bold">Cumplimiento de medidas</h3>
+  <h3 class="text-2xl font-bold">Seguimiento de medidas</h3>
 
 </div>
 <hr class="border-yellow-300 border-1" />
-<app-card-Form [titulo]="'Anexar Informe de Cumplimiento'">
+<app-card-Form [titulo]="'Anexar Informe de Seguimiento'">
   <form [formGroup]="seguimientoMedidasForm">
 
     <!-- Select de afectados -->
@@ -32,6 +32,60 @@
         <option [value]="item.id">{{ item.nombres }}</option>
         }
       </select>
+    </div>
+
+    <!-- Campos adicionales: Responsable, Razón y Sanción -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <!-- Responsable -->
+      <div>
+        <label for="responsable" class="block text-sm font-medium text-gray-700">
+          Responsable
+        </label>
+        <input
+          type="text"
+          id="responsable"
+          formControlName="responsable"
+          placeholder="Ingrese el responsable"
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none px-3 py-2"
+          [class.border-red-500]="seguimientoMedidasForm.get('responsable')?.invalid && seguimientoMedidasForm.get('responsable')?.touched"
+        />
+        <span *ngIf="seguimientoMedidasForm.get('responsable')?.invalid && seguimientoMedidasForm.get('responsable')?.touched"
+              class="text-red-500 text-xs mt-1">El responsable es requerido</span>
+      </div>
+
+      <!-- Razón -->
+      <div>
+        <label for="razon" class="block text-sm font-medium text-gray-700">
+          Razón
+        </label>
+        <input
+          type="text"
+          id="razon"
+          formControlName="razon"
+          placeholder="Ingrese la razón"
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none px-3 py-2"
+          [class.border-red-500]="seguimientoMedidasForm.get('razon')?.invalid && seguimientoMedidasForm.get('razon')?.touched"
+        />
+        <span *ngIf="seguimientoMedidasForm.get('razon')?.invalid && seguimientoMedidasForm.get('razon')?.touched"
+              class="text-red-500 text-xs mt-1">La razón es requerida</span>
+      </div>
+
+      <!-- Sanción -->
+      <div>
+        <label for="sancion" class="block text-sm font-medium text-gray-700">
+          Sanción
+        </label>
+        <input
+          type="text"
+          id="sancion"
+          formControlName="sancion"
+          placeholder="Ingrese la sanción"
+          class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none px-3 py-2"
+          [class.border-red-500]="seguimientoMedidasForm.get('sancion')?.invalid && seguimientoMedidasForm.get('sancion')?.touched"
+        />
+        <span *ngIf="seguimientoMedidasForm.get('sancion')?.invalid && seguimientoMedidasForm.get('sancion')?.touched"
+              class="text-red-500 text-xs mt-1">La sanción es requerida</span>
+      </div>
     </div>
 
     <!-- Sección de medidas dinámicas -->
@@ -115,8 +169,8 @@
 
       <app-cumpleMedidasTabla
   [datos]="tablaMedidasCumplidas"
-  [columnas]="['n', 'nombreArchivoOriginal', 'medidasCumplidas', 'medidasNoCumplidas', 'fechaCreacion']"
-  [encabezados]="['N°', 'Archivo', 'Medidas Cumplidas', 'Medidas No Cumplidas', 'Fecha']"
+  [columnas]="['n', 'nombreArchivoOriginal', 'medidasCumplidas', 'medidasNoCumplidas', 'fechaCreacion', 'responsable', 'razon', 'sancion']"
+  [encabezados]="['N°', 'Archivo', 'Medidas Cumplidas', 'Medidas No Cumplidas', 'Fecha', 'Responsable', 'Razón', 'Sanción']"
   [mostrarDescargaPdf]="true"
   [columnaPdfNombre]="'nombreArchivoOriginal'"
   [descargarPdf]="descargarArchivo.bind(this)">

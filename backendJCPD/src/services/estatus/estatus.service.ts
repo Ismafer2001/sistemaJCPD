@@ -1,6 +1,7 @@
-import { AudienciaContestacion, AudienciaPruebas, Avocatoria, CumpleMedidas, Denuncia, Notificacion, Resoluciones, Afectado, CierreCaso } from "../../models";
+import { AudienciaContestacion, AudienciaPruebas, Avocatoria, CumpleMedidas, Denuncia, Notificacion, Resoluciones, Afectado, CierreCaso, Desestimiento } from "../../models";
 import { Citacion } from "../../models/citaciones.model";
 import { ControlImpugnacion } from "../../models/controlImpugnacion.model";
+import { Providencias } from "../../models/providencia.model";
 
 
 export async function estatus(id:string) {
@@ -12,6 +13,12 @@ export async function estatus(id:string) {
                 model: Avocatoria,
                 as: 'avocatoria',
                 attributes: ['estatus'],
+            },
+            {
+                model:Providencias,
+                as:'providencia',
+                attributes:['estatus'],
+
             },
             {
                 model: Citacion,
@@ -47,6 +54,13 @@ export async function estatus(id:string) {
                         required: false
                     }
                 ]
+            },
+            {
+                model: Desestimiento,
+                as: 'Desestimiento',
+                attributes: ['estatus'],
+                required: false
+
             },
             {
                 model: CierreCaso,
@@ -109,12 +123,14 @@ export async function estatus(id:string) {
   const respuestaFormateada = {
     denuncia: estadoPlano.estatus || '',
     avocatoria: estadoPlano.avocatoria?.estatus || '',
+    providencia: estadoPlano.providencia?.estatus || '',
     citacion: estadoPlano.Citacions?.[0]?.estatus || '',
     notificacion: estadoPlano.Notificacions?.[0]?.estatus || '',
     audienciaC: estadoPlano.ac?.estatus || '',
     audienciaP: estadoPlano.ap?.estatus || '',
     resoluciones: estadoPlano.resoluciones?.[0]?.estatus || '',
     cumplimientoMedidas: cumplimientoMedidas,
+    desestimiento: estadoPlano.Desestimiento?.estatus || '',
     controlImpugnacion: controlImpugnacion,
     cierreCaso: estadoPlano.CierreCaso?.estatus || '',
   };

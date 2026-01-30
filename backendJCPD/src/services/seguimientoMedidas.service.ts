@@ -17,7 +17,7 @@ export async function agregarCumplimientoMedidas(payload: any) {
     if (!Array.isArray(payload.medidas) || payload.medidas.length === 0) throw new Error('medidas es requerido y debe ser un arreglo');
 
     // crear informe anexado
-    const informe = await InformeAnexado.create({ pathInforme: payload.file.path, fileName: payload.file.fileName }, { transaction: t });
+    const informe = await InformeAnexado.create({ pathInforme: payload.file.path, fileName: payload.file.fileName, responsable: payload.file.responsable, razon: payload.file.razon, sancion: payload.file.sancion }, { transaction: t });
 
     // preparar registros de cumplimiento
     const registros: any[] = [];
@@ -149,49 +149,48 @@ export async function obtenerMedidasCumplidasPorAfectado(idAfectado: number) {
         {
           model: InformeAnexado,
           as: 'InformeAnexado',
-          attributes: ['pathInforme', 'fileName']
+          attributes: ['pathInforme', 'fileName', 'responsable', 'razon', 'sancion']
         }
       ],
       attributes: ['idMedida', 'cumple', 'idPath']
     });
 
-    // Crear mapa de cumplimientos para búsqueda rápida
-    const cumplimientoMap = new Map();
-    cumplimientos.forEach((c: any) => {
-      cumplimientoMap.set(c.idMedida, {
-        cumple: c.cumple,
-        archivo: c.InformeAnexado ? {
-          path: c.InformeAnexado.pathInforme,
-          fileName: c.InformeAnexado.fileName
-        } : null
-      });
-    });
-
-    // Agrupar medidas por archivo
+    // Agrupar medidas por archivo directamente desde los cumplimientos
     const informesPorArchivo = new Map();
 
-    todasLasMedidas.forEach(medida => {
-      const cumplimiento = cumplimientoMap.get(medida.idMedida);
-      
-      if (cumplimiento && cumplimiento.archivo) {
-        const archivoKey = cumplimiento.archivo.path;
+    cumplimientos.forEach((c: any) => {
+      // Solo procesar si tiene archivo anexado
+      if (c.InformeAnexado) {
+        const archivoKey = c.InformeAnexado.pathInforme;
         
+        // Inicializar el archivo si no existe
         if (!informesPorArchivo.has(archivoKey)) {
           informesPorArchivo.set(archivoKey, {
-            archivo: cumplimiento.archivo,
+            archivo: {
+              path: c.InformeAnexado.pathInforme,
+              fileName: c.InformeAnexado.fileName,
+              responsable: c.InformeAnexado.responsable,
+              razon: c.InformeAnexado.razon,
+              sancion: c.InformeAnexado.sancion
+            },
             cumplemedida: [],
             nocumplemedida: []
           });
         }
 
-        const informe = informesPorArchivo.get(archivoKey);
-        if (cumplimiento.cumple === true) {
-          informe.cumplemedida.push(medida.medida);
-        } else if (cumplimiento.cumple === false) {
-          informe.nocumplemedida.push(medida.medida);
+        // Buscar la información de la medida
+        const medidaInfo = todasLasMedidas.find(m => m.idMedida === c.idMedida);
+        if (medidaInfo) {
+          const informe = informesPorArchivo.get(archivoKey);
+          if (c.cumple === true) {
+            informe.cumplemedida.push(medidaInfo.medida);
+          } else if (c.cumple === false) {
+            informe.nocumplemedida.push(medidaInfo.medida);
+          }
         }
       }
     });
+    console.log(informesPorArchivo);
 
     return Array.from(informesPorArchivo.values());
 

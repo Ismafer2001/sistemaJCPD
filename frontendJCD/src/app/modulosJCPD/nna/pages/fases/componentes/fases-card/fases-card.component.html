@@ -1,10 +1,11 @@
 <div class=" shrink-0 w-64 bg-gray-50 border-l-4 border-gray-400 p-4 rounded shadow-sm  "
      [ngClass]="{'border-green-400 bg-green-50': estatus === 'completada', 'border-gray-400 bg-gray-50 ': estatus !=='completada', 'border-gray-400 bg-gray-50 inset-shadow-sm/30  ': estatusFaseAnterior !=='completada'}">
 
-      @if (noParams) {
+      @if (queryParams) {
 
-        <a [routerLink]="[link,'editar']"
-      [queryParams]="{ id: idDenuncia}"
+        <a [routerLink]="[link,idDenuncia]"
+        [ngClass]="{ 'cursor-not-allowed pointer-events-none opacity-45 ': estatusFaseAnterior !=='completada'}"
+
       >
         <h3 class="text-lg font-bold text-gray-700">{{titulo}}</h3>
         <p class="text-sm text-gray-600"

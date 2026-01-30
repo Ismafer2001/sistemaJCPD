@@ -1,6 +1,14 @@
 import { Request, Response } from "express";
 import {  Otros } from "../models";
-import { crearNotificacion, crearOtrosNotificados, notifiacionesDTO, personasNotificacion, obtenerDatosNotificacion, actualizarNotificacion } from "../services/notificaciones.service";
+import { crearNotificacion,
+   crearOtrosNotificados,
+    notifiacionesDTO,
+      obtenerDatosNotificacion,
+       actualizarNotificacion,
+        involucradosANotificacion, 
+        otrosANotificacion,
+        eliminarOtrosNotificados,
+        actualizarOtrosNotificados} from "../services/notificaciones.service";
 
 import { PDFnotificacion } from '../services/pdfs/notificacionpdf.service';
 import { handlehttp } from "../utils/error.handle";
@@ -15,23 +23,43 @@ export const postCreateOtro = async (req: Request, res: Response) => {
     cedula,
     parte,
     idDenuncia} = req.body;
-    if (!nombres || !idDenuncia || !parte) {
+    if (!nombres || !idDenuncia) {
       return res.status(400).json({ message: 'Los campos nombres, idDenuncia y parte son requeridos' });
     }
     const nuevoOtro = await crearOtrosNotificados(req.body);
     res.status(201).json(nuevoOtro);
   } catch (error) {
-    console.error('Error al crear registro en Otros:', error);
-    res.status(500).json({ message: 'Error al crear registro', error });
+    handlehttp(res,'error_post_otro_notificado',error)
+  }
+};
+// Controlador para eliminar otros notificados
+export const deleteOtroNotificado = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const resultado = await eliminarOtrosNotificados(Number(id));
+    res.json(resultado);
+  } catch (error) {
+    handlehttp(res, 'error_delete_otro_notificado', error);
   }
 };
 
- export const getPersonasNotificar = async (req:Request, res:Response) =>{
+// Controlador para actualizar otros notificados
+export const putOtroNotificado = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const otroActualizado = await actualizarOtrosNotificados(Number(id), req.body);
+    res.json(otroActualizado);
+  } catch (error) {
+    handlehttp(res, 'error_put_otro_notificado', error);
+  }
+};
+
+ export const getInvolucradosANotificar = async (req:Request, res:Response) =>{
     try {
       const { id } = req.params;
 
 
-        const personas = await personasNotificacion(id)
+        const personas = await involucradosANotificacion(id)
 
 if (!personas) {
   return res.status(404).json({ message: 'No se encontraron personas' });
@@ -40,30 +68,55 @@ if (!personas) {
 res.json(personas);
         
     } catch (error) {
-        console.error('Error al consultar personas:', error);
-  res.status(500).json({ message: 'Error al consultar', error: error });
+    handlehttp(res,'error_get_otros_a_notificar',error)
+        
+    }
+
+
+ }
+  export const getOtrosANotificar = async (req:Request, res:Response) =>{
+    try {
+      const { id } = req.params;
+
+
+        const personas = await otrosANotificacion(id)
+
+if (!personas) {
+  return res.status(404).json({ message: 'No se encontraron personas' });
+}
+
+res.json(personas);
+        
+    } catch (error) {
+     handlehttp(res,'error_get_otros_a_notificar',error)
         
     }
 
 
  }
 
- export const getNotificacionDTO = async(req:Request, res:Response) =>{
+export const getNotificacionDTO = async(req:Request, res:Response) =>{
   try {
     const { id } = req.params;
+    const { tipoInvolucrado, idInvolucrado,idNotificacion } = req.query;
+    
+    console.log("Parametros recibidos:", { id, tipoInvolucrado, idInvolucrado, idNotificacion });
 
-  const datos = await notifiacionesDTO(id);
-  res.json(datos)
+    // Si se proporcionan parámetros, validar que ambos estén presentes
+    if ((tipoInvolucrado && !idInvolucrado) || (!tipoInvolucrado && idInvolucrado)) {
+      return res.status(400).json({ 
+        message: 'Si proporcionas tipoInvolucrado, también debes proporcionar idInvolucrado (y viceversa)',
+        parametrosRecibidos: { tipoInvolucrado, idInvolucrado }
+      });
+    }
+
+    const datos = await notifiacionesDTO(id, tipoInvolucrado as string, idInvolucrado as string, idNotificacion as string);
+    res.json(datos)
     
   } catch (error) {
     handlehttp(res,'error getDatos',error)
-    
   }
-
-  
-
-
- }
+}
 
  export const postNotificacion = async (req: Request, res: Response) => {
  try {
@@ -113,4 +166,6 @@ export const putNotificacion = async (req: Request, res: Response) => {
     handlehttp(res, 'error_put_notificacion', error);
   }
 };
+
+
 

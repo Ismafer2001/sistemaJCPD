@@ -59,14 +59,15 @@ export async function UsuarioActual(id:number) {
     error.name = "Usuarionoautorizado";
       throw error
     }
-    const resUSuario:JwtPayload ={
+    const resUSuario:any ={
       id: usuario.id,
       nombres: usuario.nombres,
-      apellidos: usuario.usuario,
+      apellidos: usuario.apellidos,
       rol: usuario.rol,
       id_canton:usuario.id_canton,
-      canton:usuario.Canton.canton
-
+      canton:usuario.Canton.canton,
+      correo:usuario.correo,
+      usuario:usuario.usuario
     }
     
 
@@ -74,3 +75,104 @@ export async function UsuarioActual(id:number) {
 
     return resUSuario;
 }
+
+// Servicio para validar la contraseña de un usuario
+export async function validarContrasenaUsuario(idUsuario: number, contrasenaActual: string) {
+  try {
+    // Buscar el usuario por ID
+    const usuario = await usuarios.findByPk(idUsuario, {
+      attributes: ['id', 'usuario', 'contrasena']
+    });
+
+    if (!usuario) {
+      return {
+        success: false,
+        message: 'Usuario no encontrado'
+      };
+    }
+
+    // Comparar la contraseña proporcionada con la almacenada
+    const contrasenaValida = await bcrypt.compare(contrasenaActual, usuario.contrasena);
+
+    if (!contrasenaValida) {
+      return {
+        success: false,
+        message: 'Contraseña incorrecta'
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Contraseña válida'
+    };
+
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Servicio para actualizar la contraseña del usuario
+export async function actualizarContrasenaUsuario(idUsuario: number, contrasenaActual: string, contrasenaNueva: string) {
+  try {
+    // Buscar el usuario por ID
+    const usuario = await usuarios.findByPk(idUsuario, {
+      attributes: ['id', 'usuario', 'contrasena']
+    });
+
+    if (!usuario) {
+      return {
+        success: false,
+        message: 'Usuario no encontrado'
+      };
+    }
+
+    // Validar la contraseña actual
+    const contrasenaValida = await bcrypt.compare(contrasenaActual, usuario.contrasena);
+
+    if (!contrasenaValida) {
+      return {
+        success: false,
+        message: 'La contraseña actual es incorrecta'
+      };
+    }
+
+    // Validar que la nueva contraseña sea diferente a la actual
+    const mismaContrasena = await bcrypt.compare(contrasenaNueva, usuario.contrasena);
+    if (mismaContrasena) {
+      return {
+        success: false,
+        message: 'La nueva contraseña debe ser diferente a la actual'
+      };
+    }
+
+    // Hashear la nueva contraseña
+    const hashedNuevaContrasena = await bcrypt.hash(contrasenaNueva, 10);
+
+    // Actualizar la contraseña en la base de datos
+    const [filasActualizadas] = await usuarios.update(
+      { contrasena: hashedNuevaContrasena },
+      { where: { id: idUsuario } }
+    );
+
+    if (filasActualizadas === 0) {
+      return {
+        success: false,
+        message: 'No se pudo actualizar la contraseña'
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Contraseña actualizada correctamente'
+    };
+
+  } catch (error) {
+    throw error;
+  }
+}
+
+
+
+
+
+

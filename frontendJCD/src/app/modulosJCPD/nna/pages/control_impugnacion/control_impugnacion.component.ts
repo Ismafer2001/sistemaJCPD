@@ -40,9 +40,11 @@ export class Control_impugnacionComponent implements OnInit {
   formularioControlImpugnacion() {
     this.controlInpugnacionForm = this.fb.group({
       codigoTramite: [''],
-      resolucionImpugnada: [''],
+      recurso_impugnacion: [''],
       idResolucion:[this.denunciaId],
-      resultadoImpugnacion: [''],
+      resolucionImpugnada: [''],
+      periodo: [''],
+      resultado: [''],
       // Define los controles del formulario aquí
     });
   }

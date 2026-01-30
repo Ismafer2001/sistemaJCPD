@@ -1,0 +1,88 @@
+<div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <a
+    [routerLink]="[`..`]"
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
+    </a>
+  <h3 class="text-2xl font-bold">Denuncias Remitidas</h3>
+</div>
+
+<hr class="border-yellow-300 border-1" />
+<div class="bg-gray-50 b p-4 shadow-lg overflow-y-scroll h-[calc(100vh-8rem)]">
+  <app-card-Form [titulo]="'Deprecatorias Recibidas'">
+
+     <form [formGroup]="deprecatoriaForm"  class="space-y-4">
+    <!-- Campo Cantón -->
+    <div>
+      <label for="cantonOrigen" class="block text-sm font-medium text-gray-700 mb-2">
+        Cantón de origen *
+      </label>
+      <input
+        type="text"
+        id="cantonOrigen"
+        formControlName="cantonOrigen"
+        readonly
+        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-100 cursor-not-allowed"
+        [class.border-red-500]="deprecatoriaForm.get('cantonOrigen')?.invalid && deprecatoriaForm.get('cantonOrigen')?.touched"
+        placeholder="Ingrese el cantón de origen"
+      />
+      <div
+        *ngIf="deprecatoriaForm.get('cantonOrigen')?.invalid && deprecatoriaForm.get('cantonOrigen')?.touched"
+        class="text-red-500 text-sm mt-1"
+      >
+        Este campo es obligatorio
+      </div>
+    </div>
+
+    <!-- Campo Motivo -->
+    <div>
+      <label for="motivo" class="block text-sm font-medium text-gray-700 mb-2">
+        Motivo *
+      </label>
+      <textarea
+        id="motivo"
+        formControlName="motivoDeInhibirse"
+        readonly
+        rows="4"
+        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-100 cursor-not-allowed"
+        [class.border-red-500]="deprecatoriaForm.get('motivoDeInhibirse')?.invalid && deprecatoriaForm.get('motivoDeInhibirse')?.touched"
+        placeholder="Ingrese el motivo de la inhibición"
+      ></textarea>
+      <div
+        *ngIf="deprecatoriaForm.get('motivoDeInhibirse')?.invalid && deprecatoriaForm.get('motivoDeInhibirse')?.touched"
+        class="text-red-500 text-sm mt-1"
+      >
+        Este campo es obligatorio
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="flex gap-3 pt-4">
+      <app-button-submit
+        label="Aceptar"
+        color="afirmar"
+        type="button"
+        [disabled]="estadoRecepcion === 'aceptada' || estadoRecepcion === 'rechazada'"
+        (clicked)="onAceptar()"
+      ></app-button-submit>
+
+      <app-button-submit
+        label="Rechazar"
+        color="error"
+        type="button"
+        [disabled]="estadoRecepcion === 'aceptada' || estadoRecepcion === 'rechazada'"
+        (clicked)="onRechazar()"
+      ></app-button-submit>
+
+
+    </div>
+  </form>
+
+
+
+
+  </app-card-Form>
+</div>

@@ -5,11 +5,13 @@ interface CitacionAttributes {
   id: number;
   codigoTramite: string;
   
+  
   fecha: Date;
   local: string;
   hora: string;
   direccion: string;
   diriguidoA: string;
+  razon: string;
   idUsuario: number;
   parte: string;
   idDenuncia: number;
@@ -31,6 +33,7 @@ export class Citacion
   declare hora: string;
   declare direccion: string;
   declare diriguidoA: string;
+  declare razon: string;
   declare parte: string;
   declare estatus: "pendiente"|"en_proceso"|"completada";
   declare idUsuario: number;
@@ -69,6 +72,9 @@ Citacion.init(
     direccion: {
       type: DataTypes.STRING,
       allowNull: false,
+    },
+    razon:{
+      type: DataTypes.TEXT,
     },
     estatus: {
       type: DataTypes.STRING,

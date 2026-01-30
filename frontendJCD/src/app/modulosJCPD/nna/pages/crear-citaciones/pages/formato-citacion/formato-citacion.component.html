@@ -1,0 +1,100 @@
+ <div class="pl-2 py-2 mb-1 flex items-center gap-2">
+
+
+  <a
+    [routerLink]="[`../../${denunciaId}`]"
+
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
+
+    </a>
+  <h3 class="text-2xl font-bold">Citaciones</h3>
+  </div>
+  <!-----------------------tabs----------------------->
+  <app-nav-formulario
+  [tabs]="tabsConfig"
+  [actions]="actionsConfig"
+  [currentTab]="currentTab"
+  (tabChanged)="cambiarTab($event)"
+  (actionClicked)="handleAction($event)"
+></app-nav-formulario>
+
+<hr class="border-yellow-300 border-1" />
+<div class="bg-gray-50 b p-4 shadow-lg overflow-y-scroll h-[calc(100vh-8rem)]">
+  <app-card-Form [hidden]=" currentTab!=0"  [titulo]="'Citar'">
+    <p>Trámite Administrativo N° <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{citar.codigoTramite}}</span></p>
+    <p>{{citar.Canton}},{{ fechaHoraActual | date:'dd' }} de {{ fechaHoraActual | date:'MMMM':'':'es' }} del {{ fechaHoraActual | date:'yyyy' }}</p>
+    <p class="font-bold text-lg">Citacion</p>
+    <p class="mb-2">señora</p>
+
+    <p>ciudad</p>
+   <p > <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold" > {{citar.Canton}} </span> </p>
+    <p>de nuestras consideraciones:</p>
+    <p>Reciban un cordial saludo de quienes conformamos la Junta de Protección del cantón <span class="font-bold"> {{citar.Canton}} </span>  </p>
+    <p>Adjunto a la presente sírvase encontrar la Citación  de fecha <span class="font-bold"> {{ fechaHoraActual | date:'dd' }}</span>  de <span class="font-bold" >{{ fechaHoraActual | date:'MMMM':'':'es' }} </span> del <span class="font-bold"> {{ fechaHoraActual | date:'yyyy' }} </span> , para que asista a la Audiencia de Contestación a realizarse:</p>
+     <form [formGroup]="citacionForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Local -->
+    <div>
+      <label for="local" class="block text-sm font-medium text-gray-700">Local</label>
+      <input type="text" id="local" name="local" formControlName="local"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+
+    <!-- Dirección -->
+    <div>
+      <label for="direccion" class="block text-sm font-medium text-gray-700">Dirección</label>
+      <input type="text" id="direccion" name="direccion" formControlName="direccion"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+
+    <!-- Fecha -->
+    <div>
+      <label for="fecha" class="block text-sm font-medium text-gray-700">Fecha</label>
+      <input type="date" id="fecha" name="fecha" formControlName="fecha"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+
+    <!-- Hora -->
+    <div>
+      <label for="hora" class="block text-sm font-medium text-gray-700">Hora</label>
+      <input type="time" id="hora" name="hora" formControlName="hora"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500" />
+    </div>
+
+
+
+
+
+    <p>Dispuesta dentro del trámite administrativo N° <span class="font-bold"> {{citar.codigoTramite}} </span> </p>
+
+    <!-- Campo Razón -->
+    <div class="col-span-2 mt-4">
+      <label for="razon" class="block text-sm font-medium text-gray-700">Razón</label>
+      <textarea id="razon" name="razon" formControlName="razon" rows="4"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500"
+        placeholder="Ingrese la razón..."></textarea>
+    </div>
+
+    <p>Sin otro particular suscribimos.  </p>
+    <p>atentamente,</p>
+    <p>MIEMBROS DE LA JUNTA CANTONAL DE PROTECCION DE DERECHOS </p>
+
+
+    <p>RECIBIDO……………………………………………………………………………...…………………</p>
+    <p>FECHA………………</p>
+
+    <p>  <span class="text-red-500">NOTA</span>: Se adjunta Avocatoria de Conocimiento, medidas de protección y boleta de auxilio</p>
+     </form>
+  </app-card-Form>
+   @if (pdfSrc) {
+        <div class="pdf-container" [hidden]="currentTab !== 1">
+          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+        </div>
+      }
+</div>
+
+
+

@@ -23,7 +23,7 @@ import { Notificacion } from './notificacion.model';
     descripcion_hechos?: string;
     solicitud?: string;
     id_canton: number;
-    estado: "activa"|"finalizada";
+    estado: "activa"|"finalizada"|'remitido';
     estatus: "pendiente"|"en_proceso"|"completada";
   }
   
@@ -58,6 +58,8 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     declare otros?: Otros[];
     declare avocatoria?: Avocatoria;
     declare Notificacions?: Notificacion[];
+    declare tipoDeViolencia?: string;
+    declare ambitoViolencia?: string;
    
 
   }

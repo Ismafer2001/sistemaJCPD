@@ -39,7 +39,7 @@ import { requiredWhen } from '@shared/validators/validacionOpcional.validators';
     Nna_creardenuncia_denunciadoComponent,
     Nna_creardenuncia_vulneracionesComponent,
     Crear_denuncia_medidasComponent,
-    CardFormComponent, ButtonSubmitComponent,
+    CardFormComponent, 
     NavFormularioComponent,RouterLink
   ],
 })
@@ -111,6 +111,35 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   idDenuncia!: number;
   grupo: string = "";
   isEditDenunciaActivate:boolean=false;
+
+  // Configuración de grupos válidos
+  private gruposValidos = ['nna', 'adultos', 'mujeres'];
+
+  // Variables para controlar campos condicionales
+  mostrarCamposMujeres = false;
+
+  // Opciones para campos de mujeres
+  tiposViolencia = [
+    { id: 'fisica', label: 'Física' },
+    { id: 'psicologica', label: 'Psicológica' },
+    { id: 'sexual', label: 'Sexual' },
+    { id: 'economica', label: 'Económica y Patrimonial' },
+    { id: 'simbolica', label: 'Simbólica' },
+    { id: 'politica', label: 'Política' },
+    { id: 'gineco_obstetrica', label: 'Gineco-obstétrica' }
+  ];
+
+  ambitosViolencia = [
+    { id: 'intrafamiliar', label: 'Intrafamiliar o Doméstico' },
+    { id: 'educativo', label: 'Educativo' },
+    { id: 'laboral', label: 'Laboral' },
+    { id: 'salud', label: 'De Salud' },
+    { id: 'institucional', label: 'Institucional' },
+    { id: 'politico', label: 'Político' },
+    { id: 'deportivo', label: 'Deportivo' },
+    { id: 'publico', label: 'Público o Callejero' }
+  ];
+
   denunciaForm!: FormGroup;
   vulneracionesCatalogo: Vulneracion[] = [];
   medidasPorArticulo: ArticuloMedidas[] = [];
@@ -151,8 +180,19 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       }
     });
     const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+    if (this.gruposValidos.includes(grupo || '')) {
+      this.grupo = grupo!;
+      console.log('Grupo válido asignado en crear denuncia:', this.grupo);
+    } else {
+      console.error('Grupo no válido:', grupo);
+      this.grupo = '';
+    }
+
+    // Crear el formulario primero
     this.denunciaFormulario();
+
+    // Luego configurar campos condicionales
+    this.configurarCamposCondicionales();
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.idDenuncia = +params['id'];
@@ -290,6 +330,11 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       solicitud: ['', [Validators.required, Validators.minLength(10)]],
       vulneraciones: this.fb.array([], [Validators.required]),
       medidas: this.fb.array([], [Validators.required]),
+
+      // Campos específicos para mujeres (siempre presentes pero con validación condicional)
+      tipoDeViolencia: [''], // Cambiar a string simple
+      ambitoViolencia: [''],
+
       id_canton: [],
       grupoPrioritario: [this.grupo],
     });
@@ -314,6 +359,95 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   }
   get medidasForm(): FormArray {
     return this.denunciaForm.get('medidas') as FormArray;
+  }
+
+  // Getter simplificado para tipos de violencia como string
+  get tiposViolenciaValue(): string {
+    return this.denunciaForm?.get('tipoDeViolencia')?.value || '';
+  }
+
+  //--------- CONFIGURACIÓN CAMPOS CONDICIONALES ---------//
+  private configurarCamposCondicionales(): void {
+    // Verificar que el formulario exista
+    if (!this.denunciaForm) {
+      console.warn('Formulario no existe aún, saltando configuración de campos condicionales');
+      return;
+    }
+
+    this.mostrarCamposMujeres = this.grupo === 'mujeres';
+
+    if (this.mostrarCamposMujeres) {
+      this.aplicarValidacionesMujeres();
+    } else {
+      this.limpiarValidacionesMujeres();
+    }
+  }
+
+  private aplicarValidacionesMujeres(): void {
+    if (!this.denunciaForm) return;
+
+    // Hacer requeridos los campos de violencia para mujeres
+    const tiposControl = this.denunciaForm.get('tipoDeViolencia');
+    const ambitoControl = this.denunciaForm.get('ambitoViolencia');
+
+    // Validar que al menos un tipo de violencia esté seleccionado (string no vacío)
+    tiposControl?.setValidators([Validators.required]);
+    ambitoControl?.setValidators([Validators.required]);
+
+    tiposControl?.updateValueAndValidity();
+    ambitoControl?.updateValueAndValidity();
+  }
+
+  private limpiarValidacionesMujeres(): void {
+    if (!this.denunciaForm) return;
+
+    const tiposControl = this.denunciaForm.get('tipoDeViolencia');
+    const ambitoControl = this.denunciaForm.get('ambitoViolencia');
+
+    tiposControl?.clearValidators();
+    ambitoControl?.clearValidators();
+
+    // Limpiar valores
+    tiposControl?.setValue('');
+    ambitoControl?.setValue('');
+
+    tiposControl?.updateValueAndValidity();
+    ambitoControl?.updateValueAndValidity();
+  }
+
+  // Métodos simplificados para manejar checkboxes de tipos de violencia
+  onTipoViolenciaChange(tipoId: string, event: any): void {
+    const tiposControl = this.denunciaForm?.get('tipoDeViolencia');
+    if (!tiposControl) return;
+
+    const currentValue = tiposControl.value || '';
+    const tiposArray = currentValue ? currentValue.split(', ').filter((t: string) => t.trim() !== '') : [];
+
+    if (event.target.checked) {
+      // Agregar el tipo si no existe
+      if (!tiposArray.includes(tipoId)) {
+        tiposArray.push(tipoId);
+      }
+    } else {
+      // Remover el tipo
+      const index = tiposArray.indexOf(tipoId);
+      if (index !== -1) {
+        tiposArray.splice(index, 1);
+      }
+    }
+
+    // Actualizar el valor del control
+    const newValue = tiposArray.join(', ');
+    tiposControl.setValue(newValue);
+    tiposControl.markAsTouched(); // Para que se disparen las validaciones
+  }
+
+  isTipoViolenciaSelected(tipoId: string): boolean {
+    const currentValue = this.tiposViolenciaValue;
+    if (!currentValue) return false;
+
+    const tiposArray = currentValue.split(', ').filter((t: string) => t.trim() !== '');
+    return tiposArray.includes(tipoId);
   }
 
   //CARGA DE DATOS EN MODO EDICION
@@ -507,7 +641,15 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         });
       }
 
-
+      // Cargar datos de violencia para mujeres si existen
+      if (this.grupo === 'mujeres') {
+        if (data.datosViolencia.tipoDeViolencia) {
+          this.denunciaForm.get('tipoDeViolencia')?.setValue(data.datosViolencia.tipoDeViolencia);
+        }
+        if (data.datosViolencia.ambitoViolencia) {
+          this.denunciaForm.get('ambitoViolencia')?.setValue(data.datosViolencia.ambitoViolencia);
+        }
+      }
 
     });
   }
@@ -611,6 +753,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       //codigoTramite,
       status: 'completada',
     };
+    console.log('Cuerpo de la denuncia a enviar:', body);
 
     this.loading = true;
 

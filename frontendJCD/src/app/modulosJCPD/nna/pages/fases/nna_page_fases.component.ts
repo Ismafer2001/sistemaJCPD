@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DenunciaService } from '@nna/services/denuncia.service';
 import { FasesService } from '@nna/services/fases.service';
@@ -16,7 +16,7 @@ interface Estatus {
   templateUrl: './nna_page_fases.component.html',
 
 
-  imports: [CommonModule, RouterLink, FasesCardComponent,ButtonSubmitComponent]
+  imports: [CommonModule, RouterLink, FasesCardComponent]
 })
 export class NnaPageFasesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -27,6 +27,7 @@ export class NnaPageFasesComponent implements OnInit, OnDestroy {
   loading: boolean = true;
   error: string | null = null;
   avocatoria:string =''
+  providencia: string = '';
   notificacion: string = '';
   cita: string = '';
   audienciaC: string = '';
@@ -34,16 +35,31 @@ export class NnaPageFasesComponent implements OnInit, OnDestroy {
   resoluciones:string ='';
   cumplimientoMedidas:string ='';
   controlImpugnacion:string ='';
+  desestimiento:string ='';
   cierreCaso:string ='';
   denunciastatus:string ='';
- tarjetasAvocatoria: any[] = [];
+ tarjetasFases: any[] = [];
+ // Configuración de grupos válidos
+  private gruposValidos = ['nna', 'adultos', 'mujeres'];
+
+ // Propiedades para el dropdown
+ isDropdownOpen: boolean = false;
 
 
 
-  constructor(private route: ActivatedRoute, private denunciaServices:DenunciaService, private fasesService:FasesService) {}
+  constructor(private route: ActivatedRoute,
+     private denunciaServices:DenunciaService,
+      private fasesService:FasesService,
+       private router: Router) {}
 ngOnInit() {
   const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+    if (this.gruposValidos.includes(grupo || '')) {
+      this.grupo = grupo!;
+      console.log('Grupo válido asignado en crear denuncia:', this.grupo);
+    } else {
+      console.error('Grupo no válido:', grupo);
+      this.grupo = '';
+    }
   this.route.params.subscribe(params => {
     this.denunciaId = +params['id'];
 
@@ -54,6 +70,7 @@ ngOnInit() {
       this.denuncia = denuncia;
       this.denunciastatus = estatus.denuncia;
       this.avocatoria = estatus.avocatoria;
+      this.providencia = estatus.providencia;
       this.notificacion = estatus.notificacion;
       this.cita = estatus.citacion;
       this.audienciaC = estatus.audienciaC;
@@ -61,9 +78,17 @@ ngOnInit() {
       this.resoluciones = estatus.resoluciones;
       this.cumplimientoMedidas = estatus.cumplimientoMedidas;
       this.controlImpugnacion = estatus.controlImpugnacion;
+      this.desestimiento = estatus.desestimiento;
       this.cierreCaso = estatus.cierreCaso;
 
-      this.armarArrayFases();
+      if(this.grupo === 'mujeres'){
+        this.armararrayFasesMujeres();
+      }else{
+        this.armarArrayFases();
+
+      }
+
+
 
     });
   });
@@ -77,7 +102,7 @@ ngOnDestroy() {
 
   //-----------armar array de fases---------///
   armarArrayFases(){
-     this.tarjetasAvocatoria = [
+     this.tarjetasFases = [
        {
     titulo: 'Denuncia',
     estatus:this.denunciastatus,
@@ -97,12 +122,22 @@ ngOnDestroy() {
   },
 
   {
+    titulo: 'Providencia',
+    estatus: this.providencia,
+    idDenuncia: this.denuncia?.idDenuncia,
+    link: `/${this.grupo}/providencia`,
+    linkDetalles: '/nna/detalle-providencia',
+    faseAnterior: this.avocatoria,
+  },
+
+  {
     titulo: 'Notificaciónes',
     estatus: this.notificacion,
     idDenuncia: this.denuncia?.idDenuncia ,
     link: `/${this.grupo}/notificaciones`,
     linkDetalles: '/nna/detalle-notificacion',
     faseAnterior: this.avocatoria,
+    isQueryParams:true
   },
    {
     titulo: 'Citaciones',
@@ -111,6 +146,7 @@ ngOnDestroy() {
     link: `/${this.grupo}/citaciones`,
     linkDetalles: '/nna/detalle-citaciones',
     faseAnterior: this.notificacion,
+    isQueryParams:true
   },
   {
     titulo: 'Audiencia de Contestacion',
@@ -138,11 +174,11 @@ ngOnDestroy() {
     idDenuncia: this.denuncia?.idDenuncia,
     link: `/${this.grupo}/resoluciones`,
     linkDetalles: '/nna/detalle-resoluciones',
-    faseAnterior: this.audienciaP,
+    faseAnterior: this.audienciaC,
   }
   ,
   {
-    titulo: 'Cumplimiento de medidas',
+    titulo: 'Seguimiento de medidas',
     estatus: this.cumplimientoMedidas,
     idDenuncia: this.denuncia?.idDenuncia,
     link: `/${this.grupo}/seguimiento`,
@@ -160,6 +196,15 @@ ngOnDestroy() {
   }
   ,
   {
+    titulo: 'Desestimiento',
+    estatus: this.desestimiento,
+    idDenuncia: this.denuncia?.idDenuncia,
+    link: `/${this.grupo}/desestimiento`,
+    linkDetalles: '/nna/detalle-desestimiento',
+    faseAnterior: this.cumplimientoMedidas,
+  }
+  ,
+  {
     titulo: 'Cierre de caso',
     estatus: this.cierreCaso,
     idDenuncia: this.denuncia?.idDenuncia,
@@ -172,9 +217,67 @@ ngOnDestroy() {
 
 
   }
+  armararrayFasesMujeres(){
+         this.tarjetasFases = [
+       {
+    titulo: 'Denuncia',
+    estatus:this.denunciastatus,
+    link: `/${this.grupo}/denuncia`,
+    linkDetalles: '/nna/detalle-denuncia',
+    idDenuncia: this.denuncia?.idDenuncia,
+
+    faseAnterior: this.denunciastatus,
+  },
+  {
+    titulo: 'Otorgamiento',
+    estatus: this.avocatoria,
+    idDenuncia: this.denuncia?.idDenuncia,
+    link: `/${this.grupo}/avocatoria`,
+    linkDetalles: '/nna/detalle-vocatoria',
+    faseAnterior: this.denunciastatus,
+  },
+
+  {
+    titulo: 'Notificaciónes',
+    estatus: this.notificacion,
+    idDenuncia: this.denuncia?.idDenuncia ,
+    link: `/${this.grupo}/notificaciones`,
+    linkDetalles: '/nna/detalle-notificacion',
+    faseAnterior: this.avocatoria,
+    isQueryParams:true
+  },
+
+  {
+    titulo: 'Legalizacion',
+    estatus: this.audienciaC,
+    idDenuncia: this.denuncia?.idDenuncia,
+    link: `/${this.grupo}/audienciaDeContestacion`,
+    linkDetalles: '/nna/detalle-audiencia-constestacion'
+    ,
+    faseAnterior: this.cita,
+  }
+
+];
+
+  }
 
 
+  // Métodos para el dropdown
+  toggleDropdown(): void {
+    this.isDropdownOpen = !this.isDropdownOpen;
+  }
 
+  onInhibirse(): void {
+    console.log('Acción: Inhibirse');
+  this.router.navigate([`/${this.grupo}/inhibicion`, this.denunciaId]);
+    this.isDropdownOpen = false;
+  }
+
+  onCrearOficio(): void {
+    console.log('Acción: Crear Oficio');
+    this.router.navigate([`/${this.grupo}/informes`, this.denunciaId]);
+    this.isDropdownOpen = false;
+  }
 
 
 }

@@ -6,7 +6,7 @@ export const grupoValidoGuard: CanActivateFn = (route) => {
   const router = inject(Router);
 
   // Define los grupos válidos
-  const gruposValidos = ['nna', 'adultos'];
+  const gruposValidos = ['nna', 'adultos', 'mujeres'];
 
   // Obtiene el parámetro 'grupo' de la ruta
   const grupo = route.paramMap.get('grupo');

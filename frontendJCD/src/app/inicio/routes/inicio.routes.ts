@@ -12,6 +12,12 @@ export const inicioRoutes: Routes = [
             loadComponent: () =>
               import('@inicio/page/inicio-page-home.component'),
           },
+          {
+            path: 'perfil',
+
+            loadComponent: () =>
+              import('@inicio/page/perfil/perfil.component'),
+          },
         ],
       },
 

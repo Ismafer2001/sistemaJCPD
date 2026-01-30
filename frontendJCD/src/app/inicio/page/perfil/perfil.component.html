@@ -1,0 +1,172 @@
+<div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <h3 class="text-2xl font-bold">Mi perfil</h3>
+</div>
+
+<hr class="border-yellow-300 border-1" />
+
+<div class="bg-gray-50 p-4 shadow-lg overflow-y-scroll h-[calc(100vh-8rem)]">
+  <app-card-Form [titulo]="'Información del Usuario'">
+
+    <!-- Loader mientras carga -->
+    <div *ngIf="cargando" class="flex justify-center items-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      <span class="ml-2 text-gray-600">Cargando información...</span>
+    </div>
+
+    <!-- Información del usuario -->
+    <div *ngIf="!cargando && usuarioData" class="space-y-6">
+
+      <!-- Información Personal -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+          </svg>
+          Información Personal
+        </h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Nombres</label>
+            <p class="text-gray-900 font-medium">{{ usuarioData.nombres }}</p>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Apellidos</label>
+            <p class="text-gray-900 font-medium">{{ usuarioData.apellidos }}</p>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Correo Electrónico</label>
+            <p class="text-gray-900 font-medium">{{ usuarioData.correo }}</p>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Usuario</label>
+            <p class="text-gray-900 font-medium">{{ usuarioData.usuario }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Información del Sistema -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+          </svg>
+          Información del Sistema
+        </h4>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Rol</label>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 capitalize">
+              {{ usuarioData.rol }}
+            </span>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Cantón</label>
+            <p class="text-gray-900 font-medium">{{ usuarioData.canton }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Formulario de Cambio de Contraseña -->
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h4 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <svg class="w-5 h-5 mr-2 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+          </svg>
+          Cambiar Contraseña
+        </h4>
+
+        <!-- Formulario de nueva contraseña -->
+        <form [formGroup]="passwordForm" (ngSubmit)="cambiarPassword()" class="space-y-4">
+
+          <!-- Contraseña Actual -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Contraseña Actual</label>
+            <app-inputs
+              [type]="'password'"
+              [placeholder]="'Ingrese su contraseña actual'"
+              [control]="$any(passwordForm.get('passwordActual'))"
+            ></app-inputs>
+            <div *ngIf="passwordForm.get('passwordActual')?.errors && passwordForm.get('passwordActual')?.touched" class="mt-1">
+              <p class="text-sm text-red-600" *ngIf="passwordForm.get('passwordActual')?.errors?.['required']">
+                La contraseña actual es requerida
+              </p>
+              <p class="text-sm text-red-600" *ngIf="passwordForm.get('passwordActual')?.errors?.['incorrect']">
+                La contraseña actual es incorrecta
+              </p>
+            </div>
+          </div>
+
+          <!-- Nueva Contraseña -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Nueva Contraseña</label>
+            <app-inputs
+              [type]="'password'"
+              [placeholder]="'Ingrese su nueva contraseña'"
+              [control]="$any(passwordForm.get('nuevaPassword'))"
+            ></app-inputs>
+            <div *ngIf="passwordForm.get('nuevaPassword')?.errors && passwordForm.get('nuevaPassword')?.touched" class="mt-1">
+              <p class="text-sm text-red-600" *ngIf="passwordForm.get('nuevaPassword')?.errors?.['required']">
+                La nueva contraseña es requerida
+              </p>
+              <p class="text-sm text-red-600" *ngIf="passwordForm.get('nuevaPassword')?.errors?.['minlength']">
+                La contraseña debe tener al menos 6 caracteres
+              </p>
+            </div>
+          </div>
+
+          <!-- Confirmar Contraseña -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Confirmar Nueva Contraseña</label>
+            <app-inputs
+              [type]="'password'"
+              [placeholder]="'Confirme su nueva contraseña'"
+              [control]="$any(passwordForm.get('confirmarPassword'))"
+            ></app-inputs>
+            <div *ngIf="passwordForm.get('confirmarPassword')?.errors && passwordForm.get('confirmarPassword')?.touched" class="mt-1">
+              <p class="text-sm text-red-600" *ngIf="passwordForm.get('confirmarPassword')?.errors?.['required']">
+                Debe confirmar la nueva contraseña
+              </p>
+              <p class="text-sm text-red-600" *ngIf="passwordForm.get('confirmarPassword')?.errors?.['passwordMismatch']">
+                Las contraseñas no coinciden
+              </p>
+            </div>
+          </div>
+
+          <!-- Botones -->
+          <div class="flex justify-end space-x-3 pt-4">
+            <app-button-submit
+              [type]="'button'"
+              [label]="'Cancelar'"
+              [color]="'cancelar'"
+              (clicked)="passwordForm.reset()"
+            ></app-button-submit>
+
+            <app-button-submit
+              [type]="'submit'"
+              [label]="cambiandoPassword ? 'Cambiando...' : 'Cambiar Contraseña'"
+              [color]="'afirmar'"
+              [disabled]="passwordForm.invalid || cambiandoPassword"
+            ></app-button-submit>
+          </div>
+
+        </form>
+      </div>
+
+    </div>
+
+    <!-- Mensaje si no hay datos -->
+    <div *ngIf="!cargando && !usuarioData" class="text-center py-8">
+      <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+      </svg>
+      <p class="mt-2 text-sm text-gray-500">No se pudo cargar la información del perfil</p>
+    </div>
+
+  </app-card-Form>
+</div>

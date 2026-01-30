@@ -18,14 +18,23 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
     // Instituciones participantes: tipoParticipante incluye 'institucion' o 'institucional'
     filaInstituciones = (() => {
       const lista = (datos.participantes || [])
-        .filter((x: any) => x.tipoParticipante && x.tipoParticipante.toLowerCase().includes('representante'))
+        .filter((x: any) => x.tipoParticipante && x.tipoParticipante.toLowerCase().includes('representante institucional'))
         .map((p: any) => `${p.nombres} ${p.apellidos} (${p.cedula})`)
         .join(', ');
       return [[{ text: 'Nombre y cédula de representante institucional', bold: true }, lista]];
     })();
+
+  // Representantes Proyectos: tipoParticipante incluye 'representantes proyectos'
+  const filaRepresentantesProyectos = (() => {
+    const lista = (datos.participantes || [])
+      .filter((x: any) => x.tipoParticipante && x.tipoParticipante.toLowerCase().includes('representante proyecto'))
+      .map((p: any) => `${p.nombres} ${p.apellidos} (${p.cedula})`)
+      .join(', ');
+    return [[{ text: 'Nombre y cédula de representantes proyectos', bold: true }, lista]];
+  })();
   const codigoTramite = datos && datos.codigoTramite ? datos.codigoTramite : '';
   // Usar los campos correctos según el DTO
-  const fecha = datos.fecha || '';
+  const fecha = datos.fechaAvocatoria || '';
   const canton = datos.canton || '';
   const hora = datos.hora || '';
   console.log('horaaaa'+hora)
@@ -119,8 +128,8 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
           table: {
             widths: ['auto', '*'],
             body: [
-              [ { text: 'Nombre persona vulnerada', bold: true }, nombresPersonaVulnerada ],
-              [ { text: 'Nombre persona vulneradora', bold: true }, nombresPersonaVulneradora ],
+              [ { text: 'Nombre persona afectada', bold: true }, nombresPersonaVulnerada ],
+              [ { text: 'Nombre persona denunciado', bold: true }, nombresPersonaVulneradora ],
               [ { text: 'Nombre persona denunciante', bold: true }, nombresPersonaDenunciante ],
               [ { text: 'Nombre testigo', bold: true }, nombresTestigo ]
             ]
@@ -135,7 +144,7 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
             ' según la Avocatoria de Conocimiento N.- ',
             { text: codigoTramite, bold: true },
             ' de fecha ',
-            { text: fecha ? new Date(fecha).toLocaleDateString() : '', bold: true },
+            { text: fecha ? new Date(fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/(\w+), (\d+) de (\w+) de (\d+)/, '$1 $2, de $3 del $4') : '', bold: true },
             '. Dirige la presente audiencia la señor-a ',
             { text: datos.dirigue || '', bold: true },
             ', miembro de la Junta Cantonal de Protección de Derechos.'
@@ -147,8 +156,8 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
           table: {
             widths: ['auto', '*'],
             body: [
-              [ { text: 'Nombre y cédula persona vulnerada', bold: true }, nombresCedulasVulnerada ],
-              [ { text: 'Nombre y cédula persona vulneradora', bold: true }, nombresCedulasVulneradora ],
+              [ { text: 'Nombre y cédula persona afectada', bold: true }, nombresCedulasVulnerada ],
+              [ { text: 'Nombre y cédula persona denunciado', bold: true }, nombresCedulasVulneradora ],
               [ { text: 'Nombre y cédula persona denunciante', bold: true }, nombresCedulasDenunciante ],
               [ { text: 'Nombre y cédula testigo', bold: true }, nombresCedulasTestigo ]
             ]
@@ -204,6 +213,18 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
           layout: 'box',
           margin: [0, 0, 0, 0]
         },
+        // Representantes Proyectos
+        { text: 'Representantes Proyectos:', margin: [0, 10, 0, 0] },
+        {
+          table: {
+            widths: ['auto', '*'],
+            body: [
+              ...filaRepresentantesProyectos
+            ]
+          },
+          layout: 'box',
+          margin: [0, 0, 0, 0]
+        },
         // Ratificación
         { text: 'se ratifica en el informe presentado', margin: [0, 10, 0, 0] },
         {
@@ -249,6 +270,18 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
             ],
             margin: [0, 0, 0, 0]
           }))),
+        // Sección de conciliación (si existe)
+        ...(datos.conciliacion ? [
+          {
+            text: 'CONCILIACIÓN',
+            style: 'subheader',
+            margin: [0, 10, 0, 5]
+          },
+          {
+            text: datos.conciliacion,
+            margin: [0, 0, 0, 10]
+          }
+        ] : []),
         // Bloque narrativo después de los participantes
         {
           text: 'Una vez escuchadas las versiones de las partes, se les pide que abandonen momentáneamente la sala para dar paso a la audiencia reservada con el adolescente',

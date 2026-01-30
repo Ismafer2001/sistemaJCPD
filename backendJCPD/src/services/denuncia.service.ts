@@ -10,6 +10,7 @@ import {
   Canton,
   Avocatoria,
 } from "../models";
+import { DenunciaMujeres } from "../models/denunciaMujeres.model";
 
 export interface datosDenuncia {
   denuncia: Denuncia;
@@ -18,6 +19,7 @@ export interface datosDenuncia {
   afectados?: Afectado[];
   vulneraciones?: { idAfectado: number; vulneraciones: number[] }[];
   medidas?: { idAfectado: number; medidas: number[] }[];
+  
 }
 
 
@@ -97,7 +99,8 @@ export async function getDenunciaCompleta(idDenuncia: number) {
       { model: Denunciante, },
       { model: Denunciado,  },
       { model: Afectado, as: 'afectados' },
-      { model: Avocatoria, as: 'avocatoria' }
+      { model: Avocatoria, as: 'avocatoria' },
+      { model: DenunciaMujeres, as: 'DM', required: false }
     ]
   });
 
@@ -153,13 +156,23 @@ export async function getDenunciaCompleta(idDenuncia: number) {
     ? (denuncia as any).Denunciados.map((d: any) => ({ ...d.get() }))
     : [];
 
+  // Obtener datos de denuncia mujeres si existe
+  let datosViolencia = null;
+  if ((denuncia as any).DM) {
+    datosViolencia = {
+      tipoDeViolencia: (denuncia as any).DM.tipoDeViolencia,
+      ambitoViolencia: (denuncia as any).DM.ambitoViolencia
+    };
+  }
+
   return {
     denuncia: { ...denuncia.get() },
     afectados,
     denunciantes,
     denunciados,
     vulneraciones,
-    medidas
+    medidas,
+    datosViolencia
   };
 }
 
@@ -168,6 +181,7 @@ export async function getDenunciaCompleta(idDenuncia: number) {
 //servicio para insertar denuncia completa
 export async function insertDenuncia(denunciajson: datosDenuncia) {
   const t: Transaction = await sequelize.transaction(); //iniciallizams transaccion
+  console.log("Denuncia JSON recibida:", denunciajson);
 
   try {
     const {
@@ -177,7 +191,10 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       afectados = [],
       vulneraciones = [],
       medidas = [],
+      
     } = denunciajson;
+
+    console.log("Denuncia a insertar:", denuncia);
 
 
   
@@ -200,11 +217,21 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
   const numTramiteFormateado = denuncia.num_tramite.toString().padStart(4, '0');
   
   // Determinar el sufijo basado en el grupo prioritario
-  const sufijo = denuncia.grupoPrioritario === 'nna' ? 'NIÑOS' : 'AM';
+  const sufijo = denuncia.grupoPrioritario === 'nna' ? 'NIÑOS' : 
+                 denuncia.grupoPrioritario === 'mujeres' ? 'MUJERES' : 'AM';
   denuncia.codigoTramite = `${numTramiteFormateado}-JCPD-${cantonName}-${currentYear}-${sufijo}`;
 
 
     const nuevaDenuncia = await Denuncia.create({...denuncia, estatus:'completada', codigoTramite: denuncia.codigoTramite}, { transaction: t });//agremamos la denuncia a la base de datos
+
+    // Si el grupo prioritario es 'mujer', crear registro en denuncia_mujeres
+    if (denuncia.grupoPrioritario === 'mujeres' ) {
+      await DenunciaMujeres.create({
+        idDenuncia: nuevaDenuncia.id,
+        tipoDeViolencia: denuncia.tipoDeViolencia,
+        ambitoViolencia: denuncia.ambitoViolencia,
+      }, { transaction: t });
+    }
 
     // si revicimos datos del denunciante lo agregamos denunciantes a la base de datos 
     if (denunciante) {
@@ -330,6 +357,15 @@ export async function actualizarDenuncia(idDenuncia: number, denunciajson: datos
       { ...denunciajson.denuncia },
       { where: { id: idDenuncia }, transaction: t }
     );
+    
+    // 2. Actualizar datos de violencia si es mujer
+    if (denunciajson.denuncia.grupoPrioritario === 'mujeres') {
+      await DenunciaMujeres.upsert({
+        idDenuncia,
+        tipoDeViolencia: denunciajson.denuncia.tipoDeViolencia,
+        ambitoViolencia: denunciajson.denuncia.ambitoViolencia,
+      }, { transaction: t });
+    }
 
     // Actualizar denunciante
     if (denunciajson.denunciante) {

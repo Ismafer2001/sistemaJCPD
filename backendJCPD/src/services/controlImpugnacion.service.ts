@@ -6,14 +6,16 @@ export async function crearControlImpugnacion(data: {
   idResolucion: number;
   codigoTramite: string;
   resolucionImpugnada: string;
-  resultadoImpugnacion: string;
+  recurso_impugnacion: string;
+  resultado: string;
+  periodo: string;
   estatus?: "pendiente" | "en_proceso" | "completada";
 }) {
   const t = await sequelize.transaction();
   try {
     // Validar que todos los campos requeridos estén presentes
-    if (!data.idResolucion || !data.codigoTramite || !data.resolucionImpugnada || !data.resultadoImpugnacion) {
-      throw new Error('Todos los campos son requeridos: idResolucion, codigoTramite, resolucionImpugnada, resultadoImpugnacion');
+    if (!data.idResolucion || !data.codigoTramite || !data.resolucionImpugnada || !data.recurso_impugnacion) {
+      throw new Error('Todos los campos son requeridos: idResolucion, codigoTramite, resolucionImpugnada, recurso_impugnacion');
     }
 
     // Verificar que la resolución existe
@@ -36,7 +38,9 @@ export async function crearControlImpugnacion(data: {
       idResolucion: data.idResolucion,
       codigoTramite: data.codigoTramite,
       resolucionImpugnada: data.resolucionImpugnada,
-      resultadoImpugnacion: data.resultadoImpugnacion,
+      recurso_impugnacion: data.recurso_impugnacion,
+      resultado: data.resultado,
+      periodo: data.periodo,
       estatus: 'completada'
     }, { transaction: t });
 

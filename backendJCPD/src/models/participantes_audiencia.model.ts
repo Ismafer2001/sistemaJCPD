@@ -47,7 +47,7 @@ declare idAC: number;
     asistio: { type: DataTypes.BOOLEAN },
     justifico: { type: DataTypes.BOOLEAN },
     
-    manifiesta:{type: DataTypes.STRING},
+    manifiesta:{type: DataTypes.TEXT},
     
     idAC:{type: DataTypes.INTEGER},
     

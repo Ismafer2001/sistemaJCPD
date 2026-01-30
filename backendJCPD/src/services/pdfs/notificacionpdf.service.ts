@@ -20,25 +20,26 @@ export const PDFnotificacion = async (res: Response,idNotificacion: any) => {
 
   const contentBlocks: any[] = [
     { text: 'FORMATO DE NOTIFICACION', style: 'title', alignment: 'center', margin: [0, 0, 0, 10] },
-    { text: `Trámite Administrativo N° ${pdfData.codigoTramite}` },
-    { text: `${pdfData.fechaAvocatoria}` },
-    { text: `Oficio N° 00000` },
+    { text: [{ text: 'Trámite Administrativo N° ' }, { text: pdfData.codigoTramite, bold: true }] },
+    { text: [{ text: pdfData.fechaCreado ? new Date(pdfData.fechaCreado).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/(\w+), (\d+) de (\w+) de (\d+)/, '$1 $2, de $3 del $4') : '', bold: true }] },
+    { text: [{ text: 'Oficio N° ' }, { text: pdfData.numOficio, bold: true }] },
     { text: 'NOTIFICACIÓN', style: 'section', margin: [0, 10, 0, 10] },
   ];
 
-  if ((pdfData.parte || '').toLowerCase() === 'institucion') {
-    contentBlocks.push({ text: pdfData.diriguidoA });
+  if ((pdfData.parte || '').toLowerCase() === 'representante institucional') {
+    contentBlocks.push({ text: [{ text: pdfData.diriguidoA, bold: true }] });
+    contentBlocks.push({ text: [{ text: `${pdfData.cargo || ''} ${pdfData.institucion || ''}`.trim(), bold: true }] });
   } else {
     contentBlocks.push({ text: 'Señor/Señora' });
-    contentBlocks.push({ text: pdfData.diriguidoA });
-    contentBlocks.push({ text: `PARTE ${pdfData.parte}` });
+    contentBlocks.push({ text: [{ text: pdfData.diriguidoA, bold: true }] });
+    contentBlocks.push({ text: [{ text: 'PARTE ' }, { text: pdfData.parte, bold: true }] });
   }
   
   contentBlocks.push({ text: 'Ciudad.' });
-  contentBlocks.push({ text: `${pdfData.canton}` });
+  contentBlocks.push({ text: [{ text: pdfData.canton, bold: true }] });
   contentBlocks.push({ text: 'De nuestras consideraciones:', decoration: 'underline', margin: [0, 10, 0, 10] });
-  contentBlocks.push({ text: `Reciban un cordial saludo de quienes conformamos la Junta de Protección del cantón ${pdfData.canton || ''}.` });
-  contentBlocks.push({ text: `Adjunto a la presente sírvase encontrar la Avocatoria de fecha ${pdfData.fechaAvocatoria}, en donde encontrará las medidas de protección dispuestas a su favor dentro del trámite administrativo N° ${pdfData.codigoTramite}.` });
+  contentBlocks.push({ text: [{ text: 'Reciban un cordial saludo de quienes conformamos la Junta de Protección del cantón ' }, { text: pdfData.canton || '', bold: true }, { text: '.' }] });
+  contentBlocks.push({ text: [{ text: 'Adjunto a la presente sírvase encontrar la Avocatoria de fecha ' }, { text: pdfData.fechaAvocatoria ? new Date(pdfData.fechaAvocatoria).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/(\w+), (\d+) de (\w+) de (\d+)/, '$1 $2, de $3 del $4') : '', bold: true }, { text: ', en donde encontrará las medidas de protección dispuestas a su favor dentro del trámite administrativo N° ' }, { text: pdfData.codigoTramite, bold: true }, { text: '.' }] });
   contentBlocks.push({ text: 'Sin otro particular suscribimos.' });
   contentBlocks.push({ text: 'Atentamente,' });
   contentBlocks.push({ text: 'MIEMBROS DE LA JUNTA CANTONAL DE PROTECCION DE DERECHOS', style: 'section', margin: [0, 10, 0, 10] });

@@ -1,0 +1,82 @@
+<div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <a
+    [routerLink]="[`../../../fases/${denunciaId}`]"
+
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
+
+    </a>
+  <h3 class="text-2xl font-bold">Control de desestimiento</h3>
+
+</div>
+<hr class="border-yellow-300 border-1" />
+
+<app-card-Form [titulo]="'Control de Desestimiento'">
+  <form [formGroup]="controlDesestimientoForm" class="space-y-6">
+    <!-- Campo Código de Trámite -->
+    <div class="space-y-2">
+      <label for="codigoTramite" class="block text-sm font-medium text-gray-700">
+        CÓDIGO DE TRÁMITE <span class="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        id="codigoTramite"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 transition-colors"
+        [class.border-red-500]="controlDesestimientoForm.get('codigoTramite')?.invalid && controlDesestimientoForm.get('codigoTramite')?.touched"
+        placeholder="Ej.: DESEEST-001-2025"
+        formControlName="codigoTramite"
+      />
+      <span *ngIf="controlDesestimientoForm.get('codigoTramite')?.invalid && controlDesestimientoForm.get('codigoTramite')?.touched"
+            class="text-red-500 text-xs mt-1">El código de trámite es requerido</span>
+    </div>
+
+    <!-- Campo Resultado Desestimiento -->
+    <fieldset class="space-y-4">
+      <legend class="text-sm font-medium text-gray-700 mb-3">
+        RESULTADO DESESTIMIENTO <span class="text-red-500">*</span>
+      </legend>
+      <div class="flex gap-4 w-full">
+        <!-- Opción: Sí -->
+        <div class="flex items-center justify-center space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-1">
+          <input
+            type="radio"
+            id="si"
+            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            value="si"
+            formControlName="resultado_desestimiento"
+          />
+          <label for="si" class="text-sm text-gray-700 cursor-pointer font-medium">
+            Sí
+          </label>
+        </div>
+
+        <!-- Opción: No -->
+        <div class="flex items-center justify-center space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-1">
+          <input
+            type="radio"
+            id="no"
+            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            value="no"
+            formControlName="resultado_desestimiento"
+          />
+          <label for="no" class="text-sm text-gray-700 cursor-pointer font-medium">
+            No
+          </label>
+        </div>
+      </div>
+      <span *ngIf="controlDesestimientoForm.get('resultado_desestimiento')?.invalid && controlDesestimientoForm.get('resultado_desestimiento')?.touched"
+            class="text-red-500 text-xs mt-1">Debe seleccionar una opción</span>
+    </fieldset>
+
+    <!-- Botón de envío -->
+    <div class="pt-4 border-t border-gray-200 flex justify-end">
+      <app-button-submit
+        [label]="'Guardar Control de Desestimiento'"
+        (clicked)="crearControlDesestimiento()">
+      </app-button-submit>
+    </div>
+  </form>
+</app-card-Form>

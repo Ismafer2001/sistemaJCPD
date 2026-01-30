@@ -12,6 +12,7 @@ import { Canton } from './cantones.models';
  dirigue: string;
  indica: string;
  manifiesta: string;
+ conciliacion?: string;
  pdf_audiencia_contestacion: number;
  seRatifica: String;
   afectadoManifiesta?: string;
@@ -33,6 +34,7 @@ interface AudienciaContestacionCreationAttributes extends Optional<AudienciaCont
     declare dirigue: string;
     declare indica: string;
     declare manifiesta: string;
+    declare conciliacion: string;
     declare seRatifica: string;
      declare afectadoManifiesta?: string;
     declare pdf_audiencia_contestacion: number;
@@ -54,6 +56,7 @@ interface AudienciaContestacionCreationAttributes extends Optional<AudienciaCont
     indica: { type: DataTypes.TEXT },
     afectadoManifiesta: { type: DataTypes.TEXT },
     manifiesta:{type: DataTypes.TEXT},
+    conciliacion: { type: DataTypes.STRING },
     idDenuncia:{type: DataTypes.INTEGER},
      estatus: {
     type: DataTypes.STRING,

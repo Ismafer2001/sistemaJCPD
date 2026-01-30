@@ -1,0 +1,43 @@
+<div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <a
+    [routerLink]="[`/${grupo}`]"
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
+    </a>
+  <h3 class="text-2xl font-bold">Denuncias Remitidas</h3>
+</div>
+<hr class="border-yellow-300 border-1" />
+<div class="bg-gray-50 b p-4 shadow-lg overflow-y-scroll h-[calc(100vh-8rem)]">
+  <app-card-Form [titulo]="'Deprecatorias Recibidas'">
+
+    <!-- Loading -->
+    <div *ngIf="loading" class="text-center py-4">
+      <p>Cargando deprecatorias...</p>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="error && !loading" class="text-center py-4 text-red-600">
+      <p>{{ error }}</p>
+    </div>
+
+    <!-- Tabla de deprecatorias -->
+    <div *ngIf="!loading && !error" class="overflow-auto bg-white shadow-xl rounded-xl max-h-[60vh] md:max-h-[55vh]">
+      <tablaNavigator
+        [columnas]="columnasTabla"
+        [encabezados]="encabezadosTabla"
+        [datos]="deprecatorias"
+        [RouterLink]="grupo+'/denuncia-remitidas'"
+        [RouterLinkparam]="'id'"
+      ></tablaNavigator>
+    </div>
+
+    <!-- Mensaje cuando no hay datos -->
+    <div *ngIf="!loading && !error && deprecatorias.length === 0" class="text-center py-8 text-gray-500">
+      <p>No hay deprecatorias recibidas</p>
+    </div>
+
+  </app-card-Form>
+</div>

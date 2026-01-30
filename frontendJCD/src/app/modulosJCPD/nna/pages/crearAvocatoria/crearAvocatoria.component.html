@@ -97,41 +97,23 @@
         {{
           fechaHoraActual ? (fechaHoraActual | date : "mm" : "" : "es") : "00"
         }} </span
-      >, en uso de las atribuciones que le confieren
+      >,
     </p>
     <div>
-      <select
-        formControlName="articulo"
-        class="my-1 p-1 block w-full rounded-md border-2 border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
-        [ngClass]="{
-          ' border-1 border-red-500':
-            avocatoriaForm.get('articulo')?.invalid &&
-            avocatoriaForm.get('articulo')?.touched
-        }"
-      >
-        <option value="" disabled selected hidden>Seleccioná una opción</option>
-        <option value="Art 205 del  Código de la Niñez y Adolescencia">
-          Art 205 del Código de la Niñez y Adolescencia
-        </option>
-        <option value="Art 206 del  Código de la Niñez y Adolescencia">
-          Art 206 del Código de la Niñez y Adolescencia
-        </option>
-        <option value="Art 206 del  Código de la Niñez y Adolescencia">
-          <p>Art 205 del Código de la Niñez y Adolescencia y</p>
-          <p>Art 206 del Código de la Niñez y Adolescencia</p>
-        </option>
-      </select>
-      <div
-        *ngIf="
-          avocatoriaForm.get('articulo')?.invalid &&
-          avocatoriaForm.get('articulo')?.touched
-        "
-        class="text-red-500 text-sm mt-1"
-      >
-        <span *ngIf="avocatoriaForm.get('articulo')?.errors?.['required']"
-          >El artículo es requerido</span
-        >
-      </div>
+
+
+      <app-inputs
+    label="en uso de las atribuciones que le confieren"
+    type="text"
+    placeholder="Ingrese articulos"
+    [formGroup]="avocatoriaForm"
+    [control]="$any(avocatoriaForm.get('articulo')!)"
+    >
+
+    <!-- Mensajes de error personalizados -->
+    <span *ngIf="avocatoriaForm.get('articulo')?.errors?.['required']">campo requerido</span>
+
+  </app-inputs>
     </div>
     <p class="leading-loose text-base">
       AVOCA CONOCIMIENTO de <span>{{ denunciaAvocatoria?.tipoDenuncia }}</span
@@ -310,6 +292,7 @@
                   medidasEmergentesForm.get('periodo')?.touched
               }"
             />
+
             <div
               *ngIf="
                 medidasEmergentesForm.get('idMedida')?.invalid &&

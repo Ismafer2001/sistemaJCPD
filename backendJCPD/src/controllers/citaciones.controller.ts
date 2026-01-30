@@ -1,11 +1,65 @@
 import { Request, Response } from "express";
-import {  Denuncia, Denunciado, Denunciante,  Otros, Avocatoria } from "../models";
-import { notifiacionesDTO, personasNotificacion } from "../services/notificaciones.service";
+import {
+  Denuncia,
+  Denunciado,
+  Denunciante,
+  Otros,
+  Avocatoria,
+} from "../models";
+
 import { handlehttp } from "../utils/error.handle";
-import { citacionesDTO, crearcitacion, personasCitacion, actualizarCitacion, obtenerCitacion } from "../services/citaciones.service";
-import { PDFcitacion } from '../services/pdfs/citacionespdf.service';
+import {
+  citacionesDTO,
+  crearcitacion,
+  actualizarCitacion,
+  obtenerCitacion,
+  involucradosACitar,
+  crearOtrosCitados,
+  otrosACitar,
+  eliminarOtrosCitados,
+  actualizarOtrosCitados,
+} from "../services/citaciones.service";
+import { PDFcitacion } from "../services/pdfs/citacionespdf.service";
 
+// Controlador para crear un registro en la tabla Otros
+export const postCreateOtrosCitados = async (req: Request, res: Response) => {
+  try {
+    const { nombres, apellidos, cedula, parte, idDenuncia } = req.body;
+    if (!nombres || !idDenuncia) {
+      return res
+        .status(400)
+        .json({
+          message: "Los campos nombres, idDenuncia y parte son requeridos",
+        });
+    }
+    const nuevoOtro = await crearOtrosCitados(req.body);
+    res.status(201).json(nuevoOtro);
+  } catch (error) {
+    handlehttp(res, "error_post_otro_notificado", error);
+  }
+};
 
+// Controlador para eliminar otros citados
+export const deleteOtroCitado = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const resultado = await eliminarOtrosCitados(Number(id));
+    res.json(resultado);
+  } catch (error) {
+    handlehttp(res, 'error_delete_otro_citado', error);
+  }
+};
+
+// Controlador para actualizar otros citados
+export const putOtroCitado = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const otroActualizado = await actualizarOtrosCitados(Number(id), req.body);
+    res.json(otroActualizado);
+  } catch (error) {
+    handlehttp(res, 'error_put_otro_citado', error);
+  }
+};
 
 // Controlador para actualizar una citación
 export const putCitacion = async (req: Request, res: Response) => {
@@ -14,7 +68,7 @@ export const putCitacion = async (req: Request, res: Response) => {
     const citacionActualizada = await actualizarCitacion(id, req.body);
     res.json(citacionActualizada);
   } catch (error) {
-    handlehttp(res, 'error_put_citacion', error);
+    handlehttp(res, "error_put_citacion", error);
   }
 };
 
@@ -25,61 +79,77 @@ export const getCitacion = async (req: Request, res: Response) => {
     const datos = await obtenerCitacion(Number(id));
     res.json(datos);
   } catch (error) {
-    handlehttp(res, 'error_get_citacion', error);
+    handlehttp(res, "error_get_citacion", error);
   }
 };
 
- export const getPersonasCitacion = async (req:Request, res:Response) =>{
-    try {
-      const { id } = req.params;
-      const personas = await personasCitacion(id);
-      if (!Array.isArray(personas) || personas.length === 0) {
-        return res.status(404).json({ message: 'No se encontraron personas notificadas' });
-      }
-      res.json(personas);
-        
-    } catch (error) {
-        console.error('Error al consultar personas:', error);
-  res.status(500).json({ message: 'Error al consultar', error: error });
-        
+export const getPersonasCitacion = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const personas = await involucradosACitar(id);
+    if (!Array.isArray(personas) || personas.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No se encontraron personas notificadas" });
     }
+    res.json(personas);
+  } catch (error) {
+    console.error("Error al consultar personas:", error);
+    res.status(500).json({ message: "Error al consultar", error: error });
+  }
+};
 
-
- }
-
- export const getCitacionesDTO = async(req:Request, res:Response) =>{
+export const getOtrosACitar = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-  const datos = await citacionesDTO(id);
-  
-  
-  console.log(datos)
-  res.json(datos)
-    
+    const personas = await otrosACitar(id);
+
+    if (!personas) {
+      return res.status(404).json({ message: "No se encontraron personas" });
+    }
+
+    res.json(personas);
   } catch (error) {
-    handlehttp(res,'error getDatos',error)
-    
+    handlehttp(res, "error_get_otros_a_notificar", error);
   }
+};
 
-  
+export const getCitacionesDTO = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { tipoInvolucrado, idInvolucrado, idCitacion } = req.query;
+    console.log("Parametros recibidos:", {
+      id,
+      tipoInvolucrado,
+      idInvolucrado,
+      idCitacion,
+    });
 
+    const datos = await citacionesDTO(
+      id,
+      tipoInvolucrado as string,
+      idInvolucrado as string,
+      idCitacion as string,
+    );
 
- }
+    console.log(datos);
+    res.json(datos);
+  } catch (error) {
+    handlehttp(res, "error_get_datos", error);
+  }
+};
 
- export const postCitacion = async (req: Request, res: Response) => {
-   try {
+export const postCitacion = async (req: Request, res: Response) => {
+  try {
     const nuevacitacion = await crearcitacion(req.body);
-        res.status(201).json(nuevacitacion);
-    
-   } catch (error) {
-  
-      handlehttp(res,'error_post_citacion',error)
-    
-   }
- }
+    res.status(201).json(nuevacitacion);
+  } catch (error) {
+    handlehttp(res, "error_post_citacion", error);
+  }
+};
 
- //-----pdfs------------///
+//-----pdfs------------///
 
 // Controlador para generar y enviar el PDF de citación
 export const getCitacionPDF = async (req: Request, res: Response) => {
@@ -87,6 +157,6 @@ export const getCitacionPDF = async (req: Request, res: Response) => {
     const { id } = req.params;
     await PDFcitacion(res, id);
   } catch (error) {
-    handlehttp(res, 'error_get_citacion_pdf', error);
+    handlehttp(res, "error_get_citacion_pdf", error);
   }
 };

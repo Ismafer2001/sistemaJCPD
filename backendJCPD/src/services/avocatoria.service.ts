@@ -301,6 +301,8 @@ export const medidasPorAfectado = async (afectadoId: number) => {
   return resultadoFormateado;
 };
 
+
+
 //servicio para editar una avocatoria existente
 export async function editarAvocatoria(idAvocatoria: number, data: {
   codigoTramite: string;

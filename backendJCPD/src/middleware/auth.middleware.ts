@@ -9,6 +9,7 @@ export const verificarToken = async (
   try {
     const authHeader = req.headers.authorization || "";
     const token = authHeader.split(" ").pop();
+    console.log("Token recibido en el middleware:", token);
 
     // Extrae el ID del usuario del token decodificado.
     const decoded = await checkToken(`${token}`);

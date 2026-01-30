@@ -22,7 +22,8 @@ interface involucrados{
   nombres: string,
   apellidos: string,
   tipo: string,
-
+  asistio?: boolean,
+  justifico?: boolean
 }
 interface vulneracionesIdentificadas{
   id: number,
@@ -369,25 +370,7 @@ eliminarVulneracionIdentificada(vulneracion: vulneracionesIdentificadas) {
     });
   }
 
-   //getters de formulario//
-  get medidas(): FormArray {
-  return this.audienciaPruebaForm.get('medidasDefinitivas') as FormArray;
-}
-  // Devuelve solo las medidas que pertenecen al afectado actualmente seleccionado
-  get filteredMedidas(): any[] {
-    const idAfectado = Number(this.medidasDefinitivasForm.get('idAfectado')?.value);
-    if (!idAfectado) return [];
-    return (this.medidas.value || []).filter((m: any) => Number(m.idAfectado) === idAfectado);
-  }
 
-       agregarAfectado(): void {
-  if (this.medidasDefinitivasForm.valid) {
-    this.medidas.push(this.fb.group(this.medidasDefinitivasForm.value));
-    this.medidasDefinitivasForm.reset(); // limpio el form para el siguiente
-  } else {
-    this.medidasDefinitivasForm.markAllAsTouched(); // para que muestre errores
-  }
-}
 
 seleccionarMEdida() {
   this.medidasDefinitivasForm.get('idMedida')!
@@ -596,7 +579,7 @@ seleccionarMEdida() {
       });
     }
     eliminarMedida(registro: any): void {
-        if (!this.medidas) return;
+
 
         this.medidasService.eliminarMedidasDefinitivas(registro.id).subscribe({
           next: () => {
@@ -640,6 +623,7 @@ seleccionarMEdida() {
     const fg = this.medidasDefinitivasForm;
   if (fg.invalid) {
     fg.markAllAsTouched();
+    console.log('Formulario inválido:', fg.errors);
     return;
   }
       this.medidasService.actualizarMedidasDefinitivas(this.medidasDefinitivasForm.get('id')?.value, this.medidasDefinitivasForm.value).subscribe({
@@ -1116,6 +1100,7 @@ get participantesArray(): FormArray {
       this.audienciaPruebaForm.patchValue({
         codigoTramite: this.datosAudienciaPrueba.codigoTramite,
         idDenuncia: this.denunciaId || 0,
+        instalacionAudiencia: this.datosAudienciaPrueba.articulo,
         // ...otros campos si es necesario
       });
 
@@ -1161,6 +1146,7 @@ get participantesArray(): FormArray {
         Hora: hora,
         fecha: fecha,
         instalacionAudiencia: data?.instalacionAudiencia ?? '',
+        articulo: data?.articulo ?? '',
         afectadoManifiesta: data?.afectadoManifiesta ?? '',
         idDenuncia: this.denunciaId || 0
       }, { emitEvent: false });
@@ -1371,6 +1357,7 @@ get participantesArray(): FormArray {
       index = indexOrData;
       const participantesData = this.participantesTabla;
       if (!participantesData || index < 0 || index >= participantesData.length) {
+        toast.error('Error: Participante no encontrado');
         console.error('Índice de participante inválido:', index, 'Total:', participantesData?.length);
         return;
       }
@@ -1387,6 +1374,7 @@ get participantesArray(): FormArray {
       );
 
       if (index === -1) {
+        toast.error('Error: No se pudo encontrar el participante');
         console.error('No se pudo encontrar el participante en el array:', participanteData);
         return;
       }
@@ -1394,12 +1382,14 @@ get participantesArray(): FormArray {
 
     // Verificar que el FormArray esté sincronizado
     if (!this.participantesArray || index >= this.participantesArray.length) {
+      toast.error('Error: Datos no sincronizados');
       console.error('FormArray no sincronizado. Index:', index, 'Array length:', this.participantesArray?.length);
       return;
     }
 
     const participanteControl = this.participantesArray.at(index);
     if (!participanteControl) {
+      toast.error('Error: Control de participante no encontrado');
       console.error('Control de participante no encontrado en índice:', index);
       return;
     }
@@ -1408,16 +1398,48 @@ get participantesArray(): FormArray {
     this.participantesForm.patchValue(participante);
     this.isActivateModoEdicionParticipante = true;
     this.indexParticipanteEditando = index;
+
+    toast.info('Modo edición activado', {
+      duration: 2000,
+      description: `Editando: ${participante.nombres} ${participante.apellidos}`
+    });
   }
 
   // Actualizar participante
   actualizarParticipante(): void {
-    if (this.indexParticipanteEditando !== null) {
+    if (this.participantesForm.invalid) {
+      this.participantesForm.markAllAsTouched();
+      toast.error('Formulario inválido', {
+        duration: 3000,
+        description: 'Por favor, completa todos los campos requeridos'
+      });
+      return;
+    }
+
+    if (this.indexParticipanteEditando === null || this.indexParticipanteEditando < 0) {
+      toast.error('Error: No hay participante en edición');
+      return;
+    }
+
+    try {
       const participanteActualizado = this.participantesForm.value;
       this.participantesArray.at(this.indexParticipanteEditando).patchValue(participanteActualizado);
       this.participantes = this.participantesArray.getRawValue();
+
+      const nombreCompleto = `${participanteActualizado.nombres || ''} ${participanteActualizado.apellidos || ''}`.trim();
+
       this.cancelarEdicionParticipante();
-      toast.success('Participante actualizado con éxito', { duration: 3000 });
+
+      toast.success('Participante actualizado correctamente', {
+        duration: 3000,
+        description: `Los cambios de ${nombreCompleto} han sido guardados`
+      });
+    } catch (error) {
+      console.error('Error al actualizar participante:', error);
+      toast.error('Error al actualizar el participante', {
+        duration: 3000,
+        description: 'Por favor, intenta nuevamente'
+      });
     }
   }
 
@@ -1427,19 +1449,31 @@ get participantesArray(): FormArray {
     this.indexParticipanteEditando = null;
     this.participantesForm.reset();
     this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+
+    toast.info('Edición cancelada', {
+      duration: 2000
+    });
   }
 
   // Eliminar participante
   eliminarParticipante(indexOrData: number | any): void {
     let index: number;
+    let participanteData: any;
 
     // Determinar si recibimos un índice o un objeto de datos
     if (typeof indexOrData === 'number') {
       // Caso 1: Recibimos un índice numérico
       index = indexOrData;
+      const participantesData = this.participantesTabla;
+      if (!participantesData || index < 0 || index >= participantesData.length) {
+        toast.error('Error: Participante no encontrado');
+        console.error('Índice de participante inválido:', index, 'Total:', participantesData?.length);
+        return;
+      }
+      participanteData = participantesData[index];
     } else {
       // Caso 2: Recibimos un objeto de datos (desde tablaEdit)
-      const participanteData = indexOrData;
+      participanteData = indexOrData;
       // Buscar el índice correspondiente en el array
       const participantesData = this.participantesTabla;
       index = participantesData.findIndex(p =>
@@ -1449,6 +1483,7 @@ get participantesArray(): FormArray {
       );
 
       if (index === -1) {
+        toast.error('Error: No se pudo encontrar el participante a eliminar');
         console.error('No se pudo encontrar el participante a eliminar:', participanteData);
         return;
       }
@@ -1456,13 +1491,16 @@ get participantesArray(): FormArray {
 
     // Verificar que el índice sea válido
     if (index < 0 || index >= this.participantesArray.length) {
+      toast.error('Error: Índice inválido');
       console.error('Índice inválido para eliminar participante:', index);
       return;
     }
 
-    this.participantesArray.removeAt(index);
-    this.participantes = this.participantesArray.getRawValue();
-    toast.success('Participante eliminado con éxito', { duration: 3000 });
+    // Confirmar eliminación
+    const nombreCompleto = `${participanteData.nombres || ''} ${participanteData.apellidos || ''}`.trim();
+    if (!confirm(`¿Está seguro de eliminar a ${nombreCompleto}?`)) {
+      return;
+    }
 
     // Si estamos editando el participante que se eliminó, cancelar edición
     if (this.indexParticipanteEditando === index) {
@@ -1470,6 +1508,15 @@ get participantesArray(): FormArray {
     } else if (this.indexParticipanteEditando !== null && this.indexParticipanteEditando > index) {
       this.indexParticipanteEditando--;
     }
+
+    // Eliminar del FormArray
+    this.participantesArray.removeAt(index);
+    this.participantes = this.participantesArray.getRawValue();
+
+    toast.success('Participante eliminado correctamente', {
+      duration: 3000,
+      description: `${nombreCompleto} ha sido eliminado`
+    });
   }
   //-----------PDF------------------//
   generarPdf(){

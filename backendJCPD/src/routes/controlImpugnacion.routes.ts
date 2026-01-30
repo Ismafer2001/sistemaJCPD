@@ -12,7 +12,7 @@ import { verificarToken } from '../middleware/auth.middleware';
 const router = Router();
 
 // Ruta para obtener código de trámite de una denuncia
-router.get('codigo-tramite/:id', getCodigoTramiteDenuncia);
+router.get('/codigo-tramite/:id', getCodigoTramiteDenuncia);
 
 // Ruta para crear un nuevo control de impugnación
 router.post('/', verificarToken, postCrearControlImpugnacion);
@@ -29,6 +29,6 @@ router.get('/:id', getControlImpugnacionPorId);
 // Ruta para actualizar un control de impugnación
 router.put('/:id', verificarToken, putActualizarControlImpugnacion);
 
-router.get('/codigo-tramite/:id', getCodigoTramiteDenuncia)
+
 
 export default router;

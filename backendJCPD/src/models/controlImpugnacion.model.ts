@@ -6,9 +6,10 @@ interface ControlImpugnacionAttributes {
     id: number;
     idResolucion: number;
     codigoTramite: string;
-    
+    resultado: string;
+    periodo: string;
     resolucionImpugnada: string;
-    resultadoImpugnacion: string;
+    recurso_impugnacion: string;
     estatus?: "pendiente"|"en_proceso"|"completada";
 }
 
@@ -18,9 +19,10 @@ export class ControlImpugnacion extends Model<ControlImpugnacionAttributes, Cont
     declare id: number;
     declare idResolucion: number;
     declare codigoTramite: string;
-
+    declare resultado: string;
+    declare periodo: string;
     declare resolucionImpugnada: string;
-    declare resultadoImpugnacion: string;
+    declare recurso_impugnacion: string;
     declare estatus: "pendiente"|"en_proceso"|"completada";
 }
 
@@ -48,10 +50,17 @@ ControlImpugnacion.init({
         type: DataTypes.TEXT,
         allowNull: false,
     },
-    resultadoImpugnacion: {
+    recurso_impugnacion: {
         type: DataTypes.TEXT,
         allowNull: false,
     },
+    resultado: {
+        type: DataTypes.TEXT,
+    },
+    periodo: {
+        type: DataTypes.STRING(100),
+    },
+
     estatus: {
     type: DataTypes.STRING,
     defaultValue: "pendiente",

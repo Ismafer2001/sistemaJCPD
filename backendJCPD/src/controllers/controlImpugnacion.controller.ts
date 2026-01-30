@@ -12,25 +12,27 @@ import { handlehttp } from '../utils/error.handle';
 // Controlador para crear un control de impugnación
 export const postCrearControlImpugnacion = async (req: Request, res: Response) => {
   try {
-    const { idResolucion, codigoTramite, resolucionImpugnada, resultadoImpugnacion, estatus } = req.body;
+    const { idResolucion, codigoTramite, resolucionImpugnada, recurso_impugnacion,resultado, periodo, estatus } = req.body;
 
     // Validar que los campos requeridos estén presentes
-    if (!idResolucion || !codigoTramite || !resolucionImpugnada || !resultadoImpugnacion) {
+    if (!idResolucion || !codigoTramite || !resolucionImpugnada || !recurso_impugnacion) {
       return res.status(400).json({
         success: false,
-        message: 'Campos requeridos: idResolucion, codigoTramite, resolucionImpugnada, resultadoImpugnacion'
+        message: 'Campos requeridos: idResolucion, codigoTramite, resolucionImpugnada, recurso_impugnacion'
       });
     }
 
-    const resultado = await crearControlImpugnacion({
+    const resultadoImpugnacion = await crearControlImpugnacion({
       idResolucion: parseInt(idResolucion),
       codigoTramite,
       resolucionImpugnada,
-      resultadoImpugnacion,
-      
+      recurso_impugnacion,
+      resultado,
+      periodo,
+      estatus
     });
 
-    res.status(201).json(resultado);
+    res.status(201).json(resultadoImpugnacion);
 
   } catch (error) {
     handlehttp(res, 'Error al crear control de impugnación', error);

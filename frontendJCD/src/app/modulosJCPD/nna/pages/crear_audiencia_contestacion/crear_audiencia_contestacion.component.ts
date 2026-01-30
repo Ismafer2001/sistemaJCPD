@@ -7,7 +7,8 @@ import { FormBuilder,
    FormGroup,
     Validators,
      ReactiveFormsModule,
-      FormArray } from '@angular/forms';
+      FormArray,
+      FormsModule } from '@angular/forms';
 import { AudienciaContestacionService } from '../../services/audienciaContestacion.service';
 import { UserService } from '@admin/services/user.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -31,6 +32,7 @@ interface involucrados{
      CardFormComponent,
       TablaEditComponent,
       ReactiveFormsModule,
+      FormsModule,
       ButtonSubmitComponent,
       TablaParticipantesComponent,
     NavFormularioComponent,
@@ -40,6 +42,8 @@ RouterLink]
 
 })
 export class Crear_audienciaComponent implements OnInit {
+  // Propiedades para manejar tipos de participantes
+
 //--- Configuración de tabs------//
   tabsConfig: any[] = [
     {
@@ -56,6 +60,10 @@ export class Crear_audienciaComponent implements OnInit {
     },
     {
       id: 3,
+      label: 'Conciliacion'
+    },
+    {
+      id: 4,
       label: 'Pdf'
     }
   ];
@@ -111,6 +119,30 @@ export class Crear_audienciaComponent implements OnInit {
   editMode: boolean = false;
 
   audienciaContestacionCargada:any=null
+
+  // Propiedades para manejar tipos de participantes
+  private _tipoParticipante: 'persona' | 'institucion' | 'proyecto' | '' = '';
+
+  get tipoParticipante(): 'persona' | 'institucion' | 'proyecto' | '' {
+    return this._tipoParticipante;
+  }
+
+  set tipoParticipante(value: 'persona' | 'institucion' | 'proyecto' | '') {
+    this._tipoParticipante = value;
+    if (value !== '') {
+      this.actualizarValidacionesPorTipo(value as 'persona' | 'institucion' | 'proyecto');
+
+      // Establecer valor por defecto automáticamente según el tipo
+      if (value === 'institucion') {
+        this.participantesForm?.get('tipoParticipante')?.setValue('Representante Institucional');
+      } else if (value === 'proyecto') {
+        this.participantesForm?.get('tipoParticipante')?.setValue('Representante Proyecto');
+      } else if (value === 'persona') {
+        // Para persona, limpiar el valor para que deba ser seleccionado manualmente
+        this.participantesForm?.get('tipoParticipante')?.setValue('');
+      }
+    }
+  }
 
 
   // Nuevas propiedades para el modo edición de participantes
@@ -173,9 +205,7 @@ export class Crear_audienciaComponent implements OnInit {
     this.formularioParticipantes();
     this.configureEditCreateMode();
 
-
     this.loadPrincipalesActivos();
-
 
     this.audienciaForm.valueChanges.subscribe((value) => {
       console.log('Audiencia Form Value Changes:', value);
@@ -183,7 +213,6 @@ export class Crear_audienciaComponent implements OnInit {
     this.participantesForm.valueChanges.subscribe((value) => {
       console.log('Participantes Form Value Changes:', value);
     });
-
   }
 
   // Maneja el cambio del checkbox de asistencia en la tabla
@@ -211,6 +240,8 @@ export class Crear_audienciaComponent implements OnInit {
       dirigue: ['', Validators.required],
       indica: ['', Validators.required],
       manifiesta: ['', Validators.required],
+      existeConciliacion: ['no'],
+      conciliacion: [''],
 
       seRatifica: ['no', Validators.required],
 
@@ -222,15 +253,52 @@ export class Crear_audienciaComponent implements OnInit {
 
   formularioParticipantes() {
     this.participantesForm = this.fb.group({
+      // Campos comunes
       nombres: ['', Validators.required],
       apellidos: ['', Validators.required],
       cedula: ['', Validators.required],
       tipoParticipante: ['', Validators.required],
-      asistio: [false,],
-      manifiesta: ['', ],
+      asistio: [false],
+      manifiesta: [''],
       idDenuncia: [this.denunciaId],
       justifico: [false],
+      // Campos específicos de institución
+      institucion: [''],
+      cargo: [''],
+      // Campo específico de proyecto
+      nombre_proyecto: ['']
     });
+
+    // Listener para cambios en el selector de tipo de participante que actualice las validaciones
+    // Esto se ejecutará cuando cambie this.tipoParticipante desde el template
+  }
+
+
+  actualizarValidacionesPorTipo(tipo: 'persona' | 'institucion' | 'proyecto') {
+    // Limpiar validaciones específicas
+    this.participantesForm.get('institucion')?.clearValidators();
+    this.participantesForm.get('cargo')?.clearValidators();
+    this.participantesForm.get('nombre_proyecto')?.clearValidators();
+    this.participantesForm.get('tipoParticipante')?.clearValidators();
+
+    // Aplicar validaciones según el tipo
+    if (tipo === 'institucion') {
+      this.participantesForm.get('institucion')?.setValidators([Validators.required]);
+      this.participantesForm.get('cargo')?.setValidators([Validators.required]);
+      // Para institución no es requerido el tipoParticipante específico
+    } else if (tipo === 'proyecto') {
+      this.participantesForm.get('nombre_proyecto')?.setValidators([Validators.required]);
+      // Para proyecto no es requerido el tipoParticipante específico
+    } else if (tipo === 'persona') {
+      // Solo para persona es requerido seleccionar el tipo específico
+      this.participantesForm.get('tipoParticipante')?.setValidators([Validators.required]);
+    }
+
+    // Actualizar estado de validaciones
+    this.participantesForm.get('institucion')?.updateValueAndValidity();
+    this.participantesForm.get('cargo')?.updateValueAndValidity();
+    this.participantesForm.get('nombre_proyecto')?.updateValueAndValidity();
+    this.participantesForm.get('tipoParticipante')?.updateValueAndValidity();
   }
   //-------------------------------------------//
 
@@ -331,6 +399,9 @@ get participantesArray(): FormArray {
             nombres: [p.nombres || p.nombre || ''],
             apellidos: [p.apellidos || ''],
             cedula: [p.cedula || ''],
+            cargo: [p.cargo || ''],
+            institucion: [p.institucion || ''],
+            nombre_proyecto: [p.nombre_proyecto || p.nombreProyecto || ''],
             tipoParticipante: [p.tipoParticipante || p.tipo || ''],
             asistio: [p.asistio || false],
             justifico: [p.justifico || false],
@@ -363,6 +434,7 @@ get participantesArray(): FormArray {
         codigoTramite: this.datosAudiencia.codigoTramite,
         Hora: this.datosAudiencia.horaCitacion,
         fecha: this.datosAudiencia.fechaCitacion ? new Date(this.datosAudiencia.fechaCitacion).toISOString().substring(0, 10) : '',
+        instalacionAudiencia: this.datosAudiencia.articulo,
 
 
         // ...otros campos si es necesario
@@ -421,6 +493,8 @@ console.log('audiencia cargada', this.audienciaContestacionCargada);
         dirigue: data?.dirigue ?? '',
         indica: data?.indica ?? '',
         manifiesta: data?.manifiesta ?? '',
+        existeConciliacion: (data?.conciliacion && data.conciliacion.trim() !== '') ? 'si' : 'no',
+        conciliacion: data?.conciliacion ?? '',
         seRatifica: data?.seRatifica ?? false,
         afectadoManifiesta: data?.afectadoManifiesta ?? '',
         instalacionAudiencia: data?.instalacionAudiencia ?? ''
@@ -572,27 +646,44 @@ regresar(): void {
   //------------SUBMIT PARTICIPANTES---///
   onSubmitParticipante(): void {
     if (this.participantesForm.invalid) {
-    this.participantesForm.markAllAsTouched();
-    toast.error('Formulario inválido', {
-      duration: 3000,
-      description: 'Por Favor, Completa Todos los Campos Requeridos'
-    });
-    return;
-  }
+      this.participantesForm.markAllAsTouched();
+      toast.error('Formulario inválido', {
+        duration: 3000,
+        description: 'Por Favor, Completa Todos los Campos Requeridos'
+      });
+      return;
+    }
+
     const body = {
       ...this.participantesForm.value,
     };
+
     console.log(body);
     this.audienciaContestacionService.postCrearParticipante(body).subscribe(() => {
       // Agregar al FormArray de audienciaForm
       this.participantesArray.push(this.fb.group({ ...this.participantesForm.value }));
       // Actualizar el array participantes para reflejar el cambio en la tabla
       this.participantes = this.participantesArray.getRawValue();
-      this.participantesForm.reset();
-      this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+
+      // Reset del formulario
+      this.resetFormularioParticipantes();
 
       toast.success('Participante agregado correctamente');
     });
+  }
+
+  resetFormularioParticipantes() {
+    this.participantesForm.reset();
+    this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+    this.participantesForm.get('asistio')?.setValue(false);
+    this.participantesForm.get('justifico')?.setValue(false);
+
+    // Re-aplicar el valor de tipoParticipante para que el setter establezca los valores por defecto
+    if (this.tipoParticipante !== '') {
+      const currentTipo = this.tipoParticipante;
+      this._tipoParticipante = ''; // Limpiar temporalmente
+      this.tipoParticipante = currentTipo; // Re-establecer para activar el setter
+    }
   }
 
   //-----------MÉTODOS PARA EDITAR/ELIMINAR PARTICIPANTES---///
@@ -615,7 +706,18 @@ regresar(): void {
     this.modoEdicionParticipante = true;
     this.participanteEnEdicionIndex = index;
 
-    // Cargar datos en el formulario
+    // Determinar el tipo de participante y establecer la propiedad tipoParticipante
+    const tipoParticipante = item.tipoParticipante || '';
+
+    if (tipoParticipante.toLowerCase().includes('institucional') || tipoParticipante.toLowerCase().includes('institucion')) {
+      this.tipoParticipante = 'institucion';
+    } else if (tipoParticipante.toLowerCase().includes('proyecto') || tipoParticipante.toLowerCase().includes('servicio')) {
+      this.tipoParticipante = 'proyecto';
+    } else {
+      this.tipoParticipante = 'persona';
+    }
+
+    // Cargar todos los datos en el formulario único
     this.participantesForm.patchValue({
       nombres: item.nombres || '',
       apellidos: item.apellidos || '',
@@ -624,48 +726,17 @@ regresar(): void {
       asistio: item.asistio || false,
       justifico: item.justifico || false,
       manifiesta: item.manifiesta || '',
-      idDenuncia: item.idDenuncia || this.denunciaId
+      idDenuncia: item.idDenuncia || this.denunciaId,
+      // Campos específicos
+      institucion: item.institucion || '',
+      cargo: item.cargo || '',
+      nombre_proyecto: item.nombre_proyecto || item.nombreProyecto || ''
     });
 
-    toast.info('Participante cargado para edición', {
-      duration: 3000,
+    toast.info('Modo edición activado', {
+      duration: 2000,
       description: `Editando: ${item.nombres} ${item.apellidos}`
     });
-  }
-
-  /**
-   * Eliminar participante - Elimina del FormArray y actualiza la tabla
-   */
-  eliminarParticipante(item: any, index: number) {
-    // Verificar que el índice sea válido
-    if (index < 0 || index >= this.participantesArray.length) {
-      toast.error('Error: Participante no encontrado');
-      return;
-    }
-
-    // Confirmar eliminación
-    if (confirm(`¿Estás seguro de eliminar a ${item.nombres} ${item.apellidos}?`)) {
-      // Eliminar del FormArray
-      this.participantesArray.removeAt(index);
-
-      // Actualizar array local para la tabla
-      this.participantes = this.participantesArray.getRawValue();
-
-      // Si estábamos editando este participante, cancelar edición
-      if (this.modoEdicionParticipante && this.participanteEnEdicionIndex === index) {
-        this.cancelarEdicionParticipante();
-      }
-
-      // Si eliminamos un participante antes del que estamos editando, ajustar índice
-      if (this.modoEdicionParticipante && this.participanteEnEdicionIndex > index) {
-        this.participanteEnEdicionIndex--;
-      }
-
-      toast.success('Participante eliminado correctamente', {
-        duration: 3000,
-        description: `${item.nombres} ${item.apellidos} ha sido eliminado`
-      });
-    }
   }
 
   /**
@@ -689,21 +760,8 @@ regresar(): void {
     // Obtener el control del participante en edición
     const participanteControl = this.participantesArray.at(this.participanteEnEdicionIndex);
 
-    // Actualizar con los nuevos valores
-    participanteControl.patchValue({
-      nombres: this.participantesForm.get('nombres')?.value,
-      apellidos: this.participantesForm.get('apellidos')?.value,
-      cedula: this.participantesForm.get('cedula')?.value,
-      tipoParticipante: this.participantesForm.get('tipoParticipante')?.value,
-      asistio: this.participantesForm.get('asistio')?.value,
-      justifico: this.participantesForm.get('justifico')?.value,
-      manifiesta: this.participantesForm.get('manifiesta')?.value,
-      idDenuncia: this.participantesForm.get('idDenuncia')?.value
-    });
-
-    // Actualizar array local para la tabla
-    this.participantes = this.participantesArray.getRawValue();
-
+    // Actualizar con todos los valores del formulario
+    participanteControl.patchValue(this.participantesForm.value);
     // Salir del modo edición
     this.cancelarEdicionParticipante();
 
@@ -723,9 +781,11 @@ regresar(): void {
       participanteControl.patchValue(this.datosOriginalesParticipante);
     }
 
-    // Resetear formulario
-    this.participantesForm.reset();
-    this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+    // Resetear el formulario único
+    this.resetFormularioParticipantes();
+
+    // Limpiar el tipo de participante para ocultar formularios
+    this.tipoParticipante = '';
 
     // Salir del modo edición
     this.modoEdicionParticipante = false;
@@ -737,18 +797,54 @@ regresar(): void {
 
     toast.info('Edición cancelada');
   }
+  /**
+   * Eliminar participante del array
+   */
+  eliminarParticipante(item: any, index: number) {
+    // Verificar que el índice sea válido
+    if (index < 0 || index >= this.participantesArray.length) {
+      toast.error('Error: Participante no encontrado');
+      return;
+    }
+
+    // Confirmar eliminación
+    if (!confirm(`¿Está seguro de eliminar a ${item.nombres} ${item.apellidos}?`)) {
+      return;
+    }
+
+    // Si estamos eliminando el participante que se está editando, cancelar edición
+    if (this.modoEdicionParticipante && this.participanteEnEdicionIndex === index) {
+      this.cancelarEdicionParticipante();
+    }
+
+    // Si eliminamos un participante antes del que estamos editando, ajustar índice
+    if (this.modoEdicionParticipante && this.participanteEnEdicionIndex > index) {
+      this.participanteEnEdicionIndex--;
+    }
+
+    // Eliminar del FormArray
+    this.participantesArray.removeAt(index);
+
+    // Actualizar el array local
+    this.participantes = this.participantesArray.getRawValue();
+
+    toast.success('Participante eliminado correctamente', {
+      duration: 3000,
+      description: `${item.nombres} ${item.apellidos} ha sido eliminado`
+    });
+  }
+
   //-----------PDF------------------//
   generarPdf(){
-    this.actionsConfig[2].disabled = true
+    this.actionsConfig[2].disabled = true;
 
     this.audienciaContestacionService.crearpdfBlob(this.idAudienciaC).subscribe((res: Blob) => {
       const url = URL.createObjectURL(res);
       this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-      this.actionsConfig[2].disabled = false
+      this.actionsConfig[2].disabled = false;
     });
-    this.cambiarTab(3);
+    this.cambiarTab(4);
   }
-
 }
 
-export default Crear_audienciaComponent
+export default Crear_audienciaComponent;

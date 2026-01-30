@@ -115,6 +115,26 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 			{ text: pdfData?.denuncia?.descripcion_hechos || '(Sin descripción proporcionada)', margin: [0, 0, 0, 10] }
 		
 
+		// Tabla de violencia (solo para mujeres)
+		const violenciaBlock: any[] = [];
+		if (pdfData.denuncia?.grupoPrioritario === 'mujeres' && pdfData.datosViolencia) {
+			violenciaBlock.push({
+				table: {
+					widths: ['30%', '70%'],
+					body: [
+						[
+							{ text: 'Tipo de Violencia', bold: true, fontSize: 12 },
+							{ text: pdfData.datosViolencia?.tipoDeViolencia || '(No especificado)', fontSize: 12 }
+						],
+						[
+							{ text: 'Ámbito de Violencia', bold: true, fontSize: 12 },
+							{ text: pdfData.datosViolencia?.ambitoViolencia || '(No especificado)', fontSize: 12 }
+						]
+					]
+				},
+				margin: [0, 4, 0, 8]
+			});
+		}
 
 		// Vulneraciones por afectado
 		const vulneracionesBlocks: any[] = [];
@@ -225,6 +245,7 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 				...denunciadosBlocks,
 				{ text: '\n4. SOBRE EL HECHO', style: 'section' },
 				sobreHechosBlock,
+				...violenciaBlock,
 				{ text: '\n5. VULNERACIONES POR AFECTADO', style: 'section' },
 				...vulneracionesBlocks,
 				{ text: '\n6. SOLICITUD', style: 'section' },

@@ -4,21 +4,24 @@ interface medidaAttributes{
     id: number;
     medidas: string;
     idArticulo: number;
+    cuerpoLegal: string;
 }
 interface medidaCreationAttributes extends Optional<medidaAttributes,'id'>{
   
 }
 
 export class medida extends Model<medidaAttributes,medidaCreationAttributes> implements medidaAttributes{
-    public id!: number;
-    public medidas!: string;
-    public idArticulo!: number;
+    declare id: number;
+    declare medidas: string;
+    declare idArticulo: number;
+    declare cuerpoLegal: string;
 }
 medida.init({
     id: { type: DataTypes.INTEGER, primaryKey: true,
          autoIncrement: true },
   medidas: { type: DataTypes.STRING, allowNull: false },
-  idArticulo:{type:DataTypes.INTEGER,allowNull: false}
+  idArticulo:{type:DataTypes.INTEGER},
+  cuerpoLegal: { type: DataTypes.STRING, allowNull: false },
 },{
   sequelize,
   modelName: 'medida',

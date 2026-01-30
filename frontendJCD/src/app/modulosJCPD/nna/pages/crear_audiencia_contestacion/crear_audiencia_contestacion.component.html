@@ -73,17 +73,17 @@
 
 
    </div>
-      <p>se Instala la Audiencia de contestación prevista en
-         <select formControlName="instalacionAudiencia" class="mt-1  inline-block rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
-         [ngClass]="{
-          ' border-1 border-red-500': audienciaForm.get('instalacionAudiencia')?.invalid && audienciaForm.get('instalacionAudiencia')?.touched
-        }">
-          <option value=""  disabled selected hidden >Seleccione...</option>
-          <option value="Art 205 del  Código de la Niñez y Adolescencia">Art 205 del  Código de la Niñez y Adolescencia</option>
-          <option value="Art 206 del  Código de la Niñez y Adolescencia">Art 206 del  Código de la Niñez y Adolescencia</option>
-        </select>.
 
-      </p>
+         <app-inputs
+           label="se Instala la Audiencia de contestación prevista en"
+           type="text"
+           placeholder="Ej: Art 205 del Código de la Niñez y Adolescencia"
+           [formGroup]="audienciaForm"
+           [control]="$any(audienciaForm.get('instalacionAudiencia')!)"
+           >
+           <span *ngIf="audienciaForm.get('instalacionAudiencia')?.errors?.['required'] && audienciaForm.get('instalacionAudiencia')?.touched">Este campo es requerido</span>
+         </app-inputs>
+
 
 
       <p>según la Avocatoria de Conocimiento N.-{{datosAudiencia?.codigoTramite}} De fecha {{datosAudiencia?.fechaCreado |date}}</p>
@@ -111,77 +111,117 @@
 
 <!-- particiantes de la  audiencia -->
       <app-card-Form [titulo]="'Participantes'" [hidden]="currentTab!=1" [class]="((existeAudienciaPrueba && !isEditAudienciaActivate ) || (!isEditAudienciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">
-          <div class="bg-white rounded-xl shadow-md p-4 border  ">
+          <div class="bg-white rounded-xl shadow-md p-4 border">
+            <!-- Selector de tipo de participante -->
+            <div class="mb-4">
+              <label class="block text-sm font-medium text-gray-700">Tipo de participante a agregar</label>
+              <select [(ngModel)]="tipoParticipante" name="tipoParticipante" [ngModelOptions]="{standalone: true}"
+                      class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
+                <option value="">Seleccione</option>
+                <option value="persona">Persona</option>
+                <option value="institucion">Institución</option>
+                <option value="proyecto">Proyecto/Servicio</option>
+              </select>
+            </div>
 
-        <form [formGroup]="participantesForm" class=" grid grid-cols-4  gap-4 ">
-          <div class="grid grid-cols-2 col-span-3 gap-1">
-                      <app-inputs
-    label="Nombres"
-    type="text"
-    placeholder="Ingrese los nombres"
-    [formGroup]="participantesForm"
-    [control]="$any(participantesForm.get('nombres')!)"
-    >
+            <!-- Formulario único con campos dinámicos -->
+            <form *ngIf="tipoParticipante !== ''" [formGroup]="participantesForm" class="grid grid-cols-4 gap-4">
+              <div class="grid grid-cols-2 col-span-3 gap-1">
 
-  </app-inputs>
+                <!-- Campo específico de proyecto/servicio -->
+                <div *ngIf="tipoParticipante === 'proyecto'" class="col-span-2">
+                  <app-inputs
+                    label="Nombre del proyecto/servicio"
+                    type="text"
+                    placeholder="Ingrese nombre del proyecto"
+                    [formGroup]="participantesForm"
+                    [control]="$any(participantesForm.get('nombre_proyecto')!)">
+                    <span *ngIf="participantesForm.get('nombre_proyecto')?.errors?.['required']">El nombre del proyecto es requerido</span>
+                  </app-inputs>
+                </div>
 
-            <app-inputs
-    label="Apellidos"
-    type="text"
-    placeholder="Ingrese los apellidos"
-    [formGroup]="participantesForm"
-    [control]="$any(participantesForm.get('apellidos')!)"
-    >
+                <!-- Campos específicos de institución -->
+                <ng-container *ngIf="tipoParticipante === 'institucion'">
+                  <app-inputs
+                    label="Institución"
+                    type="text"
+                    placeholder="Ingrese institución"
+                    [formGroup]="participantesForm"
+                    [control]="$any(participantesForm.get('institucion')!)">
+                    <span *ngIf="participantesForm.get('institucion')?.errors?.['required']">La institución es requerida</span>
+                  </app-inputs>
 
+                  <app-inputs
+                    label="Cargo del representante"
+                    type="text"
+                    placeholder="Ingrese cargo"
+                    [formGroup]="participantesForm"
+                    [control]="$any(participantesForm.get('cargo')!)">
+                    <span *ngIf="participantesForm.get('cargo')?.errors?.['required']">El cargo es requerido</span>
+                  </app-inputs>
+                </ng-container>
 
-  </app-inputs>
+                <!-- Campos comunes -->
+                <app-inputs
+                  [label]="tipoParticipante === 'persona' ? 'Nombres' : 'Nombres del responsable'"
+                  type="text"
+                  placeholder="Ingrese nombres"
+                  [formGroup]="participantesForm"
+                  [control]="$any(participantesForm.get('nombres')!)">
+                  <span *ngIf="participantesForm.get('nombres')?.errors?.['required']">Los nombres son requeridos</span>
+                </app-inputs>
 
-          <app-inputs
-    label="Cedula"
-    type="text"
-    placeholder="Ingrese la cédula"
-    [formGroup]="participantesForm"
-    [control]="$any(participantesForm.get('cedula')!)"
-    >
+                <app-inputs
+                  [label]="tipoParticipante === 'persona' ? 'Apellidos' : 'Apellidos del responsable'"
+                  type="text"
+                  placeholder="Ingrese apellidos"
+                  [formGroup]="participantesForm"
+                  [control]="$any(participantesForm.get('apellidos')!)">
+                  <span *ngIf="participantesForm.get('apellidos')?.errors?.['required']">Los apellidos son requeridos</span>
+                </app-inputs>
 
+                <app-inputs
+                  [label]="tipoParticipante === 'persona' ? 'Cédula' : 'Cédula del responsable'"
+                  type="text"
+                  placeholder="Ingrese cédula"
+                  [formGroup]="participantesForm"
+                  [control]="$any(participantesForm.get('cedula')!)">
+                  <span *ngIf="participantesForm.get('cedula')?.errors?.['required']">La cédula es requerida</span>
+                </app-inputs>
 
-  </app-inputs>
+                <!-- Selector de tipo específico solo para persona -->
+                <div *ngIf="tipoParticipante === 'persona'">
+                  <label class="block text-sm font-medium text-gray-700">Tipo</label>
+                  <select formControlName="tipoParticipante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
+                    <option value="">Seleccione</option>
+                    <option value="Denunciante">Denunciante</option>
+                    <option value="Denunciado">Denunciado</option>
+                    <option value="Testigo">Testigo</option>
 
-        <div>
-          <label class="block text-sm font-medium text-gray-700">Tipo</label>
-          <select formControlName="tipoParticipante" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75">
-            <option value="">Seleccione</option>
-            <option value="Denunciante">Denunciante</option>
-            <option value="Denunciado">Denunciado</option>
-            <option value="Testigo">Testigo</option>
-            <option value="Representante">Representante</option>
-          </select>
-        </div>
+                  </select>
+                </div>
+              </div>
 
-          </div>
+              <!-- Botones condicionales -->
+              <div class="ml-8 grid grid-cols-1 gap-1">
+                <app-button-submit
+                  type="button"
+                  [label]="modoEdicionParticipante ? 'Actualizar' : 'Agregar'"
+                  [color]="'submit'"
+                  [icon]="modoEdicionParticipante ? 'edit' : 'plus'"
+                  [disabled]="participantesForm.invalid"
+                  (clicked)="modoEdicionParticipante ? actualizarParticipante() : onSubmitParticipante()">
+                </app-button-submit>
 
-        <!-- Botones condicionales -->
-        <div class="ml-8 grid grid-cols-1 gap-1">
-          <!-- Botón principal: Agregar o Actualizar según el modo -->
-          <app-button-submit
-            type="button"
-            [label]="modoEdicionParticipante ? 'Actualizar' : 'Agregar'"
-            [color]=" 'submit'"
-            [icon]="modoEdicionParticipante ? 'edit' : 'plus'"
-            [disabled]="modoEdicionParticipante && !participantesForm.valid"
-            (clicked)="modoEdicionParticipante ? actualizarParticipante() : onSubmitParticipante()">
-          </app-button-submit>
-
-          <!-- Botón Cancelar: Solo visible en modo edición -->
-          <app-button-submit
-            *ngIf="modoEdicionParticipante"
-            label="Cancelar"
-            type="button"
-            color="cancelar"
-            (clicked)="cancelarEdicionParticipante()">
-          </app-button-submit>
-        </div>
-      </form>
+                <app-button-submit
+                  *ngIf="modoEdicionParticipante"
+                  label="Cancelar"
+                  type="button"
+                  color="cancelar"
+                  (clicked)="cancelarEdicionParticipante()">
+                </app-button-submit>
+              </div>
+            </form>
 
       </div>
 
@@ -295,9 +335,50 @@
         }"
         ></textarea>
 </div>
+      </app-card-Form >
+
+      <app-card-Form [titulo]="'Conciliacion'" [hidden]="currentTab!=3">
+        <div class="bg-white rounded-xl shadow-md p-6 border">
+          <div class="space-y-6">
+            <!-- Radio buttons para determinar si hay conciliación -->
+            <div class="flex items-center gap-6">
+              <label class="block text-sm font-semibold text-gray-700 mb-1">¿Hay conciliación?</label>
+              <div class="flex items-center gap-4" [ngClass]="{
+                'border-1 border-red-500': audienciaForm.get('existeConciliacion')?.invalid && audienciaForm.get('existeConciliacion')?.touched
+              }">
+                <label class="flex items-center gap-1">
+                  <input type="radio" formControlName="existeConciliacion" value="si" class="accent-blue-600" />
+                  <span class="text-gray-700">Sí</span>
+                </label>
+                <label class="flex items-center gap-1">
+                  <input type="radio" formControlName="existeConciliacion" value="no" class="accent-blue-600" />
+                  <span class="text-gray-700">No</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Contenido condicional cuando hay conciliación -->
+            <div *ngIf="audienciaForm.get('existeConciliacion')?.value === 'si'" class="space-y-4">
+              <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-1">Detalles de la conciliación:</label>
+                <textarea
+                  formControlName="conciliacion"
+                  rows="4"
+                  placeholder="Describa los términos y condiciones de la conciliación..."
+                  class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                ></textarea>
+              </div>
+            </div>
+
+            <!-- Mensaje cuando no hay conciliación -->
+            <div *ngIf="audienciaForm.get('existeConciliacion')?.value === 'no'" class="bg-gray-50 p-4 rounded-md">
+              <p class="text-gray-600 italic">No se llegó a un acuerdo de conciliación entre las partes.</p>
+            </div>
+          </div>
+        </div>
       </app-card-Form>
       @if (pdfSrc) {
-        <div class="pdf-container" [hidden]="currentTab !== 3">
+        <div class="pdf-container" [hidden]="currentTab !== 4">
           <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
         </div>
       }

@@ -1,17 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '@auth/services/auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ModalComponent, ModalConfig } from '@shared/components/modal/modal.component';
+
 
 
 @Component({
   selector: 'nna-layout-sidebar',
-  imports:[RouterLink ],
+  imports:[RouterLink, CommonModule, ModalComponent ],
   templateUrl: './nna_layout_sidebar.component.html',
 
 })
 export class SidebarComponent  implements OnInit {
+  @ViewChild(ModalComponent) modalComponent!: ModalComponent;
 
   grupo: string = '';
+
+  // Modal de confirmación de cierre de sesión
+  mostrarModalLogout = false;
+  modalConfig: ModalConfig = {
+    titulo: ' Cerrar Sesión',
+    descripcion: '¿Está seguro de que desea cerrar su sesión? ',
+    mostrarInput: false
+  };
+
+  // Configuración de grupos válidos
+  private gruposValidos = ['nna', 'adultos', 'mujeres'];
 
   constructor(private authService: AuthService,private router: Router,
     private route: ActivatedRoute
@@ -21,23 +36,35 @@ export class SidebarComponent  implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-
-    if (params['grupo']=='nna') {
-      this.grupo = "nna"
-
-    } else {
-      this.grupo = "adultos"
-
-    };
-  })
+      const grupo = params['grupo'];
+      if (this.gruposValidos.includes(grupo)) {
+        this.grupo = grupo;
+      } else {
+        console.error('Grupo no válido:', grupo);
+        this.grupo = '';
+      }
+    });
   }
 
 
-  logout(): void {
+  iniciarLogout(): void {
+    this.mostrarModalLogout = true;
+  }
+
+  confirmarLogout(): void {
     localStorage.removeItem('token');
 
-
     this.router.navigate(['/login']);
+    this.cerrarModalLogout();
+  }
+
+  cerrarModalLogout(): void {
+    this.mostrarModalLogout = false;
+  }
+
+  // Método original mantenido por compatibilidad
+  logout(): void {
+    this.iniciarLogout();
   }
 
 

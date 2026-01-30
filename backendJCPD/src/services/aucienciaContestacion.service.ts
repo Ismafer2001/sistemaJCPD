@@ -27,6 +27,7 @@ interface AudienciaContestacionData {
 	dirigue: string;
 	indica: string;
 	manifiesta: string;
+	conciliacion?: string;
 	afectadoManifiesta?: string;
 	pdf_audiencia_contestacion: number;
 	seRatifica: string;
@@ -47,6 +48,7 @@ export async function crearAudienciaContestacion(data: AudienciaContestacionData
 			dirigue: data.dirigue,
 			indica: data.indica,
 			manifiesta: data.manifiesta,
+			conciliacion: data.conciliacion,
 			seRatifica: data.seRatifica,
 			afectadoManifiesta: data.afectadoManifiesta,
 			pdf_audiencia_contestacion: data.pdf_audiencia_contestacion,
@@ -92,7 +94,7 @@ export async function AudiencaContestacionDTO(id:string) {
 			{
 				model: Avocatoria,
 				as: 'avocatoria',
-				attributes: ['fechaCreado']
+				attributes: ['fechaCreado', 'articulo']
 			},
 			{
 				model: Canton,
@@ -120,6 +122,7 @@ export async function AudiencaContestacionDTO(id:string) {
 		codigoTramite,
 		fechaCreado: avo?.fechaCreado || '',
 		Canton: can?.canton || '',
+		articulo: avo?.articulo || '',
 		fechaCitacion: citacion?.fecha || '',
 		horaCitacion: citacion?.hora || '',
 		id: audienciaContestacion?.id || null
@@ -146,7 +149,19 @@ export async function obtenerAudienciaContestacionCompleta(idAudiencia: number) 
 	// Buscar el cantón de la audiencia (a través de la denuncia)
 	let usuariosPrincipales: any[] = [];
 	let nombreCanton = '';
-	const denuncia = await Denuncia.findByPk(audiencia.idDenuncia, { attributes: ['id_canton'] });
+	let fechaAvocatoria = '';
+	
+	const denuncia = await Denuncia.findByPk(audiencia.idDenuncia, { 
+		attributes: ['id_canton'],
+		include: [
+			{
+				model: Avocatoria,
+				as: 'avocatoria',
+				attributes: ['fechaCreado']
+			}
+		]
+	});
+	
 	if (denuncia && denuncia.id_canton) {
 		usuariosPrincipales = await usuarios.findAll({
 			where: {
@@ -158,6 +173,11 @@ export async function obtenerAudienciaContestacionCompleta(idAudiencia: number) 
 		});
 		const canton = await Canton.findByPk(denuncia.id_canton, { attributes: ['canton'] });
 		if (canton) nombreCanton = canton.canton;
+		
+		// Obtener fecha de avocatoria
+		if ((denuncia as any).avocatoria) {
+			fechaAvocatoria = (denuncia as any).avocatoria.fechaCreado;
+		}
 	}
 	// Buscar los participantes relacionados
 	const participantes = await ParticipantesAudienciaContestacion.findAll({
@@ -204,10 +224,12 @@ export async function obtenerAudienciaContestacionCompleta(idAudiencia: number) 
 		dirigue: audiencia.dirigue,
 		indica: audiencia.indica,
 		manifiesta: audiencia.manifiesta,
+		conciliacion: audiencia.conciliacion,
 		seRatifica: audiencia.seRatifica,
 		pdf_audiencia_contestacion: audiencia.pdf_audiencia_contestacion,
 		afectadoManifiesta: audiencia.afectadoManifiesta,
 		canton: nombreCanton,
+		fechaAvocatoria: fechaAvocatoria,
 		participantes: participantes.map(p => ({
 			nombres: p.nombres,
 			apellidos: p.apellidos,
@@ -275,113 +297,92 @@ export async function actualizarAudienciaContestacion(idAudiencia: number, data:
 
 // Obtener los nombres de los afectados y el campo diriguidoA de citaciones para una denuncia
 export async function getAfectadosYDirigidoA(idDenuncia: number) {
-		const existeCitacion = await Citacion.findOne({ where: { idDenuncia } });
-		if (!existeCitacion) {
-			const error = new Error("No existe una citación para esta denuncia");
-			error.name = "NoExisteCitacion";
-			throw error;
-		}
+	const existeCitacion = await Citacion.findOne({ where: { idDenuncia } });
+	if (!existeCitacion) {
+		const error = new Error("No existe una citación para esta denuncia");
+		error.name = "NoExisteCitacion";
+		throw error;
+	}
 
-		// Traer todas las citaciones asociadas a la denuncia
-		const citados = await Citacion.findAll({
-			where: {
-				idDenuncia,
-				parte: { [Op.not]: 'institucion' }
-			},
-			attributes: ["diriguidoA", "parte", "idUsuario"]
+	// Obtener todos los participantes de la denuncia
+	const [denunciantes, denunciados, afectados, otros] = await Promise.all([
+		Denunciante.findAll({ 
+			where: { idDenuncia }, 
+			attributes: ["id", "nombres", "apellidos", "cedula"] 
+		}),
+		Denunciado.findAll({ 
+			where: { idDenuncia }, 
+			attributes: ["id", "nombres", "apellidos", "cedula"] 
+		}),
+		Afectado.findAll({ 
+			where: { idDenuncia }, 
+			attributes: ["id", "nombres", "apellidos", "cedula"] 
+		}),
+		Otros.findAll({ 
+			where: { idDenuncia }, 
+			attributes: ["id", "nombres", "apellidos", "cedula", "tipoParticipante", "cargo", "institucion", "nombre_proyecto"] 
+		})
+	]);
+
+	const resultado = [];
+
+	// Agregar todos los denunciantes
+	for (const d of denunciantes) {
+		resultado.push({
+			nombres: d.nombres,
+			apellidos: d.apellidos,
+			cedula: d.cedula,
+			tipoParticipante: 'Denunciante'
+		});
+	}
+
+	// Agregar todos los denunciados
+	for (const d of denunciados) {
+		resultado.push({
+			nombres: d.nombres,
+			apellidos: d.apellidos,
+			cedula: d.cedula,
+			tipoParticipante: 'Denunciado'
+		});
+	}
+
+	// Agregar todos los afectados con sus medidas emergentes
+	for (const a of afectados) {
+		const medidas = await MedidasEmergentes.findAll({
+			where: { idAfectado: a.id },
+			include: [{ model: medida, as: 'Med', attributes: ['medidas'] }],
+			attributes: ['idMedida', 'periodo', 'observaciones']
 		});
 		
+		resultado.push({
+			nombres: a.nombres,
+			apellidos: a.apellidos,
+			cedula: a.cedula,
+			tipoParticipante: 'Afectado',
+			medidasEmergentes: medidas.map(m => ({
+				idMedida: m.idMedida,
+				medida: m.Med?.medidas,
+				periodo: m.periodo,
+				observaciones: m.observaciones
+			}))
+		});
+	}
 
-		// Preparar ids por tipo
-		const idsDenunciante = citados.filter(c => c.parte === 'Accionante').map(c => c.idUsuario);
-		const idsDenunciado = citados.filter(c => c.parte === 'Accionado').map(c => c.idUsuario);
-		const idsOtros = citados.filter(c => c.parte !== 'institucion' ).map(c => c.idUsuario);
+	// Agregar otros participantes
+	for (const o of otros) {
+		resultado.push({
+			nombres: o.nombres,
+			apellidos: o.apellidos,
+			cedula: o.cedula,
+			tipoParticipante: o.tipoParticipante || 'Otro',
+			cargo: o.cargo,
+			institucion: o.institucion,
+			nombre_proyecto: o.nombre_proyecto
+		});
+	}
 
-		
-
-		// Batch fetch personas solo por tipo
-		const [denunciantes, denunciados, otros, afectados, otrosAudiencia] = await Promise.all([
-			idsDenunciante.length > 0
-				? Denunciante.findAll({ where: { id: idsDenunciante, idDenuncia:idDenuncia }, attributes: ["id", "nombres", "apellidos", "cedula"] })
-				: [],
-			idsDenunciado.length > 0
-				? Denunciado.findAll({ where: { id: idsDenunciado, idDenuncia:idDenuncia }, attributes: ["id", "nombres", "apellidos", "cedula"] })
-				: [],
-			idsOtros.length > 0
-				? Otros.findAll({ where: { id: idsOtros, idDenuncia:idDenuncia }, attributes: ["id", "nombres", "apellidos", "cedula", "tipoParticipante"] })
-				: [],
-			Afectado.findAll({ where: { idDenuncia:idDenuncia }, attributes: ["id", "nombres", "apellidos", "cedula"] }),
-			Otros.findAll({ where: { idDenuncia:idDenuncia, fase: 'audienciaContestacion' }, attributes: ["nombres", "apellidos", "cedula", "tipoParticipante"] })
-		]);
-		
-
-		const mapDenunciante = new Map(denunciantes.map(d => [d.id, d]));
-		const mapDenunciado = new Map(denunciados.map(d => [d.id, d]));
-		const mapOtros = new Map(otros.map(o => [o.id, o]));
-
-		const resultado = [];
-		// Agregar todos los afectados aparte, incluyendo sus medidas emergentes
-		for (const a of afectados) {
-			// Buscar medidas emergentes para el afectado
-			const medidas = await MedidasEmergentes.findAll({
-				where: { idAfectado: a.id },
-				include: [{ model: medida, as: 'Med', attributes: ['medidas'] }],
-				attributes: ['idMedida', 'periodo', 'observaciones']
-			});
-			resultado.push({
-				nombres: a.nombres,
-				apellidos: a.apellidos,
-				cedula: a.cedula,
-				tipoParticipante: 'Afectado',
-				medidasEmergentes: medidas.map(m => ({
-					idMedida: m.idMedida,
-					medida: m.Med?.medidas,
-					periodo: m.periodo,
-					observaciones: m.observaciones
-				}))
-			});
-		}
-
-		for (const citado of citados) {
-			let persona = null;
-			let tipo = '';
-			if (citado.parte === 'Accionante' && mapDenunciante.has(citado.idUsuario)) {
-				persona = mapDenunciante.get(citado.idUsuario);
-				tipo = 'Denunciante';
-			} else if (citado.parte === 'Accionado' && mapDenunciado.has(citado.idUsuario)) {
-				persona = mapDenunciado.get(citado.idUsuario);
-				tipo = 'Denunciado';
-			} else if (mapOtros.has(citado.idUsuario)) {
-				persona = mapOtros.get(citado.idUsuario);
-				tipo = persona?.tipoParticipante || 'Otro';
-			}
-			if (persona) {
-				resultado.push({
-					nombres: persona.nombres,
-					apellidos: persona.apellidos,
-					cedula: persona.cedula,
-					tipoParticipante: tipo
-				});
-			}
-		}
-		for (const o of otrosAudiencia) {
-			resultado.push({
-				nombres: o.nombres,
-				apellidos: o.apellidos,
-				cedula: o.cedula,
-				tipoParticipante: o.tipoParticipante || 'Otro'
-			});
-		}
-		console.log("Resultado participantes:", resultado);
-
-		
-
-		return resultado;
-
-
-
-
-	
+	console.log("Resultado participantes:", resultado);
+	return resultado;
 }
 
 
@@ -389,14 +390,18 @@ export async function getAfectadosYDirigidoA(idDenuncia: number) {
 //servicio para  agregar mas participantes
 export async function AgregarOtrosParticipantes(data: any) {
 	// params: { nombres, apellidos, cedula, tipoParticipante, idDenuncia }
-  const { nombres, apellidos, cedula, tipoParticipante, idDenuncia } = data;
+  const { nombres, apellidos, cedula, tipoParticipante, idDenuncia, nombre_proyecto,cargo,institucion } = data;
   
   const nuevoParticipante = await Otros.create({
     nombres,
     apellidos,
     cedula,
     tipoParticipante,
+	nombre_proyecto,
+	cargo,
+	institucion,
     idDenuncia,
+
 	fase: 'audienciaContestacion'
   });
   return nuevoParticipante;

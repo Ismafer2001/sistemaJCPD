@@ -1,7 +1,7 @@
 import { actualizarAudienciaContestacion } from '../services/aucienciaContestacion.service';
 import { crearAudienciaContestacion, obtenerAudienciaContestacionCompleta } from '../services/aucienciaContestacion.service';
 import { Request, Response } from 'express';
-import { AgregarOtrosParticipantes, AgregarRepresentantesInstitucionales, AudiencaContestacionDTO, getAfectadosYDirigidoA, ObtenerRepresentantesInstitucionales } from '../services/aucienciaContestacion.service';
+import { AgregarOtrosParticipantes,  AudiencaContestacionDTO, getAfectadosYDirigidoA,  } from '../services/aucienciaContestacion.service';
 import { handlehttp } from '../utils/error.handle';
 import { crearPdfAudienciaContestacionNNA } from '../services/pdfs/audienciaContestacionpdf.service';
 

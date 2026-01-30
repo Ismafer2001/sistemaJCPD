@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -10,17 +10,38 @@ export class NotificacionService {
 
 constructor(private http: HttpClient) { }
 
-getinvolucrados(id:number): Observable<any>{
-  return this.http.get<any>(`${this.apiUrl}/${id}`)
+getInvolucradosPrincipales(id:number): Observable<any>{
+  return this.http.get<any>(`${this.apiUrl}/involucrados-principales/${id}`)
+
+
+}
+getOtrosPrincipales(id:number): Observable<any>{
+  return this.http.get<any>(`${this.apiUrl}/otros-involucrados/${id}`)
+
 
 }
 
 postCrearnotificado(otro:{}){
   return this.http.post(`${this.apiUrl}`,otro)
 }
-getnotificacionDTO(id:number): Observable<any>{
-  return this.http.get<any>(`${this.apiUrl}/notificar/${id}`)
 
+getnotificacionDTO(id: number, tipoInvolucrado?: string, idInvolucrado?: number,idNotificacion?: number): Observable<any> {
+  let params = new HttpParams();
+
+  if (tipoInvolucrado) {
+    params = params.set('tipoInvolucrado', tipoInvolucrado);
+  }
+
+  if (idInvolucrado) {
+    params = params.set('idInvolucrado', idInvolucrado.toString());
+  }
+
+  if (idNotificacion) {
+    params = params.set('idNotificacion', idNotificacion.toString());
+  }
+
+
+  return this.http.get<any>(`${this.apiUrl}/notificar/${id}`, { params });
 }
 
 postNotificar(notificar: any): Observable<any> {
@@ -36,6 +57,16 @@ postNotificar(notificar: any): Observable<any> {
 
 getNotificacionEditMode(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/notificacion-completa/${id}`);
+  }
+
+  // Eliminar otro notificado
+  deleteOtroNotificado(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/otros/${id}`);
+  }
+
+  // Actualizar otro notificado
+  putOtroNotificado(id: number, otroNotificado: any): Observable<any> {
+    return this.http.put<any>(`${this.apiUrl}/otros/${id}`, otroNotificado);
   }
 
 

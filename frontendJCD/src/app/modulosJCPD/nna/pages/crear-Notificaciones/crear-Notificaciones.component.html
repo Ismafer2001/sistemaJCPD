@@ -1,6 +1,6 @@
 <div class="pl-2 py-2 mb-1 flex items-center gap-2">
   <a
-    [routerLink]="[`../../../fases/${denunciaId}`]"
+    [routerLink]="[`../../fases/${denunciaId}`]"
 
       class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
     >
@@ -15,230 +15,203 @@
 
 <hr class="border-yellow-300 border-1" />
 
-   <!--tabs-->
 
-  <div class="flex mt-5 mb-0 gap-3 " id="tabs">
-    <button type="button" class="rounded-t-2xl p-2"
-       [ngClass]="{
-      'bg-blue-500 text-white': currentTab === '0',
-      'bg-gray-100': currentTab !== '0'
-    }"
-      (click)="cambiarTab('0')"
-
-    >
-      partes
-    </button>
-    <button type="button"
-      class="  rounded-t-2xl p-2"
-
-
-      [ngClass]="{
-      'bg-blue-500 text-white': currentTab != '0',
-      'bg-gray-100': currentTab ==='0'
-
-    }"
-    >
-     notificaciones
-    </button>
-    @if (currentTab==='2') {
-      <a
-      class="bg-gray-100 focus:bg-blue-500 rounded-t-2xl p-2"
-      (click)="cambiarTab('2')"
-
-
-      [ngClass]="{
-
-      'bg-blue-500 text-white': currentTab === '2',
-      'bg-gray-100': currentTab !== '2'
-    }"
-    >
-      pdf
-    </a>
-
-    }
-    <div class="flex flex-1 m-1 justify-end space-x-4" [hidden]="currentTab=='0'? true:false">
-
-
-    <app-button-submit
-    type="button"
-    label="Cancelar"
-    color="cancelar"
-
-    >
-
-    </app-button-submit>
-    <app-button-submit
-    type="button"
-    label="Editar"
-    color="afirmar"
-    (clicked)="updateNotificacion()"
-     [disabled]="editarDisabled"
-
-
-    >
-
-    </app-button-submit>
-
-    <app-button-submit
-    type="button"
-    label="Guardar"
-    color="submit"
-    (click)="submitNotificacion()"
-    [disabled]="guardarDisabled"
-
-
-    >
-
-    </app-button-submit>
-    <app-button-submit
-    type="button"
-    label="GenerarPDF"
-    color="submit"
-    [disabled]="pdfDisabled"
-    (clicked)="generarPdf()"
-    >
-    </app-button-submit>
-
-
-
-  </div>
-  <div class="flex flex-1 m-1 justify-end space-x-4" [hidden]="currentTab!='0'? true:false">
-
-
-    <app-button-submit
-    type="button"
-    label="Volver"
-    color="cancelar"
-    (click)="volver()"
-
-    >
-
-    </app-button-submit>
-
-
-
-  </div>
-
-  </div>
-
-  <div class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]">
-  <app-card-Form [hidden]="currentTab!='0'" [titulo]="'Involucrados'">
-
-
-
-    <tablaNavigator
+  <div class="bg-gray-50 b p-4 shadow-lg overflow-y-scroll h-[calc(100vh-8rem)]">
+  <app-card-Form  >
+    <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
+        <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> involucrados Principales</h3>
+         <tablaNavigator
     [columnas]="['nombres','parte','estado']"
     [encabezados]="['Nombres','Parte','Estado']"
-    [datos]="involucrados"
-    [RouterLinkparam]=" 'nombres'"
-    [cambiar]="cambiarTab.bind(this)"
-
+    [datos]="involucradosPrincipales"
+    [RouterLinkparam]=" 'idDenuncia'"
+    [RouterLink]="grupo+'/notificaciones'"
+    [queryParams]="['idUsuario','estado','parte','idNotificacion']"
     >
 
     </tablaNavigator>
-    <app-card-Form [titulo]="'Agregar Notificado'">
-      <form [formGroup]="nuevoNotificadoForm" (ngSubmit)="onSubmit()" class="mt-8 flex flex-wrap gap-4 items-end">
-        <label class="block text-sm font-medium text-gray-700">Tipo</label>
-  <select [(ngModel)]="tipoNotificado" name="tipoNotificado" [ngModelOptions]="{standalone: true}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-          <option value="">Seleccione</option>
-          <option value="persona">Persona</option>
-          <option value="institucion">Institución</option>
-        </select>
+           </div>
+           <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
+        <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> otros notificados</h3>
+         <tablaNavigator
+    [columnas]="['nombresCompletos','parte','estado']"
+    [encabezados]="['Nombres','Parte','Estado']"
+    [datos]="otrosInvolucrados"
+    [RouterLinkparam]=" 'idDenuncia'"
+    [RouterLink]="grupo+'/notificaciones'"
+    [queryParams]="['idUsuario','estado','parte','idNotificacion']"
+    [acciones]="true"
 
-        <!-- Si es persona -->
-        <ng-container *ngIf="tipoNotificado === 'persona'">
-          <label class="block text-sm font-medium text-gray-700">Nombres</label>
-          <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-
-          <label class="block text-sm font-medium text-gray-700">Apellidos</label>
-          <input type="text" formControlName="apellidos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-
-          <label class="block text-sm font-medium text-gray-700">Cédula</label>
-          <input type="text" formControlName="cedula" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-
-          <label class="block text-sm font-medium text-gray-700">Parte</label>
-          <select formControlName="parte" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-            <option value="">seleccione</option>
-            <option value="Accionado">Accionado</option>
-            <option value="Accionante">Accionante</option>
-          </select>
-        </ng-container>
-
-        <!-- Si es institucion -->
-        <ng-container *ngIf="tipoNotificado === 'institucion'">
-          <label class="block text-sm font-medium text-gray-700">Nombre de la institución</label>
-          <input type="text" formControlName="nombres" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
-        </ng-container>
-
-         <app-button-submit
-      type="submit"
-      label="Agregar"
-      color="afirmar"
-
+        [eliminar]="eliminarNotificado.bind(this)"
+        [editar]="seleccionarParaEditarNotificado.bind(this)"
     >
 
-    </app-button-submit>
+    </tablaNavigator>
+           </div>
+           <h2 class="text-xl text-blue-500 font-semibold my-4">Agregar Notificado</h2>
 
+
+           <div class="bg-white rounded-xl shadow-md p-6 border   ">
+             <label class="block text-sm font-medium text-gray-700">tipo a notificar</label>
+      <select [(ngModel)]="tipoNotificado" name="tipoNotificado" [ngModelOptions]="{standalone: true}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none ">
+          <option value="">Seleccione</option>
+          <option value="persona">Persona</option>
+          <option value="Representante Institucional">Institución</option>
+        </select>
+
+
+        <!--Formulario si es persona -->
+      <form *ngIf="tipoNotificado === 'persona'"
+      [formGroup]="nuevoNotificadoForm"
+       (ngSubmit)="onSubmit()"
+        class=" mt-2 flex flex-wrap gap-4 items-end">
+        <!--nombres-->
+         <app-inputs
+    label="nombres"
+    type="text"
+    placeholder="Ingrese nombres"
+    [formGroup]="nuevoNotificadoForm"
+    [control]="$any(nuevoNotificadoForm.get('nombres')!)"
+    >
+    <!-- Mensajes de error personalizados -->
+    <span *ngIf="nuevoNotificadoForm.get('nombres')?.errors?.['required']">Los nombres son requeridos</span>
+
+  </app-inputs>
+  <!--apellidos-->
+  <app-inputs
+  label="apellidos"
+    type="text"
+    placeholder="Ingrese apellidos"
+    [formGroup]="nuevoNotificadoForm"
+    [control]="$any(nuevoNotificadoForm.get('apellidos')!)"
+    >
+
+    <!-- Mensajes de error personalizados -->
+    <span *ngIf="nuevoNotificadoForm.get('apellidos')?.errors?.['required']">Los apellidos son requeridos</span>
+  </app-inputs>
+  <!--cedula-->
+  <app-inputs
+  label="cedula"
+    type="text"
+    placeholder="Ingrese cédula"
+    [formGroup]="nuevoNotificadoForm"
+    [control]="$any(nuevoNotificadoForm.get('cedula')!)"
+    >
+      <!-- Mensajes de error personalizados -->
+    <span *ngIf="nuevoNotificadoForm.get('cedula')?.errors?.['required']">La cédula es requerida</span>
+
+  </app-inputs>
+
+
+      <div class="ml-8 grid grid-cols-1 gap-1">
+          <!-- Botón principal: Agregar o Actualizar según el modo -->
+          <app-button-submit
+            type="submit"
+            [label]="modoEdicionNotificados ? 'Actualizar' : 'Agregar'"
+            [color]=" 'submit'"
+            [icon]="modoEdicionNotificados ? 'edit' : 'plus'"
+            [disabled]="modoEdicionNotificados && !nuevoNotificadoForm.valid"
+            >
+          </app-button-submit>
+
+          <!-- Botón Cancelar: Solo visible en modo edición -->
+          <app-button-submit
+            *ngIf="modoEdicionNotificados"
+            label="Cancelar"
+            type="button"
+            color="cancelar"
+            (clicked)="cancelarEdicionNotificado()">
+          </app-button-submit>
+        </div>
+      </form>
+      <!--Formulario si es institucion -->
+      <form *ngIf="tipoNotificado === 'Representante Institucional'"
+      [formGroup]="nuevaInstitucionForm"
+       (ngSubmit)="onSubmit()"
+       class="mt-2 flex flex-wrap gap-4 items-end">
+       <app-inputs
+    label="Institucion"
+    type="text"
+    placeholder="Ingrese institución"
+    [formGroup]="nuevaInstitucionForm"
+    [control]="$any(nuevaInstitucionForm.get('institucion')!)"
+    >
+
+    <!-- Mensajes de error personalizados -->
+    <span *ngIf="nuevaInstitucionForm.get('institucion')?.errors?.['required']">La institución es requerida</span>
+  </app-inputs>
+        <app-inputs
+    label="Nombres de representante"
+    type="text"
+    placeholder="Ingrese nombres"
+    [formGroup]="nuevaInstitucionForm"
+    [control]="$any(nuevaInstitucionForm.get('nombres')!)"
+    >
+    <!-- Mensajes de error personalizados -->
+    <span *ngIf="nuevaInstitucionForm.get('nombres')?.errors?.['required']">Los nombres son requeridos</span>
+
+  </app-inputs>
+  <app-inputs
+  label="Apellidos de representante"
+    type="text"
+    placeholder="Ingrese apellidos"
+    [formGroup]="nuevaInstitucionForm"
+    [control]="$any(nuevaInstitucionForm.get('apellidos')!)"
+    >>
+
+    <!-- Mensajes de error personalizados -->
+    <span *ngIf="nuevaInstitucionForm.get('apellidos')?.errors?.['required']">Los apellidos son requeridos</span>
+  </app-inputs>
+  <app-inputs
+    label="Cédula de representante"
+    type="text"
+    placeholder="Ingrese cédula"
+    [formGroup]="nuevaInstitucionForm"
+    [control]="$any(nuevaInstitucionForm.get('cedula')!)"
+    >
+
+
+    <!-- Mensajes de error personalizados -->
+    <span *ngIf="nuevaInstitucionForm.get('cedula')?.errors?.['required']">La cédula es requerida</span>
+  </app-inputs>
+<app-inputs
+    label="Cargo del representante"
+    type="text"
+    placeholder="Ingrese cargo"
+    [formGroup]="nuevaInstitucionForm"
+    [control]="$any(nuevaInstitucionForm.get('cargo')!)"
+    >
+
+    <!-- Mensajes de error personalizados -->
+    <span *ngIf="nuevaInstitucionForm.get('cargo')?.errors?.['required']">El cargo es requerido</span>
+  </app-inputs>
+
+  <div class="ml-8 grid grid-cols-1 gap-1">
+          <!-- Botón principal: Agregar o Actualizar según el modo -->
+          <app-button-submit
+            type="submit"
+            [label]="modoEdicionNotificados ? 'Actualizar' : 'Agregar'"
+            [color]=" 'submit'"
+            [icon]="modoEdicionNotificados ? 'edit' : 'plus'"
+            [disabled]="modoEdicionNotificados && !nuevoNotificadoForm.valid"
+            >
+          </app-button-submit>
+
+          <!-- Botón Cancelar: Solo visible en modo edición -->
+          <app-button-submit
+            *ngIf="modoEdicionNotificados"
+            label="Cancelar"
+            type="button"
+            color="cancelar"
+            (clicked)="cancelarEdicionNotificado()">
+          </app-button-submit>
+        </div>
 
       </form>
 
-
-    </app-card-Form>
-
-
-
+           </div>
 
   </app-card-Form>
 
-  <app-card-Form [hidden]="( currentTab!=currentTab || currentTab=='0'||currentTab=='2')" [titulo]="'Notificar'"  >
-    <form [formGroup]="notificacionForm" >
-      <p>Trámite Administrativo N° <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">{{notificar.codigoTramite}}</span></p>
-    <p>{{notificar.Canton}},{{ fechaHoraActual | date:'dd' }} de {{ fechaHoraActual | date:'MMMM':'':'es' }} del {{ fechaHoraActual | date:'yyyy' }}</p>
-    <p>Oficio N° <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold">00001</span></p>
-    <p>Notificacion</p>
-    @for (item of involucrados; track $index) {
 
-
-
-      @if (currentTab===(item.nombres) && item.parte !== 'institucion' ) {
-        <p class="mb-2">señora</p>
-        <p><span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"> {{item.nombres}} </span></p>
-        <p class="my-2">parte <span class="font-bold"> {{item.parte}}</span> </p>
-
-      }@else{
-         @if (currentTab===item.nombres && item.parte === 'institucion') {
-          <p><span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"> {{item.nombres}} </span></p>
-        }
-
-      }
-
-
-
-
-    }
-
-
-    <p class="mb-2">ciudad</p>
-    <p > <span class="p-1  border-1 rounded-lg border-blue-200 bg-gray-100 font-bold"> {{notificar.Canton}}</span> </p>
-    <p class="mt-2">de nuestras consideraciones:</p>
-    <p>Reciban un cordial saludo de quienes conformamos la Junta de Protección del cantón <span class="font-bold" >{{notificar.Canton}}</span> </p>
-    <p>Adjunto a la presente sírvase encontrar la Avocatoria de Conocimiento de fecha <span class="font-bold">{{notificar.fechaCreado | date : "dd"}}   </span> de  <span class="font-bold"> {{notificar.fechaCreado | date : "MMMM" : "" : "es" }} </span> del <span class="font-bold"> {{notificar.fechaCreado | date : "yyyy"}} </span> , en donde encontrará las medidas de protección dispuestas a su favor dentro del trámite administrativo N° <span class="font-bold"> {{notificar.codigoTramite}}</span> </p>
-    <p>Sin otro particular suscribimos.  </p>
-    <p>atentamente,</p>
-    <p>MIEMBROS DE LA JUNTA CANTONAL DE PROTECCION DE DERECHOS </p>
-
-
-    <label class="font-bold flex flex-col" for="">direccion</label>
-    <input class="border-2 rounded-2xl" type="text" formControlName="direccion" placeholder="Ingrese la dirección">
-    <p>NOTA: Se adjunta Avocatoria de Conocimiento, medidas de protección y boleta de auxilio</p>
-
-
-    </form>
-
-  </app-card-Form>
-  @if (pdfSrc) {
-        <div class="pdf-container" [hidden]="currentTab !== '2'">
-          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
-        </div>
-      }
 </div>

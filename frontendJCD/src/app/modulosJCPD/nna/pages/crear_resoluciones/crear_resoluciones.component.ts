@@ -15,6 +15,7 @@ import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Fo
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 import { QuillModule } from 'ngx-quill';
 import { toast } from 'ngx-sonner';
+import { catchError, finalize, forkJoin, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-crear_resoluciones',
@@ -98,6 +99,8 @@ grupo: string = '';
      medidasPorArticulo: any[] = [];
 
   editMode: boolean = false;
+
+  medidasDefinitivasArray: any[] = [];
 
   idResolucion!: number;
   //---------------------------///
@@ -274,6 +277,11 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
       });
     }
 
+       //getters de formulario//
+        // Devuelve solo las medidas que pertenecen al afectado actualmente seleccionado
+
+
+
 
     cargarDatosEditMode(idDenuncia:number){
       this.resolucionesService.getresolucion(idDenuncia).subscribe(data =>{
@@ -333,7 +341,7 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
     this.medidasService.agregarMedidasDefinitivas(body).subscribe({
       next: () => {
 
-          this.loadMedidasDefinitivas(this.medidasDefinitivasForm.get('idAfectado')?.value);
+          this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
           this.resetEditor();
           toast.success('Medida agregada con éxito', {
               duration: 3000,
@@ -369,7 +377,7 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
             toast.success('Medida eliminada con éxito', {
               duration: 3000,
             });
-            this.loadMedidasDefinitivas(this.medidasDefinitivasForm.get('idAfectado')?.value);
+            this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
           },
           error: (err) => {
             toast.error('Error al eliminar medida', {
@@ -415,7 +423,7 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
         this.editMedidasMode = false;
 
 
-        this.loadMedidasDefinitivas(this.medidasDefinitivasForm.get('idAfectado')?.value);
+        this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
       },
       error: (err) => {
         toast.error('Error al actualizar medida', {
@@ -431,9 +439,145 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
   console.log('Afectado seleccionado ID:', afectadoId);
   if (!afectadoId) return;
   // reset editor to avoid leftover selection from other afectado
-  this.loadMedidasDefinitivas(afectadoId);
+
+  this.resetEditor();
+  this.loadMedidasporAfectado(afectadoId);
 
   }
+
+   obtenerMedidasDefinitivasPorAfectado(afectadoId: number): void {
+    if (!afectadoId) {
+      console.warn('No se puede obtener medidas definitivas: ID de afectado no disponible');
+      this.medidasDefinitivasArray = [];
+      return;
+    }
+
+    console.log('Actualizando medidas definitivas para afectado:', afectadoId);
+    this.medidasService.getMedidasDefinitivas(afectadoId).subscribe({
+      next: (response: any) => {
+        if (response && Array.isArray(response.afectado)) {
+          this.medidasDefinitivasArray = response.afectado;
+          console.log('Medidas definitivas actualizadas:', this.medidasDefinitivasArray);
+        } else {
+          console.warn('Respuesta inesperada del servicio:', response);
+          this.medidasDefinitivasArray = [];
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al obtener medidas definitivas por afectado:', error);
+        this.medidasDefinitivasArray = [];
+      }
+    });
+  }
+
+   loadMedidasporAfectado(afectadoId: number) {
+    if (!afectadoId) return;
+
+    // PRIMERO: Verificar si ya existen medidas emergentes para este afectado
+    this.medidasService.getMedidasDefinitivas(afectadoId).subscribe({
+      next: (responseMedidasDefinitivas: any) => {
+        const medidasDefinitivasExistentes = Array.isArray(responseMedidasDefinitivas.afectado) ? responseMedidasDefinitivas.afectado : [];
+
+        if (medidasDefinitivasExistentes.length > 0) {
+          // Si ya existen medidas emergentes, solo cargarlas y mostrarlas
+          console.log('Ya existen medidas emergentes para este afectado, cargando existentes...');
+          this.medidasDefinitivasArray = medidasDefinitivasExistentes;
+          console.log('Medidas emergentes existentes cargadas:', this.medidasDefinitivasArray);
+        } else {
+          // Si NO existen medidas emergentes, entonces cargar y agregar las medidas identificadas
+          console.log('No existen medidas emergentes, procediendo a cargar medidas identificadas...');
+          this.cargarYAgregarMedidasDefinitivas(afectadoId);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error al verificar medidas emergentes existentes:', error);
+        // En caso de error, intentar cargar medidas identificadas como fallback
+        this.cargarYAgregarMedidasDefinitivas(afectadoId);
+      }
+    });
+  }
+   private cargarYAgregarMedidasDefinitivas(afectadoId: number) {
+      // Consumir API de medidas identificadas
+      this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
+        next: (response: any) => {
+          console.log('Medidas identificadas obtenidas:', response);
+
+          // Obtener la lista de medidas del afectado
+          const medidasEmergentes = Array.isArray(response?.afectado) ? response.afectado : [];
+
+          if (medidasEmergentes.length > 0) {
+            // Agregar cada medida una por una como medida definitiva
+            this.agregarMedidasDefinitivasIndividualmente(medidasEmergentes, afectadoId);
+          } else {
+            console.log('No se encontraron medidas identificadas para este afectado');
+            // Asegurar que el array esté vacío si no hay medidas
+            this.medidasDefinitivasArray = [];
+          }
+        },
+        error: (error: any) => {
+          console.error('Error al cargar medidas identificadas:', error);
+          this.medidasDefinitivasArray = [];
+        }
+      });
+    }
+    private agregarMedidasDefinitivasIndividualmente(medidas: any[], afectadoId: number) {
+        if (medidas.length === 0) {
+          console.log('No hay medidas identificadas para procesar');
+          this.medidasDefinitivasArray = [];
+          return;
+        }
+
+        console.log(`Procesando ${medidas.length} medidas identificadas para agregar como medidas definitivas`);
+
+        // Crear array de observables para todas las operaciones
+        const requests: Observable<any>[] = medidas.map((medida, index) => {
+          const medidaDefinitiva = {
+            idAfectado: afectadoId,
+            idMedida: medida.idMedida || medida.id || null,
+            medida: medida.medida || medida.descripcion || '',
+            periodo: medida.periodo || '', // Se puede dejar vacío para que el usuario lo complete
+            observaciones: medida.observaciones || 'Medida agregada automáticamente desde medidas identificadas'
+          };
+
+          // Retornar observable con manejo de errores individual
+          return this.medidasService.agregarMedidasDefinitivas(medidaDefinitiva).pipe(
+            catchError((error) => {
+              console.error(`Error al agregar medida definitiva ${index + 1}:`, error);
+              // Retornar un observable con error controlado para que forkJoin no se detenga
+              return of({ error: true, medida: medidaDefinitiva, errorDetails: error });
+            })
+          );
+        });
+
+        // Usar forkJoin para esperar a que TODAS las operaciones terminen
+        forkJoin(requests).pipe(
+          finalize(() => {
+            console.log('Todas las operaciones de medidas emergentes han finalizado');
+          })
+        ).subscribe({
+          next: (responses) => {
+            // Contar éxitos y errores
+            const exitosos = responses.filter(r => !r.error).length;
+            const errores = responses.filter(r => r.error).length;
+
+            console.log(`✅ Medidas procesadas: ${exitosos} exitosas, ${errores} con errores`);
+
+            if (exitosos > 0) {
+              console.log('Actualizando lista de medidas definitivas...');
+              // Ahora SÍ actualizar la lista porque sabemos que las operaciones terminaron
+              this.obtenerMedidasDefinitivasPorAfectado(afectadoId);
+            } else {
+              console.warn('Ninguna medida fue agregada exitosamente');
+              this.medidasDefinitivasArray = [];
+            }
+          },
+          error: (error) => {
+            console.error('Error crítico en el procesamiento de medidas:', error);
+            // En caso de error crítico, intentar cargar las medidas existentes
+            this.obtenerMedidasDefinitivasPorAfectado(afectadoId);
+          }
+        });
+      }
  //funcion para autocompletar el input de vulneraciones del formulario de vulneraciones identificadas
  seleccionarMedida() {
   this.medidasDefinitivasForm.get('idMedida')!

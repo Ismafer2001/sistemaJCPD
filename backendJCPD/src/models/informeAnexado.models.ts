@@ -6,6 +6,9 @@ interface informeAnexadoAttributes {
   id: number;
   pathInforme: string;
  fileName: string;
+ responsable: string;
+ razon ?: string;
+ sancion?: string;
 }
 interface informeAnexadoCreationAttributes extends Optional<informeAnexadoAttributes, 'id'> {}
 
@@ -14,6 +17,9 @@ export class InformeAnexado extends Model<informeAnexadoAttributes, informeAnexa
     
     declare pathInforme: string;
     declare fileName: string;
+    declare responsable: string;
+    declare razon : string;
+    declare sancion: string;
 }
     InformeAnexado.init({
     id: {
@@ -30,6 +36,18 @@ export class InformeAnexado extends Model<informeAnexadoAttributes, informeAnexa
         type: DataTypes.STRING,
         allowNull: false,
     },
+    responsable: {
+        type: DataTypes.STRING,
+
+    },
+    razon: {
+        type: DataTypes.TEXT,
+
+    },
+    sancion: {
+        type: DataTypes.STRING,
+
+    }
 }, {
     sequelize,
     modelName: 'InformeAnexado',

@@ -15,7 +15,7 @@ export class FasesCardComponent implements OnInit {
 @Input() link:string='';
 @Input() idDenuncia:string='';
 @Input() linkDetalles:string='';
-@Input() noParams:boolean=false;
+@Input() queryParams:boolean=false;
 
   constructor() { }
 

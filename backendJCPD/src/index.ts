@@ -9,6 +9,7 @@ import denunciasRoutes from './routes/denuncias.routes';
 import vulneracionesRoutes from './routes/vulneraciones.routes'
 import medidasRoutes from './routes/medidas.routes';
 import avocaroriaRoutes from './routes/avocatoria.routes';
+import providenciaRoutes from './routes/providencia.routes';
 import { seedInitialData } from './utils/seed';
 import notificacionRoutes from './routes/notificacion.routes';
 import citacionRoutes from './routes/citaciones.routes'
@@ -22,7 +23,10 @@ import uploadRoutes from './routes/upload.routes';
 import seguimientoMedidasRoutes from './routes/seguimientoMedidas.routes';
 import resolucionesRoutes from './routes/resoluciones.routes';
 import  ControlImpugnacionRoutes  from './routes/controlImpugnacion.routes';
+import desestimiento from './routes/desestimiento.routes'
 import cierreCasoRoutes from './routes/cierreCaso.routes';
+import informesRoutes from './routes/informes.routes';
+import inhibirseRoutes from './routes/inhibirse.routes';
 
 
 const app = express();
@@ -42,6 +46,7 @@ app.use('/api/denuncias', denunciasRoutes);
 app.use('/api/vulneraciones', vulneracionesRoutes);
 app.use('/api/medidas', medidasRoutes);
 app.use('/api/avocatoria', avocaroriaRoutes);
+app.use('/api/providencias', providenciaRoutes);
 app.use('/api/notificacion', notificacionRoutes);
 app.use('/api/citacion', citacionRoutes);
 app.use('/api/reportes', reportedenunciasRoutes);
@@ -53,6 +58,9 @@ app.use('/api/resoluciones', resolucionesRoutes);
 app.use('/api/seguimiento-medidas', seguimientoMedidasRoutes);
 app.use('/api/control-impugnacion', ControlImpugnacionRoutes);
 app.use('/api/cierre-caso', cierreCasoRoutes);
+app.use('/api/desestimiento', desestimiento);
+app.use('/api/informes', informesRoutes);
+app.use('/api/inhibirse', inhibirseRoutes);
 
 app.use('/files', express.static(path.join(__dirname, '../uploads')));
 

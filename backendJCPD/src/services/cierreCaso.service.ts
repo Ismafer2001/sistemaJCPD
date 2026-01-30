@@ -63,7 +63,7 @@ export async function crearCierreCaso(data: CierreCasoData) {
         await transaction.rollback();
         throw error;
     }
-}
+}    
 
 export async function obtenerDatosParaCierreCaso(idDenuncia: number) {
     try {
@@ -101,19 +101,20 @@ export async function obtenerDatosParaCierreCaso(idDenuncia: number) {
             attributes: ['id']
         });
 
-        // Extraer todos los filenames de los informes anexados
-        const filenames: string[] = [];
+        // Extraer todos los filenames de los informes anexados (sin duplicados)
+        const filenamesSet = new Set<string>();
         if (denuncia.afectados) {
             denuncia.afectados.forEach((afectado: any) => {
                 if (afectado.cumpleM) {
                     afectado.cumpleM.forEach((cumple: any) => {
                         if (cumple.InformeAnexado && cumple.InformeAnexado.fileName) {
-                            filenames.push(cumple.InformeAnexado.fileName);
+                            filenamesSet.add(cumple.InformeAnexado.fileName);
                         }
                     });
                 }
             });
         }
+        const filenames = Array.from(filenamesSet);
 
         const resultado: any = {
             codigoTramiteDenuncia: denuncia.codigoTramite,

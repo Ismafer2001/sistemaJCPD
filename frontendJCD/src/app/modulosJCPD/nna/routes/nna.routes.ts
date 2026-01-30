@@ -32,9 +32,45 @@ export const nnaRoutes: Routes = [
 
       },
       {
+        path:'inhibicion/:id',
+        loadComponent:()=>
+          import('@nna/pages/fases/pages/inhibirse/inhibirse.component')
+
+
+      },
+      {
+        path:'informes/:id',
+        loadComponent:()=>
+          import('@nna/pages/fases/pages/Crear_informe/Crear_informe.component')
+
+
+      },
+      {
+        path:'informes/:id/:modo',
+        loadComponent:()=>
+          import('@nna/pages/fases/pages/Crear_informe/formatoinforme/formatoinforme.component')
+
+
+      },
+      {
+        path:'informes/:id/:modo/:idinforme',
+        loadComponent:()=>
+          import('@nna/pages/fases/pages/Crear_informe/formatoinforme/formatoinforme.component')
+
+
+      },
+
+      {
         path:'avocatoria/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/crearAvocatoria/crearAvocatoria.component')
+
+
+      },
+      {
+        path:'providencia/:modo/:id',
+        loadComponent:()=>
+          import('@nna/pages/crear_providencia/crear_providencia.component')
 
 
       },
@@ -46,16 +82,30 @@ export const nnaRoutes: Routes = [
 
       },
       {
-        path:'notificaciones/:modo/:id',
+        path:'notificaciones/:id',
         loadComponent:()=>
           import('@nna/pages/crear-Notificaciones/crear-Notificaciones.component')
 
 
       },
       {
-        path:'citaciones/:modo/:id',
+        path:'notificaciones/:id/formulario',
+        loadComponent:()=>
+          import('@nna/pages/crear-Notificaciones/pages/formato-notificacion/formato-notificacion.component')
+
+
+      },
+      {
+        path:'citaciones/:id',
         loadComponent:()=>
           import('@nna/pages/crear-citaciones/crear-citaciones.component')
+
+
+      },
+      {
+        path:'citaciones/:id/formulario',
+        loadComponent:()=>
+          import('@nna/pages/crear-citaciones/pages/formato-citacion/formato-citacion.component')
 
 
       },
@@ -96,6 +146,13 @@ export const nnaRoutes: Routes = [
 
       },
       {
+        path:'desestimiento/:modo/:id',
+        loadComponent:()=>
+          import('@nna/pages/control_desestimiento/control_desestimiento.component')
+
+
+      },
+      {
         path:'cierreDeCaso/:modo/:id',
         loadComponent:()=>
           import('@nna/pages/cierre_caso/cierre_caso.component')
@@ -103,10 +160,21 @@ export const nnaRoutes: Routes = [
 
       },
       {
+        path: 'denuncia-remitidas',
+        loadComponent: () =>
+          import('@nna/pages/denuncias-remitidas/denuncias-remitidas.component')
+      },
+      {
+        path: 'denuncia-remitidas/:id',
+        loadComponent: () =>
+          import('@nna/pages/denuncias-remitidas/informacionDenunciaRemitidas/informacionDenunciaRemitidas.component')
+      },
+      {
         path: 'reportes',
         loadChildren: () =>
           import('@nna/routes/reportes.routes')
       },
+
 
 
 

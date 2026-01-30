@@ -44,7 +44,7 @@ declare idAP: number;
     cedula: { type: DataTypes.STRING },
     tipoParticipante: { type: DataTypes.STRING },
     parte: { type: DataTypes.STRING },
-    pruebas:{type: DataTypes.STRING},
+    pruebas:{type: DataTypes.TEXT},
    
     idAP:{type: DataTypes.INTEGER},
     

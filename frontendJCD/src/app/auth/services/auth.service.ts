@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, } from 'rxjs';
+import { Observable, tap, map } from 'rxjs';
 import { login } from '../interfaces/login.interface';
 import { perfil } from '@shared/interfaces/perfil.interface';
 import { jwtDecode } from 'jwt-decode';
@@ -23,6 +23,20 @@ login(user: login): Observable<{ token: string }> {
       localStorage.setItem('token', response.token);
     })
   );
+}
+
+validarPasswordAdmin(contrasenaActual: string): Observable<any> {
+  return this.http.post<any>(`${this.apiUrl}/validar-contrasena-admin`, { contrasenaActual })
+    .pipe(
+      // Extraer solo el valor success de la respuesta
+      tap(response => console.log('Respuesta validación:', response)),
+      // Mapear la respuesta para devolver solo el boolean
+      map(response => response.success)
+    );
+}
+actualizarContrasenia(contrasenaActual: string, contrasenaNueva: string): Observable<any> {
+  return this.http.put<any>(`${this.apiUrl}/actualizar-contrasena`, { contrasenaActual, contrasenaNueva })
+
 }
 
 
@@ -52,6 +66,21 @@ login(user: login): Observable<{ token: string }> {
   }
 }
 
+getUsuarioInfo(): any {
+  const token = this.getToken();
+  if (!token) return null;
+
+  try {
+    return jwtDecode(token);
+  } catch (error) {
+    return null;
+  }
+}
+
+logout(): void {
+  localStorage.removeItem('token');
+  this.router.navigate(['/auth/login']);
+}
 
 }
 

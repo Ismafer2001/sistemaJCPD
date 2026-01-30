@@ -12,6 +12,7 @@ interface NotificacionAttributes {
   datosGenerales?: string;
   idDenuncia: number;
   idUsuario: number;
+  numOficio: string;
   estatus?: "pendiente"|"en_proceso"|"completada";
 }
 
@@ -26,6 +27,7 @@ export class Notificacion extends Model<NotificacionAttributes, NotificacionCrea
   declare datosGenerales: string;
   declare idDenuncia: number;
   declare diriguidoA: string;
+  declare numOficio: string;
   declare estatus: "pendiente"|"en_proceso"|"completada";
   declare idUsuario: number;
 }
@@ -55,6 +57,10 @@ Notificacion.init({
   datosGenerales: {
     type: DataTypes.TEXT,
     allowNull: true,
+  },
+  numOficio: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   estatus: {
     type: DataTypes.STRING,

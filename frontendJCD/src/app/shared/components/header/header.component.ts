@@ -2,13 +2,13 @@
 
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AuthService } from '@auth/services/auth.service';
 import { Subject } from 'rxjs';
 
 @Component({
   selector: 'globla-header',
-  imports: [CommonModule],
+  imports: [CommonModule,RouterLink],
   templateUrl: './header.component.html',
 
 
@@ -21,26 +21,30 @@ export class headerComponent implements OnInit {
   private destroy$ = new Subject<void>();
   mostrarMenuUsuario = false;
   nombreModulo: string = "";
+
+  // Configuración de módulos
+  private modulosConfig = {
+    'nna': 'Niñez y Adolescencia',
+    'adultos': 'Adultos Mayores',
+    'mujeres': 'Mujeres Victima de Violencia'
+  };
+
   constructor(private AuthService: AuthService, private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-    if (params['grupo']=='nna') {
-      this.nombreModulo = "Niñez y Adolescencia"
+      const grupo = params['grupo'];
+      this.nombreModulo = this.modulosConfig[grupo as keyof typeof this.modulosConfig] || 'Junta Cantonal de Protección de Derechos';
 
-    } else if (params['grupo']=='adultos') {
-      this.nombreModulo = "Adultos Mayores"
+      console.log('Grupo actual:', grupo);
+    });
 
-    };
-  })
     this.AuthService.getUsuarioActual().subscribe(user => {
-  this.nombreUsuario = user.nombres;
-  this.rolUsuario = user.rol;
-  this.cantonUsuario = user.canton
-  console.log(user)
-
-
-});
+      this.nombreUsuario = user.nombres;
+      this.rolUsuario = user.rol;
+      this.cantonUsuario = user.canton;
+      console.log(user);
+    });
   }
 
    toggleMenu() {

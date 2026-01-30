@@ -26,6 +26,11 @@ import { InformeAnexado } from "./informeAnexado.models";
 import { CierreCaso } from "./cierreCaso.models";
 import { InformesPresentados } from "./informes_presentados.models";
 import { ControlImpugnacion } from "./controlImpugnacion.model";
+import { DenunciaMujeres } from "./denunciaMujeres.model";
+import { Providencias } from "./providencia.model";
+import { Desestimiento } from "./desestimiento.models";
+import { Informe } from "./informe.models";
+import { Deprecatoria } from "./deprecatoria.models";
 
 //relacion usuario -- canton
 usuarios.belongsTo(Canton, { foreignKey: "id_canton" });
@@ -34,6 +39,13 @@ Canton.hasMany(usuarios, { foreignKey: "id_canton" });
 //relacion denuncia  -- canton
 Denuncia.belongsTo(Canton, { foreignKey: "id_canton", as: "canton" });
 Canton.hasMany(Denuncia, { foreignKey: "id_canton" });
+//relacion denuncia mujeres y denuncia
+DenunciaMujeres.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
+Denuncia.hasOne(DenunciaMujeres, { foreignKey: "idDenuncia", as: "DM" });
+
+//relacion providencia y denuncia
+Providencias.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "denunciaP" });
+Denuncia.hasOne(Providencias, { foreignKey: "idDenuncia", as: "providencia" });
 
 //relacion afectado denuncia
 Denuncia.hasMany(Afectado, { foreignKey: "idDenuncia", as: "afectados" });
@@ -129,6 +141,7 @@ Denuncia.hasMany(Citacion, { foreignKey: "idDenuncia" });
 AudienciaContestacion.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
 Denuncia.hasOne(AudienciaContestacion, { foreignKey: "idDenuncia", as: "ac" });
 
+
 //relacion audiencia contestacion y participantes audiencia
 ParticipantesAudienciaContestacion.belongsTo(AudienciaContestacion, {
   foreignKey: "idAC", as: "PAC",
@@ -193,11 +206,32 @@ Denuncia.hasOne(CierreCaso, { foreignKey: "idDenuncia", as: "CierreCaso" });
 
 //relacion informes presentados -- cierre caso
 InformesPresentados.belongsTo(CierreCaso, { foreignKey: "idCierraCaso", as: "CierreCaso" });
-CierreCaso.hasMany(InformesPresentados, { foreignKey: "idCierraCaso", as: "informesPresentados" });
+CierreCaso.hasMany(InformesPresentados, { foreignKey: "idCierraCaso", as: "InformesPresentados" });
 
 //relacion control impugnacion -- resoluciones
 ControlImpugnacion.belongsTo(Resoluciones, { foreignKey: "idResolucion", as: "Resolucion" });
 Resoluciones.hasMany(ControlImpugnacion, { foreignKey: "idResolucion", as: "ControlImpugnaciones" });
+
+//relacion desestimiento -- denuncia
+Desestimiento.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "DenunciaDes" });
+Denuncia.hasOne(Desestimiento, { foreignKey: "idDenuncia", as: "Desestimiento" });
+
+//relacion informe -- denuncia
+Informe.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "DenunciaInforme" });
+Denuncia.hasMany(Informe, { foreignKey: "idDenuncia", as: "informes" });
+
+//relacion deprecatoria -- denuncia
+Deprecatoria.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "DenunciaDeprecatoria" });
+Denuncia.hasOne(Deprecatoria, { foreignKey: "idDenuncia", as: "deprecatoria" });
+
+//relacion deprecatoria -- canton origen
+Deprecatoria.belongsTo(Canton, { foreignKey: "idCantonOrigen", as: "cantonOrigen" });
+Canton.hasMany(Deprecatoria, { foreignKey: "idCantonOrigen", as: "deprecatoriasOrigen" });
+
+//relacion deprecatoria -- canton destino
+Deprecatoria.belongsTo(Canton, { foreignKey: "idCantonDestino", as: "cantonDestino" });
+Canton.hasMany(Deprecatoria, { foreignKey: "idCantonDestino", as: "deprecatoriasDestino" });
+
 
 
 export {
@@ -228,6 +262,9 @@ export {
   InformeAnexado,
   CierreCaso,
   InformesPresentados,
-  ControlImpugnacion
+  ControlImpugnacion,
+  Desestimiento,
+  Informe,
+  Deprecatoria
 
 };

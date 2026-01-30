@@ -12,7 +12,7 @@ import {
 	ParticipantesAudienciaContestacion,
 	MedidasDefinitivas,
 	Afectado,
-	
+	Avocatoria,
 	medida,
 	VulneracionesIdentificadas,
 	Vulneracion,
@@ -46,6 +46,7 @@ interface AudienciaPruebasData {
 	instalacionAudiencia: string;
 	afectadoManifiesta?: string;
 	pdf_audiencia_pruebas: string;
+	articulo: string;
 	participantes: ParticipanteData[];
 	
 	estatus: "pendiente"|"en_proceso"|"completada";
@@ -187,6 +188,7 @@ export async function obtenerAudienciaPruebasCompleta(idAudiencia: number) {
 			codigoTramite: audiencia.codigoTramite,
 			fecha: audiencia.fecha,
 			hora: audiencia.hora,
+			articulo: audiencia.articulo,
 			instalacionAudiencia: audiencia.instalacionAudiencia,
 			afectadoManifiesta: audiencia.afectadoManifiesta,
 			pdf_audiencia_pruebas: audiencia.pdf_audiencia_pruebas,
@@ -218,6 +220,7 @@ export async function crearAudienciaPruebas(data: AudienciaPruebasData) {
 			instalacionAudiencia: data.instalacionAudiencia,
 			afectadoManifiesta: data.afectadoManifiesta,
 			pdf_audiencia_pruebas: data.pdf_audiencia_pruebas,
+			articulo: data.articulo,
 			estatus:  'completada',
 		}, { transaction: t });
 		// Crear medidas emergentes asociadas en la tabla medidas_emergentes
@@ -322,7 +325,11 @@ export async function AudienciaPruebasDTO(id:string) {
 	const resultado = await Denuncia.findByPk(id, {
 		attributes: ['codigoTramite'],
 		include: [
-			
+			{
+				model: Avocatoria,
+				as: 'avocatoria',
+				attributes: ['articulo']
+			},
 			{
 				model: Canton,
 				attributes: ['canton'],
@@ -339,11 +346,11 @@ export async function AudienciaPruebasDTO(id:string) {
 
 	
 
-	const { codigoTramite,  canton: can, ap:audienciaPruebas } = resultado as any;
+	const { codigoTramite, avocatoria: avo, canton: can, ap:audienciaPruebas } = resultado as any;
 
 	const respuestaFormateada = {
 		codigoTramite,
-		
+		articulo: avo?.articulo || '',
 		Canton: can?.canton || '',
 		id: audienciaPruebas?.id || null
 

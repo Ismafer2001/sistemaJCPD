@@ -44,7 +44,7 @@ interface AudienciaPruebasCreationAttributes extends Optional<AudienciaPruebasAt
     hora: { type: DataTypes.TIME },
     instalacionAudiencia: { type: DataTypes.STRING },
     pdf_audiencia_pruebas: { type: DataTypes.STRING },
-    afectadoManifiesta: { type: DataTypes.STRING },
+    afectadoManifiesta: { type: DataTypes.TEXT },
     articulo: { type: DataTypes.STRING },
     idDenuncia:{type: DataTypes.INTEGER},
      estatus: {

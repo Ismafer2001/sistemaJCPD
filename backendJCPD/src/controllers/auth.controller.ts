@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { loginUsuario, UsuarioActual } from '../services/auth.service';
+import { loginUsuario, UsuarioActual, validarContrasenaUsuario, actualizarContrasenaUsuario } from '../services/auth.service';
 import { Canton, usuarios } from '../models';
 import { handlehttp } from '../utils/error.handle';
 
@@ -49,6 +49,92 @@ export const postloginUsuario = async (req: Request, res: Response) => {
   } catch (error) {
     handlehttp(res,"Error_post_login",error)
     
+  }
+};
+
+// Validar contraseña de usuario
+export const postValidarContrasena = async (req: Request, res: Response) => {
+  try {
+    const { contrasenaActual } = req.body;
+    
+    // Obtener ID del usuario desde el token JWT
+    const idUsuario: number = Number(req.user.id);
+
+    if (!idUsuario) {
+      return res.status(401).json({
+        success: false,
+        message: 'Usuario no autorizado'
+      });
+    }
+
+    if (!contrasenaActual) {
+      return res.status(400).json({
+        success: false,
+        message: 'La contraseña actual es requerida'
+      });
+    }
+
+    const resultado = await validarContrasenaUsuario(idUsuario, contrasenaActual);
+    
+    if (resultado.success) {
+      res.status(200).json(resultado);
+    } else {
+      res.status(400).json(resultado);
+    }
+
+  } catch (error) {
+    handlehttp(res, 'Error al validar contraseña', error);
+  }
+};
+
+// Actualizar contraseña de usuario
+export const putActualizarContrasena = async (req: Request, res: Response) => {
+  try {
+    const { contrasenaActual, contrasenaNueva } = req.body;
+    
+    // Obtener ID del usuario desde el token JWT
+    const idUsuario: number = Number(req.user.id);
+
+    if (!idUsuario) {
+      return res.status(401).json({
+        success: false,
+        message: 'Usuario no autorizado'
+      });
+    }
+
+    // Validar campos requeridos
+    if (!contrasenaActual) {
+      return res.status(400).json({
+        success: false,
+        message: 'La contraseña actual es requerida'
+      });
+    }
+
+    if (!contrasenaNueva) {
+      return res.status(400).json({
+        success: false,
+        message: 'La nueva contraseña es requerida'
+      });
+    }
+
+    // Validar longitud mínima de la nueva contraseña
+    if (contrasenaNueva.length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'La nueva contraseña debe tener al menos 6 caracteres'
+      });
+    }
+
+    const resultado = await actualizarContrasenaUsuario(idUsuario, contrasenaActual, contrasenaNueva);
+    
+    if (resultado.success) {
+      res.status(200).json(resultado);
+    } else {
+      res.status(400).json(resultado);
+    }
+
+  } catch (error) {
+    handlehttp(res, 'Error al actualizar contraseña', error);
   }
 };
 

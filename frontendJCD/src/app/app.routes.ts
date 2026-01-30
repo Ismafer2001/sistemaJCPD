@@ -12,13 +12,8 @@ export const routes: Routes = [
     loadChildren:() => import('@inicio/routes/inicio.routes')
   },
 
-  {
+ 
 
-    path: 'mujeres',
-    canActivate: [authGuard,],
-    loadChildren: () => import('@mujeres/routes/mujeres.routes'),
-  },
-  
   {
 
     path: 'login',

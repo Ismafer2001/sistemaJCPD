@@ -23,16 +23,16 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
           margin: [0, 0, 0, 20]
         },
         {
-          text: (
-            'En el Cantón ' + (pdfData.canton || '') +
-            ' a los ' + (pdfData.fecha ? new Date(pdfData.fecha).getDate() : '') +
-            ' días del mes de ' + (pdfData.fecha ? new Date(pdfData.fecha).toLocaleString('es-ES', { month: 'long' }) : '') +
-            ' del año dos mil ' + (pdfData.fecha ? ('' + new Date(pdfData.fecha).getFullYear()).slice(-2) : '') + ', a las ' +
-            (pdfData.hora ? new Date('1970-01-01T' + pdfData.hora).getHours() : '') +
-            ' horas y ' + (pdfData.hora ? new Date('1970-01-01T' + pdfData.hora).getMinutes() : '') +
-            ' minutos, ante la Junta Cantonal de Protección de Derechos de ' + (pdfData.canton || '') +
-            ' integrada por los miembros principales'
-          ),
+          text: [
+            { text: 'En el Cantón ' }, { text: pdfData.canton || '', bold: true },
+            { text: ' a los ' }, { text: pdfData.fecha ? new Date(pdfData.fecha).getDate().toString() : '', bold: true },
+            { text: ' días del mes de ' }, { text: pdfData.fecha ? new Date(pdfData.fecha).toLocaleString('es-ES', { month: 'long' }) : '', bold: true },
+            { text: ' del año dos mil ' }, { text: pdfData.fecha ? ('' + new Date(pdfData.fecha).getFullYear()).slice(-2) : '', bold: true },
+            { text: ', a las ' }, { text: pdfData.hora ? new Date('1970-01-01T' + pdfData.hora).getHours().toString() : '', bold: true },
+            { text: ' horas y ' }, { text: pdfData.hora ? new Date('1970-01-01T' + pdfData.hora).getMinutes().toString() : '', bold: true },
+            { text: ' minutos, ante la Junta Cantonal de Protección de Derechos de ' }, { text: pdfData.canton || '', bold: true },
+            { text: ' integrada por los miembros principales' }
+          ],
           margin: [0, 0, 0, 20]
         },
         {
@@ -50,7 +50,7 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
           margin: [0, 40, 0, 0]
         },
                 {
-                    text: 'Se instala la Audiencia de Pruebas tal como lo determina ' + (pdfData.instalacionAudiencia || ''),
+                    text: [{ text: 'Se instala la Audiencia de Pruebas tal como lo determina ' }, { text: pdfData.instalacionAudiencia || '', bold: true }],
                     margin: [0, 10, 0, 20]
                 },
                 {
@@ -77,24 +77,25 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
                     margin: [0, 0, 0, 20]
         },
         {
-          text: (
-            'En cumplimiento a lo que determina la Constitución de la República Art. 75, 76 y 76 numeral 1, se recepta la intervención de la Abogada ' +
-            ((pdfData.participantes || []).filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('actora')).map((p: any) => `${p.nombres} ${p.apellidos}`).join(', ') || '') +
-            ' en representación de la parte accionada; quien manifiesta que las pruebas a presentar a esta audiencia son: ' +
-            ((pdfData.participantes || [])
-              .filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('actora'))
+          text: [
+            { text: 'En cumplimiento a lo que determina la Constitución de la República ' }, { text: pdfData.articulo || 'Art. 75, 76 y 76 numeral 1', bold: true },
+            { text: ', se recepta la intervención de la Abogada ' },
+            { text: ((pdfData.participantes || []).filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('denunciante')).map((p: any) => `${p.nombres} ${p.apellidos}`).join(', ') || '') },
+            { text: ' en representación de la parte denunciante; quien manifiesta que las pruebas a presentar a esta audiencia son: ' },
+            { text: ((pdfData.participantes || [])
+              .filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('denunciante'))
               .map((p: any) => p.pruebas)
               .filter((pruebas: any) => pruebas && pruebas.trim() !== '')
-              .join('; ') || 'No registradas')
-          ),
+              .join('; ') || 'No registradas'), bold: true }
+          ],
           margin: [0, 0, 0, 20]
   },
-        // Iterar testimonios de la parte actora
+        // Iterar testimonios de la parte denunciante
         ...((pdfData.participantesConTestimonio || [])
-          .filter((p: any) => p.parte && p.parte.toLowerCase().includes('actora'))
+          .filter((p: any) => p.parte && p.parte.toLowerCase().includes('denunciante'))
           .map((p: any, idx: number) => [
             {
-              text: `PRUEBA TESTIMONIAL ${idx + 1} DE LA PARTE ACTORA`,
+              text: `PRUEBA TESTIMONIAL ${idx + 1} DE LA PARTE DENUNCIANTE`,
               bold: true,
               margin: [0, 20, 0, 5]
             },
@@ -127,27 +128,27 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
         ).reduce((acc: any[], arr: any[]) => acc.concat(arr), []),
         // Intervención del abogado de la parte accionada
         {
-          text: (
-            'Se procede a receptar la intervención del Abogado ' +
-            ((pdfData.participantes || [])
-              .filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('accionada'))
+          text: [
+            { text: 'Se procede a receptar la intervención del Abogado ' },
+            { text: ((pdfData.participantes || [])
+              .filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('denunciado'))
               .map((p: any) => `${p.nombres} ${p.apellidos}`)
-              .join(', ') || '') +
-            ' en representación de la parte accionada quien manifiesta que las pruebas a presentar a esta audiencia son: ' +
-            ((pdfData.participantes || [])
-              .filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('accionada'))
+              .join(', ') || '') },
+            { text: ' en representación de la parte denunciado quien manifiesta que las pruebas a presentar a esta audiencia son: ' },
+            { text: ((pdfData.participantes || [])
+              .filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('denunciado'))
               .map((p: any) => p.pruebas)
               .filter((pruebas: any) => pruebas && pruebas.trim() !== '')
-              .join('; ') || 'No registradas')
-          ),
+              .join('; ') || 'No registradas'), bold: true }
+          ],
           margin: [0, 20, 0, 20]
         },
-        // Iterar testimonios de la parte accionada
+        // Iterar testimonios de la parte denunciada
         ...((pdfData.participantesConTestimonio || [])
-          .filter((p: any) => p.parte && p.parte.toLowerCase().includes('accionada'))
+          .filter((p: any) => p.parte && p.parte.toLowerCase().includes('denunciado'))
           .map((p: any, idx: number) => [
             {
-              text: `PRUEBA TESTIMONIAL ${idx + 1} DE LA PARTE ACCIONADA`,
+              text: `PRUEBA TESTIMONIAL ${idx + 1} DE LA PARTE DENUNCIADA`,
               bold: true,
               margin: [0, 20, 0, 5]
             },
@@ -181,14 +182,14 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
         // Párrafo de cierre y deliberación
         {
           text: [
-            'Una vez escuchadas las versiones de las partes, y receptadas todas las pruebas; se les pide que abandonen momentáneamente la sala para dar paso a la audiencia reservada con el adolescente ',
-            (pdfData.participantes || [])
+            { text: 'Una vez escuchadas las versiones de las partes, y receptadas todas las pruebas; se les pide que abandonen momentáneamente la sala para dar paso a la audiencia reservada con el adolescente ' },
+            { text: (pdfData.participantes || [])
               .filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('afectado'))
               .map((p: any) => `${p.nombres} ${p.apellidos}`)
-              .join(', '),
-            '. Quién indica:\n',
-            pdfData.afectadoManifiesta || '(Sin manifestación registrada)',
-            '\nSe procede con la deliberación de los miembros de la Junta.\nTranscurrido una hora, la Junta Cantonal de Derechos pide que se convoque a las partes a la sala y se reinicia la Audiencia dando paso a la lectura de la presente acta, en la que se considera que se trata de una vulneración:'
+              .join(', ') },
+            { text: '. Quién indica:\n' },
+            { text: pdfData.afectadoManifiesta || '(Sin manifestación registrada)', bold: true },
+            { text: '\nSe procede con la deliberación de los miembros de la Junta.\nTranscurrido una hora, la Junta Cantonal de Derechos pide que se convoque a las partes a la sala y se reinicia la Audiencia dando paso a la lectura de la presente acta, en la que se considera que se trata de una vulneración:' }
           ],
           margin: [0, 20, 0, 20]
         },

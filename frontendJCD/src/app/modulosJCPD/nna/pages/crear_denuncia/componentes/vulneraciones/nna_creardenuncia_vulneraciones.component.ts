@@ -19,6 +19,8 @@ export class Nna_creardenuncia_vulneracionesComponent implements OnInit {
     @Input() formAfectados!: FormArray;
     vulneracionesForm: FormGroup;
     vulneraciones: Vulneracion[] = [];
+    vulneracionesFiltradas: Vulneracion[] = []; // Para las vulneraciones filtradas
+    cuerposLegales: any[] = []; // Lista de cuerpos legales disponibles
     editandoIndex: number = -1; // Para rastrear si estamos editando y qué índice
 
 
@@ -28,12 +30,20 @@ export class Nna_creardenuncia_vulneracionesComponent implements OnInit {
   ) {
     this.vulneracionesForm = this.fb.group({
       idAfectado: [, [Validators.required, Validators.minLength(1)]],
+      cuerpoLegal: [''], // Nuevo campo para filtro
       vulneraciones: [[], [Validators.required, Validators.minLength(1)]]
     });
   }
 
   ngOnInit(): void {
     this.cargarVulneraciones();
+    this.cargarCuerposLegales();
+
+    // Suscribirse a cambios en el cuerpo legal para filtrar
+    this.vulneracionesForm.get('cuerpoLegal')?.valueChanges.subscribe(cuerpoLegal => {
+      this.filtrarVulneraciones(cuerpoLegal);
+    });
+
     this.vulneracionesForm.valueChanges.subscribe(nna => {
       console.log(this.formArray.value)
     });
@@ -61,6 +71,7 @@ get mapeoAfectados() {
     this.vulneracionService.getVulneraciones().subscribe({
       next: (data) => {
         this.vulneraciones = data;
+        this.vulneracionesFiltradas = data; // Inicialmente mostrar todas
         console.log(data)
         // Inicializar los controles del formulario para cada vulneración
 
@@ -69,6 +80,42 @@ get mapeoAfectados() {
         console.error('Error al cargar vulneraciones:', error);
       }
     });
+  }
+
+  cargarCuerposLegales(): void {
+    // Lista de cuerpos legales con los códigos que vienen del JSON
+    this.cuerposLegales = [
+      { id: 'CONNA', nombre: 'Código de la Niñez y Adolescencia' },
+      { id: 'LOPAM', nombre: 'Ley de Personas Adultas Mayores' },
+      { id: 'LOIPEVCM', nombre: 'Ley Orgánica Integral para Prevenir y Erradicar la Violencia contra las Mujeres' }
+    ];
+  }
+
+  filtrarVulneraciones(cuerpoLegalId: string): void {
+    if (!cuerpoLegalId || cuerpoLegalId === '') {
+      // Si no hay filtro seleccionado, mostrar todas
+      this.vulneracionesFiltradas = this.vulneraciones;
+    } else {
+      // Filtrar por cuerpo legal comparando directamente los códigos de texto
+      this.vulneracionesFiltradas = this.vulneraciones.filter(v =>
+        String(v.cuerpoLegal) === cuerpoLegalId
+      );
+    }
+    // NO limpiar selecciones - mantener las selecciones existentes
+  }
+
+  // Método helper para obtener el nombre del cuerpo legal seleccionado
+  getNombreCuerpoLegalSeleccionado(): string {
+    const cuerpoLegalId = this.vulneracionesForm.get('cuerpoLegal')?.value;
+    const cuerpoLegal = this.cuerposLegales.find(c => c.id === cuerpoLegalId);
+    return cuerpoLegal?.nombre || '';
+  }
+
+  // Método helper para obtener el nombre del cuerpo legal de una vulneración
+  getNombreCuerpoLegal(cuerpoLegalId: string | number): string {
+    const id = String(cuerpoLegalId);
+    const cuerpoLegal = this.cuerposLegales.find(c => c.id === id);
+    return cuerpoLegal?.nombre || 'Sin cuerpo legal';
   }
    toggleVulneracion(vulneraciones: number): void {
   const control = this.vulneracionesForm.get('vulneraciones');

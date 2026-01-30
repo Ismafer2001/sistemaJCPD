@@ -14,6 +14,7 @@ import { toast } from 'ngx-sonner';
 import { forkJoin, Observable, of, Subject } from 'rxjs';
 import { catchError, finalize } from 'rxjs/operators';
 import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Formulario.component';
+import InputsComponent from '@shared/components/inputs/inputs.component';
 
 @Component({
   selector: 'app-crearAvocatoria',
@@ -25,7 +26,8 @@ import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Fo
       ButtonSubmitComponent,
       TablaEditComponent,
     NavFormularioComponent,
-  RouterLink],
+  RouterLink,
+InputsComponent],
 })
 export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
   @ViewChild('formContainer', { static: false }) formContainerRef?: ElementRef<HTMLElement>;
@@ -54,7 +56,7 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
     },
     {
       id: 1,
-      label: 'Resoluciones'
+      label: 'Disposiciones'
     },
     {
       id: 2,
@@ -179,28 +181,12 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
 
     //----escucha cambios en los formularios para debug----//
 
-    this.avocatoriaForm.valueChanges.subscribe((data) => {
-        // In edit mode: ignore the first change caused by patchValue, then
-        // when the user modifies the form enable 'Editar' and disable PDF
-        if (this.editMode) {
 
-
-          // Ignorar cambios mientras estamos cargando datos de edición
-          if (this.cargandoDatosEdicion) {
-            return;
-          }
-
-
-
-          return;
-        }
-
-
-
-    });
     this.medidasEmergentesForm.valueChanges.subscribe((data) => {
       console.log( data);
     });
+
+    this.avocatoriaForm.valueChanges.subscribe((data) => { console.log('cambios del formulario avocatoria', data);})
 
 
   }
@@ -263,7 +249,7 @@ CUARTO.-<p>`,
   //--------------carga de datos---------//
 
   avocaroriaEditMode(idAvocatoria: number){
-    this.cargandoDatosEdicion = true; // Marcar que estamos cargando datos
+
     this.avocatoriaService.getAvocatoriaEditMode(idAvocatoria).subscribe(data=>{
       this.avocatoriacargada = data;
       this.fechaHoraActual= new Date(this.avocatoriacargada.fechaCreado),
@@ -311,20 +297,11 @@ CUARTO.-<p>`,
           dispocisiones: this.avocatoriacargada.dispocisiones ?? this.avocatoriacargada.disposiciones ?? this.avocatoriacargada.disposicion ?? this.avocatoriacargada.dispocisiones ?? this.avocatoriaForm.get('dispocisiones')?.value,
           articulo: this.avocatoriacargada.articulo ?? this.avocatoriacargada.articulo ?? this.avocatoriaForm.get('articulo')?.value,
          }, { emitEvent: false });
-        // Ensure initial button state for edit mode: PDF enabled, Edit disabled
-        if (this.editMode) {
-
-
-        }
-
 
 
       }
 
-      // Marcar que terminó la carga de datos para permitir detectar cambios reales del usuario
-      setTimeout(() => {
-        this.cargandoDatosEdicion = false;
-      }, 100); // Pequeño delay para asegurar que todos los patchValue hayan terminado
+
     });
 
 

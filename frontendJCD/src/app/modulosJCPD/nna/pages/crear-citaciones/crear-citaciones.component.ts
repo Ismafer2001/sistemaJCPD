@@ -2,16 +2,17 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import  TablaNavigatorComponent from '@shared/components/tabla/tablaNavigator/tabla.component';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink} from '@angular/router';
 import { CitacionesService } from '@nna/services/citaciones.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { toast } from 'ngx-sonner';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
+import { InputsComponent } from '@shared/components/inputs/inputs.component';
 
 interface involucrados{
-  personasNotificadas:string,
-  parte:string
+  nombres: string;
+  parte: string;
   idUsuario?: number;
 
 }
@@ -28,23 +29,34 @@ interface notificacion{
     CommonModule,
     ReactiveFormsModule,
     ButtonSubmitComponent,
+    InputsComponent,
+    FormsModule,
   RouterLink]
 
 })
 export class CrearCitacionesComponent implements OnInit {
 
-
+  grupo:string =''
   currentTab='0'
     involucrados:involucrados[]=[]
+    otrosInvolucrados: involucrados[] = [];
+    tipoNotificado: 'persona' | 'Representante Institucional' | '' = '';
+
+    modoEdicionCitados: boolean = false;
+
     citar:notificacion={codigoTramite:'',Canton:''};
     denunciaId =0
     citacionForm!:FormGroup;
+    nuevoCitadoForm!:FormGroup;
+    nuevaInstitucionForm!:FormGroup;
     fechaHoraActual: Date = new Date();
       pdfSrc: SafeResourceUrl | null = null;
   pdfDisabled: boolean = true;
   guardarDisabled: boolean = false;
   editarDisabled: boolean = true;
   idCitacion!: number;
+
+    itemEnEdicion: any = null;
 
 
   constructor(private CitacionesService:CitacionesService,
@@ -54,20 +66,24 @@ export class CrearCitacionesComponent implements OnInit {
        private sanitizer: DomSanitizer) { }
 
   ngOnInit() {
+
+     const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
+    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
     this.route.params.subscribe(params => {   ///<-----suscirbmos para obtener paramtro de la url
 
       this.denunciaId = +params['id'];
 
     });
+    this.formularioCitarInstituciones();
+    this.formularioCitarPersona();
 
-    this.loadinvolucrados(this.denunciaId)
+    this.loadinvolucrados(this.denunciaId);
+    this.loadOtrosInvolucrados(this.denunciaId);
     this.loadCitados(this.denunciaId)
     this.formularioFormatoCitacion();
     this.citacionForm.valueChanges.subscribe(value => {
       console.log('Formulario actualizado:', value);
-      if (!this.guardarDisabled) return; // Solo si ya se guardó
-      this.pdfDisabled = true;
-      this.editarDisabled = false;
+
 
     })
 
@@ -96,13 +112,44 @@ export class CrearCitacionesComponent implements OnInit {
     })
   }
 
+   formularioCitarPersona(){
+    this.nuevoCitadoForm = this.fb.group({
+      nombres: ['', Validators.required],
+      apellidos: ['', Validators.required],
+      cedula: ['', Validators.required],
+      tipoParticipante: ['Otros', Validators.required],
+
+      idDenuncia: [this.denunciaId]
+    });
+  }
+  formularioCitarInstituciones(){
+    this.nuevaInstitucionForm = this.fb.group({
+      nombres: ['', Validators.required],
+      apellidos: ['', Validators.required],
+      cedula: ['', Validators.required],
+      institucion: ['', Validators.required],
+      cargo: ['', Validators.required],
+      tipoParticipante: ['Representante Institucional', Validators.required],
+
+      idDenuncia: [this.denunciaId]
+    });
+  }
+
   //--------------------CARGA DE DATOS------------//
 
   loadinvolucrados(id:number){
 
   this.CitacionesService.getinvolucradosCitaciones(id).subscribe(data=>{
     this.involucrados=data;
-    console.log(data)
+    console.log(this.involucrados)
+  })
+
+  }
+  loadOtrosInvolucrados(id:number){
+
+  this.CitacionesService.getOtrosInvolucrados(id).subscribe(data=>{
+    this.otrosInvolucrados=data;
+    console.log('aquiiiiiii'+this.otrosInvolucrados);
   })
 
   }
@@ -120,22 +167,6 @@ export class CrearCitacionesComponent implements OnInit {
   //-----------*-----------OTROS--------------//
 
 
-  cambiarTab(valor: string) {
-  this.currentTab = valor;
-
-  const itemSeleccionado = this.involucrados.find(i => i.personasNotificadas === valor);
-
-    if (itemSeleccionado) {
-      this.citacionForm.patchValue({
-        diriguidoA: itemSeleccionado.personasNotificadas,
-        parte: itemSeleccionado.parte
-      });
-      // Setear idUsuario en el formulario de notificado si existe
-      if (itemSeleccionado.idUsuario) {
-        this.citacionForm.get('idUsuario')?.setValue(itemSeleccionado.idUsuario);
-      }
-    }
-}
 //---------------------submit---------------------//
 volver(): void {
     this.router.navigate(['/nna/fases/' + this.denunciaId]);
@@ -164,49 +195,150 @@ updateCitacion() {
     })
 
 }
-submitCitacion() {
-   if (this.citacionForm.invalid) {
-      this.citacionForm.markAllAsTouched();
-      toast.error('Formulario inválido', {
-        duration: 3000,
-        description: 'Por Favor, Completa Todos los Campos Requeridos'
+
+seleccionarParaEditarNotificado(item: any){
+    this.modoEdicionCitados = true;
+    this.itemEnEdicion = item;
+
+    // Determinar el tipo basado en el tipoParticipante
+    if (item.parte === 'Representante Institucional') {
+      this.tipoNotificado = 'Representante Institucional';
+
+      // Rellenar formulario de institución
+      this.nuevaInstitucionForm.patchValue({
+        nombres: item.nombres || '',
+        apellidos: item.apellidos || '',
+        cedula: item.cedula || '',
+        institucion: item.institucion || '',
+        cargo: item.cargo || '',
+        tipoParticipante: item.parte,
+        idDenuncia: this.denunciaId
       });
-      return;
+
+    } else {
+      this.tipoNotificado = 'persona';
+
+      // Rellenar formulario de persona
+      this.nuevoCitadoForm.patchValue({
+        nombres: item.nombres || '',
+        apellidos: item.apellidos || '',
+        cedula: item.cedula || '',
+        tipoParticipante: item.parte,
+        idDenuncia: this.denunciaId
+      });
     }
-  const body ={
-    ...this.citacionForm.value,
 
+    console.log('Editando notificado:', item);
+    console.log('Tipo seleccionado:', this.tipoNotificado);
   }
-  this.CitacionesService.postCitar(body).subscribe({
-    next: (body) => {
-      this.idCitacion = body.id;
-      toast.success('Citacion Guardada con Éxito', {
-                duration: 3000,
-              });
-      this.pdfDisabled = false;
-        this.guardarDisabled = true;
+  editarnotificados(): void{
+    if (!this.itemEnEdicion) return;
 
+    const formData = this.tipoNotificado === 'Representante Institucional'
+      ? this.nuevaInstitucionForm.value
+      : this.nuevoCitadoForm.value;
 
-          },error(err) {
+    this.CitacionesService.putOtroCitado(this.itemEnEdicion.idUsuario, formData).subscribe({
+      next: (response) => {
+        console.log('Notificado actualizado exitosamente:', response);
+        toast.success('Notificado actualizado correctamente');
 
-      toast.error('Error al guardar', {
-        duration: 3000,
-      description:`${err}`
-      });
-
-  }
-
-  })
-
-}
-generarPdf(){
-
-    this.CitacionesService.crearpdfBlob(this.idCitacion).subscribe((res: Blob) => {
-      const url = URL.createObjectURL(res);
-      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        // Recargar listas y resetear modo edición
+        this.loadinvolucrados(this.denunciaId);
+        this.loadOtrosInvolucrados(this.denunciaId);
+        this.cancelarEdicionNotificado();
+      },
+      error: (error) => {
+        console.error('Error al actualizar notificado:', error);
+        toast.error('Error al actualizar el notificado');
+      }
     });
-    this.cambiarTab('2');
   }
+  agregarNotificado(): void{
+    if (this.tipoNotificado === 'persona') {
+      const body = {
+      ...this.nuevoCitadoForm.value,
+
+    };
+    console.log(body);
+    this.CitacionesService.postCrearCitados(body).subscribe(() => {
+      this.loadOtrosInvolucrados(this.denunciaId);
+      this.nuevoCitadoForm.reset();
+      this.nuevoCitadoForm.get('idDenuncia')?.setValue(this.denunciaId);
+
+    });
+
+    }else{
+      const body = {
+      ...this.nuevaInstitucionForm.value,
+
+    };
+    console.log(body);
+    this.CitacionesService.postCrearCitados(body).subscribe(() => {
+      this.loadOtrosInvolucrados(this.denunciaId);
+      this.nuevaInstitucionForm.reset();
+      this.nuevaInstitucionForm.get('idDenuncia')?.setValue(this.denunciaId);
+
+    });
+
+    }
+
+  }
+  cancelarEdicionNotificado(): void{
+    this.modoEdicionCitados = false;
+    this.itemEnEdicion = null;
+    this.tipoNotificado = '';
+
+    // Resetear ambos formularios
+    this.nuevoCitadoForm.reset();
+    this.nuevaInstitucionForm.reset();
+
+    // Restaurar valores por defecto
+    this.nuevoCitadoForm.get('idDenuncia')?.setValue(this.denunciaId);
+    this.nuevoCitadoForm.get('tipoParticipante')?.setValue('Otros');
+
+    this.nuevaInstitucionForm.get('idDenuncia')?.setValue(this.denunciaId);
+    this.nuevaInstitucionForm.get('tipoParticipante')?.setValue('Institucion');
+
+    console.log('Edición cancelada');
+  }
+   eliminarNotificado(item: any){
+    if (confirm('¿Estás seguro de que deseas eliminar este notificado?')) {
+      this.CitacionesService.deleteOtroCitado(item.idUsuario).subscribe({
+        next: (response) => {
+          console.log('Notificado eliminado exitosamente:', response);
+          toast.success('Notificado eliminado correctamente');
+
+          // Recargar ambas listas para reflejar los cambios
+          this.loadinvolucrados(this.denunciaId);
+          this.loadOtrosInvolucrados(this.denunciaId);
+        },
+        error: (error) => {
+          console.error('Error al eliminar notificado:', error);
+          toast.error('Error al eliminar el notificado');
+        }
+      });
+    }
+  }
+ onSubmit(): void {
+    switch (this.modoEdicionCitados) {
+      case true:
+        this.editarnotificados();
+
+        break;
+
+      case false:
+        this.agregarNotificado();
+
+        break;
+    }
+
+
+
+
+  }
+
+
 
 
 

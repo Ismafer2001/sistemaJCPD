@@ -28,6 +28,44 @@
       />
     </div>
 
+    <!-- Campo Resultado de la Impugnación (Recurso Impugnación) -->
+    <fieldset class="space-y-4">
+      <legend class="text-sm font-medium text-gray-700 mb-3">
+        RESULTADO DE LA IMPUGNACIÓN <span class="text-red-500">*</span>
+      </legend>
+      <div class="flex gap-4 w-full">
+        <!-- Opción: Reposición -->
+        <div class="flex items-center justify-center space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-1">
+          <input
+            type="radio"
+            id="reposicion"
+            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            value="reposicion"
+            formControlName="recurso_impugnacion"
+          />
+          <label for="reposicion" class="text-sm text-gray-700 cursor-pointer font-medium">
+            Reposición
+          </label>
+        </div>
+
+        <!-- Opción: Apelación -->
+        <div class="flex items-center justify-center space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-1">
+          <input
+            type="radio"
+            id="apelacion"
+            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+            value="apelacion"
+            formControlName="recurso_impugnacion"
+          />
+          <label for="apelacion" class="text-sm text-gray-700 cursor-pointer font-medium">
+            Apelación
+          </label>
+        </div>
+
+        
+      </div>
+    </fieldset>
+
     <!-- Campo Resolución Impugnada -->
     <div class="space-y-2">
       <label for="resolucion_impugnada" class="block text-sm font-medium text-gray-700">
@@ -42,58 +80,33 @@
       ></textarea>
     </div>
 
-    <!-- Campo Resultado de la Impugnación -->
-    <fieldset class="space-y-4">
-      <legend class="text-sm font-medium text-gray-700 mb-3">
-        RESULTADO DE LA IMPUGNACIÓN <span class="text-red-500">*</span>
-      </legend>
-      <div class="flex gap-4 w-full">
-        <!-- Opción: Reposición -->
-        <div class="flex items-center justify-center space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-1">
-          <input
-            type="radio"
-            id="reposicion"
+    <!-- Campo Periodo -->
+    <div class="space-y-2">
+      <label for="periodo" class="block text-sm font-medium text-gray-700">
+        PERIODO
+      </label>
+      <input
+        type="text"
+        id="periodo"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 transition-colors"
+        placeholder="Ej.: Enero - Marzo 2025"
+        formControlName="periodo"
+      />
+    </div>
 
-            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-            value="reposicion"
-            formControlName="resultadoImpugnacion"
-          />
-          <label for="reposicion" class="text-sm text-gray-700 cursor-pointer font-medium">
-            Reposición
-          </label>
-        </div>
-
-        <!-- Opción: Apelación -->
-        <div class="flex items-center justify-center space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-1">
-          <input
-            type="radio"
-            id="apelacion"
-
-            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-            value="apelacion"
-            formControlName="resultadoImpugnacion"
-          />
-          <label for="apelacion" class="text-sm text-gray-700 cursor-pointer font-medium">
-            Apelación
-          </label>
-        </div>
-
-        <!-- Opción: Desistimiento -->
-        <div class="flex items-center justify-center space-x-2 p-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex-1">
-          <input
-            type="radio"
-            id="desistimiento"
-
-            class="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-            value="desistimiento"
-            formControlName="resultadoImpugnacion"
-          />
-          <label for="desistimiento" class="text-sm text-gray-700 cursor-pointer font-medium">
-            Desistimiento
-          </label>
-        </div>
-      </div>
-    </fieldset>
+    <!-- Campo Resultado -->
+    <div class="space-y-2">
+      <label for="resultado" class="block text-sm font-medium text-gray-700">
+        RESULTADO
+      </label>
+      <textarea
+        id="resultado"
+        rows="3"
+        class="mt-1 block w-full rounded-lg border border-gray-300 shadow-sm px-3 py-2 focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none resize-none transition-colors"
+        placeholder="Describir el resultado obtenido"
+        formControlName="resultado"
+      ></textarea>
+    </div>
 
     <!-- Botón de envío -->
     <div class="pt-4 border-t border-gray-200 flex justify-end">

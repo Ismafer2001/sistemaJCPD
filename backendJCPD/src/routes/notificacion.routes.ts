@@ -1,5 +1,5 @@
 import { Router,  } from 'express';
-import {  getNotificacionDTO, getPersonasNotificar, postCreateOtro, postNotificacion, getNotificacionById, getNotificacionPDF, putNotificacion } from '../controllers/notificacion.controller';
+import {  getNotificacionDTO,  postCreateOtro, postNotificacion, getNotificacionById, getNotificacionPDF, putNotificacion, getInvolucradosANotificar, getOtrosANotificar, deleteOtroNotificado, putOtroNotificado } from '../controllers/notificacion.controller';
 import { verificarToken } from '../middleware/auth.middleware';
 
 
@@ -7,14 +7,22 @@ import { verificarToken } from '../middleware/auth.middleware';
 const router = Router();
 
 
-router.get('/:id',getPersonasNotificar);
-router.get('/notificar/:id',getNotificacionDTO);
-router.post('/',postCreateOtro);
-router.post('/notificacion',postNotificacion);
-// Obtener los datos de una notificación por id
+// Rutas específicas primero
+router.get('/notificar/:id', getNotificacionDTO);
 router.get('/notificacion-completa/:id', getNotificacionById);
-
 router.get('/crearpdf/:id', getNotificacionPDF);
+
+// Rutas POST
+router.post('/', postCreateOtro);
+router.post('/notificacion', postNotificacion);
+
+// Rutas PUT y DELETE
+router.put('/otros/:id', putOtroNotificado);
+router.delete('/otros/:id', deleteOtroNotificado);
+
+// Rutas más generales al final
+router.get('/involucrados-principales/:id', getInvolucradosANotificar);
+router.get('/otros-involucrados/:id', getOtrosANotificar);
 router.put('/:id', verificarToken, putNotificacion);
 
 export default router;

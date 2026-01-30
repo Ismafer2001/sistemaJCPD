@@ -19,20 +19,31 @@ export const PDFcitacion = async (res: Response, idCitacion: any) => {
 
 	const docDefinition: any = {
 		content: [
-			{ text: 'FORMATO DE CITACIÓN', style: 'title', alignment: 'center', margin: [0, 0, 0, 10] },
+			{ text: [{ text: 'CITACIÓN N° ' }, { text: pdfData.codigoTramite || '', bold: true }], style: 'title', alignment: 'center', margin: [0, 0, 0, 10] },
 			{ text: 'CITACION', style: 'section', margin: [0, 10, 0, 10] },
-			{ text: 'Señor:' },
-			{ text: pdfData.diriguidoA },
-			{ text: `PARTE ${pdfData.parte || 'ACCIONADA'}` },
+			...(((pdfData.parte || '').toLowerCase() === 'representante institucional') ? [
+				{ text: 'Señor:' },
+				{ text: [{ text: pdfData.diriguidoA, bold: true }] },
+				{ text: [{ text: `${pdfData.cargo || ''}, ${pdfData.institucion || ''}`.replace(/^,\s*/, '').replace(/,\s*$/, ''), bold: true }] }
+			] : [
+				{ text: 'Señor:' },
+				{ text: [{ text: pdfData.diriguidoA, bold: true }] },
+				{ text: [{ text: 'PARTE ' }, { text: pdfData.parte || 'ACCIONADA', bold: true }] }
+			]),
 			{ text: 'Ciudad.' },
 			{ text: 'De nuestras consideraciones:', decoration: 'underline', margin: [0, 10, 0, 10] },
-			{ text: 'Reciban un cordial saludo de quienes conformamos la Junta de Protección de Derechos de la ciudad de …………………...' },
-			{ text: `Adjunto a la presente sírvase encontrar la Citación de fecha ${pdfData.fecha || 'XXXX'} del …………….de ………., para que asista a la Audiencia de Contestación a realizarse:` },
-			{ text: `LOCAL: ${pdfData.local || ''}` },
-			{ text: `DIRECCIÓN: ${pdfData.direccion || ''}` },
-			{ text: `HORA: ${pdfData.hora || ''}` },
-			{ text: `FECHA: ${pdfData.fecha || ''}` },
-			{ text: `Dispuesta dentro del trámite administrativo N° ${pdfData.codigoTramite || '0XXXXX-JCPD-…..-……………..'}` },
+			{ text: [{ text: 'Reciban un cordial saludo de quienes conformamos la Junta de Protección de Derechos de la ciudad de ' }, { text: pdfData.canton || '', bold: true }, { text: '.' }] },
+			{ text: [{ text: 'Adjunto a la presente sírvase encontrar la Citación de fecha ' }, { text: pdfData.fecha ? new Date(pdfData.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/(\w+), (\d+) de (\w+) de (\d+)/, '$1 $2, de $3 del $4') : '', bold: true }, { text: ', para que asista a la Audiencia de Contestación a realizarse:' }] },
+			{
+				ul: [
+					{ text: [{ text: 'LOCAL: ' }, { text: pdfData.local || '', bold: true }] },
+					{ text: [{ text: 'DIRECCIÓN: ' }, { text: pdfData.direccion || '', bold: true }] },
+					{ text: [{ text: 'HORA: ' }, { text: pdfData.hora || '', bold: true }] },
+					{ text: [{ text: 'FECHA: ' }, { text: pdfData.fecha ? new Date(pdfData.fecha).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/(\w+), (\d+) de (\w+) de (\d+)/, '$1 $2, de $3 del $4') : '', bold: true }] }
+				]
+			},
+			{ text: [{ text: 'Dispuesta dentro del trámite administrativo N° ' }, { text: pdfData.codigoTramite || '', bold: true }] },
+			{ text: [{ text: 'RAZÓN: ' }, { text: pdfData.razon || '', bold: true }], margin: [0, 10, 0, 10] },
 			{ text: 'Sin otro particular suscribimos.' },
 			{ text: 'Atentamente,' },
 			{ text: 'MIEMBROS DE LA JUNTA CANTONAL DE PROTECCION DE DERECHOS', style: 'section', margin: [0, 10, 0, 10] },

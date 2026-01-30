@@ -17,7 +17,7 @@ export class Testimonio extends Model<TestimonioAttributes, TestimonioCreationAt
 }
 Testimonio.init({
     id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-    testimonio: { type: DataTypes.STRING, allowNull: false },
+    testimonio: { type: DataTypes.TEXT, allowNull: false },
     parte: { type: DataTypes.STRING, allowNull: false },
     idParticipante: { type: DataTypes.INTEGER, allowNull: false }
 },{

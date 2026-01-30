@@ -3,6 +3,7 @@ import { RegistrarUsuarioDTOS } from "../interfaces/usuarios.interface";
 import { Canton } from "../models";
 import { usuarios } from "../models/usuarios.models";
 import bcrypt from "bcryptjs";
+import { Op } from "sequelize";
 
 //------------------------METODOS GET---------------//
 
@@ -10,6 +11,9 @@ import bcrypt from "bcryptjs";
 export const obtenerUsuarios = async () => {
 
   const allusuarios = await usuarios.findAll({
+      where: {
+        rol: { [Op.ne]: 'admin' } // Excluir usuarios con rol admin
+      },
       include: [{ model: Canton}],
     });
     const usuariosMapeados = allusuarios.map(u => ({

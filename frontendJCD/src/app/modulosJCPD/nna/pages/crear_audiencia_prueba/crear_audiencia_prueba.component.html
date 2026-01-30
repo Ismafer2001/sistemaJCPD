@@ -54,15 +54,17 @@
 
    </div>
    <div class="flex flex-wrap items-center gap-2 mt-2">
-  <p class="whitespace-nowrap">se Instala la Audiencia de contestación prevista en</p>
-  <select formControlName="instalacionAudiencia" class="min-w-0 flex-shrink rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none px-3 py-1">
-    <option value="" disabled selected hidden>Seleccione...</option>
-    <option value="Art 205 del Código de la Niñez y Adolescencia">Art 205 del Código de la Niñez y Adolescencia</option>
-    <option value="Art 206 del Código de la Niñez y Adolescencia">Art 206 del Código de la Niñez y Adolescencia</option>
-    <option value="Art 206 del Código de la Niñez y Adolescencia y Art 205 del Código de la Niñez y Adolescencia ">Art 206  y Art 205 del Código de la Niñez y Adolescencia</option>
 
-  </select>
-  <span>.</span>
+  <app-inputs
+    label="se Instala la Audiencia de contestación prevista en"
+    type="text"
+    placeholder="Ej: Art 205 del Código de la Niñez y Adolescencia"
+    [formGroup]="audienciaPruebaForm"
+    [control]="$any(audienciaPruebaForm.get('instalacionAudiencia')!)"
+    >
+    <span *ngIf="audienciaPruebaForm.get('instalacionAudiencia')?.errors?.['required'] && audienciaPruebaForm.get('instalacionAudiencia')?.touched">Este campo es requerido</span>
+  </app-inputs>
+
 </div>
 
       </div>
@@ -113,7 +115,7 @@
             <option value="Denunciado">Denunciado</option>
             <option value="Testigo">Testigo</option>
             <option value="Abogado">Abogado</option>
-            <option value="Representante">Representante</option>
+
           </select>
         </div>
 
@@ -150,12 +152,11 @@
       [encabezados]="['nombres','apellidos','Cedula','Tipo']"
         [columnas]="['nombres','apellidos','cedula','tipoParticipante']"
         [datos]="participantesTabla"
-        [acciones]="(isEditAudienciaPruebasActivate || !editMode)"
+        [acciones]="true"
         [mostrarEditar]="true"
         [editar]="editarParticipante.bind(this)"
         [eliminar]="eliminarParticipante.bind(this)"
       >
-
       </app-tablaEdit>
       </div>
 
@@ -203,8 +204,8 @@
             class="w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none px-3 py-2"
           >
             <option value="">Seleccione parte</option>
-            <option value="Actora">Actora</option>
-            <option value="Accionada">Accionada</option>
+            <option value="Denunciante">Denunciante</option>
+            <option value="Denunciado">Denunciado</option>
           </select>
         </div>
       </div>
@@ -275,8 +276,8 @@
                   <label class="block text-sm font-semibold text-gray-700 mb-1">Parte</label>
                   <select formControlName="parte" class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none">
                     <option value="">Seleccione parte</option>
-                    <option value="Actora">Actora</option>
-                    <option value="Accionada">Accionada</option>
+                    <option value="Denunciante">Denunciante</option>
+                    <option value="Denunciado">Denunciado</option>
 
                   </select>
                 </div>

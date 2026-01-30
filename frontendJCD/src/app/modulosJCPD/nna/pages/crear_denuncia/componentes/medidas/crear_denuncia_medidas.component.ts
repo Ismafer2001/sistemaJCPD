@@ -17,6 +17,8 @@ export class Crear_denuncia_medidasComponent implements OnInit {
   @Input() formAfectados!:FormArray; // Assuming this is used for some other purpose
   medidasForm: FormGroup;
   medidasPorArticulo: ArticuloMedidas[] = [];
+  medidasFiltradas: Medida[] = []; // Array de medidas filtradas para mostrar
+  articulosDisponibles: {id: number, articulo: string}[] = []; // Lista de artículos para el filtro
   loading = false;
   error: string | null = null;
   editandoIndex: number = -1; // Para rastrear si estamos editando y qué índice
@@ -27,12 +29,19 @@ export class Crear_denuncia_medidasComponent implements OnInit {
   ) {
     this.medidasForm = this.fb.group({
       idAfectado: [, [Validators.required, Validators.minLength(1)]],
+      articuloFiltro: [''], // Campo para filtrar por artículo
       ids_medidas: [[], [Validators.required, Validators.minLength(1)]]
     });
   }
 
   ngOnInit() {
     this.cargarMedidas();
+
+    // Suscribirse a cambios en el artículo filtro
+    this.medidasForm.get('articuloFiltro')?.valueChanges.subscribe(articuloId => {
+      this.filtrarMedidasPorArticulo(articuloId);
+    });
+
     this.medidasForm.valueChanges.subscribe(nna => {
       console.log('medidas:',nna);
     });
@@ -93,6 +102,16 @@ export class Crear_denuncia_medidasComponent implements OnInit {
       next: (response) => {
         if (response.success) {
           this.medidasPorArticulo = response.data;
+
+          // Inicializar lista de artículos para el filtro
+          this.articulosDisponibles = this.medidasPorArticulo.map(articulo => ({
+            id: articulo.id,
+            articulo: articulo.articulo
+          }));
+
+          // Inicializar medidas filtradas con todas las medidas
+          this.inicializarMedidasFiltradas();
+
           console.log('Medidas cargadas:', this.medidasPorArticulo);
         } else {
           this.error = 'Error al cargar las medidas';
@@ -106,7 +125,51 @@ export class Crear_denuncia_medidasComponent implements OnInit {
       }
     });
   }
+  inicializarMedidasFiltradas(): void {
+    // Recopilar todas las medidas de todos los artículos
+    this.medidasFiltradas = [];
+    this.medidasPorArticulo.forEach(articulo => {
+      if (articulo.medidas) {
+        this.medidasFiltradas.push(...articulo.medidas);
+      }
+    });
+  }
 
+  filtrarMedidasPorArticulo(articuloId: string): void {
+    if (!articuloId || articuloId === '') {
+      // Si no hay filtro seleccionado, mostrar todas las medidas
+      this.inicializarMedidasFiltradas();
+    } else {
+      // Filtrar medidas del artículo seleccionado
+      const articuloSeleccionado = this.medidasPorArticulo.find(a =>
+        String(a.id) === String(articuloId)
+      );
+
+      if (articuloSeleccionado && articuloSeleccionado.medidas) {
+        this.medidasFiltradas = [...articuloSeleccionado.medidas];
+      } else {
+        this.medidasFiltradas = [];
+      }
+    }
+    // NO limpiar selecciones - mantener las selecciones existentes
+  }
+
+  // Método helper para obtener el nombre del artículo seleccionado
+  getNombreArticuloSeleccionado(): string {
+    const articuloId = this.medidasForm.get('articuloFiltro')?.value;
+    const articulo = this.articulosDisponibles.find(a => String(a.id) === String(articuloId));
+    return articulo?.articulo || '';
+  }
+
+  // Método helper para obtener el artículo de una medida
+  getArticuloDeMedida(medidaId: number): string {
+    for (const articulo of this.medidasPorArticulo) {
+      if (articulo.medidas && articulo.medidas.find(m => m.id === medidaId)) {
+        return articulo.articulo;
+      }
+    }
+    return 'Sin artículo';
+  }
 
   toggleMedida(medidaId: number) {
     const control = this.medidasForm.get('ids_medidas');

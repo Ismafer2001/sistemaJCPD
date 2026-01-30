@@ -9,8 +9,11 @@ interface OtrosAttributes {
   parte?: string;
   cedula?: string;
   tipoParticipante?: string;
+  cargo?: string;
+  institucion?: string;
   fase: string;
   idDenuncia: number;
+  nombre_proyecto?: string;
   
 }
 
@@ -25,7 +28,9 @@ export class Otros extends Model<OtrosAttributes, OtrosCreationAttributes> imple
   declare cedula: string;
   declare idDenuncia: number;
   declare fase: string;
-
+  declare cargo: string;
+  declare institucion: string;
+  declare nombre_proyecto: string;
 }
 
 Otros.init({
@@ -54,7 +59,17 @@ Otros.init({
     type: DataTypes.STRING,
     
   },
-  
+  cargo: {
+    type: DataTypes.STRING,
+    
+  },
+  institucion: {
+    type: DataTypes.STRING,
+    
+  },
+  nombre_proyecto: {
+    type: DataTypes.STRING,
+  },
   idDenuncia: {
     type: DataTypes.INTEGER,
     allowNull: false,

@@ -31,6 +31,9 @@ export class NnaPageNnaComponent implements OnInit {
   totalDenuncias = 0;
   grupo: string = "";
 
+  // Configuración de grupos válidos
+  private gruposValidos = ['nna', 'adultos', 'mujeres'];
+
   constructor(private denunciaService: DenunciaService,
      private UserService:UserService,
     private route:ActivatedRoute) {
@@ -39,18 +42,19 @@ export class NnaPageNnaComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-    if (params['grupo']=='nna') {
-      this.grupo = "nna"
-
-    } else {
-      this.grupo = "adultos"
-
-    };
-  })
+      const grupo = params['grupo'];
+      if (this.gruposValidos.includes(grupo)) {
+        this.grupo = grupo;
+      } else {
+        console.error('Grupo no válido:', grupo);
+        // No asignar valor por defecto, dejarlo vacío o manejar el error
+        this.grupo = '';
+      }
+    });
 
     this.cargarDenuncias();
     this.totalDenunciasActivas();
-    this.principalesActivos()
+    this.principalesActivos();
 
   }
 
