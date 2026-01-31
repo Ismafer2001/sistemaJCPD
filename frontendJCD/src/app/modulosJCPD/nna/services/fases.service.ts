@@ -1,11 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from 'environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FasesService {
-  private apiUrl = 'http://localhost:3000/api/estatus/';
+  private apiUrl = `${environment.CLIENT_URL}/api/estatus/`;
 
 constructor(private http:HttpClient ) { }
 getEstatus(id:number){

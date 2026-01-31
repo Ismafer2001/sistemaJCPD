@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AvocatoriaService {
-  private apiUrl = 'http://localhost:3000/api/avocatoria';
-  private apiUrlUpload = 'http://localhost:3000/api/upload/upload';
+  private apiUrl = `${environment.CLIENT_URL}/api/avocatoria`;
+  private apiUrlUpload = `${environment.CLIENT_URL}/api/upload/upload`;
 
   constructor(private http: HttpClient) { }
 
@@ -17,7 +18,7 @@ export class AvocatoriaService {
   getMedidasIdentificadas(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/medidas/${id}`);
   }
-  
+
   getAfectados(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/afectados/${id}`);
   }

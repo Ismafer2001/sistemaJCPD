@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {rxResource} from '@angular/core/rxjs-interop';
+import { environment } from 'environments/environment';
 
 export interface Canton {
   id: number;
@@ -24,12 +25,12 @@ export interface Usuario {
 })
 export class UserService {
 
-  private apiUrl = 'http://localhost:3000/api/usuarios';
+  private apiUrl = `${environment.CLIENT_URL}/api/usuarios`;
 
   constructor(private http: HttpClient) {}
 
   obtenerCantones(): Observable<Canton[]> {
-  return this.http.get<Canton[]>('http://localhost:3000/api/cantones');
+  return this.http.get<Canton[]>(`${environment.CLIENT_URL}/api/cantones`);
 }
 
 

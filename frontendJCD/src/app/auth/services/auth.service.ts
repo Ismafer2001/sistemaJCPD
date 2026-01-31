@@ -5,6 +5,7 @@ import { Observable, tap, map } from 'rxjs';
 import { login } from '../interfaces/login.interface';
 import { perfil } from '@shared/interfaces/perfil.interface';
 import { jwtDecode } from 'jwt-decode';
+import { environment } from 'environments/environment';
 
 
 
@@ -12,7 +13,7 @@ import { jwtDecode } from 'jwt-decode';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:3000/api/auth';
+  private apiUrl = `${environment.CLIENT_URL}/api/auth`;
 
 
   constructor(private http: HttpClient, private router: Router) {}

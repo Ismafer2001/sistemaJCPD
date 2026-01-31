@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from 'environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ControlImpugnacionService {
 
-   private apiUrl = 'http://localhost:3000/api/control-impugnacion';
+   private apiUrl = `${environment.CLIENT_URL}/api/control-impugnacion`;
 
 constructor(private http: HttpClient) { }
 getCodigoTramite(id: number) {

@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Denuncia } from '@nna/interfaces/denuncia.interface';
+import { environment } from 'environments/environment';
 
 
 
@@ -9,7 +10,7 @@ import { Denuncia } from '@nna/interfaces/denuncia.interface';
   providedIn: 'root'
 })
 export class DenunciaService {
-  private apiUrl = 'http://localhost:3000/api/denuncias';
+  private apiUrl = `${environment.CLIENT_URL}/api/denuncias`;
 
   constructor(private http: HttpClient) { }
 

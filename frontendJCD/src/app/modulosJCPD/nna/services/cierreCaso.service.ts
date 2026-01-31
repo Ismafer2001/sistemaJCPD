@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -7,7 +8,7 @@ import { Observable } from 'rxjs';
 })
 export class CierreCasoService {
 
-  private apiUrl = 'http://localhost:3000/api/cierre-caso';
+  private apiUrl = `${environment.CLIENT_URL}/api/cierre-caso`;
 
   constructor(private http: HttpClient) { }
 

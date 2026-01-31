@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from 'environments/environment';
 
 export interface Medida {
   id: number;
@@ -23,7 +24,7 @@ export interface MedidasResponse {
   providedIn: 'root'
 })
 export class MedidasService {
-  private apiUrl = 'http://localhost:3000/api/medidas';
+  private apiUrl = `${environment.CLIENT_URL}/api/medidas`;
 
   constructor(private http: HttpClient) { }
 

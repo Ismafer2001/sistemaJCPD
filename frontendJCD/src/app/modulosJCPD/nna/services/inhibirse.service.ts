@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from 'environments/environment';
 import { Observable } from 'rxjs';
 export interface Canton {
   id: number;
@@ -10,12 +11,12 @@ export interface Canton {
   providedIn: 'root'
 })
 export class InhibirseService {
-   private apiUrl = 'http://localhost:3000/api/inhibirse';
+   private apiUrl = `${environment.CLIENT_URL}/api/inhibirse`;
 
 constructor(private http: HttpClient) { }
 
  obtenerCantones(): Observable<Canton[]> {
-  return this.http.get<Canton[]>('http://localhost:3000/api/cantones');
+  return this.http.get<Canton[]>(`${environment.CLIENT_URL}/api/cantones`);
 }
 IniciarInhibirse(inhibirse: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, inhibirse);

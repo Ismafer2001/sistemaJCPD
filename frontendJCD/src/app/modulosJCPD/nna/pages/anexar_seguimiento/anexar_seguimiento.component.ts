@@ -7,6 +7,7 @@ import { DenunciaService } from '@nna/services/denuncia.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 import { CumpleMedidasTablaComponent } from './cumpleMedidasTabla/cumpleMedidasTabla.component';
+import { environment } from 'environments/environment';
 
 @Component({
   selector: 'app-anexar_seguimiento',
@@ -364,18 +365,7 @@ export class Anexar_seguimientoComponent implements OnInit {
     });
   }
 
-  // Generar enlace de descarga para el archivo
-  /*generarEnlaceDescarga(nombreArchivo: string): string {
-    if (!nombreArchivo) return 'Archivo no disponible';
-
-    // Construir URL de descarga usando el middleware express.static
-    const baseUrl = 'http://localhost:3000'; // http://localhost:4200 o tu dominio
-    const downloadUrl = `${baseUrl}/files/${nombreArchivo}`;
-
-    return `<a href="${downloadUrl}" target="_blank" class="text-blue-600 hover:text-blue-800 underline" download>
-              <i class="fas fa-download mr-1"></i>Descargar
-            </a>`;
-  }*/
+  
 
   // Método para descargar archivo directamente
   descargarArchivo(event: any) {
@@ -412,7 +402,7 @@ export class Anexar_seguimientoComponent implements OnInit {
     }
 
     // Construir URL con la estructura: /files/{codigoTramite}/seguimiento/{nombreArchivo}
-    const baseUrl = 'http://localhost:3000';
+    const baseUrl = environment.CLIENT_URL;
     const downloadUrl = `${baseUrl}/files/${this.codigoTramite}/seguimiento/${nombreArchivo}`;
     console.log('Iniciando descarga desde URL:', downloadUrl);
 
