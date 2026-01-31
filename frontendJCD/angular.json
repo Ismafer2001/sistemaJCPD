@@ -24,7 +24,8 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              }
+              },
+              "src/_redirects"
             ],
             "styles": [
               "node_modules/quill/dist/quill.snow.css",
@@ -94,9 +95,9 @@
               {
                 "glob": "**/*",
                 "input": "public"
-              },
+              }
 
-                "src/_redirects"
+
 
             ],
             "styles": [
