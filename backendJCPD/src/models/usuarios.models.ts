@@ -12,7 +12,7 @@ interface usuarioAttributes {
   contrasena: string;
   rol: 'admin' | 'principal' | 'secretaria' | 'suplente';
   isactivo: boolean;
-  id_canton: number;
+  id_canton: number | null;
   
 }
 interface UsuarioCreationAttributes extends Optional<usuarioAttributes, 'id' | 'isactivo' >{
