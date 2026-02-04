@@ -44,7 +44,7 @@ usuarios.init({
   contrasena: { type: DataTypes.STRING, allowNull: false },
   rol: { type: DataTypes.ENUM('admin', 'principal', 'secretaria', 'suplente'), allowNull: false },
   isactivo: { type: DataTypes.BOOLEAN, defaultValue: true },
-  id_canton: { type: DataTypes.INTEGER, allowNull: false, references: { model: Canton, key: 'id' } },
+  id_canton: { type: DataTypes.INTEGER, allowNull: true, references: { model: Canton, key: 'id' } },
   
 }, {
   sequelize,

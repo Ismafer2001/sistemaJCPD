@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { getAfectadosSeguimientoMedidas, postAgregarCumplimientoMedidas, getMedidasPendientesPorAfectado, getMedidasCumplidasPorAfectado } from '../controllers/seguimientoMedidas.controller';
+import { getAfectadosSeguimientoMedidas, postAgregarCumplimientoMedidas, putActualizarCumplimientoMedidas, getMedidasPendientesPorAfectado, getMedidasCumplidasPorAfectado, getMedidasDefinitivasPorAfectado } from '../controllers/seguimientoMedidas.controller';
 import { upload } from '../middleware/multer.middleware';
 import { verificarToken } from '../middleware/auth.middleware';
+import { verificarCantonDenuncia } from '../middleware/canton.middleware';
 
 const router = Router();
 const path = require('path');
@@ -9,7 +10,7 @@ const fs = require('fs');
 // Rutas protegidas - requieren autenticación
 router.use(verificarToken);
 
-router.get('/files/:codigoTramite/seguimiento/:nombreArchivo', (req, res) => {
+router.get('/files/:codigoTramite/seguimiento/:nombreArchivo',verificarCantonDenuncia, (req, res) => {
     // 1. El JWT ya debió ser validado por un middleware previo (ej. tu verifyToken)
     // 2. Extraemos los datos del token que ya tienes (canton, rol, etc.)
     const cantonUsuario = req.user.canton; 
@@ -35,9 +36,11 @@ router.get('/files/:codigoTramite/seguimiento/:nombreArchivo', (req, res) => {
 });
 
 router.get('/afectados/:id', getAfectadosSeguimientoMedidas);
+router.get('/medidas-definitivas/:idAfectado', getMedidasDefinitivasPorAfectado);
 router.get('/medidas-pendientes/:idAfectado', getMedidasPendientesPorAfectado);
 router.get('/medidas-cumplidas/:idAfectado', getMedidasCumplidasPorAfectado);
 router.post('/cumplimiento-medidas', verificarToken, upload.single('archivo'), postAgregarCumplimientoMedidas);
+router.put('/cumplimiento-medidas', verificarToken, upload.single('archivo'), putActualizarCumplimientoMedidas);
 
 
 

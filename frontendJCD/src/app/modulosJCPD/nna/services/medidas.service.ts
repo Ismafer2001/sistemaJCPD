@@ -6,6 +6,7 @@ import { environment } from 'environments/environment';
 export interface Medida {
   id: number;
   medida: string;
+  cuerpoLegal: string;
 }
 
 export interface ArticuloMedidas {
@@ -16,7 +17,7 @@ export interface ArticuloMedidas {
 
 export interface MedidasResponse {
   success: boolean;
-  data: ArticuloMedidas[];
+  data: Medida[];
   message?: string;
 }
 

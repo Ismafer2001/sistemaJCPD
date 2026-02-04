@@ -1,55 +1,82 @@
-<table class=" table-auto  w-full text-sm text-left  ">
-      <thead class="bg-blue-50  ">
-        <tr class="">
-          @for (header of encabezados; track $index) {
-            <th class=" p-2">{{header}}</th>
-          }
-
-
-
-          @if(acciones){
-            <th class=" p-1 ">
-              Acciones
-            </th>
-
-          }
-
-
-
-        </tr>
-      </thead>
-      <tbody class="">
-        @for (item of datos; track $index) {
-
-          <tr (click)="RouterLink && RouterLinkparam && !queryParams? navegar(item) : tabs(item)" class="hover:bg-gray-50 cursor-pointer border-t-2 border-t-blue-100  " >
-            @for (col of columnas; track $index) {
-
-              <td class=" overflow-hidden  truncate p-2">{{obtenerValorAnidado(item, col) || item[col] }}</td>
-
+<!-- Loading State -->
+@if (isLoading) {
+  <div class="w-full flex flex-col items-center justify-center py-12 bg-gray-50 rounded-lg">
+    <!-- Spinner -->
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+    <p class="text-gray-600 text-lg font-medium">{{ loadingMessage }}</p>
+  </div>
+} @else {
+  <!-- Table Content -->
+  <div class="w-full">
+    @if (datos && datos.length > 0) {
+      <table class="table-auto w-full text-sm text-left">
+        <thead class="bg-blue-50">
+          <tr>
+            @for (header of encabezados; track $index) {
+              <th class="p-3 font-semibold text-gray-700 border-b border-blue-200">{{header}}</th>
             }
-            @if (acciones) {
-              <td class=" p-2 grid grid-cols-2  ">
-
-                  <button type="button" (click)="editar(item); $event.stopPropagation()"
-                class=" w-10 h-10  flex items-center justify-center text-gray-700 font-medium transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700 hover:text-white'">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
-  <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
-  <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
-</svg>
-                </button>
-
-                <button type="button" (click)="eliminar(item); $event.stopPropagation()"class="w-10 h-10 flex items-center justify-center text-gray-700 font-medium transition-colors duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-700 hover:text-white'">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
-  <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
-</svg>
-                </button>
-              </td>
+            @if(acciones){
+              <th class="p-3 font-semibold text-gray-700 border-b border-blue-200">
+                Acciones
+              </th>
             }
-
-
           </tr>
-
-        }
-
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (item of datos; track $index) {
+            <tr (click)="RouterLink && RouterLinkparam && !queryParams? navegar(item) : tabs(item)" 
+                class="hover:bg-gray-50 cursor-pointer border-t border-gray-100 transition-colors duration-150">
+              @for (col of columnas; track $index) {
+                <td class="overflow-hidden truncate p-3 text-gray-800">
+                  {{obtenerValorAnidado(item, col) || item[col] }}
+                </td>
+              }
+              @if (acciones) {
+                <td class="p-3">
+                  <div class="flex space-x-2">
+                    <button type="button" 
+                            (click)="editar(item); $event.stopPropagation()"
+                            class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-white hover:bg-blue-600 rounded-md transition-all duration-200"
+                            title="Editar">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                        <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
+                        <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
+                      </svg>
+                    </button>
+                    <button type="button" 
+                            (click)="eliminar(item); $event.stopPropagation()"
+                            class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-white hover:bg-red-600 rounded-md transition-all duration-200"
+                            title="Eliminar">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-4">
+                        <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <!-- Empty State -->
+      <div class="w-full flex flex-col items-center justify-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+        <!-- Empty State Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" 
+             class="h-16 w-16 text-gray-400 mb-4" 
+             fill="none" 
+             viewBox="0 0 24 24" 
+             stroke="currentColor">
+          <path stroke-linecap="round" 
+                stroke-linejoin="round" 
+                stroke-width="1.5" 
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+        <h3 class="text-lg font-medium text-gray-600 mb-2">{{ emptyMessage }}</h3>
+        <p class="text-gray-500 text-sm text-center max-w-sm">
+          No hay información disponible para mostrar en este momento.
+        </p>
+      </div>
+    }
+  </div>
+}

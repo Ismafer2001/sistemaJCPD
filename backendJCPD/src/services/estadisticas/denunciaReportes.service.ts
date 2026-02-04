@@ -46,6 +46,7 @@ export const obtenerResumenDenuncias = async (filtros: {
       baseWhere.fechaCreado = { [Op.lte]: hastaDate };
     }
   }
+  console.log('Base Where after date filter:', baseWhere);
   
 
   const totalDenuncias = await Denuncia.count({ where: baseWhere  });
@@ -128,7 +129,7 @@ export const contarAfectadosPorSexo = async (filtros: {
   // Convertimos el resultado a un objeto más legible
   const conteo: Record<string, number> = {};
   for (const r of resultado) {
-    const sexo = (r.get('sexo') as string)?.toLowerCase() || 'desconocido';
+    const sexo = (r.get('sexo') as string)?.toLowerCase() || 'otro';
     conteo[sexo] = parseInt(r.get('cantidad') as string, 10);
   }
 
@@ -162,34 +163,25 @@ export const contarAfectadosPorEdad = async (filtros: FiltroReporte) => {
     }
   }
 
-  const rangos = [
-    { label: '0-1', min: 0, max: 1 },
-    { label: '1-3', min: 1, max: 3 },
-    { label: '3-5', min: 3, max: 5 },
-    { label: '5-8', min: 5, max: 8 },
-    { label: '8-12', min: 8, max: 12 },
-    { label: '12-15', min: 12, max: 15 },
-    { label: '15-18', min: 15, max: 18 }
-  ];
+  const resultado = await Afectado.findAll({
+    attributes: ['edad', [fn('COUNT', col('Afectado.id')), 'cantidad']],
+    include: [{
+      model: Denuncia,
+      attributes: [],
+      where: whereDenuncia
+    }],
+    group: ['edad'],
+    order: [['edad', 'ASC']]
+  });
 
-  const resultados: Record<string, number> = {};
-
-  for (const rango of rangos) {
-    const cantidad = await Afectado.count({
-      where: {
-        edad: { [Op.between]: [rango.min, rango.max] }
-      },
-      include: [{
-        model: Denuncia,
-        attributes: [],
-        where: whereDenuncia
-      }]
-    });
-
-    resultados[rango.label] = cantidad;
+  const conteo: Record<string, number> = {};
+  for (const r of resultado) {
+    const edad = r.get('edad') as number;
+    const edadKey = edad !== null && edad !== undefined ? edad.toString() : 'sin_edad';
+    conteo[edadKey] = parseInt(r.get('cantidad') as string, 10);
   }
 
-  return resultados;
+  return conteo;
 };
 export const contarAfectadosPorNacionalidad = async (filtros: FiltroReporte) => {
   const whereDenuncia: any = {

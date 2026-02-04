@@ -12,6 +12,7 @@ export class CumpleMedidasTablaComponent  {
   @Input() datos: any[] = [];
   @Input() acciones: boolean = false;
   @Input() mostrarEditar = false;
+  @Input() mostrarEliminar = true; // Nueva propiedad para controlar el botón eliminar
   @Input() botonEstado: boolean = false;
   
   // Nuevas propiedades para descarga PDF

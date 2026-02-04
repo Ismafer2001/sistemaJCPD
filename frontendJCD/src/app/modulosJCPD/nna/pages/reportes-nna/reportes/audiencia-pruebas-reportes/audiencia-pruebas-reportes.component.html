@@ -6,27 +6,11 @@
     <p class="text-gray-600 mb-6">Cantidad de audiencias programadas y su origen</p>
 
     <!-- Filtro por fechas -->
-    <div class="bg-white p-4 rounded-xl shadow flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-      <div>
-        <h2 class="text-lg font-semibold text-gray-800">📅 Filtrar por fechas</h2>
-        <p class="text-sm text-gray-500">Seleccioná un rango de fechas</p>
-      </div>
-      <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-        <div>
-          <label class="text-sm text-gray-600">Desde</label>
-          <input type="date" class="mt-1 block w-full sm:w-44 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" />
-        </div>
-        <div>
-          <label class="text-sm text-gray-600">Hasta</label>
-          <input type="date" class="mt-1 block w-full sm:w-44 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" />
-        </div>
-        <div class="self-end">
-          <button class="w-full sm:w-auto px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition">
-            Filtrar
-          </button>
-        </div>
-      </div>
-    </div>
+     <!-- 🔍 Filtro por fechas -->
+   <app-filtro class=" flex flex-col md:flex-row "
+     [filtroForm]="filtroForm"
+     [filtrar]="filtrar.bind(this)">
+   </app-filtro>
 
     <!-- Tarjetas resumen de audiencias -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -38,7 +22,7 @@
           <p class="text-sm text-gray-500">Programadas en el sistema</p>
         </div>
         <div class="text-blue-600 text-4xl font-bold">
-          60
+          {{audiencias?.total || 0}}
         </div>
       </div>
 
@@ -49,7 +33,7 @@
           <p class="text-sm text-gray-500">Audiencias relacionadas</p>
         </div>
         <div class="text-indigo-600 text-4xl font-bold">
-          25
+          {{audiencias?.oficio || 0}}
         </div>
       </div>
 
@@ -60,7 +44,7 @@
           <p class="text-sm text-gray-500">Audiencias relacionadas</p>
         </div>
         <div class="text-rose-600 text-4xl font-bold">
-          35
+          {{audiencias?.externa || 0}}
         </div>
       </div>
 

@@ -20,16 +20,28 @@ export async function contarResolucionesTotales(filtro: FiltroReporte) {
   };
 
   const whereResoluciones: any = {};
-  if (filtro.desde) {
-    whereResoluciones.fecha_creado = { [Op.gte]: new Date(filtro.desde) };
-  }
-  if (filtro.hasta) {
+  
+  if (filtro.desde && filtro.hasta) {
+    // Si hay ambas fechas, crear rango inclusivo
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0); // Inicio del día
+    
     const hasta = new Date(filtro.hasta);
-    hasta.setHours(23, 59, 59, 999);
+    hasta.setUTCHours(23, 59, 59, 999); // Final del día
+    
     whereResoluciones.fecha_creado = {
-      ...(whereResoluciones.fecha_creado || {}),
-      [Op.lte]: hasta,
+      [Op.between]: [desde, hasta]
     };
+  } else if (filtro.desde) {
+    // Solo fecha desde
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0);
+    whereResoluciones.fecha_creado = { [Op.gte]: desde };
+  } else if (filtro.hasta) {
+    // Solo fecha hasta
+    const hasta = new Date(filtro.hasta);
+    hasta.setUTCHours(23, 59, 59, 999);
+    whereResoluciones.fecha_creado = { [Op.lte]: hasta };
   }
 
   // Total resoluciones (filtrando por denuncia -> canton y grupo)
@@ -81,32 +93,46 @@ export async function contarResolucionesTotales(filtro: FiltroReporte) {
 }
 
 export const contarMedidasDefinitivasAgrupadasPorArticulo = async (filtro: FiltroReporte) => {
-  const whereFecha: any = {};
-  if (filtro.desde) {
-    whereFecha.fechaCreado = { [Op.gte]: new Date(filtro.desde) };
-  }
-  if (filtro.hasta) {
+  const whereFechaMedidas: any = {};
+  
+  if (filtro.desde && filtro.hasta) {
+    // Si hay ambas fechas, crear rango inclusivo
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0); // Inicio del día
+    
     const hasta = new Date(filtro.hasta);
-    hasta.setHours(23, 59, 59, 999);
-    whereFecha.fechaCreado = {
-      ...(whereFecha.fechaCreado || {}),
-      [Op.lte]: hasta
+    hasta.setUTCHours(23, 59, 59, 999); // Final del día
+    
+    whereFechaMedidas.FechaCreado = {
+      [Op.between]: [desde, hasta]
     };
+  } else if (filtro.desde) {
+    // Solo fecha desde
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0);
+    whereFechaMedidas.FechaCreado = { [Op.gte]: desde };
+  } else if (filtro.hasta) {
+    // Solo fecha hasta
+    const hasta = new Date(filtro.hasta);
+    hasta.setUTCHours(23, 59, 59, 999);
+    whereFechaMedidas.FechaCreado = { [Op.lte]: hasta };
   }
 
+  // Consulta para medidas agrupadas
   const resultado = await MedidasDefinitivas.findAll({
     attributes: [
       [fn('COUNT', col('MedidasDefinitivas.id')), 'cantidad']
     ],
+    where: whereFechaMedidas,
     include: [
       {
         model: medida,
         as: "MedidasD" ,
-    attributes: ['id','medidas'],
+        attributes: ['id','medidas'],
         include: [
           {
-      model: articulo,
-      attributes: ['id','articulo']
+            model: articulo,
+            attributes: ['id','articulo']
           }
         ]
       },
@@ -122,16 +148,7 @@ export const contarMedidasDefinitivasAgrupadasPorArticulo = async (filtro: Filtr
             where: {
               grupoPrioritario: filtro.grupoPrioritario,
               id_canton: filtro.id_canton
-            },
-            include: [
-              {
-                model: Resoluciones,
-                as:"resoluciones",
-                required: true,
-                attributes: [],
-                where: whereFecha
-              }
-            ]
+            }
           }
         ]
       },
@@ -141,6 +158,30 @@ export const contarMedidasDefinitivasAgrupadasPorArticulo = async (filtro: Filtr
   group: ['MedidasD.id', 'MedidasD.medidas', 'MedidasD->articulo.id', 'MedidasD->articulo.articulo'],
     raw: true,
     nest: true
+  });
+
+  // Contar afectados únicos
+  const totalAfectados = await MedidasDefinitivas.count({
+    distinct: true,
+    col: 'idAfectado',
+    where: whereFechaMedidas,
+    include: [
+      {
+        model: Afectado,
+        required: true,
+        include: [
+          {
+            model: Denuncia,
+            required: true,
+            where: {
+              grupoPrioritario: filtro.grupoPrioritario,
+              id_canton: filtro.id_canton
+            },
+           
+          }
+        ]
+      }
+    ]
   });
 
   const resumen: Record<string, Record<string, number>> = {};
@@ -161,5 +202,8 @@ export const contarMedidasDefinitivasAgrupadasPorArticulo = async (filtro: Filtr
 
   console.log("Resumen de medidas agrupadas por artículo:", resumen);
 
-  return resumen;
+  return {
+    medidas: resumen,
+    totalAfectadosConMedidasDefinitivas: totalAfectados
+  };
 };

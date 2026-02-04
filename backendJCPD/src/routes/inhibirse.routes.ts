@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as inhibirseController from '../controllers/inhibirse.controller';
 import { verificarToken } from '../middleware/auth.middleware';
+import { verificarCantonDenuncia } from '../middleware/canton.middleware';
 
 const router = Router();
 
@@ -11,10 +12,13 @@ router.use(verificarToken);
 router.post('/', inhibirseController.crearInhibicion);
 
 // GET /inhibirse/codigo-tramite/:id - Obtener código de trámite por ID denuncia
-router.get('/codigo-tramite/:id', inhibirseController.getCodigoTramiteInhibirse);
+router.get('/codigo-tramite/:id',verificarCantonDenuncia, inhibirseController.getCodigoTramiteInhibirse);
 
 // GET /inhibirse/deprecatorias/:idcanton - Obtener deprecatorias por cantón destino
 router.get('/deprecatorias/:idcanton', inhibirseController.obtenerDeprecatoriasPorcanton);
+
+// GET /inhibirse/deprecatorias-pendientes/:idcanton - Obtener deprecatorias pendientes por cantón
+router.get('/deprecatorias-pendientes/:idcanton', inhibirseController.obtenerDeprecatoriasPendientesPorCanton);
 
 
 

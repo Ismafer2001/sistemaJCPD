@@ -61,7 +61,9 @@ MedidasEmergentes.init({
   sequelize,
   modelName: 'MedidasEmergentes',
   tableName: 'medidas_emergentes',
-  timestamps: false,
+  timestamps: true,
+    createdAt: 'fechaCreado',
+    updatedAt: false
 });
 
 

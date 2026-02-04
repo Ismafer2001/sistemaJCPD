@@ -7,7 +7,7 @@ import { FormBuilder,
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DenunciaService } from '@nna/services/denuncia.service';
-import { MedidasService } from '@nna/services/medidas.service';
+import { ArticuloMedidas, Medida, MedidasService } from '@nna/services/medidas.service';
 import { ResolucionesService } from '@nna/services/resoluciones.service';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
@@ -93,10 +93,12 @@ export class Crear_resolucionesComponent implements OnInit {
   editMedidasMode: boolean = false;
 grupo: string = '';
  medidasDefinitivasForm!:FormGroup;
+    todasLasMedidas: Medida[] = [];
+    medidasFiltradas: Medida[] = [];
+    cuerposLegalesDisponibles: string[] = [];
     medidasDefinitivas: any[] = [];
     denunciaId!:number;
     afectados: any[] = [{id: 0, nombres: ''}];
-     medidasPorArticulo: any[] = [];
 
   editMode: boolean = false;
 
@@ -124,6 +126,10 @@ grupo: string = '';
   ]
 };
 pdfSrc: SafeResourceUrl | null = null;
+
+// Estado de loading para PDF
+pdfLoading: boolean = false;
+pdfError: boolean = false;
 
   constructor(private fb: FormBuilder,
     private medidasService:MedidasService,
@@ -269,6 +275,7 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
       formularioMedidasDefinitivas() {
      this.medidasDefinitivasForm= this.fb.group({
         idAfectado: ['', Validators.required],
+        cuerpoLegalFiltro: [''], // Campo para filtrar por cuerpo legal
         idMedida: ['', Validators.required],
         medida: ['', Validators.required],
         periodo: ['', Validators.required],
@@ -315,8 +322,15 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
   cargarMedidas() {
     this.medidasService.getAllMedidas().subscribe({
       next: (response) => {
-          this.medidasPorArticulo = response.data;
-          console.log('Medidas por Artículo:', this.medidasPorArticulo);
+          this.todasLasMedidas = response.data;
+
+          // Inicializar lista de cuerpos legales únicos para el filtro
+          this.cuerposLegalesDisponibles = [...new Set(this.todasLasMedidas.map(medida => medida.cuerpoLegal))];
+
+          // Inicializar medidas filtradas con todas las medidas
+          this.inicializarMedidasFiltradas();
+
+          console.log('medidas cargadas:', this.todasLasMedidas);
       },
       error: () => {
         console.error('Error al cargar medidas:');
@@ -578,17 +592,14 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
           }
         });
       }
- //funcion para autocompletar el input de vulneraciones del formulario de vulneraciones identificadas
+ //funcion para autocompletar el input de medidas del formulario de medidas definitivas
  seleccionarMedida() {
   this.medidasDefinitivasForm.get('idMedida')!
     .valueChanges
     .subscribe((id: number | string) => {
       const numId = Number(id);
-      // Busca el nombre en tu catálogo
-      const encontrado = this.medidasPorArticulo
-        .flatMap(articulo => articulo.medidas)
-        .find(m => m.id === numId);
-
+      // Busca el nombre en el catálogo actualizado
+      const encontrado = this.medidasFiltradas.find(m => m.id === numId);
 
       this.medidasDefinitivasForm.patchValue(
         { medida: encontrado?.medida ?? '' },
@@ -596,7 +607,38 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
       );
     });
 
+  // Suscribirse a cambios en el filtro de cuerpo legal
+  this.medidasDefinitivasForm.get('cuerpoLegalFiltro')?.valueChanges.subscribe(cuerpoLegal => {
+    this.filtrarMedidasPorCuerpoLegal(cuerpoLegal);
+  });
+
 }
+
+  // Métodos para el filtrado de medidas
+  inicializarMedidasFiltradas(): void {
+    // Mostrar todas las medidas disponibles
+    this.medidasFiltradas = [...this.todasLasMedidas];
+  }
+
+  filtrarMedidasPorCuerpoLegal(cuerpoLegalNombre: string): void {
+    if (!cuerpoLegalNombre || cuerpoLegalNombre === '') {
+      // Si no hay filtro seleccionado, mostrar todas las medidas
+      this.inicializarMedidasFiltradas();
+    } else {
+      // Filtrar medidas del cuerpo legal seleccionado
+      this.medidasFiltradas = this.todasLasMedidas.filter(medida =>
+        medida.cuerpoLegal === cuerpoLegalNombre
+      );
+    }
+    // Limpiar selección de medida cuando cambie el filtro
+    this.medidasDefinitivasForm.get('idMedida')?.setValue('');
+  }
+
+  // Método helper para obtener el nombre del cuerpo legal seleccionado
+  getNombreCuerpoLegalSeleccionado(): string {
+    return this.medidasDefinitivasForm.get('cuerpoLegalFiltro')?.value || '';
+  }
+
  // Cancelar edición medidas
   cancelarEdicionMedidas(): void {
     this.editMedidasMode = false;
@@ -717,15 +759,34 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
   }
 
    generarPdf(){
-    this.actionsConfig[2].disabled = true
+    this.pdfLoading = true;
+    this.pdfError = false;
+    this.actionsConfig[2].disabled = true;
 
-    this.resolucionesService.crearpdfBlob(this.idResolucion).subscribe((res: Blob) => {
-      console.log('esta es el id del pdf', this.idResolucion);
-      const url = URL.createObjectURL(res);
-      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-      this.actionsConfig[2].disabled = false
+    this.resolucionesService.crearpdfBlob(this.idResolucion).subscribe({
+      next: (res: Blob) => {
+        console.log('esta es el id del pdf', this.idResolucion);
+        const url = URL.createObjectURL(res);
+        this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        this.pdfLoading = false;
+        this.actionsConfig[2].disabled = false;
+        this.cambiarTab(3);
+      },
+      error: (err: any) => {
+        console.error('Error al generar PDF:', err);
+        this.pdfLoading = false;
+        this.pdfError = true;
+        this.actionsConfig[2].disabled = false;
+        toast.error('Error al generar PDF', {
+          duration: 4000,
+          description: 'No se pudo generar el PDF. Intenta nuevamente.'
+        });
+      }
     });
-    this.cambiarTab(3);
+  }
+
+  retryGenerarPdf(): void {
+    this.generarPdf();
   }
 
 }

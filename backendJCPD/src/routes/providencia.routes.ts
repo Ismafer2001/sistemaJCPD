@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { createProvidencia, getProvidenciaById, getProvidenciaIdByDenunciaId, getProvidenciaPdf, updateProvidencia } from '../controllers/providencia.controller';
 import { verificarToken } from '../middleware/auth.middleware';
+import { verificarCantonDenuncia } from '../middleware/canton.middleware';
 
 const router = Router();
 
@@ -11,9 +12,9 @@ router.post('', verificarToken, createProvidencia);
 router.get('/providencia-completa/:id', verificarToken, getProvidenciaById);
 
 // Ruta para obtener ID de providencia por ID de denuncia
-router.get('/id-providencia/:idDenuncia', verificarToken, getProvidenciaIdByDenunciaId);
+router.get('/id-providencia/:idDenuncia', verificarToken,verificarCantonDenuncia, getProvidenciaIdByDenunciaId);
 
-router.get('/crearpdf/:id',  getProvidenciaPdf);
+router.get('/crearpdf/:id',verificarToken,  getProvidenciaPdf);
 
 // Ruta para actualizar una providencia
 router.put('/:id', verificarToken, updateProvidencia);

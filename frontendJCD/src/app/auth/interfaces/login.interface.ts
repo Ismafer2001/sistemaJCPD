@@ -8,6 +8,7 @@ export interface login{
       nombres: string,
       usuario: string,
       canton: string
+      id_canton: string;
        rol: string;
 
 }

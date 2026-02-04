@@ -53,12 +53,16 @@ export class DenunciaService {
    * Obtiene denuncias con paginación desde el backend.
    * Asume que el endpoint responde con un objeto { data: Denuncia[], total: number, page: number, limit: number }
    */
-  obtenerDenunciasPaginadas( grupoPrioritario: string, page: number = 1, limit: number = 10): Observable<{ data: Denuncia[]; total: number; page: number; limit: number }> {
+  obtenerDenunciasPaginadas( grupoPrioritario: string, page: number = 1, limit: number = 10, search?: string, searchBy?: string): Observable<{ data: Denuncia[]; total: number; page: number; limit: number }> {
     let params = new HttpParams()
-
       .set('grupoPrioritario', grupoPrioritario)
       .set('page', String(page))
       .set('limit', String(limit));
+
+    if (search && search.trim() && searchBy) {
+      params = params.set('search', search.trim())
+                    .set('searchBy', searchBy);
+    }
 
     return this.http.get<{ data: Denuncia[]; total: number; page: number; limit: number }>(`${this.apiUrl}`, { params });
   }

@@ -10,26 +10,27 @@ import { deleteOtroCitado,
           putCitacion, 
           putOtroCitado } from '../controllers/citaciones.controller';
 import { verificarToken } from '../middleware/auth.middleware';
+import { verificarCantonDenuncia } from '../middleware/canton.middleware';
 
 
 const router = Router();
-router.get('/citar/:id',getCitacionesDTO);
-router.get('/datoscitacion/:id', getCitacion);
-router.get('/crearpdf/:id', getCitacionPDF );
+router.get('/citar/:id',verificarToken, verificarCantonDenuncia, getCitacionesDTO);
+router.get('/datoscitacion/:id', verificarToken, getCitacion);
+router.get('/crearpdf/:id', verificarToken, getCitacionPDF );
 
 // Rutas POST
-router.post('/', postCreateOtrosCitados);
-router.post('/citacion', postCitacion);
+router.post('/', verificarToken, postCreateOtrosCitados);
+router.post('/citacion', verificarToken, postCitacion);
 
 // Rutas PUT y DELETE
-router.put('/otros/:id', putOtroCitado);
-router.delete('/otros/:id', deleteOtroCitado);
+router.put('/otros/:id', verificarToken, putOtroCitado);
+router.delete('/otros/:id', verificarToken, deleteOtroCitado);
 
 
 
 // Rutas más generales al final
-router.get('/involucrados-principales/:id', getPersonasCitacion);
-router.get('/otros-involucrados/:id', getOtrosACitar);
+router.get('/involucrados-principales/:id', verificarToken,verificarCantonDenuncia, getPersonasCitacion);
+router.get('/otros-involucrados/:id', verificarToken,verificarCantonDenuncia, getOtrosACitar);
 
 
 

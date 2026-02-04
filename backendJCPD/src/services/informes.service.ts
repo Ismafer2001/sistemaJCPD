@@ -1,6 +1,7 @@
 import sequelize from "../config/database";
 import { Informe } from "../models/informe.models";
 import { Avocatoria, Denuncia } from "../models";
+import { usuarios } from "../models/usuarios.models";
 
 export interface InformeDTO {
   idDenuncia: number;
@@ -50,11 +51,48 @@ export async function obtenerInformesPorDenuncia(idDenuncia: number) {
 export async function obtenerInformePorId(id: number) {
 
     console.log('ID recibido en el servicio:'+id);
-  const informe = await Informe.findByPk(id);
+  const informe = await Informe.findByPk(id, {
+    include: [
+      {
+        model: Denuncia,
+        as: 'DenunciaInforme',
+        attributes: ['id_canton'],
+        include: [
+          {
+            model: Avocatoria,
+            as: 'avocatoria',
+            attributes: ['fechaCreado']
+          },
+          {
+            model: require('../models/cantones.models').Canton,
+            as: 'canton',
+            attributes: ['canton']
+          }
+        ]
+      }
+    ]
+  });
   console.log('aquiiiiIIIII MIRAAAAAAAAAAAAAAAAAAAAAAA'+informe);
   
   if (!informe) {
     throw new Error('Informe no encontrado');
+  }
+
+  const informeData = informe as any;
+  
+  // Obtener usuarios principales activos del cantón
+  let usuariosPrincipales: any[] = [];
+  const denuncia = informeData.DenunciaInforme;
+  
+  if (denuncia && denuncia.id_canton) {
+    usuariosPrincipales = await usuarios.findAll({
+      where: {
+        id_canton: denuncia.id_canton,
+        rol: 'principal',
+        isactivo: true
+      },
+      attributes: ['id', 'nombres', 'apellidos', 'correo', 'rol', 'id_canton']
+    });
   }
 
   return {
@@ -65,7 +103,10 @@ export async function obtenerInformePorId(id: number) {
     numeroOficio: informe.numeroOficio,
     codigoTramite: informe.codigoTramite,
     transcripcion: informe.transcripcion,
-    fechaCreado: (informe as any).fechaCreado
+    fechaCreado: informeData.fechaCreado,
+    canton: informeData.DenunciaInforme?.canton?.canton || '',
+    fechaCreacionAvocatoria: informeData.DenunciaInforme?.avocatoria?.fechaCreado || null,
+    usuariosPrincipalesCanton: usuariosPrincipales
   };
 }
 
@@ -90,6 +131,54 @@ export async function datosParaInforme(idDenuncia: number) {
     codigoTramite: denuncia.avocatoria.codigoTramite
   };
 }
+
+// Servicio para actualizar un informe
+export async function actualizarInforme(id: number, data: Partial<InformeDTO>) {
+  const t = await sequelize.transaction();
+  try {
+    // Verificar que el informe existe
+    const informeExiste = await Informe.findByPk(id);
+    
+    if (!informeExiste) {
+      throw new Error('Informe no encontrado');
+    }
+
+    // Actualizar el informe
+    const [filasActualizadas] = await Informe.update(
+      {
+        ...(data.nombre && { nombre: data.nombre }),
+        ...(data.dirigidoA && { dirigidoA: data.dirigidoA }),
+        ...(data.numeroOficio && { numeroOficio: data.numeroOficio }),
+        ...(data.codigoTramite && { codigoTramite: data.codigoTramite }),
+        ...(data.transcripcion && { transcripcion: data.transcripcion })
+      },
+      { 
+        where: { id },
+        transaction: t 
+      }
+    );
+
+    if (filasActualizadas === 0) {
+      throw new Error('No se pudo actualizar el informe');
+    }
+
+    // Obtener el informe actualizado
+    const informeActualizado = await Informe.findByPk(id, { transaction: t });
+
+    await t.commit();
+    
+    return {
+      success: true,
+      message: 'Informe actualizado correctamente',
+      data: informeActualizado
+    };
+
+  } catch (error) {
+    await t.rollback();
+    throw error;
+  }
+}
+
 
 
 

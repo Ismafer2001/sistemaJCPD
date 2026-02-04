@@ -77,6 +77,11 @@ getUsuarioInfo(): any {
     return null;
   }
 }
+ // Obtener solo el id_canton del usuario
+  getIdCanton(): number {
+    const usuario = this.getUsuarioInfo();
+    return usuario?.id_canton || 1; // Valor por defecto si no existe
+  }
 
 logout(): void {
   localStorage.removeItem('token');

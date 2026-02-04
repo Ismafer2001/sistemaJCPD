@@ -87,4 +87,52 @@ private apiUrl = `${environment.CLIENT_URL}/api/reportes`; // adaptalo si tenés
 
     return this.http.get(`${this.apiUrl}/audienciaspruebastotales`, { params });
   }
+  getReporteresoluciones(grupoPrioritario: string, desde?: string, hasta?: string): Observable<any> {
+    let params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
+
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+
+    return this.http.get(`${this.apiUrl}/resolucionestotales`, { params });
+  }
+  getReporteMedidasDefinitivas(grupoPrioritario: string, desde?: string, hasta?: string): Observable<any> {
+    let params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
+
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+
+    return this.http.get(`${this.apiUrl}/resoluciones/medidasagrupadasporarticulo`, { params });
+  }
+  getReporteMedidasDefinitivasCumplidas(grupoPrioritario: string, desde?: string, hasta?: string): Observable<any> {
+    let params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
+
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+
+    return this.http.get(`${this.apiUrl}/seguimientomedidas/cumplidas`, { params });
+  }
+   getReporteInpugnacion(grupoPrioritario: string, desde?: string, hasta?: string): Observable<any> {
+    let params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
+
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+
+    return this.http.get(`${this.apiUrl}/impugnacionestotales`, { params });
+  }
+   getReporteDesestimiento(grupoPrioritario: string, desde?: string, hasta?: string): Observable<any> {
+    let params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
+
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+
+    return this.http.get(`${this.apiUrl}/desestimientostotales`, { params });
+  }
+   getReporteCierreCaso(grupoPrioritario: string, desde?: string, hasta?: string): Observable<any> {
+    let params = new HttpParams().set('grupoPrioritario', grupoPrioritario);
+
+    if (desde) params = params.set('desde', desde);
+    if (hasta) params = params.set('hasta', hasta);
+
+    return this.http.get(`${this.apiUrl}/cierrecasostotales`, { params });
+  }
 }

@@ -8,6 +8,10 @@ import { getCitacionesTotales } from '../../controllers/estadisticas/citacionesR
 import { getAudienciasContestacionTotales } from '../../controllers/estadisticas/audienciaContestacionReporte.controller';
 import { getAudienciasPruebasTotales } from '../../controllers/estadisticas/audienciaPruebasReporte.controller';
 import { getMedidasDefinitivasAgrupadasPorArticulo, getResolucionesTotales } from '../../controllers/estadisticas/resolucionesReporte.controller';
+import { getMedidasCumplidasYNoCumplidas } from '../../controllers/estadisticas/seguimientoMedidas.controller';
+import { getImpugnacionesTotales } from '../../controllers/estadisticas/inpugnacionReporte.controller';
+import { getDesestimientosTotales } from '../../controllers/estadisticas/desestimientoReporte.controller';
+import { getCierreCasosTotales } from '../../controllers/estadisticas/cierreCasoReporte.controller';
 
 const router = Router();
 
@@ -27,4 +31,17 @@ router.get('/resolucionestotales', verificarToken, getResolucionesTotales);
 
 // Ruta para obtener medidas agrupadas por artículo
 router.get('/resoluciones/medidasagrupadasporarticulo', verificarToken, getMedidasDefinitivasAgrupadasPorArticulo);
+
+// Ruta para seguimiento de medidas cumplidas y no cumplidas
+router.get('/seguimientomedidas/cumplidas', verificarToken, getMedidasCumplidasYNoCumplidas);
+
+// Ruta para reportes/estadísticas de impugnaciones
+router.get('/impugnacionestotales', verificarToken, getImpugnacionesTotales);
+
+// Ruta para reportes/estadísticas de desestimientos
+router.get('/desestimientostotales', verificarToken, getDesestimientosTotales);
+
+// Ruta para reportes/estadísticas de cierre de casos
+router.get('/cierrecasostotales', verificarToken, getCierreCasosTotales);
+
 export default router;

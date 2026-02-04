@@ -18,26 +18,16 @@ export const getAllMedidas = async (req: Request, res: Response) => {
       ]
     });
 
-    // Agrupar medidas por artículo
-    const medidasPorArticulo = medidas.reduce((acc: any, medida: any) => {
-      const articuloId = medida.idArticulo;
-      if (!acc[articuloId]) {
-        acc[articuloId] = {
-          id: medida.articulo.id,
-          articulo: medida.articulo.articulo,
-          medidas: []
-        };
-      }
-      acc[articuloId].medidas.push({
-        id: medida.id,
-        medida: medida.medidas
-      });
-      return acc;
-    }, {});
+    // Mapear medidas a la estructura deseada
+    const medidasMapeadas = medidas.map((medida: any) => ({
+      id: medida.id,
+      medida: medida.medidas,
+      cuerpoLegal: medida.articulo.articulo
+    }));
 
     res.json({
       success: true,
-      data: Object.values(medidasPorArticulo)
+      data: medidasMapeadas
     });
   } catch (error) {
     console.error('Error al obtener medidas:', error);

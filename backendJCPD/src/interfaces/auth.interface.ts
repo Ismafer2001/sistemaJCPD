@@ -6,7 +6,8 @@ export interface login{
     usuario: string;
     contrasena: string;
     rol: string;
-    id_canton: number
+    id_canton?: number;
+    isactivo: boolean;
 }
 export interface jwtpayload {
   id: number;
@@ -14,5 +15,6 @@ export interface jwtpayload {
   usuario: string;
   rol: string;
   canton?: string;
-  id_canton: number;
+  id_canton?: number;
+  isactivo: boolean;
 }

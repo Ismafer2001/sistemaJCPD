@@ -202,7 +202,7 @@ export async function obtenerDatosCierreCasoCompleto(idCierreCaso: number) {
             include: [
                 {
                     model: InformesPresentados,
-                    as: 'informesPresentados'
+                    as: 'InformesPresentados'
                 },
                 {
                     model: Denuncia,

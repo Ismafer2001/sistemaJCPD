@@ -38,6 +38,7 @@ export const getAvocatoriaCompletaController = async (req: Request, res: Respons
 export const getMedidasIdentificadasPorAfecado = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
+    console.log("ID recibido en controlador de medidas:", id);
   if (isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
   const afectado = await medidasPorAfectado(id);

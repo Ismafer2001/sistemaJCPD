@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AvocatoriaService } from '@nna/services/avocatoria.service';
-import { ArticuloMedidas, MedidasService } from '@nna/services/medidas.service';
+import { ArticuloMedidas, Medida, MedidasService } from '@nna/services/medidas.service';
 import { ProvidenciaService } from '@nna/services/providencia.service';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
@@ -41,7 +41,9 @@ export class Crear_providenciaComponent implements OnInit {
    isBotonDesactivated: boolean = false;
    editMode: boolean = false;
   editMediasMode: boolean = false;
-  medidasPorArticulo: ArticuloMedidas[] = [];
+  todasLasMedidas: Medida[] = [];
+  medidasFiltradas: Medida[] = [];
+  cuerposLegalesDisponibles: string[] = [];
   medidasEmergentes: any[] = [];
   afectados: any[] = [{id: 0, nombres: ''}];
   avocatoriacargada: any;
@@ -50,6 +52,11 @@ export class Crear_providenciaComponent implements OnInit {
      fechaHoraActual: string = new Date().toISOString().slice(0, 16);
      fechaFormateada: string = '';
      pdfSrc: SafeResourceUrl | null = null;
+
+  // Propiedades de loading
+  initialLoading: boolean = false;
+  pdfLoading: boolean = false;
+  pdfError: string | null = null;
   //--- Configuración de tabs------//
   tabsConfig: any[] = [
     {
@@ -131,6 +138,7 @@ export class Crear_providenciaComponent implements OnInit {
   ) { }
 
   ngOnInit() {
+    this.initialLoading = true;
     this.formularioProvidencia();
     this.formularioMedidasEmergentes();
      const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
@@ -169,6 +177,16 @@ export class Crear_providenciaComponent implements OnInit {
 
   }
 
+  private checkInitialLoadingComplete(): void {
+    // Verificar si todos los datos necesarios están cargados
+    if (this.avocatoriacargada &&
+        this.afectados.length > 0 &&
+        this.todasLasMedidas.length > 0 &&
+        this.providenciaForm.get('codigoTramite')?.value) {
+      this.initialLoading = false;
+    }
+  }
+
   formularioProvidencia(){
     this.providenciaForm = this.fb.group({
       idDenuncia: ['',Validators.required],
@@ -186,6 +204,7 @@ export class Crear_providenciaComponent implements OnInit {
   formularioMedidasEmergentes() {
      this.medidasEmergentesForm= this.fb.group({
         idAfectado: ['', Validators.required],
+        cuerpoLegalFiltro: [''], // Campo para filtrar por cuerpo legal
         idMedida: ['', Validators.required],
         medida: ['', Validators.required],
         periodo: ['', Validators.required],
@@ -198,16 +217,17 @@ export class Crear_providenciaComponent implements OnInit {
     loadIdAvocatoria(id:number){
       this.avocatoriaService.obtenerDenunciaParaAvocatoria(id).subscribe({
         next: (data) => {
-
           this.idAvocatoria=data.idAvocatoria;
            this.providenciaForm.patchValue({
-          codigoTramite: data.codigoTramite,
-          idDenuncia: data.id,
-
-        });
+            codigoTramite: data.codigoTramite,
+            idDenuncia: data.id,
+          });
           this.loadDatosAvocatoriaParaProvidencia(this.idAvocatoria);
-
         },
+        error: (err) => {
+          console.error('Error al cargar ID avocatoria:', err);
+          this.initialLoading = false;
+        }
       })
     }
     providenciaEditMode(idDenuncia:number){
@@ -228,9 +248,11 @@ export class Crear_providenciaComponent implements OnInit {
                 institucionSuscrito: providenciaData.institucionSuscrito,
                 disposiciones: providenciaData.disposiciones
               });
+              this.checkInitialLoadingComplete();
             },
             error: (err) => {
               console.error('Error al cargar providencia:', err);
+              this.initialLoading = false;
               toast.error('Error al cargar providencia', {
                 duration: 3000,
                 description: 'No se pudieron cargar los datos de la providencia.'
@@ -240,6 +262,7 @@ export class Crear_providenciaComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al obtener ID de providencia:', err);
+          this.initialLoading = false;
           toast.error('Error al obtener ID de providencia', {
             duration: 3000,
             description: 'No se pudo obtener el ID de la providencia.'
@@ -249,25 +272,25 @@ export class Crear_providenciaComponent implements OnInit {
     }
 
     loadDatosAvocatoriaParaProvidencia(idAvocatoria:number){
-    this.avocatoriaService.getAvocatoriaEditMode(idAvocatoria).subscribe((data) => {
+    this.avocatoriaService.getAvocatoriaEditMode(idAvocatoria).subscribe({
+      next: (data) => {
+        this.avocatoriacargada = data;
 
-      this.avocatoriacargada = data;
-
-      if(this.editMode){
-        this.providenciaEditMode(this.denunciaId);
-      }else{
-        this.providenciaForm.patchValue({
-          disposiciones: this.avocatoriacargada.dispocisiones ?? this.avocatoriacargada.disposiciones ?? this.avocatoriacargada.disposicion ?? this.avocatoriacargada.dispocisiones ?? this.providenciaForm.get('dispocisiones')?.value,
-          articulos: this.avocatoriacargada.articulo ?? this.avocatoriacargada.articulo ?? this.providenciaForm.get('articulo')?.value,
-         })
-
+        if(this.editMode){
+          this.providenciaEditMode(this.denunciaId);
+        }else{
+          this.providenciaForm.patchValue({
+            disposiciones: this.avocatoriacargada.dispocisiones ?? this.avocatoriacargada.disposiciones ?? this.avocatoriacargada.disposicion ?? this.avocatoriacargada.dispocisiones ?? this.providenciaForm.get('dispocisiones')?.value,
+            articulos: this.avocatoriacargada.articulo ?? this.avocatoriacargada.articulo ?? this.providenciaForm.get('articulo')?.value,
+          })
+          this.checkInitialLoadingComplete();
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar datos de avocatoria:', err);
+        this.initialLoading = false;
       }
-
-
-
-
     })
-
     }
 
     getIdProvidencia(idDenuncia:number){
@@ -281,18 +304,25 @@ export class Crear_providenciaComponent implements OnInit {
 
 
 
-  //cargar listado de la medidas de poroteccion por articulo
+  //cargar listado de la medidas de protección por cuerpo legal
   cargarListaDeMedidas() {
 
     this.medidasService.getAllMedidas().subscribe({
       next: (response) => {
+          this.todasLasMedidas = response.data;
 
-          this.medidasPorArticulo = response.data;
-          console.log(this.medidasPorArticulo);
+          // Inicializar lista de cuerpos legales únicos para el filtro
+          this.cuerposLegalesDisponibles = [...new Set(this.todasLasMedidas.map(medida => medida.cuerpoLegal))];
+
+          // Inicializar medidas filtradas con todas las medidas
+          this.inicializarMedidasFiltradas();
+
+          console.log('medidas cargadas:', this.todasLasMedidas);
+          this.checkInitialLoadingComplete();
       },
-      error: () => {
-        console.error('Error al cargar medidas:');
-
+      error: (err) => {
+        console.error('Error al cargar medidas:', err);
+        this.initialLoading = false;
       }
     });
   }
@@ -424,17 +454,14 @@ export class Crear_providenciaComponent implements OnInit {
   this.loadMedidasEmergentes(afectadoId);
 
   }
- //funcion para autocompletar el input de vulneraciones del formulario de vulneraciones identificadas
+ //funcion para autocompletar el input de medidas del formulario de medidas emergentes
  seleccionarMedida() {
   this.medidasEmergentesForm.get('idMedida')!
     .valueChanges
     .subscribe((id: number | string) => {
       const numId = Number(id);
-      // Busca el nombre en tu catálogo
-      const encontrado = this.medidasPorArticulo
-        .flatMap(articulo => articulo.medidas)
-        .find(m => m.id === numId);
-
+      // Busca el nombre en el catálogo actualizado
+      const encontrado = this.medidasFiltradas.find(m => m.id === numId);
 
       this.medidasEmergentesForm.patchValue(
         { medida: encontrado?.medida ?? '' },
@@ -442,7 +469,38 @@ export class Crear_providenciaComponent implements OnInit {
       );
     });
 
+  // Suscribirse a cambios en el filtro de cuerpo legal
+  this.medidasEmergentesForm.get('cuerpoLegalFiltro')?.valueChanges.subscribe(cuerpoLegal => {
+    this.filtrarMedidasPorCuerpoLegal(cuerpoLegal);
+  });
+
 }
+
+  // Métodos para el filtrado de medidas
+  inicializarMedidasFiltradas(): void {
+    // Mostrar todas las medidas disponibles
+    this.medidasFiltradas = [...this.todasLasMedidas];
+  }
+
+  filtrarMedidasPorCuerpoLegal(cuerpoLegalNombre: string): void {
+    if (!cuerpoLegalNombre || cuerpoLegalNombre === '') {
+      // Si no hay filtro seleccionado, mostrar todas las medidas
+      this.inicializarMedidasFiltradas();
+    } else {
+      // Filtrar medidas del cuerpo legal seleccionado
+      this.medidasFiltradas = this.todasLasMedidas.filter(medida =>
+        medida.cuerpoLegal === cuerpoLegalNombre
+      );
+    }
+    // Limpiar selección de medida cuando cambie el filtro
+    this.medidasEmergentesForm.get('idMedida')?.setValue('');
+  }
+
+  // Método helper para obtener el nombre del cuerpo legal seleccionado
+  getNombreCuerpoLegalSeleccionado(): string {
+    return this.medidasEmergentesForm.get('cuerpoLegalFiltro')?.value || '';
+  }
+
  // Cancelar edición medidas
   cancelarEdicionMedidas(): void {
     this.editMedidasMode = false;
@@ -564,14 +622,32 @@ regresar(): void {
   }
 
   generarPdf(){
-  this.actionsConfig[2].disabled = true
-  this.providenciaService.crearpdfBlob(this.idProvidencia).subscribe((res: Blob) => {
-    const url = URL.createObjectURL(res);
-    this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-    this.actionsConfig[2].disabled = false
-  });
+    this.pdfLoading = true;
+    this.pdfError = null;
+    this.pdfSrc = null;
+    this.actionsConfig[2].disabled = true;
 
-  this.cambiarTab(2);
+    this.providenciaService.crearpdfBlob(this.idProvidencia).subscribe({
+      next: (res: Blob) => {
+        if (res && res.size > 0) {
+          const url = URL.createObjectURL(res);
+          this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+          this.pdfLoading = false;
+          this.actionsConfig[2].disabled = false;
+        } else {
+          this.pdfError = 'No se pudo generar el PDF. No hay datos suficientes.';
+          this.pdfLoading = false;
+          this.actionsConfig[2].disabled = false;
+        }
+      },
+      error: (err) => {
+        console.error('Error al generar PDF:', err);
+        this.pdfError = 'Error al generar el PDF. Por favor intente nuevamente.';
+        this.pdfLoading = false;
+        this.actionsConfig[2].disabled = false;
+      }
+    });
+    this.cambiarTab(2);
   }
 
   formatearFecha(): string {

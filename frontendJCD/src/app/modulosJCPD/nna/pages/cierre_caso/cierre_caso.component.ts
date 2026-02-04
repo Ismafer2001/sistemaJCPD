@@ -94,6 +94,10 @@ export class Cierre_casoComponent implements OnInit {
     columnasInformes = ['informe', 'nombreTecnico', 'fecha', 'lugar', 'personaEvaluada'];
     pdfSrc: SafeResourceUrl | null = null;
 
+    // Estado de loading para PDF
+    pdfLoading: boolean = false;
+    pdfError: boolean = false;
+
     //quillModule//
   modules = {
   toolbar: [
@@ -553,14 +557,33 @@ export class Cierre_casoComponent implements OnInit {
   }
 
   generarPdf(){
-  this.actionsConfig[2].disabled = true
-  this.cierreCasoService.crearpdfBlob(this.idCierreCaso).subscribe((res: Blob) => {
-    const url = URL.createObjectURL(res);
-    this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-    this.actionsConfig[2].disabled = false
-  });
-  this.cambiarTab(2);
+    this.pdfLoading = true;
+    this.pdfError = false;
+    this.actionsConfig[2].disabled = true;
 
+    this.cierreCasoService.crearpdfBlob(this.idCierreCaso).subscribe({
+      next: (res: Blob) => {
+        const url = URL.createObjectURL(res);
+        this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        this.pdfLoading = false;
+        this.actionsConfig[2].disabled = false;
+        this.cambiarTab(2);
+      },
+      error: (err: any) => {
+        console.error('Error al generar PDF:', err);
+        this.pdfLoading = false;
+        this.pdfError = true;
+        this.actionsConfig[2].disabled = false;
+        toast.error('Error al generar PDF', {
+          duration: 4000,
+          description: 'No se pudo generar el PDF. Intenta nuevamente.'
+        });
+      }
+    });
+  }
+
+  retryGenerarPdf(): void {
+    this.generarPdf();
   }
 
 

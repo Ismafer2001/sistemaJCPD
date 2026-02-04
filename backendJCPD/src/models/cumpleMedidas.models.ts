@@ -65,5 +65,7 @@ CumpleMedidas.init({
     sequelize,
     modelName: 'CumpleMedidas',
     tableName: 'cumple_medidas',
-    timestamps: false
+     timestamps: true,
+    createdAt: 'fechaCreado',
+    updatedAt: false
 });

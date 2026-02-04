@@ -72,6 +72,13 @@ export class FormatoNotificacionComponent implements OnInit {
    notificacionForm!: FormGroup;
    fechaHoraActual: Date = new Date();
    pdfSrc: SafeResourceUrl | null = null;
+
+   // Loading states
+   initialLoading = true;
+   loading = false;
+   pdfLoading = false;
+   pdfError: string | null = null;
+
    notificar: any = { };
    datosPersonas: any = {};
   notificacionCargada: any = null;
@@ -89,6 +96,7 @@ export class FormatoNotificacionComponent implements OnInit {
     private sanitizer: DomSanitizer ) {}
 
   ngOnInit() {
+    this.initialLoading = true;
     this.formularioFormatoNotificacion();
 
     // Para parámetros de matriz (;nombres=valor;estado=valor;parte=valor)
@@ -168,6 +176,14 @@ export class FormatoNotificacionComponent implements OnInit {
 
     })
   }
+
+  // Método para verificar si la carga inicial está completa
+  private checkInitialLoadingComplete(): void {
+    if (this.notificar && this.datosPersonas) {
+      this.initialLoading = false;
+    }
+  }
+
    loadNotificadosEditMode(id:number){
     this.notificacionServices.getNotificacionEditMode(id).subscribe(data=>{
       this.notificacionCargada=data;
@@ -191,25 +207,31 @@ export class FormatoNotificacionComponent implements OnInit {
 
     console.log('Cargando datos de notificación con:', id, tipoInvolucrado, idInvolucrado, idNotificacion);
 
-    this.notificacionServices.getnotificacionDTO(id,tipoInvolucrado,idInvolucrado,idNotificacion).subscribe(data=>{
-      this.notificar=data;
-      this.datosPersonas=this.notificar.datosPersona;
-      this.idNotificacion=this.notificar.id;
-      console.log('Notificar cargado:', this.notificar);
-      console.log('Datos de la persona:', this.datosPersonas);
-      console.log('ID Notificación:', this.notificar.id);
-      if (this.isNotificado) {
-        this.loadNotificadosEditMode(this.notificar.id);
+    this.notificacionServices.getnotificacionDTO(id,tipoInvolucrado,idInvolucrado,idNotificacion).subscribe({
+      next: (data) => {
+        this.notificar=data;
+        this.datosPersonas=this.notificar.datosPersona;
+        this.idNotificacion=this.notificar.id;
+        console.log('Notificar cargado:', this.notificar);
+        console.log('Datos de la persona:', this.datosPersonas);
+        console.log('ID Notificación:', this.notificar.id);
+        if (this.isNotificado) {
+          this.loadNotificadosEditMode(this.notificar.id);
 
+        }
+         this.notificacionForm.patchValue({
+            codigoTramite: this.notificar.codigoTramite,
+            diriguidoA: this.datosPersonas.nombres + ' ' + this.datosPersonas.apellidos,
+
+
+          });
+
+        this.checkInitialLoadingComplete();
+      },
+      error: (err) => {
+        console.error('Error al cargar datos de notificación:', err);
+        this.checkInitialLoadingComplete();
       }
-       this.notificacionForm.patchValue({
-          codigoTramite: this.notificar.codigoTramite,
-          diriguidoA: this.datosPersonas.nombres + ' ' + this.datosPersonas.apellidos,
-
-
-        });
-
-
     })
   }
 
@@ -253,8 +275,12 @@ export class FormatoNotificacionComponent implements OnInit {
 
 
   }
+
+  this.loading = true;
+
   this.notificacionServices.actualizarNotificacion(this.idNotificacion, body).subscribe({
       next: () => {
+        this.loading = false;
         toast.success('Notificación Actualizada con Éxito', {
                   duration: 3000,
                 });
@@ -268,6 +294,7 @@ export class FormatoNotificacionComponent implements OnInit {
 
       },
       error: (err) => {
+        this.loading = false;
         toast.error('Error al actualizar la notificación', {
           duration: 3000,
         });
@@ -290,8 +317,12 @@ submitNotificacion() {
     ...this.notificacionForm.value,
 
   }
+
+  this.loading = true;
+
   this.notificacionServices.postNotificar(body).subscribe({
    next: (body) => {
+      this.loading = false;
       this.idNotificacion = body.id;
       this.notificacionForm.patchValue({ id: this.idNotificacion })
       this.router.navigate(['../../'+ this.denunciaId+ '/formulario', {idUsuario: this.idInvolucrado, estado: 'Notificado', parte: body.parte}], { relativeTo: this.route });
@@ -301,8 +332,8 @@ submitNotificacion() {
 
 
     },
-    error(err) {
-
+    error: (err) => {
+      this.loading = false;
       toast.error('Error al guardar', {
         duration: 3000,
       description:`${err}`
@@ -316,10 +347,26 @@ submitNotificacion() {
 
 
   generarPdf(){
+    this.pdfLoading = true;
+    this.pdfError = null;
+    this.pdfSrc = null;
 
-    this.notificacionServices.crearpdfBlob(this.idNotificacion).subscribe((res: Blob) => {
-      const url = URL.createObjectURL(res);
-      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    this.notificacionServices.crearpdfBlob(this.idNotificacion).subscribe({
+      next: (res: Blob) => {
+        if (res && res.size > 0) {
+          const url = URL.createObjectURL(res);
+          this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+          this.pdfLoading = false;
+        } else {
+          this.pdfError = 'No se pudo generar el PDF. No hay datos suficientes.';
+          this.pdfLoading = false;
+        }
+      },
+      error: (err) => {
+        console.error('Error al generar PDF:', err);
+        this.pdfError = 'Error al generar el PDF. Por favor intente nuevamente.';
+        this.pdfLoading = false;
+      }
     });
     this.cambiarTab(1);
   }

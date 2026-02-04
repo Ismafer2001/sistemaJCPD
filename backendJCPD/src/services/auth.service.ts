@@ -11,6 +11,8 @@ import { JwtPayload } from "jsonwebtoken";
 //------------------------METODOS POST----------------//
 
 export const loginUsuario = async (user: login) => {
+
+  console.log("Iniciando proceso de autenticación para el usuario:", user.usuario);
   const existe = await usuarios.findOne({ //-->verificamos que exista el usuario
     where: { usuario: user.usuario },
     include: [{ model: Canton, attributes: ["canton"] }],
@@ -28,13 +30,24 @@ export const loginUsuario = async (user: login) => {
     return "contraseña incorrecta";
   }
 
+  if (!existe.isactivo) {
+
+    console.log("Usuario inactivo, contacte al administrador");
+    return "Usuario inactivo, contacte al administrador";
+  }
+
+  console.log("Usuario autenticado correctamente");
+
+  console.log("Generando token JWT para el usuario:", existe);
+
   const sing: jwtpayload = { ///--->armamos el payload
     id: existe.id,
     nombres: existe.nombres,
     usuario: existe.usuario,
     rol: existe.rol,
-    canton: existe.Canton.canton,
-    id_canton: existe.id_canton,
+    canton: existe.Canton?.canton || '',
+    id_canton: existe.id_canton || 0,
+    isactivo: existe.isactivo
   };
 
   const token = generarToken(sing); //generamos el token
@@ -64,8 +77,8 @@ export async function UsuarioActual(id:number) {
       nombres: usuario.nombres,
       apellidos: usuario.apellidos,
       rol: usuario.rol,
-      id_canton:usuario.id_canton,
-      canton:usuario.Canton.canton,
+      id_canton:usuario.id_canton||"",
+      canton:usuario.Canton?.canton||'',
       correo:usuario.correo,
       usuario:usuario.usuario
     }

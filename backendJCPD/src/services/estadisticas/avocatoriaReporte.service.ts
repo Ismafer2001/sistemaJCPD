@@ -16,17 +16,27 @@ export const contarAvocatorias = async (filtros: FiltroAvocatoria) => {
   };
    const whereAvocatoria: any = {};
 
-  if (filtros.desde) {
-    whereAvocatoria.fechaCreado = { [Op.gte]: new Date(filtros.desde) };
-  }
-
-  if (filtros.hasta) {
+  if (filtros.desde && filtros.hasta) {
+    // Si hay ambas fechas, crear rango inclusivo
+    const desde = new Date(filtros.desde);
+    desde.setUTCHours(0, 0, 0, 0); // Inicio del día
+    
     const hasta = new Date(filtros.hasta);
+    hasta.setUTCHours(23, 59, 59, 999); // Final del día
     
     whereAvocatoria.fechaCreado = {
-      ...(whereAvocatoria.fechaCreado || {}),
-      [Op.lte]: hasta
+      [Op.between]: [desde, hasta]
     };
+  } else if (filtros.desde) {
+    // Solo fecha desde
+    const desde = new Date(filtros.desde);
+    desde.setUTCHours(0, 0, 0, 0);
+    whereAvocatoria.fechaCreado = { [Op.gte]: desde };
+  } else if (filtros.hasta) {
+    // Solo fecha hasta
+    const hasta = new Date(filtros.hasta);
+    hasta.setUTCHours(23, 59, 59, 999);
+    whereAvocatoria.fechaCreado = { [Op.lte]: hasta };
   }
 
   const totalAvocatorias = await Avocatoria.count({
@@ -49,79 +59,91 @@ export const contarMedidasEmergentes = async (filtros: FiltroAvocatoria) => {
     id_canton: filtros.id_canton
   };
 
-   const whereAvocatoria: any = {};
+  const whereFechaMedidas: any = {};
 
-  if (filtros.desde) {
-    whereAvocatoria.fechaCreado = { [Op.gte]: new Date(filtros.desde) };
-  }
-
-  if (filtros.hasta) {
+  if (filtros.desde && filtros.hasta) {
+    // Si hay ambas fechas, crear rango inclusivo
+    const desde = new Date(filtros.desde);
+    desde.setUTCHours(0, 0, 0, 0); // Inicio del día
+    
     const hasta = new Date(filtros.hasta);
-    hasta.setHours(23, 59, 59, 999);
-    whereAvocatoria.fechaCreado = {
-      ...(whereAvocatoria.fechaCreado || {}),
-      [Op.lte]: hasta
+    hasta.setUTCHours(23, 59, 59, 999); // Final del día
+    
+    whereFechaMedidas.fechaCreado = {
+      [Op.between]: [desde, hasta]
     };
+  } else if (filtros.desde) {
+    // Solo fecha desde
+    const desde = new Date(filtros.desde);
+    desde.setUTCHours(0, 0, 0, 0);
+    whereFechaMedidas.fechaCreado = { [Op.gte]: desde };
+  } else if (filtros.hasta) {
+    // Solo fecha hasta
+    const hasta = new Date(filtros.hasta);
+    hasta.setUTCHours(23, 59, 59, 999);
+    whereFechaMedidas.fechaCreado = { [Op.lte]: hasta };
   }
 
   const total = await MedidasEmergentes.count({
+    where: whereFechaMedidas,
     include: [
-      
       {
         model: Afectado,
-        
         required: true,
         include: [{
           model: Denuncia,
-          
           attributes: [],
-          where: whereDenuncia,
-          include: [
-              {
-                model: Avocatoria,
-                as:'avocatoria',
-                required: true,
-                attributes: [],
-                where: whereAvocatoria
-              }
-            ]
-        }
-      ]
+          where: whereDenuncia
+        }]
       }
     ]
   });
+  console.log("Total de medidas emergentes:", total);
 
   return total;
 };
 
 
 export const contarMedidasAgrupadasPorArticulo = async (filtro: FiltroAvocatoria) => {
-  const whereFechaAvocatoria: any = {};
-  if (filtro.desde) {
-    whereFechaAvocatoria.fechaCreado = { [Op.gte]: new Date(filtro.desde) };
-  }
-  if (filtro.hasta) {
+  const whereFechaMedidas: any = {};
+  
+  if (filtro.desde && filtro.hasta) {
+    // Si hay ambas fechas, crear rango inclusivo
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0); // Inicio del día
+    
     const hasta = new Date(filtro.hasta);
-    hasta.setHours(23, 59, 59, 999);
-    whereFechaAvocatoria.fechaCreado = {
-      ...(whereFechaAvocatoria.fechaCreado || {}),
-      [Op.lte]: hasta
+    hasta.setUTCHours(23, 59, 59, 999); // Final del día
+    
+    whereFechaMedidas.fechaCreado = {
+      [Op.between]: [desde, hasta]
     };
+  } else if (filtro.desde) {
+    // Solo fecha desde
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0);
+    whereFechaMedidas.fechaCreado = { [Op.gte]: desde };
+  } else if (filtro.hasta) {
+    // Solo fecha hasta
+    const hasta = new Date(filtro.hasta);
+    hasta.setUTCHours(23, 59, 59, 999);
+    whereFechaMedidas.fechaCreado = { [Op.lte]: hasta };
   }
 
   const resultado = await MedidasEmergentes.findAll({
     attributes: [
       [fn('COUNT', col('MedidasEmergentes.id')), 'cantidad']
     ],
+    where: whereFechaMedidas,
     include: [
       {
         model: medida,
         as: "Med" ,
-    attributes: ['id','medidas'],
+        attributes: ['id','medidas'],
         include: [
           {
-      model: articulo,
-      attributes: ['id','articulo']
+            model: articulo,
+            attributes: ['id','articulo']
           }
         ]
       },
@@ -137,16 +159,7 @@ export const contarMedidasAgrupadasPorArticulo = async (filtro: FiltroAvocatoria
             where: {
               grupoPrioritario: filtro.grupoPrioritario,
               id_canton: filtro.id_canton
-            },
-            include: [
-              {
-                model: Avocatoria,
-                as:'avocatoria',
-                required: true,
-                attributes: [],
-                where: whereFechaAvocatoria
-              }
-            ]
+            }
           }
         ]
       },
@@ -181,16 +194,28 @@ export const contarMedidasAgrupadasPorArticulo = async (filtro: FiltroAvocatoria
 
 export async function vulneracionesagrupadas(filtro: FiltroAvocatoria) {
   const whereFechaAvocatoria: any = {};
-  if (filtro.desde) {
-    whereFechaAvocatoria.fechaCreado = { [Op.gte]: new Date(filtro.desde) };
-  }
-  if (filtro.hasta) {
+  
+  if (filtro.desde && filtro.hasta) {
+    // Si hay ambas fechas, crear rango inclusivo
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0); // Inicio del día
+    
     const hasta = new Date(filtro.hasta);
-    hasta.setHours(23, 59, 59, 999);
+    hasta.setUTCHours(23, 59, 59, 999); // Final del día
+    
     whereFechaAvocatoria.fechaCreado = {
-      ...(whereFechaAvocatoria.fechaCreado || {}),
-      [Op.lte]: hasta
+      [Op.between]: [desde, hasta]
     };
+  } else if (filtro.desde) {
+    // Solo fecha desde
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0);
+    whereFechaAvocatoria.fechaCreado = { [Op.gte]: desde };
+  } else if (filtro.hasta) {
+    // Solo fecha hasta
+    const hasta = new Date(filtro.hasta);
+    hasta.setUTCHours(23, 59, 59, 999);
+    whereFechaAvocatoria.fechaCreado = { [Op.lte]: hasta };
   }
 
   const whereDenuncia: any = {

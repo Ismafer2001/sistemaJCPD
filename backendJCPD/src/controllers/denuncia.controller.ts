@@ -16,15 +16,27 @@ import { handlehttp } from '../utils/error.handle';
 // Obtener todas las denuncias
 export const getAllDenuncias = async (req: Request, res: Response) => {
   try {
-    // Parámetros de paginación y grupoPrioritario desde query
+    // Parámetros de paginación, grupoPrioritario y búsqueda desde query
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
     const grupoPrioritario = req.query.grupoPrioritario as string;
+    const search = req.query.search as string; // Valor a buscar
+    const searchBy = req.query.searchBy as 'codigoTramite' | 'nombre' | 'cedula'; // Tipo de búsqueda
     const id_canton = Number((req.user as any).id_canton);
+    
     if (!id_canton || Number.isNaN(id_canton)) {
       return res.status(400).json({ error: 'ID de cantón inválido' });
     }
-    const resultado = await obtenertodasLasDenuncias({ page, limit, grupoPrioritario, id_canton });
+
+    const resultado = await obtenertodasLasDenuncias({ 
+      page, 
+      limit, 
+      grupoPrioritario, 
+      id_canton,
+      search, // Valor a buscar
+      searchBy // Tipo de búsqueda
+    });
+    
     res.json(resultado);
   } catch (error) {
     console.error('Error al obtener denuncias:', error);

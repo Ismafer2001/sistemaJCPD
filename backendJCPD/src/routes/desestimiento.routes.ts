@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as desestimientoController from '../controllers/desestimiento.controller';
 import { verificarToken } from '../middleware/auth.middleware';
 import { getCodigoTramiteDenunciaDes } from '../controllers/desestimiento.controller';
+import { verificarCantonDenuncia } from '../middleware/canton.middleware';
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.post(
   desestimientoController.crearDesestimiento
 );
 
-router.get('/codigo-tramite/:id', getCodigoTramiteDenunciaDes);
+router.get('/codigo-tramite/:id',verificarCantonDenuncia, getCodigoTramiteDenunciaDes);
 
 
 

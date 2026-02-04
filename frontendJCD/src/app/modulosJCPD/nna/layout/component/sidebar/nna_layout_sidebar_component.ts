@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '@auth/services/auth.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ModalComponent, ModalConfig } from '@shared/components/modal/modal.component';
+import { WebSocketService } from '@shared/services/web-socket.service';
 
 
 
@@ -29,7 +30,8 @@ export class SidebarComponent  implements OnInit {
   private gruposValidos = ['nna', 'adultos', 'mujeres'];
 
   constructor(private authService: AuthService,private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private webSocketService: WebSocketService
   ){
 
   }
@@ -53,7 +55,7 @@ export class SidebarComponent  implements OnInit {
 
   confirmarLogout(): void {
     localStorage.removeItem('token');
-
+    this.webSocketService.desconectar();
     this.router.navigate(['/login']);
     this.cerrarModalLogout();
   }

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { InformesService } from '@nna/services/informes.service';
 import { ButtonSubmitComponent } from '@shared/components/button-submit/button-submit.component';
@@ -8,20 +9,22 @@ import { CardFormComponent } from '@shared/components/card-Form/card-Form.compon
 import { InputsComponent } from '@shared/components/inputs/inputs.component';
 import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Formulario.component';
 import TablaNavigatorComponent from '@shared/components/tabla/tablaNavigator/tabla.component';
+import { QuillModule } from 'ngx-quill';
 import { toast } from 'ngx-sonner';
 
 @Component({
   selector: 'app-formatoinforme',
   templateUrl: './formatoinforme.component.html',
   imports: [CardFormComponent,
-     TablaNavigatorComponent,
+
      InputsComponent,
       CommonModule,
       ReactiveFormsModule,
        FormsModule,
-        ButtonSubmitComponent,
+
       RouterLink,
-      NavFormularioComponent]
+      NavFormularioComponent,
+      QuillModule]
 
 })
 export class FormatoinformeComponent implements OnInit {
@@ -45,6 +48,10 @@ export class FormatoinformeComponent implements OnInit {
       label: 'pdf'
     }
   ];
+
+  // Propiedades para el PDF
+  pdfLoading = false;
+  pdfError = false;
    actionsConfig: any[] = [
     {
       id: 'update',
@@ -85,10 +92,31 @@ export class FormatoinformeComponent implements OnInit {
   informe: any ={};
   modo: any;
 
+  // Configuración de Quill
+  quillConfig = {
+    toolbar: [
+      ['bold', 'italic', 'underline', 'strike'],
+      ['blockquote', 'code-block'],
+      [{ 'header': 1 }, { 'header': 2 }],
+      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+      [{ 'script': 'sub'}, { 'script': 'super' }],
+      [{ 'indent': '-1'}, { 'indent': '+1' }],
+      [{ 'direction': 'rtl' }],
+      [{ 'size': ['small', false, 'large', 'huge'] }],
+      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+      [{ 'color': [] }, { 'background': [] }],
+      [{ 'font': [] }],
+      [{ 'align': [] }],
+      ['clean'],
+      ['link']
+    ]
+  };
+
   constructor(private route:ActivatedRoute,
      private router:Router,
     private fb:FormBuilder,
-    private informesService: InformesService){}
+    private informesService: InformesService,
+   private sanitizer: DomSanitizer){}
 
   ngOnInit() {
      const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
@@ -226,7 +254,7 @@ export class FormatoinformeComponent implements OnInit {
           this.idInforme = body.id;
           this.informeForm.patchValue({ id: this.idInforme })
           this.router.navigate(['../../'+ this.denunciaId+ '/editar',this.idInforme], { relativeTo: this.route });
-          toast.success('Notificación Guardada con Éxito', {
+          toast.success('Informe Guardado con Éxito', {
                     duration: 3000,
                   });
 
@@ -244,8 +272,60 @@ export class FormatoinformeComponent implements OnInit {
       })
 
   }
-  updateInforme() {}
-  generarPdf() {}
+  updateInforme() {
+     const body ={
+        ...this.informeForm.value,
+
+      }
+      this.informesService.actualizarInforme(this.idInforme, body).subscribe({
+        next: () => {
+          toast.success('Informe Actualizado con Éxito', {
+                    duration: 3000,
+                  });
+                  this.actionsConfig[1].disabled = true
+        this.actionsConfig[2].disabled = false
+        this.actionsConfig[0].disabled = false;
+        this.isEditInformeActivate=false;
+        this.informeForm.disable();
+
+        },
+        error: (err) => {
+          toast.error('Error al actualizar la avocatoria', {
+            duration: 3000,
+          });
+        }
+
+      })
+  }
+  generarPdf(){
+    this.actionsConfig[2].disabled = true
+    this.pdfLoading = true;
+    this.pdfError = false;
+    this.cambiarTab(1); // Cambiar al tab PDF inmediatamente para mostrar el loader
+
+    this.informesService.crearpdfBlob(this.idInforme).subscribe({
+      next: (res: Blob) => {
+        const url = URL.createObjectURL(res);
+        this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        this.pdfLoading = false;
+        this.actionsConfig[2].disabled = false;
+      },
+      error: (error) => {
+        console.error('Error al generar PDF:', error);
+        this.pdfLoading = false;
+        this.pdfError = true;
+        this.actionsConfig[2].disabled = false;
+        toast.error('Error', {
+          description: 'Error al generar el PDF. Inténtalo de nuevo.',
+          duration: 3000,
+        });
+      }
+    });
+  }
+
+  retryGenerarPdf() {
+    this.generarPdf();
+  }
 
 }
 export default FormatoinformeComponent;

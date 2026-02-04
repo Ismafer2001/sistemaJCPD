@@ -39,7 +39,7 @@ import { requiredWhen } from '@shared/validators/validacionOpcional.validators';
     Nna_creardenuncia_denunciadoComponent,
     Nna_creardenuncia_vulneracionesComponent,
     Crear_denuncia_medidasComponent,
-    CardFormComponent, 
+    CardFormComponent,
     NavFormularioComponent,RouterLink
   ],
 })
@@ -103,7 +103,10 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   editMode: boolean = false;
 
   loading = false;
+  initialLoading = true; // Para la carga inicial de datos
+  pdfLoading = false; // Para la carga del PDF
   error: string | null = null;
+  pdfError: string | null = null;
   // Variable para el cantón
   anioActual!: number;
   canton!: string;
@@ -142,7 +145,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
   denunciaForm!: FormGroup;
   vulneracionesCatalogo: Vulneracion[] = [];
-  medidasPorArticulo: ArticuloMedidas[] = [];
+  todasLasMedidas: Medida[] = [];
   tipoDenunciaSeleccionado: string = '';
 
   constructor(
@@ -157,26 +160,33 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.initialLoading = true;
+
     // Cargar catálogo de vulneraciones para mapear nombres a IDs
     this.vulneracionService.getVulneraciones().subscribe({
       next: (data) => {
         this.vulneracionesCatalogo = data;
+        this.checkInitialLoadingComplete();
       },
       error: (error) => {
         console.error('Error al cargar vulneraciones:', error);
+        this.checkInitialLoadingComplete();
       }
     });
+
     // Cargar catálogo de medidas para mapear nombres a IDs
     this.medidasService.getAllMedidas().subscribe({
       next: (response) => {
         if (response && response.success) {
-          this.medidasPorArticulo = response.data || [];
+          this.todasLasMedidas = response.data || [];
         } else if (Array.isArray(response)) {
-          this.medidasPorArticulo = response as ArticuloMedidas[];
+          this.todasLasMedidas = response as Medida[];
         }
+        this.checkInitialLoadingComplete();
       },
       error: (err) => {
         console.error('Error al cargar medidas:', err);
+        this.checkInitialLoadingComplete();
       }
     });
     const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
@@ -263,7 +273,12 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
   }
 
-
+  // Método para verificar si la carga inicial está completa
+  private checkInitialLoadingComplete(): void {
+    if (this.vulneracionesCatalogo.length > 0 && this.todasLasMedidas.length > 0) {
+      this.initialLoading = false;
+    }
+  }
 
   //--------- CREACION FORMULARIO--------------------//
   denunciaFormulario() {
@@ -567,15 +582,12 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
                 const num = Number(trimmed);
                 if (!isNaN(num)) return String(num);
                 // Si no es número, intentar buscar en el catálogo de medidas por nombre (exacto o parcial)
-                for (const articulo of this.medidasPorArticulo) {
-                  if (!Array.isArray(articulo.medidas)) continue;
-                  const found = articulo.medidas.find((mm: Medida) => {
-                    const a = String(mm.medida || '').toLowerCase().trim();
-                    const b = trimmed.toLowerCase();
-                    return a === b || a.includes(b) || b.includes(a);
-                  });
-                  if (found) return String(found.id);
-                }
+                const found = this.todasLasMedidas.find((medida: Medida) => {
+                  const a = String(medida.medida || '').toLowerCase().trim();
+                  const b = trimmed.toLowerCase();
+                  return a === b || a.includes(b) || b.includes(a);
+                });
+                if (found) return String(found.id);
                 return null;
               }
               // Si viene como objeto con id
@@ -714,8 +726,12 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       ...this.denunciaForm.value,
       status: 'completada',
     };
+
+    this.loading = true;
+
     this.denunciaService.actualizarDenuncia(this.idDenuncia, body).subscribe({
       next: () => {
+        this.loading = false;
         toast.success('Denuncia Actualizada con Éxito', {
           duration: 3000,
         });
@@ -726,6 +742,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
     this.denunciaForm.disable();
       },
       error: (err) => {
+        this.loading = false;
         toast.error('Error al Actualizar la Denuncia', {
           duration: 3000,
         });
@@ -781,17 +798,34 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
 //---------------------------GENERAR PDF-------------------//
   generarPdf(){
-    this.actionsConfig[2].disabled = true
+    this.actionsConfig[2].disabled = true;
+    this.pdfLoading = true;
+    this.pdfError = null;
+    this.pdfSrc = null;
 
-    this.denunciaService.crearpdfBlob(this.idDenuncia).subscribe((res: Blob) => {
+    this.denunciaService.crearpdfBlob(this.idDenuncia).subscribe({
+      next: (res: Blob) => {
+        console.log('esta es el id del pdf', this.idDenuncia);
 
+        if (res && res.size > 0) {
+          const url = URL.createObjectURL(res);
+          this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+          this.pdfLoading = false;
+        } else {
+          this.pdfError = 'No se pudo generar el PDF. No hay datos suficientes.';
+          this.pdfLoading = false;
+        }
 
-      console.log('esta es el id del pdf', this.idDenuncia);
-      const url = URL.createObjectURL(res);
-      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-      this.actionsConfig[2].disabled = false
-
+        this.actionsConfig[2].disabled = false;
+      },
+      error: (err) => {
+        console.error('Error al generar PDF:', err);
+        this.pdfError = 'Error al generar el PDF. Por favor intente nuevamente.';
+        this.pdfLoading = false;
+        this.actionsConfig[2].disabled = false;
+      }
     });
+
     this.cambiarTab(2);
   }
 }

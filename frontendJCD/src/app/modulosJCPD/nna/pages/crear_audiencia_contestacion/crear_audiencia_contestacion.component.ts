@@ -120,6 +120,11 @@ export class Crear_audienciaComponent implements OnInit {
 
   audienciaContestacionCargada:any=null
 
+  // Propiedades de loading
+  initialLoading: boolean = false;
+  pdfLoading: boolean = false;
+  pdfError: string | null = null;
+
   // Propiedades para manejar tipos de participantes
   private _tipoParticipante: 'persona' | 'institucion' | 'proyecto' | '' = '';
 
@@ -200,6 +205,7 @@ export class Crear_audienciaComponent implements OnInit {
 
 
   ngOnInit() {
+    this.initialLoading = true;
     // Inicializar formularios primero (para que patchValue y valueChanges funcionen)
     this.formularioAudienciaContestacion();
     this.formularioParticipantes();
@@ -213,6 +219,16 @@ export class Crear_audienciaComponent implements OnInit {
     this.participantesForm.valueChanges.subscribe((value) => {
       console.log('Participantes Form Value Changes:', value);
     });
+  }
+
+  private checkInitialLoadingComplete(): void {
+    // Verificar si todos los datos necesarios están cargados
+    if (this.datosAudiencia &&
+        this.miembrosPrincipales.length > 0 &&
+        this.participantesArray.length > 0 &&
+        this.audienciaForm.get('codigoTramite')?.value) {
+      this.initialLoading = false;
+    }
   }
 
   // Maneja el cambio del checkbox de asistencia en la tabla
@@ -386,18 +402,18 @@ get participantesArray(): FormArray {
 
   cargarAfectadosYDirigidoA() {
     if (!this.denunciaId) return;
-    this.audienciaContestacionService.getAfectadosYDirigidoA(this.denunciaId).subscribe(data => {
-      console.log('Afectados y dirigidoA cargados', data);
-      // Limpiar el FormArray antes de llenarlo
-      while (this.participantesArray.length !== 0) {
-        this.participantesArray.removeAt(0);
-      }
-      if (Array.isArray(data)) {
-        data.forEach((p: any) => {
-
-          this.participantesArray.push(this.fb.group({
-            nombres: [p.nombres || p.nombre || ''],
-            apellidos: [p.apellidos || ''],
+    this.audienciaContestacionService.getAfectadosYDirigidoA(this.denunciaId).subscribe({
+      next: (data) => {
+        console.log('Afectados y dirigidoA cargados', data);
+        // Limpiar el FormArray antes de llenarlo
+        while (this.participantesArray.length !== 0) {
+          this.participantesArray.removeAt(0);
+        }
+        if (Array.isArray(data)) {
+          data.forEach((p: any) => {
+            this.participantesArray.push(this.fb.group({
+              nombres: [p.nombres || p.nombre || ''],
+              apellidos: [p.apellidos || ''],
             cedula: [p.cedula || ''],
             cargo: [p.cargo || ''],
             institucion: [p.institucion || ''],
@@ -409,53 +425,61 @@ get participantesArray(): FormArray {
             idDenuncia: [p.idDenuncia || this.denunciaId]
           }));
         });
-
-
-
       }
       // Si quieres seguir guardando en this.participantes para otros usos:
       this.participantes = data;
-
-    });
+      this.checkInitialLoadingComplete();
+    },
+    error: (err) => {
+      console.error('Error al cargar afectados:', err);
+      this.initialLoading = false;
+    }
+  });
   }
 
   cargarDatosAudiencia() {
     if (!this.denunciaId) return;
 
-    this.audienciaContestacionService.getDatosAudiencia(this.denunciaId).subscribe(data => {
-      this.datosAudiencia = data;
-      this.idAudienciaC = data.id;
-      console.log('Datos de audiencia cargados', data);
-      if (this.editMode) {
-        this.audienciaContestacionEditMode();
-
+    this.audienciaContestacionService.getDatosAudiencia(this.denunciaId).subscribe({
+      next: (data) => {
+        this.datosAudiencia = data;
+        this.idAudienciaC = data.id;
+        console.log('Datos de audiencia cargados', data);
+        if (this.editMode) {
+          this.audienciaContestacionEditMode();
+        } else {
+          this.audienciaForm.patchValue({
+            codigoTramite: this.datosAudiencia.codigoTramite,
+            Hora: this.datosAudiencia.horaCitacion,
+            fecha: this.datosAudiencia.fechaCitacion ? new Date(this.datosAudiencia.fechaCitacion).toISOString().substring(0, 10) : '',
+            instalacionAudiencia: this.datosAudiencia.articulo,
+          });
+          this.checkInitialLoadingComplete();
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar datos de audiencia:', err);
+        this.initialLoading = false;
       }
-      this.audienciaForm.patchValue({
-        codigoTramite: this.datosAudiencia.codigoTramite,
-        Hora: this.datosAudiencia.horaCitacion,
-        fecha: this.datosAudiencia.fechaCitacion ? new Date(this.datosAudiencia.fechaCitacion).toISOString().substring(0, 10) : '',
-        instalacionAudiencia: this.datosAudiencia.articulo,
-
-
-        // ...otros campos si es necesario
-      });
-
-
-
-
     });
   }
    loadPrincipalesActivos(){
-    this.UserService.usuariosActivos().subscribe(n=>{
-      this.miembrosPrincipales=n;
-
+    this.UserService.usuariosActivos().subscribe({
+      next: (n) => {
+        this.miembrosPrincipales=n;
+        this.checkInitialLoadingComplete();
+      },
+      error: (err) => {
+        console.error('Error al cargar miembros principales:', err);
+        this.initialLoading = false;
+      }
     })
   }
 
 audienciaContestacionEditMode()
 {
-
-  this.audienciaContestacionService.getAudienciaContestacionEditMode(this.idAudienciaC).subscribe(data => {
+  this.audienciaContestacionService.getAudienciaContestacionEditMode(this.idAudienciaC).subscribe({
+    next: (data) => {
       this.audienciaContestacionCargada = data;
       this.existeAudienciaPrueba = data?.idAudienciaPruebas ?? null;
        // Actualizar estados después de cargar audiencia prueba
@@ -523,9 +547,13 @@ console.log('audiencia cargada', this.audienciaContestacionCargada);
 
       // sync local copy
       this.participantes = this.participantesArray.getRawValue();
-
-
-    });
+      this.checkInitialLoadingComplete();
+    },
+    error: (err) => {
+      console.error('Error al cargar audiencia en modo edición:', err);
+      this.initialLoading = false;
+    }
+  });
 }
 
 //---------------------------OTROS-------------------//
@@ -836,12 +864,30 @@ regresar(): void {
 
   //-----------PDF------------------//
   generarPdf(){
+    this.pdfLoading = true;
+    this.pdfError = null;
+    this.pdfSrc = null;
     this.actionsConfig[2].disabled = true;
 
-    this.audienciaContestacionService.crearpdfBlob(this.idAudienciaC).subscribe((res: Blob) => {
-      const url = URL.createObjectURL(res);
-      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-      this.actionsConfig[2].disabled = false;
+    this.audienciaContestacionService.crearpdfBlob(this.idAudienciaC).subscribe({
+      next: (res: Blob) => {
+        if (res && res.size > 0) {
+          const url = URL.createObjectURL(res);
+          this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+          this.pdfLoading = false;
+          this.actionsConfig[2].disabled = false;
+        } else {
+          this.pdfError = 'No se pudo generar el PDF. No hay datos suficientes.';
+          this.pdfLoading = false;
+          this.actionsConfig[2].disabled = false;
+        }
+      },
+      error: (err) => {
+        console.error('Error al generar PDF:', err);
+        this.pdfError = 'Error al generar el PDF. Por favor intente nuevamente.';
+        this.pdfLoading = false;
+        this.actionsConfig[2].disabled = false;
+      }
     });
     this.cambiarTab(4);
   }

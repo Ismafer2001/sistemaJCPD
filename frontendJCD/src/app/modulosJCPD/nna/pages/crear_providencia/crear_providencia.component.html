@@ -1,30 +1,53 @@
-<div class="pl-2 py-2 mb-1 flex items-center gap-2">
-  <a
-    [routerLink]="[`../../../fases/${denunciaId}`]"
+<!-- Loader de carga inicial -->
+@if (initialLoading) {
+  <div class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
+    <div class="text-center">
+      <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-600"></div>
+      <p class="mt-4 text-lg font-medium text-gray-600">Cargando providencia...</p>
+    </div>
+  </div>
+}
 
+@if (!initialLoading) {
+  <!-- Overlay transparente para PDF -->
+  @if (pdfLoading) {
+    <div class="fixed inset-0 z-50"
+         style="backdrop-filter: blur(3px); background-color: rgba(255, 255, 255, 0.3);">
+      <div class="flex items-center justify-center h-full">
+        <div class="bg-white bg-opacity-90 backdrop-blur-md rounded-lg p-6 border shadow-xl">
+          <div class="flex flex-col items-center space-y-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
+            <p class="text-sm font-medium text-gray-700">Generando PDF...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <div class="pl-2 py-2 mb-1 flex items-center gap-2">
+    <a
+      [routerLink]="[`../../../fases/${denunciaId}`]"
       class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
     >
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
-        </svg>
-
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+      </svg>
     </a>
-  <h3 class="text-2xl font-bold">Providencia administrativa</h3>
+    <h3 class="text-2xl font-bold">Providencia administrativa</h3>
+  </div>
+  <hr class="border-yellow-300 border-1" />
 
-</div>
-<hr class="border-yellow-300 border-1" />
-
-<!--tabs-->
-<app-nav-formulario
-  [tabs]="tabsConfig"
-  [actions]="actionsConfig"
-  [currentTab]="currentTab"
-  (tabChanged)="cambiarTab($event)"
-  (actionClicked)="handleActionButton($event)"
-></app-nav-formulario>
-<form
- [formGroup]="providenciaForm"
-  class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]" >
+  <!--tabs-->
+  <app-nav-formulario
+    [tabs]="tabsConfig"
+    [actions]="actionsConfig"
+    [currentTab]="currentTab"
+    (tabChanged)="cambiarTab($event)"
+    (actionClicked)="handleActionButton($event)"
+  ></app-nav-formulario>
+  <form
+   [formGroup]="providenciaForm"
+    class="bg-gray-50 b p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)]" >
 
 <app-card-Form
     [hidden]="currentTab != 0">
@@ -201,25 +224,46 @@
           <!-- Tabla de medidas -->
           <!-- Tabla de medidas emergentes -->
 
-          <!-- Lista de medidas por artículo -->
-          <div class="flex col-span-2 my-4 gap-2 h-60 ">
-            @for (articulo of medidasPorArticulo; track $index) {
+          <!-- Lista de medidas con filtro por cuerpo legal -->
+          <div class="flex col-span-2 my-4 gap-2 h-60 flex-col">
 
-            <div
-              class="bg-white ring-1 ring-blue-200 rounded-lg shadow-md pt-0 p-1  overflow-auto"
-            >
-              <h3
-                class="bg-white sticky top-0 text-lg font-semibold text-gray-800 mb-1 h-8"
+            <!-- Selector de Cuerpo Legal para filtro -->
+            <div class="flex items-center gap-2 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-gray-500 flex-shrink-0">
+                <path d="M14 2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2.172a2 2 0 0 0 .586 1.414l2.828 2.828A2 2 0 0 1 6 9.828v4.363a.5.5 0 0 0 .724.447l2.17-1.085A2 2 0 0 0 10 11.763V9.829a2 2 0 0 1 .586-1.414l2.828-2.828A2 2 0 0 0 14 4.172V2Z" />
+              </svg>
+
+              <select
+                formControlName="cuerpoLegalFiltro"
+                class="flex-1 text-sm py-1.5 px-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
               >
-                {{ articulo.articulo }}
+                <option value="">Todos los cuerpos legales</option>
+                <option *ngFor="let cuerpoLegal of cuerposLegalesDisponibles" [value]="cuerpoLegal">
+                  {{ cuerpoLegal }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Información del filtro activo -->
+            <div *ngIf="medidasEmergentesForm.get('cuerpoLegalFiltro')?.value" class="mb-3 p-2 bg-blue-50 rounded-lg">
+              <p class="text-xs text-blue-600">
+                <i class="fas fa-filter"></i>
+                Mostrando medidas de:
+                <strong>{{ getNombreCuerpoLegalSeleccionado() }}</strong>
+              </p>
+            </div>
+
+            <!-- Lista de medidas filtradas -->
+            <div class="bg-white ring-1 ring-blue-200 rounded-lg shadow-md pt-0 p-1 overflow-auto flex-1">
+              <h3 class="bg-white sticky top-0 text-lg font-semibold text-gray-800 mb-1 h-8">
+                Medidas Disponibles
               </h3>
 
-              <div class="space-y-3">
+              <div class="space-y-3" *ngIf="medidasFiltradas.length > 0; else noMedidas">
                 <div
-                  *ngFor="let medida of articulo.medidas"
+                  *ngFor="let medida of medidasFiltradas"
                   class="bg-gray-50 rounded-lg p-3 hover:bg-gray-100 cursor-pointer flex items-start"
                 >
-
                   <div class="flex items-center h-5">
                     <input
                       type="radio"
@@ -232,16 +276,22 @@
                   <div class="ml-3">
                     <label
                       [for]="'medida-' + medida.id"
-                      class="text-sm text-gray-700"
+                      class="text-sm text-gray-700 cursor-pointer"
                     >
-                      {{ medida.medida }}
+                      <strong>{{ medida.medida }}</strong>
+                      <br>
+                      <small class="text-gray-500">{{ medida.cuerpoLegal }}</small>
                     </label>
                   </div>
                 </div>
               </div>
-            </div>
 
-            }
+              <ng-template #noMedidas>
+                <div class="text-center py-4 text-gray-500">
+                  <p>No hay medidas disponibles para el filtro seleccionado</p>
+                </div>
+              </ng-template>
+            </div>
           </div>
 
            </div>
@@ -285,15 +335,43 @@
 
           ></app-tablaEdit>
         </div>
+      </app-card-Form>
 
-
-
-
-  </app-card-Form>
-  @if (pdfSrc) {
-        <div class="pdf-container" [hidden]="currentTab !== 2">
-          <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
-        </div>
-      }
-
-</form>
+      <!-- Sección del PDF con estados de carga y error -->
+      <div class="pdf-section" [hidden]="currentTab !== 2">
+        @if (pdfLoading) {
+          <div class="flex flex-col items-center justify-center py-12">
+            <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-yellow-600"></div>
+            <p class="mt-4 text-lg font-medium text-gray-600">Generando PDF...</p>
+          </div>
+        } @else if (pdfError) {
+          <div class="flex flex-col items-center justify-center py-12">
+            <div class="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto text-center">
+              <svg class="w-12 h-12 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z"></path>
+              </svg>
+              <h3 class="text-lg font-semibold text-red-800 mb-2">Error al generar PDF</h3>
+              <p class="text-red-600 mb-4">{{pdfError}}</p>
+              <button (click)="generarPdf()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors">
+                Reintentar
+              </button>
+            </div>
+          </div>
+        } @else if (pdfSrc) {
+          <div class="pdf-container">
+            <iframe [src]="pdfSrc" width="100%" height="500px"></iframe>
+          </div>
+        } @else {
+          <div class="flex flex-col items-center justify-center py-12">
+            <div class="text-center text-gray-500">
+              <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+              </svg>
+              <p class="text-lg font-medium">No hay PDF disponible</p>
+              <p class="text-sm mt-2">Genera el PDF para visualizar el documento</p>
+            </div>
+          </div>
+        }
+      </div>
+    </form>
+}

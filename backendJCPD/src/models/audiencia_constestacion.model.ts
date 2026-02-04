@@ -56,7 +56,7 @@ interface AudienciaContestacionCreationAttributes extends Optional<AudienciaCont
     indica: { type: DataTypes.TEXT },
     afectadoManifiesta: { type: DataTypes.TEXT },
     manifiesta:{type: DataTypes.TEXT},
-    conciliacion: { type: DataTypes.STRING },
+    conciliacion: { type: DataTypes.TEXT },
     idDenuncia:{type: DataTypes.INTEGER},
      estatus: {
     type: DataTypes.STRING,

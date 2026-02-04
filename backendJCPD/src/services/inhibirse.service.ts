@@ -4,6 +4,20 @@ import { Deprecatoria } from "../models/deprecatoria.models";
 import { Canton } from "../models/cantones.models";
 import { Afectado } from "../models/afectado.models";
 import { Denunciante } from "../models/denunciante.models";
+import { Denunciado } from "../models/denunciado.models";
+import { AudienciaContestacion } from "../models/audiencia_constestacion.model";
+import { AudienciaPruebas } from "../models/audiencia_prueba.model";
+import { Citacion } from "../models/citaciones.model";
+import { Notificacion } from "../models/notificacion.model";
+import { Providencias } from "../models/providencia.model";
+import { Resoluciones } from "../models/resoluciones.models";
+import { MedidasEmergentes } from "../models/medidas_emergentes.model";
+import { MedidasDefinitivas } from "../models/medidasDefinitivas.models";
+import { CierreCaso } from "../models/cierreCaso.models";
+import { Desestimiento } from "../models/desestimiento.models";
+import { ControlImpugnacion } from "../models/controlImpugnacion.model";
+import { Informe } from "../models/informe.models";
+import { Avocatoria } from "../models/avocatoria.model";
 
 export interface InhibicionDTO {
   idDenuncia: number;
@@ -130,7 +144,42 @@ export async function obtenerDeprecatoriasPorCanton(idCanton: number) {
   }
 }
 
+// Servicio para obtener deprecatorias pendientes por cantón
+export async function obtenerDeprecatoriasPendientesPorCanton(idCanton: number) {
+  try {
+    const deprecatorias = await Deprecatoria.findAll({
+      where: {
+        idCantonDestino: idCanton,
+        estadoRecepcion: 'pendiente'
+      },
+      include: [
+        {
+          model: Canton,
+          as: 'cantonOrigen',
+          attributes: ['canton']
+        }
+      ],
+      attributes: ['estadoRecepcion', 'codigoTramite'],
+      order: [['fechaCreado', 'DESC']]
+    });
 
+    // Formatear la respuesta
+    const deprecatoriasFormateadas = deprecatorias.map((deprecatoria: any) => {
+      return {
+        estadoRecepcion: deprecatoria.estadoRecepcion,
+        codigoTramite: deprecatoria.codigoTramite,
+        cantonOrigen: deprecatoria.cantonOrigen?.canton
+      };
+    });
+
+    console.log('Deprecatorias pendientes formateadas:', deprecatoriasFormateadas);
+
+    return deprecatoriasFormateadas;
+
+  } catch (error) {
+    throw error;
+  }
+}
 
 // Servicio para obtener una deprecatoria por ID
 export async function obtenerDeprecatoriaPorId(id: number) {
@@ -193,9 +242,9 @@ export async function aceptarInhibicion(idDeprecatoria: number) {
     const idCantonDestino = deprecatoriaData.idCantonDestino;
     const nombreCantonDestino = deprecatoriaData.cantonDestino?.canton;
 
-    // Obtener información de la denuncia original para el grupo prioritario
+    // Obtener información de la denuncia original para el grupo prioritario y código de trámite anterior
     const denunciaOriginal = await Denuncia.findByPk(idDenuncia, {
-      attributes: ['grupoPrioritario']
+      attributes: ['grupoPrioritario', 'codigoTramite']
     });
 
     if (!denunciaOriginal) {
@@ -203,6 +252,7 @@ export async function aceptarInhibicion(idDeprecatoria: number) {
     }
 
     const grupoPrioritario = (denunciaOriginal as any).grupoPrioritario;
+    const codigoTramiteAnterior = (denunciaOriginal as any).codigoTramite;
 
     // Obtener el último número de trámite para el cantón destino en el año actual
     const anioActual = new Date().getFullYear();
@@ -261,16 +311,123 @@ export async function aceptarInhibicion(idDeprecatoria: number) {
       }
     );
 
+   
+
+    
+    // Actualizar Audiencias de Contestación
+    await AudienciaContestacion.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    // Actualizar Audiencias de Pruebas
+    await AudienciaPruebas.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    // Actualizar Citaciones
+    await Citacion.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    // Actualizar Notificaciones
+    await Notificacion.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    // Actualizar Providencias
+    await Providencias.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    // Actualizar Resoluciones
+    await Resoluciones.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    
+
+   
+
+    // Actualizar Cierre de Caso
+    await CierreCaso.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    // Actualizar Desestimiento
+    await Desestimiento.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    // Actualizar Control de Impugnación
+    await ControlImpugnacion.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    // Actualizar Informes
+    await Informe.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
+    // Actualizar Avocatoria
+    await Avocatoria.update(
+      { codigoTramite: nuevoCodigoTramite },
+      { 
+        where: { codigoTramite: codigoTramiteAnterior },
+        transaction: t 
+      }
+    );
+
     await t.commit();
     
     return { 
       success: true, 
-      message: 'Inhibición aceptada correctamente',
+      message: 'Inhibición aceptada correctamente y todos los registros relacionados actualizados',
       deprecatoriaId: idDeprecatoria,
       denunciaId: idDenuncia,
       nuevoCantonId: idCantonDestino,
       nuevoCantonNombre: nombreCantonDestino,
       nuevoNumTramite: nuevoNumTramite,
+      codigoTramiteAnterior: codigoTramiteAnterior,
       nuevoCodigoTramite: nuevoCodigoTramite
     };
   } catch (error) {

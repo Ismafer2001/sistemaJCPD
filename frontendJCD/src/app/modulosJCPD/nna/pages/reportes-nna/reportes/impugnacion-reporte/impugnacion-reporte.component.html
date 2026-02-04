@@ -1,55 +1,56 @@
-<div class="min-h-screen bg-gray-50 p-6">
+  <div class="min-h-screen bg-gray-50 p-6">
   <div class="max-w-7xl mx-auto">
 
     <!-- Título -->
     <h1 class="text-3xl font-bold text-gray-800 mb-1">📑 Reporte de Impugnaciones</h1>
     <p class="text-gray-600 mb-6">Resumen general de acciones impugnatorias registradas</p>
 
-    <!-- Filtro por fechas -->
-    <div class="bg-white p-4 rounded-xl shadow flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
-      <div>
-        <h2 class="text-lg font-semibold text-gray-800">📅 Filtrar por fechas</h2>
-        <p class="text-sm text-gray-500">Seleccioná un rango de fechas</p>
-      </div>
-      <div class="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-        <div>
-          <label class="text-sm text-gray-600">Desde</label>
-          <input type="date" class="mt-1 block w-full sm:w-44 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" />
-        </div>
-        <div>
-          <label class="text-sm text-gray-600">Hasta</label>
-          <input type="date" class="mt-1 block w-full sm:w-44 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" />
-        </div>
-        <div class="self-end">
-          <button class="w-full sm:w-auto px-4 py-2 rounded-md bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition">
-            Filtrar
-          </button>
-        </div>
+    <!-- Componente de filtro reutilizable -->
+    <app-filtro class="flex flex-col md:flex-row"
+      [filtroForm]="filtroForm"
+      [filtrar]="filtrar.bind(this)">
+    </app-filtro>
+
+    <!-- Loading y error states -->
+    <div *ngIf="loading" class="bg-white p-8 rounded-xl shadow text-center mb-8">
+      <div class="inline-block w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+      <p class="text-gray-600">Cargando datos del reporte...</p>
+    </div>
+
+    <div *ngIf="error && !loading" class="bg-red-50 border border-red-200 rounded-xl p-4 mb-8">
+      <div class="flex items-center">
+        <svg class="w-5 h-5 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span class="text-red-800">{{ error }}</span>
       </div>
     </div>
 
     <!-- Tarjetas resumen -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div *ngIf="impugnacionData && !loading" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
 
-      <!-- Impugnaciones -->
-      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-blue-600 flex items-center justify-between">
+      <!-- Total Impugnaciones -->
+      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-purple-600 flex items-center justify-between">
         <div>
-          <h2 class="text-lg font-semibold text-gray-700">Impugnaciones</h2>
-          <p class="text-sm text-gray-500">Realizadas en total</p>
+          <h2 class="text-lg font-semibold text-gray-700">Total Impugnaciones</h2>
+          <p class="text-sm text-gray-500">Reposiciones + Apelaciones</p>
         </div>
-        <div class="text-blue-600 text-4xl font-bold">
-          22
+        <div class="text-purple-600 text-4xl font-bold">
+          {{ totalImpugnaciones }}
         </div>
       </div>
 
       <!-- Reposiciones -->
-      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-indigo-500 flex items-center justify-between">
+      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-blue-600 flex items-center justify-between">
         <div>
           <h2 class="text-lg font-semibold text-gray-700">Reposiciones</h2>
           <p class="text-sm text-gray-500">Solicitadas por usuarios</p>
+          <div class="text-xs text-blue-600 mt-1">
+            {{ totalImpugnaciones > 0 ? (impugnacionData.reposiciones / totalImpugnaciones * 100).toFixed(1) : 0 }}% del total
+          </div>
         </div>
-        <div class="text-indigo-600 text-4xl font-bold">
-          14
+        <div class="text-blue-600 text-4xl font-bold">
+          {{ impugnacionData.reposiciones }}
         </div>
       </div>
 
@@ -58,20 +59,12 @@
         <div>
           <h2 class="text-lg font-semibold text-gray-700">Apelaciones</h2>
           <p class="text-sm text-gray-500">Registradas en el sistema</p>
+          <div class="text-xs text-rose-600 mt-1">
+            {{ totalImpugnaciones > 0 ? (impugnacionData.apelaciones / totalImpugnaciones * 100).toFixed(1) : 0 }}% del total
+          </div>
         </div>
         <div class="text-rose-600 text-4xl font-bold">
-          6
-        </div>
-      </div>
-
-      <!-- Desistimientos -->
-      <div class="bg-white p-6 rounded-xl shadow border-l-4 border-yellow-500 flex items-center justify-between">
-        <div>
-          <h2 class="text-lg font-semibold text-gray-700">Desistimientos</h2>
-          <p class="text-sm text-gray-500">Procesos cancelados</p>
-        </div>
-        <div class="text-yellow-600 text-4xl font-bold">
-          3
+          {{ impugnacionData.apelaciones }}
         </div>
       </div>
 

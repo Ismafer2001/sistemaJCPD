@@ -10,26 +10,27 @@ import { getAfectadosYDirigidoAController,
            putAudienciaContestacion } from '../controllers/audienciaContestacion.controller';
 import { getAudienciasContestacionTotales } from '../controllers/estadisticas/audienciaContestacionReporte.controller';
 import { verificarToken } from '../middleware/auth.middleware';
+import { verificarCantonDenuncia } from '../middleware/canton.middleware';
 
 
 const router = Router();
 
 
 
-router.get('/datos-audiencia/:id', getDatosAudienciaController);
+router.get('/datos-audiencia/:id',verificarToken,verificarCantonDenuncia, getDatosAudienciaController);
 
 // GET /audiencia-contestacion/completa/:id
-router.get('/Datosaudienciacompleta/:id', getAudienciaContestacionCompleta);
+router.get('/Datosaudienciacompleta/:id',verificarToken, getAudienciaContestacionCompleta);
 
 // GET /audiencia-contestacion/afectados-dirigidoA/:idDenuncia
-router.get('/afectados-dirigidoA/:idDenuncia', getAfectadosYDirigidoAController);
+router.get('/afectados-dirigidoA/:idDenuncia',verificarToken,verificarCantonDenuncia, getAfectadosYDirigidoAController);
 
 // GET /audiencia-contestacion/representantes-institucionales/:idDenuncia
 
-router.post('/afectados-dirigidoA', postaniadirParticipante);
-router.post('', postAudienciaContestacion);
-router.get('/crearpdf/:id',  getAudienciaContestacionPdf);
-router.put('/:id',  putAudienciaContestacion);
+router.post('/afectados-dirigidoA',verificarToken,verificarCantonDenuncia, postaniadirParticipante);
+router.post('', verificarToken,verificarCantonDenuncia, postAudienciaContestacion);
+router.get('/crearpdf/:id',verificarToken,  getAudienciaContestacionPdf);
+router.put('/:id',verificarToken,  putAudienciaContestacion);
 
 
 

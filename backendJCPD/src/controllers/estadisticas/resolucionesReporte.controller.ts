@@ -10,6 +10,7 @@ export const getResolucionesTotales = async (req: Request, res: Response) => {
       desde: req.query.desde as string,
       hasta: req.query.hasta as string,
     };
+    console.log('controlador con filtros', filtros);
 
     // 👇 Este dato viene del usuario autenticado (por ejemplo, desde el token)
     

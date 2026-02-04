@@ -1,4 +1,4 @@
-import { Transaction } from "sequelize";
+import { Transaction, Op } from "sequelize";
 import sequelize from "../config/database";
 import {
   Denuncia,
@@ -25,29 +25,80 @@ export interface datosDenuncia {
 
 //---------------servicios globales de grupos prioritarios------------------//
 
-export async function obtenertodasLasDenuncias({ page = 1, limit = 10, grupoPrioritario, id_canton }: { page?: number; limit?: number; grupoPrioritario: string; id_canton?: number }) {
+export async function obtenertodasLasDenuncias({ 
+  page = 1, 
+  limit = 10, 
+  grupoPrioritario, 
+  id_canton,
+  search, // Valor a buscar
+  searchBy // Tipo de búsqueda: 'codigoTramite', 'nombre', 'cedula'
+}: { 
+  page?: number; 
+  limit?: number; 
+  grupoPrioritario: string; 
+  id_canton?: number;
+  search?: string; // Valor a buscar
+  searchBy?: 'codigoTramite' | 'nombre' | 'cedula'; // Tipo de búsqueda
+}) {
   const offset = (page - 1) * limit;
   const where: any = {};
+  
+  // Filtros base
   if (grupoPrioritario) {
     where.grupoPrioritario = grupoPrioritario;
   }
   if (id_canton) {
     where.id_canton = id_canton;
   }
+
+  // Búsqueda específica según el tipo seleccionado
+  if (search && searchBy) {
+    switch (searchBy) {
+      case 'codigoTramite':
+        where.codigoTramite = { [Op.like]: `%${search}%` };
+        break;
+      case 'cedula':
+        where.id = {
+          [Op.in]: sequelize.literal(`(
+            SELECT DISTINCT idDenuncia 
+            FROM afectado 
+            WHERE cedula LIKE '%${search.replace(/'/g, "''")}%'
+          )`)
+        };
+        break;
+      case 'nombre':
+        where.id = {
+          [Op.in]: sequelize.literal(`(
+            SELECT DISTINCT idDenuncia 
+            FROM afectado 
+            WHERE nombres LIKE '%${search.replace(/'/g, "''")}%'
+               OR apellidos LIKE '%${search.replace(/'/g, "''")}%'
+          )`)
+        };
+        break;
+    }
+  }
+
+  // Configurar includes
+  const includeAfectados = {
+    model: Afectado,
+    as: 'afectados',
+    attributes: ['nombres', 'apellidos', 'cedula'],
+    required: false
+  };
+
+  // Conteo simple
   const total = await Denuncia.count({ where });
+
+  // Consulta principal
   const denuncias = await Denuncia.findAll({
     where,
-    include: [
-      {
-        model: Afectado,
-        as: 'afectados',
-        attributes: ['nombres', 'apellidos', 'cedula']
-      }
-    ],
+    include: [includeAfectados],
     order: [['fechaCreado', 'DESC']],
     limit,
     offset
   });
+
   return {
     data: denuncias.map(denuncia => ({
       codigoTramite: denuncia.codigoTramite,
@@ -63,6 +114,7 @@ export async function obtenertodasLasDenuncias({ page = 1, limit = 10, grupoPrio
     totalPages: Math.ceil(total / limit)
   };
 }
+
 //funciones para obtener tramite e incrementar automaticamente
 export async function obtenerNumTramite({ incrementar = false } = {}, id_canton:number,grupoPrioritario:string) {
   const tramite = await Denuncia.findOne({

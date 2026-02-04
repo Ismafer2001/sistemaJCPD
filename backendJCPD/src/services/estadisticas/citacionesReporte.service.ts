@@ -20,16 +20,28 @@ export async function contarcitacionesTotales(filtro: FiltroReporte) {
   };
 
   const whereNotificacion: any = {};
-  if (filtro.desde) {
-    whereNotificacion.fechaCreado = { [Op.gte]: new Date(filtro.desde) };
-  }
-  if (filtro.hasta) {
+  
+  if (filtro.desde && filtro.hasta) {
+    // Si hay ambas fechas, crear rango inclusivo
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0); // Inicio del día
+    
     const hasta = new Date(filtro.hasta);
-    hasta.setHours(23, 59, 59, 999);
+    hasta.setUTCHours(23, 59, 59, 999); // Final del día
+    
     whereNotificacion.fechaCreado = {
-      ...(whereNotificacion.fechaCreado || {}),
-      [Op.lte]: hasta,
+      [Op.between]: [desde, hasta]
     };
+  } else if (filtro.desde) {
+    // Solo fecha desde
+    const desde = new Date(filtro.desde);
+    desde.setUTCHours(0, 0, 0, 0);
+    whereNotificacion.fechaCreado = { [Op.gte]: desde };
+  } else if (filtro.hasta) {
+    // Solo fecha hasta
+    const hasta = new Date(filtro.hasta);
+    hasta.setUTCHours(23, 59, 59, 999);
+    whereNotificacion.fechaCreado = { [Op.lte]: hasta };
   }
 
   // Total notificaciones (filtrando por denuncia -> canton y grupo)

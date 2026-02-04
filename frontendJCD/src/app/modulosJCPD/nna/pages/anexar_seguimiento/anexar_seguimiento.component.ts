@@ -31,6 +31,16 @@ export class Anexar_seguimientoComponent implements OnInit {
   medidasPorCumplir: any[] = []; // Array para almacenar las medidas cargadas
   afectadoSeleccionado: number | null = null;
   tablaMedidasCumplidas: any[] = []; // Array para la tabla de informes guardados
+  editMode: boolean = false; // Controlar si estamos en modo edición
+  editingItemId: number | null = null; // ID del item que estamos editando
+
+  medidasEjemplo = [{
+      idMedida: 7,
+      idAfectado: 15,
+
+      cumple: true
+    },
+    ]
 
   constructor(private anexarSeguimientoMedidasService: AnexarSeguimientoMedidasService,
     private route: ActivatedRoute,
@@ -90,7 +100,8 @@ export class Anexar_seguimientoComponent implements OnInit {
       responsable: ['', Validators.required], // Nuevo campo
       razon: ['', Validators.required], // Nuevo campo
       sancion: ['', Validators.required], // Nuevo campo
-      medidas: this.fb.array([]) // FormArray para las medidas dinámicas
+      medidas: this.fb.array([]), // FormArray para las medidas dinámicas
+      idPath: ['0', Validators.required] //
     });
   }
 
@@ -118,16 +129,12 @@ export class Anexar_seguimientoComponent implements OnInit {
   loadMediadasPorCumplir(idAfectado: number) {
     this.anexarSeguimientoMedidasService.getMedidasporCumplir(idAfectado).subscribe({
       next: (data) => {
-        console.log('Medidas por cumplir - respuesta completa:', data);
-        console.log('Tipo de data:', typeof data);
-        console.log('Es array:', Array.isArray(data));
-
+        console.log('Medidas por cumplir recibidas:', data);
         this.medidasPorCumplir = data;
         this.construirFormularioMedidas(data);
       },
       error: (err) => {
         console.error('Error al cargar medidas por cumplir:', err);
-        // En caso de error, limpiar las medidas
         this.limpiarMedidas();
       }
     });
@@ -136,14 +143,31 @@ export class Anexar_seguimientoComponent implements OnInit {
   loadMedidasCumplidas(idAfectado: number) {
     this.anexarSeguimientoMedidasService.getMedidasCumplidas(idAfectado).subscribe({
       next: (data) => {
-        console.log('Medidas cumplidas - respuesta completa:', data);
+
+        console.log('idPath cargado en el formulario:', this.seguimientoMedidasForm.value.idPath);
         // Procesar datos y actualizar tabla
         this.procesarMedidasCumplidasReales(data);
+
       },
       error: (err) => {
         console.error('Error al cargar medidas cumplidas:', err);
         // Fallback a datos de prueba si hay error
 
+      }
+    });
+  }
+
+  // Nuevo método para cargar medidas definitivas usando getMedidasDeAfectados
+  loadMedidasDefinitivas(idAfectado: number) {
+    this.anexarSeguimientoMedidasService.getMedidasDeAfectados(idAfectado).subscribe({
+      next: (data) => {
+        console.log('Medidas definitivas recibidas:', data);
+        // El servicio ya retorna el formato correcto: [{ idMedida, medida, idAfectado }]
+        this.construirFormularioMedidasDefinitivas(data.data);
+      },
+      error: (err) => {
+        console.error('Error al cargar medidas definitivas:', err);
+        this.limpiarMedidas();
       }
     });
   }
@@ -155,6 +179,7 @@ export class Anexar_seguimientoComponent implements OnInit {
 
       return;
     }
+    console.log('Datos reales de medidas cumplidas recibidos:', data);
 
     this.tablaMedidasCumplidas = data.map((item, index) => {
       // Extraer información del archivo
@@ -181,13 +206,17 @@ export class Anexar_seguimientoComponent implements OnInit {
         fechaCreacion: fechaFormateada,
         codigoTramite: item.codigoTramite || 'N/A',
         nombreArchivoOriginal: nombreArchivo,
+        idAfectado: archivo.idAfectado || null,
+        idPath: archivo.idPath || '0',
         // Métodos de acción personalizados
         descargar: () => this.descargarArchivo(nombreArchivo)
       };
     });
 
     console.log('Tabla de medidas cumplidas procesada:', this.tablaMedidasCumplidas);
-  }  construirFormularioMedidas(medidas: any) {
+  }
+
+   construirFormularioMedidas(medidas: any) {
     // Limpiar el FormArray actual
     this.limpiarMedidas();
 
@@ -211,7 +240,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       return;
     }
 
-    console.log('Medidas procesadas como array:', medidasArray);
+    console.log(`Construyendo formulario con ${medidasArray.length} medidas`);
 
     // Crear un FormGroup para cada medida
     medidasArray.forEach((medida, index) => {
@@ -222,7 +251,36 @@ export class Anexar_seguimientoComponent implements OnInit {
       });
 
       this.medidasArray.push(medidaFormGroup);
-    });    console.log('FormArray de medidas construido:', this.medidasArray.value);
+    });
+
+    console.log('FormArray de medidas construido con', this.medidasArray.length, 'elementos');
+  }
+
+  // Método específico para construir formulario con medidas definitivas
+  construirFormularioMedidasDefinitivas(medidas: any[]) {
+    // Limpiar el FormArray actual
+    this.limpiarMedidas();
+
+    // Verificar que sea un array
+    if (!Array.isArray(medidas)) {
+      console.warn('Las medidas definitivas no son un array:', medidas);
+      return;
+    }
+
+    console.log(`Construyendo formulario definitivo con ${medidas.length} medidas`);
+
+    // Crear un FormGroup para cada medida usando el formato del servicio
+    medidas.forEach((medida, index) => {
+      const medidaFormGroup = this.fb.group({
+        idMedida: [medida.idMedida, Validators.required],
+        nombreMedida: [medida.medida, Validators.required], // Usar 'medida' del servicio
+        cumple: [null, Validators.required] // null para forzar selección
+      });
+
+      this.medidasArray.push(medidaFormGroup);
+    });
+
+    console.log('FormArray definitivo construido con', this.medidasArray.length, 'elementos');
   }
 
   limpiarMedidas() {
@@ -293,6 +351,7 @@ export class Anexar_seguimientoComponent implements OnInit {
     formData.append('responsable', formValue.responsable);
     formData.append('razon', formValue.razon);
     formData.append('sancion', formValue.sancion);
+
     formData.append('medidas', JSON.stringify(medidasParaEnviar));
 
     console.log('FormData preparado:', {
@@ -317,6 +376,50 @@ export class Anexar_seguimientoComponent implements OnInit {
         console.error('Error al subir el archivo:', error);
       }
     });
+  }
+  actualizarSeguimiento() {
+    if (!this.seguimientoMedidasForm.valid || !this.archivo) {
+      console.log('Formulario no válido o archivo no seleccionado');
+      this.seguimientoMedidasForm.markAllAsTouched();
+      return;
+    }
+
+    const formData = new FormData();
+    const formValue = this.seguimientoMedidasForm.value;
+    const medidasParaEnviar = this.medidasArray.value.map((medida: any) => ({
+      idMedida: medida.idMedida,
+      idAfectado: this.afectadoSeleccionado,
+      cumple: medida.cumple
+    }));
+
+
+
+    formData.append('archivo', this.archivo);
+    formData.append('codigoTramite', formValue.codigoTramite);
+    formData.append('tipoCarpeta', formValue.tipoCarpeta);
+     formData.append('responsable', formValue.responsable);
+    formData.append('razon', formValue.razon);
+    formData.append('sancion', formValue.sancion);
+
+ formData.append('idPath', formValue.idPath);
+
+    formData.append('medidas', JSON.stringify(medidasParaEnviar));
+
+
+
+    this.anexarSeguimientoMedidasService.updateseguimiento(formData, formValue.codigoTramite, formValue.tipoCarpeta).subscribe({
+      next: (response) => {
+        console.log('Archivo subido con éxito:', response);
+        // Recargar la tabla después de subir
+        this.cargarInformesCumplimiento();
+        // Opcional: resetear formulario
+        this.resetearFormulario();
+      },
+      error: (error) => {
+        console.error('Error al subir el archivo:', error);
+      }
+    });
+
   }
 
   // Cargar informes de cumplimiento existentes para mostrar en la tabla
@@ -365,7 +468,7 @@ export class Anexar_seguimientoComponent implements OnInit {
     });
   }
 
-  
+
 
   // Método para descargar archivo directamente
   descargarArchivo(event: any) {
@@ -428,10 +531,54 @@ export class Anexar_seguimientoComponent implements OnInit {
   });
   }
 
+  // Método para editar un registro de la tabla
+  editarRegistro(item: any) {
+    console.log('Editando registro:', item);
+    this.editMode = true;
+    this.editingItemId = item.id;
+
+    // Seleccionar el afectado correspondiente
+    this.afectadoSeleccionado = item.idAfectado;
+
+    this.seguimientoMedidasForm.patchValue({
+      idAfectado: item.idAfectado,
+      responsable: item.responsable,
+      razon: item.razon,
+      sancion: item.sancion,
+      idPath: item.idPath
+    });
+
+    // 🔥 CAMBIO: Usar getMedidasDeAfectados para cargar las medidas definitivas cuando editamos
+    this.loadMedidasDefinitivas(item.idAfectado);
+    this.loadMedidasCumplidas(item.idAfectado);
+
+    // Scroll hacia el formulario
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Método para cancelar la edición
+  cancelarEdicion() {
+    this.editMode = false;
+    this.editingItemId = null;
+    this.afectadoSeleccionado = null;
+    this.limpiarMedidas();
+    this.seguimientoMedidasForm.reset({
+      archivo: null,
+      tipoCarpeta: 'seguimiento',
+      idAfectado: '',
+      responsable: '',
+      razon: '',
+      sancion: ''
+    });
+    this.archivo = null;
+  }
+
   // Resetear formulario después de envío exitoso
   resetearFormulario() {
     this.archivo = null;
     this.afectadoSeleccionado = null;
+    this.editMode = false; // Salir del modo edición
+    this.editingItemId = null; // Limpiar ID de edición
      // Limpiar también el código de trámite
     this.limpiarMedidas();
     this.tablaMedidasCumplidas = []; // Limpiar también la tabla

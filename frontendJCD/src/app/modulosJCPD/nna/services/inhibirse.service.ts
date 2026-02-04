@@ -28,6 +28,9 @@ getCodigoTramite(id: number) {
 getDeprecatorias(idCanton: number) {
     return this.http.get<any>(`${this.apiUrl}/deprecatorias/${idCanton}`);
 }
+getDeprecatoriasPendientes(idCanton: number) {
+    return this.http.get<any>(`${this.apiUrl}/deprecatorias-pendientes/${idCanton}`);
+}
 
 getDeprecatoriasById(idDeprecatoria: number) {
     return this.http.get<any>(`${this.apiUrl}/${idDeprecatoria}`);

@@ -44,7 +44,7 @@
                 <td class=" whitespace-pre-line  p-2">{{item[col] }}</td>
               }
             }
-           
+
             @if (acciones && !mostrarDescargaPdf) {
               <td class="p-2">
                 @if (mostrarEditar) {
@@ -53,9 +53,11 @@
                   editar
                 </button>
                 }
-                <button type="button" (click)="eliminar(item)"class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
-                  eliminar
-                </button>
+                @if (mostrarEliminar) {
+                  <button type="button" (click)="eliminar(item)"class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
+                    eliminar
+                  </button>
+                }
               </td>
             }
 
@@ -67,9 +69,11 @@
                   editar
                 </button>
                 }
-                <button type="button" (click)="eliminar(item)"class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
-                  eliminar
-                </button>
+                @if (mostrarEliminar) {
+                  <button type="button" (click)="eliminar(item)"class="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded">
+                    eliminar
+                  </button>
+                }
               </td>
             }
           </tr>

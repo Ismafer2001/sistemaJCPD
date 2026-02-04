@@ -40,59 +40,76 @@
       </div>
     </div>
 
-    <!-- Medidas por tipo -->
+    <!-- Medidas por tipo organizadas por artículo -->
     <div class="bg-white p-6 rounded-xl shadow mb-8">
-  <h3 class="text-xl font-semibold text-gray-700 mb-6 text-center">
-    🛡️ Medidas de Protección por Tipo
-  </h3>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- ========== CONNAN Art. 47 ========== -->
-    <section>
-      <div class="mb-2 flex items-center justify-between">
-        <h4 class="text-sm font-semibold text-gray-700">CONNAN Art. 217</h4>
-        <!-- opcional: total
-        <span class="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">Total: 00</span>
-      -->
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-xl font-semibold text-gray-700">🛡️ Medidas de Protección por Tipo</h3>
       </div>
 
-      <ul role="list" class="divide-y divide-gray-200 rounded-lg border border-gray-200 overflow-hidden">
-        <!-- iterá acá tus ítems del Art. 47 -->
-         @for (item of medidasConnanart217 | keyvalue; track $index) {
-          <li class="px-4 py-3 flex items-center justify-between">
-          <span class="text-sm font-medium text-gray-700 ml-1">{{ item.key }}</span>
-          <span class="text-blue-700 font-semibold">{{ item.value }}</span>
-        </li>
-
-         }
-
-      </ul>
-    </section>
-
-
-    <!-- ========== CONNAN Art. 207 ========== -->
-    <section>
-      <div class="mb-2 flex items-center justify-between">
-        <h4 class="text-sm font-semibold text-gray-700">CONNAN Art. 207</h4>
-        <!-- opcional: total
-        <span class="text-xs px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">Total: 00</span>
--->
+      <!-- Mensaje cuando no hay datos -->
+      <div *ngIf="medidasPorArticulo.length === 0" class="text-center text-gray-500 py-8">
+        <p>No hay medidas de protección registradas para el periodo seleccionado.</p>
       </div>
 
-      <ul role="list" class="divide-y divide-gray-200 rounded-lg border border-gray-200 overflow-hidden">
-        <!-- iterá acá tus ítems del Art. 207 -->
-          @for (item of medidasCONNAart59 | keyvalue; track $index) {
-          <li class="px-4 py-3 flex items-center justify-between ml-1">
-          <span class="text-sm font-medium text-gray-700">{{ item.key }}</span>
-          <span class="text-purple-700 font-semibold">{{ item.value }}</span>
-        </li>
+      <!-- Artículos colapsables -->
+      <div *ngIf="medidasPorArticulo.length > 0" class="space-y-4">
+        <div *ngFor="let articuloGroup of medidasPorArticulo"
+             class="border border-gray-200 rounded-lg overflow-hidden">
 
-         }
+          <!-- Header del artículo (clickeable para colapsar) -->
+          <div class="bg-gray-50 p-4 cursor-pointer hover:bg-gray-100 transition-colors"
+               (click)="toggleArticulo(articuloGroup.articulo)">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <svg class="w-5 h-5 text-gray-600 transform transition-transform"
+                     [class.rotate-90]="!articulosColapsados[articuloGroup.articulo]"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+                <h4 class="font-semibold text-gray-800">{{articuloGroup.articulo}}</h4>
+              </div>
+              <div class="flex items-center space-x-4 text-sm text-gray-600">
+                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                  {{articuloGroup.totalMedidas}} medidas
+                </span>
+              </div>
+            </div>
+          </div>
 
-      </ul>
-    </section>
-  </div>
-</div>
+          <!-- Contenido colapsable -->
+          <div *ngIf="!articulosColapsados[articuloGroup.articulo]"
+               class="bg-white">
+            <div class="overflow-x-auto">
+              <table class="w-full">
+                <thead class="bg-gray-50 border-t">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Medida de Protección
+                    </th>
+                    <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Cantidad
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr *ngFor="let medida of articuloGroup.medidas; let i = index"
+                      class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3 text-sm text-gray-900">
+                      {{medida.medida}}
+                    </td>
+                    <td class="px-4 py-3 text-right">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        {{medida.cantidad}}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
 

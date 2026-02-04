@@ -54,11 +54,16 @@ const nnaReportes: Routes = [
           import('@nna/pages/reportes-nna/reportes/impugnacion-reporte/impugnacion-reporte.component')
       },
       {
+        path:'desestimiento-reporte',
+        loadComponent:()=>
+          import('@nna/pages/reportes-nna/reportes/desestimiento_reporte/desestimiento_reporte.component')
+      },
+      {
         path:'cierre-reporte',
         loadComponent:()=>
           import('@nna/pages/reportes-nna/reportes/cierre-reporte/cierre-reporte.component')
       }
 
-  
+
 ];
 export default nnaReportes;

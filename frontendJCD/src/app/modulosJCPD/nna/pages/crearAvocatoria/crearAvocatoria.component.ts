@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { QuillModule } from 'ngx-quill';
 import {FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ArticuloMedidas, MedidasService } from '@nna/services/medidas.service';
+import { ArticuloMedidas, Medida, MedidasService } from '@nna/services/medidas.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
@@ -44,7 +44,9 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
   //------------------------------------
   denunciaAvocatoria: any = null;
   avocatoriacargada: any = null;
-  medidasPorArticulo: ArticuloMedidas[] = [];
+  todasLasMedidas: Medida[] = [];
+  medidasFiltradas: Medida[] = [];
+  cuerposLegalesDisponibles: string[] = [];
   afectados: any[] = [{id: 0, nombres: ''}];
 
   denunciaId: number = 0;
@@ -105,6 +107,12 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
   fechaHoraActual: Date = new Date();
   pdfSrc: SafeResourceUrl | null = null;
 
+  // Loading states
+  initialLoading = true;
+  loading = false;
+  pdfLoading = false;
+  pdfError: string | null = null;
+
   private cargandoDatosEdicion = false; // Flag para ignorar cambios durante carga
 
   idAvocatoria!: number;
@@ -142,6 +150,7 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.initialLoading = true;
     this.formularioAvocatoria();
     this.formularioMedidasEmergentes();
     const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
@@ -196,6 +205,13 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  // Método para verificar si la carga inicial está completa
+  private checkInitialLoadingComplete(): void {
+    if (this.todasLasMedidas.length > 0 && this.denunciaAvocatoria && this.afectados.length > 0) {
+      this.initialLoading = false;
+    }
+  }
+
   //--------CREAcion de FORMULARIO DE AVOCATORIA-----------------//
 
   formularioAvocatoria() {
@@ -236,6 +252,7 @@ CUARTO.-<p>`,
   formularioMedidasEmergentes() {
    this.medidasEmergentesForm= this.fb.group({
       idAfectado: ['', Validators.required],
+      cuerpoLegalFiltro: [''], // Campo para filtrar por cuerpo legal
       idMedida: ['', Validators.required],
       medida: ['', Validators.required],
       periodo: ['', Validators.required],
@@ -325,10 +342,11 @@ CUARTO.-<p>`,
 
         });
 
-
+        this.checkInitialLoadingComplete();
       },
       error: (err) => {
         console.error('Error al cargar la denuncia para avocatoria', err);
+        this.checkInitialLoadingComplete();
       }
     });
   }
@@ -340,9 +358,11 @@ CUARTO.-<p>`,
     this.avocatoriaService.getAfectados(id).subscribe({
       next: (data) => {
         this.afectados = data;
+        this.checkInitialLoadingComplete();
       },
       error: (err) => {
         console.error('Error al cargar los afectados', err);
+        this.checkInitialLoadingComplete();
       }
     });
   }
@@ -352,16 +372,19 @@ CUARTO.-<p>`,
     .valueChanges
     .subscribe((id: number | string) => {
       const numId = Number(id);
-      // Busca el nombre en tu catálogo
-      const encontrado = this.medidasPorArticulo
-        .flatMap(a => a.medidas)
-        .find(m => m.id === numId);
+      // Busca el nombre en el catálogo actualizado
+      const encontrado = this.medidasFiltradas.find(m => m.id === numId);
 
       this.medidasEmergentesForm.patchValue(
         { medida: encontrado?.medida ?? '' },
         { emitEvent: false }
       );
     });
+
+  // Suscribirse a cambios en el filtro de cuerpo legal
+  this.medidasEmergentesForm.get('cuerpoLegalFiltro')?.valueChanges.subscribe(cuerpoLegal => {
+    this.filtrarMedidasPorCuerpoLegal(cuerpoLegal);
+  });
 
 }
 //cargar listado de la medidas de poroteccion por articulo
@@ -370,14 +393,47 @@ CUARTO.-<p>`,
     this.medidasService.getAllMedidas().subscribe({
       next: (response) => {
 
-          this.medidasPorArticulo = response.data;
-          console.log(this.medidasPorArticulo);
+          this.todasLasMedidas = response.data;
+
+          // Inicializar lista de cuerpos legales únicos para el filtro
+          this.cuerposLegalesDisponibles = [...new Set(this.todasLasMedidas.map(medida => medida.cuerpoLegal))];
+
+          // Inicializar medidas filtradas con todas las medidas
+          this.inicializarMedidasFiltradas();
+
+          console.log('medidas cargadas:', this.todasLasMedidas);
+          this.checkInitialLoadingComplete();
       },
       error: () => {
         console.error('Error al cargar medidas:');
-
+        this.checkInitialLoadingComplete();
       }
     });
+  }
+
+  // Métodos para el filtrado de medidas
+  inicializarMedidasFiltradas(): void {
+    // Mostrar todas las medidas disponibles
+    this.medidasFiltradas = [...this.todasLasMedidas];
+  }
+
+  filtrarMedidasPorCuerpoLegal(cuerpoLegalNombre: string): void {
+    if (!cuerpoLegalNombre || cuerpoLegalNombre === '') {
+      // Si no hay filtro seleccionado, mostrar todas las medidas
+      this.inicializarMedidasFiltradas();
+    } else {
+      // Filtrar medidas del cuerpo legal seleccionado
+      this.medidasFiltradas = this.todasLasMedidas.filter(medida =>
+        medida.cuerpoLegal === cuerpoLegalNombre
+      );
+    }
+    // Limpiar selección de medida cuando cambie el filtro
+    this.medidasEmergentesForm.get('idMedida')?.setValue('');
+  }
+
+  // Método helper para obtener el nombre del cuerpo legal seleccionado
+  getNombreCuerpoLegalSeleccionado(): string {
+    return this.medidasEmergentesForm.get('cuerpoLegalFiltro')?.value || '';
   }
 
    onAfectadoSeleccionado(event: Event) {
@@ -698,8 +754,12 @@ regresar(): void {
     ...this.avocatoriaForm.value,
 
   }
+
+  this.loading = true;
+
   this.avocatoriaService.actualizarAvocatoria(this.idAvocatoria, body).subscribe({
     next: () => {
+      this.loading = false;
       toast.success('avocatoria Actualizada con Éxito', {
                 duration: 3000,
               });
@@ -711,6 +771,7 @@ regresar(): void {
     this.medidasEmergentesForm.disable();
     },
     error: (err) => {
+      this.loading = false;
       toast.error('Error al actualizar la avocatoria', {
         duration: 3000,
       });
@@ -737,8 +798,11 @@ submitAvocatoria() {
 
   }
 
+  this.loading = true;
+
   this.avocatoriaService.postAvocatoria(body).subscribe({
     next: (body) => {
+      this.loading = false;
       this.idAvocatoria = body.id;
 
        this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
@@ -747,8 +811,8 @@ submitAvocatoria() {
               });
 
     },
-    error(err) {
-
+    error: (err) => {
+      this.loading = false;
       toast.error('Error al guardar', {
         duration: 3000,
       description:`${err}`
@@ -759,11 +823,29 @@ submitAvocatoria() {
 }
 
 generarPdf(){
-  this.actionsConfig[2].disabled = true
-  this.avocatoriaService.crearpdfBlob(this.idAvocatoria).subscribe((res: Blob) => {
-    const url = URL.createObjectURL(res);
-    this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-    this.actionsConfig[2].disabled = false
+  this.actionsConfig[2].disabled = true;
+  this.pdfLoading = true;
+  this.pdfError = null;
+  this.pdfSrc = null;
+
+  this.avocatoriaService.crearpdfBlob(this.idAvocatoria).subscribe({
+    next: (res: Blob) => {
+      if (res && res.size > 0) {
+        const url = URL.createObjectURL(res);
+        this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        this.pdfLoading = false;
+      } else {
+        this.pdfError = 'No se pudo generar el PDF. No hay datos suficientes.';
+        this.pdfLoading = false;
+      }
+      this.actionsConfig[2].disabled = false;
+    },
+    error: (err) => {
+      console.error('Error al generar PDF:', err);
+      this.pdfError = 'Error al generar el PDF. Por favor intente nuevamente.';
+      this.pdfLoading = false;
+      this.actionsConfig[2].disabled = false;
+    }
   });
   this.cambiarTab(3);
   }

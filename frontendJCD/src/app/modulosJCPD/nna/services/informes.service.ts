@@ -30,4 +30,10 @@ export class InformesService {
   obtenerInformePorId(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/informe-completo/${id}`);
   }
+  actualizarInforme(id: number, informe: Partial<any>): Observable<{ success: boolean; message: string }> {
+        return this.http.put<any>(`${this.apiUrl}/${id}`, informe);
+      }
+  crearpdfBlob(id: number): Observable<Blob> {
+        return this.http.get(`${this.apiUrl}/crearpdf/${id}`, { responseType: 'blob' });
+      }
 }

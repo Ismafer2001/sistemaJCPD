@@ -1,4 +1,6 @@
 import express from 'express';
+import { createServer } from 'http'; // Necesario para unir Express con Socket.io
+import { SocketService } from './services/socket.service';
 import cors from 'cors';
 import 'dotenv/config';
 import  sequelize  from './config/database'; // Conecta y carga modelos
@@ -14,7 +16,7 @@ import { seedInitialData } from './utils/seed';
 import notificacionRoutes from './routes/notificacion.routes';
 import citacionRoutes from './routes/citaciones.routes'
 import reportedenunciasRoutes from './routes/estadisticas/denunciaReporte.routes'
-import pdfRoutes from './routes/pdf.routes'; 
+
 import estatusRoutes from './routes/estatus.routes'; 
 import path from 'path';
 import audienciaContestacionRoutes from './routes/audienciaContestacion.routes';
@@ -30,6 +32,8 @@ import inhibirseRoutes from './routes/inhibirse.routes';
 
 
 const app = express();
+const httpServer = createServer(app); // Crear servidor HTTP para Socket.io
+export const socketService = new SocketService(httpServer);
 const PORT = process.env.PORT || 3000;
 
 
@@ -50,7 +54,7 @@ app.use('/api/providencias', providenciaRoutes);
 app.use('/api/notificacion', notificacionRoutes);
 app.use('/api/citacion', citacionRoutes);
 app.use('/api/reportes', reportedenunciasRoutes);
-app.use('/api/pdf', pdfRoutes); // Ruta para generar PDF de denuncias
+
 app.use('/api/estatus', estatusRoutes)
 app.use('/api/audiencia-contestacion', audienciaContestacionRoutes);
 app.use('/api/audiencia-pruebas', audienciaPruebaRoutes);
@@ -71,7 +75,7 @@ sequelize.sync().then(async () => {
   console.log('✅ Base de datos conectada y modelos sincronizados');
   await seedInitialData(); //  Ejecuta la carga si no hay datos
 
-  app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
+  httpServer.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
 }).catch((err: any) => {
   console.error('❌ Error al iniciar la base de datos:', err);
 });

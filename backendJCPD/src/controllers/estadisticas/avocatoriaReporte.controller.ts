@@ -7,7 +7,7 @@ export const getavocatoriaReporte = async (req: Request, res: Response) => {
     const filtros = {
       grupoPrioritario: req.query.grupoPrioritario as string,
       id_canton: req.user?.id_canton,
-      desde: req.query.desdeas as string,
+      desde: req.query.desde as string,
       hasta: req.query.hasta as string,
     };
 
@@ -44,7 +44,7 @@ export const getMedidasAgrupadasPorArticulo = async (req: Request, res: Response
     const filtros = {
       grupoPrioritario: req.query.grupoPrioritario as string,
       id_canton: req.user?.id_canton,
-      desde: req.query.desdeas as string,
+      desde: req.query.desde as string,
       hasta: req.query.hasta as string,
     };
 
@@ -75,7 +75,7 @@ export const getVulneracionesAgrupadas = async (req: Request, res: Response) => 
     const filtros = {
       grupoPrioritario: req.query.grupoPrioritario as string,
       id_canton: req.user?.id_canton,
-      desde: req.query.desdeas as string,
+      desde: req.query.desde as string,
       hasta: req.query.hasta as string,
     };
 

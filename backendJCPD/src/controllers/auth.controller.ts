@@ -42,6 +42,9 @@ export const postloginUsuario = async (req: Request, res: Response) => {
       res.status(401).json(token)
       
     }
+    if(token=="Usuario inactivo, contacte al administrador"){
+      res.status(403).json({message:token})
+    }
     
     
     res.status(200).json({token})

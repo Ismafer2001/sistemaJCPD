@@ -59,5 +59,7 @@ MedidasDefinitivas.init({
   sequelize,
   modelName: 'MedidasDefinitivas',
   tableName: 'medidas_definitivas',
-  timestamps: false,
+  timestamps: true,
+    createdAt: 'fechaCreado',
+    updatedAt: false
 });

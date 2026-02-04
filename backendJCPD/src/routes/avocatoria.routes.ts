@@ -8,12 +8,12 @@ const router = Router();
 
 // GET /api/avocaroria/:id
 router.get('/:id',verificarToken,verificarCantonDenuncia, getDenunciaParaAvocatoria);
-router.get('/avocatoria-completa/:id', verificarToken, getAvocatoriaCompletaController);
+router.get('/avocatoria-completa/:id', verificarToken , getAvocatoriaCompletaController);
 
-router.get('/afectados/:id', getAfectadosAvocatoria);
-router.get('/medidas/:id',getMedidasIdentificadasPorAfecado)
-router.post('', postAvocatoria);
-router.get('/crearpdf/:id',verificarToken,  getAvocatoriaPdf);
+router.get('/afectados/:id', verificarToken,verificarCantonDenuncia, getAfectadosAvocatoria);
+router.get('/medidas/:id',verificarToken,getMedidasIdentificadasPorAfecado)
+router.post('', verificarToken,verificarCantonDenuncia, postAvocatoria);
+router.get('/crearpdf/:id',verificarToken ,  getAvocatoriaPdf);
 router.put('/:id', verificarToken, putAvocatoria);
 
 export default router;

@@ -58,19 +58,19 @@
 
   <!-- Columna Derecha: Filtro y lista de medidas -->
   <div>
-    <!-- Selector de Artículo -->
+    <!-- Selector de Cuerpo Legal -->
     <div class="flex items-center gap-2 mb-4">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-gray-500 flex-shrink-0">
         <path d="M14 2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2.172a2 2 0 0 0 .586 1.414l2.828 2.828A2 2 0 0 1 6 9.828v4.363a.5.5 0 0 0 .724.447l2.17-1.085A2 2 0 0 0 10 11.763V9.829a2 2 0 0 1 .586-1.414l2.828-2.828A2 2 0 0 0 14 4.172V2Z" />
       </svg>
       
       <select
-        formControlName="articuloFiltro"
+        formControlName="cuerpoLegalFiltro"
         class="flex-1 text-sm py-1.5 px-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
       >
-        <option value="">Todos los artículos</option>
-        <option *ngFor="let articulo of articulosDisponibles" [value]="articulo.id">
-          {{ articulo.articulo }}
+        <option value="">Todos los cuerpos legales</option>
+        <option *ngFor="let cuerpoLegal of cuerposLegalesDisponibles" [value]="cuerpoLegal">
+          {{ cuerpoLegal }}
         </option>
       </select>
     </div>
@@ -89,11 +89,11 @@
       </div>
 
       <!-- Información del filtro activo -->
-      <div *ngIf="medidasForm.get('articuloFiltro')?.value" class="mb-3 p-2 bg-blue-50 rounded-lg">
+      <div *ngIf="medidasForm.get('cuerpoLegalFiltro')?.value" class="mb-3 p-2 bg-blue-50 rounded-lg">
         <p class="text-xs text-blue-600">
           <i class="fas fa-filter"></i>
           Mostrando medidas de: 
-          <strong>{{ getNombreArticuloSeleccionado() }}</strong>
+          <strong>{{ getNombreCuerpoLegalSeleccionado() }}</strong>
         </p>
       </div>
 
@@ -122,7 +122,7 @@
               {{ medida.medida }}
             </label>
             <p class="text-xs text-gray-500 mt-1">
-              {{ getArticuloDeMedida(medida.id) }}
+              {{ getCuerpoLegalDeMedida(medida.id) }}
             </p>
           </div>
         </div>
@@ -149,7 +149,7 @@
 </div>
 
 <!-- Mensaje cuando no hay medidas -->
-<div *ngIf="!loading && !error && medidasPorArticulo.length === 0" class="text-center py-4">
+<div *ngIf="!loading && !error && todasLasMedidas.length === 0" class="text-center py-4">
   <p class="text-gray-600">No hay medidas disponibles</p>
 </div>
 </div>

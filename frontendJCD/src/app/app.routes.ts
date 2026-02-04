@@ -1,18 +1,18 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@shared/guards/auth.guards';
 import { grupoValidoGuard } from '@shared/guards/grupos_validos.guards';
-
 import { AdminGuard } from '@shared/guards/rol.guards copy';
+import { NoAdminGuard } from '@shared/guards/no-admin.guard';
 
 export const routes: Routes = [
 
   {
     path: '',
-    canActivate: [authGuard],
+    canActivate: [authGuard, NoAdminGuard],
     loadChildren:() => import('@inicio/routes/inicio.routes')
   },
 
- 
+
 
   {
 
@@ -29,7 +29,7 @@ export const routes: Routes = [
   {
 
     path: ':grupo',
-    canActivate: [authGuard,grupoValidoGuard],
+    canActivate: [authGuard, NoAdminGuard, grupoValidoGuard],
     loadChildren: () => import('@nna/routes/nna.routes'),
   },
   {

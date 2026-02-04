@@ -7,6 +7,7 @@ import FasesCardComponent from './componentes/fases-card/fases-card.component';
 import { forkJoin, Subject } from 'rxjs';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 
+
 interface Estatus {
 
 }
@@ -50,8 +51,11 @@ export class NnaPageFasesComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute,
      private denunciaServices:DenunciaService,
       private fasesService:FasesService,
-       private router: Router) {}
+       private router: Router,
+      ) {}
+
 ngOnInit() {
+
   const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
     if (this.gruposValidos.includes(grupo || '')) {
       this.grupo = grupo!;
@@ -62,36 +66,47 @@ ngOnInit() {
     }
   this.route.params.subscribe(params => {
     this.denunciaId = +params['id'];
+    this.loading = true;
+    this.error = null;
 
-    forkJoin({
-      denuncia: this.denunciaServices.obtenerDenuncia(this.denunciaId),
-      estatus: this.fasesService.getEstatus(this.denunciaId)
-    }).subscribe(({ denuncia, estatus }) => {
-      this.denuncia = denuncia;
-      this.denunciastatus = estatus.denuncia;
-      this.avocatoria = estatus.avocatoria;
-      this.providencia = estatus.providencia;
-      this.notificacion = estatus.notificacion;
-      this.cita = estatus.citacion;
-      this.audienciaC = estatus.audienciaC;
-      this.audienciaP = estatus.audienciaP;
-      this.resoluciones = estatus.resoluciones;
-      this.cumplimientoMedidas = estatus.cumplimientoMedidas;
-      this.controlImpugnacion = estatus.controlImpugnacion;
-      this.desestimiento = estatus.desestimiento;
-      this.cierreCaso = estatus.cierreCaso;
+    // 🔥 DELAY ARTIFICIAL PARA TESTING DEL LOADER (REMOVER EN PRODUCCIÓN)
+   
+      forkJoin({
+        denuncia: this.denunciaServices.obtenerDenuncia(this.denunciaId),
+        estatus: this.fasesService.getEstatus(this.denunciaId),
+      }).subscribe({
+        next: ({ denuncia, estatus }) => {
+          this.denuncia = denuncia;
+          this.denunciastatus = estatus.denuncia;
+          this.avocatoria = estatus.avocatoria;
+          this.providencia = estatus.providencia;
+          this.notificacion = estatus.notificacion;
+          this.cita = estatus.citacion;
+          this.audienciaC = estatus.audienciaC;
+          this.audienciaP = estatus.audienciaP;
+          this.resoluciones = estatus.resoluciones;
+          this.cumplimientoMedidas = estatus.cumplimientoMedidas;
+          this.controlImpugnacion = estatus.controlImpugnacion;
+          this.desestimiento = estatus.desestimiento;
+          this.cierreCaso = estatus.cierreCaso;
 
-      if(this.grupo === 'mujeres'){
-        this.armararrayFasesMujeres();
-      }else{
-        this.armarArrayFases();
+          if(this.grupo === 'mujeres'){
+            this.armararrayFasesMujeres();
+          }else{
+            this.armarArrayFases();
+          }
 
-      }
-
-
-
-    });
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error al cargar datos del trámite:', error);
+          this.error = error.error?.message || 'Error al cargar la información del trámite';
+          this.loading = false;
+        }
+      });
+    // 2.5 segundos de delay para ver el loader
   });
+
 }
 ngOnDestroy() {
     console.log('✅ Limpiando todas las suscripciones');

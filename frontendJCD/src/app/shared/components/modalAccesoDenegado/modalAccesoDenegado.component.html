@@ -1,0 +1,59 @@
+<div
+  *ngIf="isVisible"
+  class="fixed inset-0 z-50 flex items-center justify-center"
+  (click)="onBackdropClick($event)"
+>
+  <!-- Backdrop -->
+  <div class="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"></div>
+
+  <!-- Modal -->
+  <div
+    class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 p-6 transform transition-all duration-200 scale-100"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Icono de Error -->
+    <div class="flex items-center justify-center w-16 h-16 mx-auto mb-4"
+         [ngClass]="{
+           'bg-red-100': errorType === '403',
+           'bg-yellow-100': errorType === '401'
+         }">
+      <!-- Icono para 403 (Prohibido) -->
+      <svg *ngIf="errorType === '403'" class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z">
+        </path>
+      </svg>
+
+      <!-- Icono para 401 (Sesión expirada) -->
+      <svg *ngIf="errorType === '401'" class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 15v2m-6 0h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+        </path>
+      </svg>
+    </div>
+
+    <!-- Título dinámico -->
+    <h3 class="text-xl font-semibold text-gray-900 text-center mb-2">
+      {{ title }}
+    </h3>
+
+    <!-- Mensaje dinámico -->
+    <p class="text-gray-600 text-center mb-6">
+      {{ message }}
+    </p>
+
+    <!-- Botón con color dinámico -->
+    <div class="flex justify-center">
+      <button
+        (click)="onAccept()"
+        class="px-6 py-2 font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2"
+        [ngClass]="{
+          'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500': errorType === '403',
+          'bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-500': errorType === '401'
+        }"
+      >
+        Aceptar
+      </button>
+    </div>
+  </div>
+</div>

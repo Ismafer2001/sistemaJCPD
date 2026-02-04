@@ -12,7 +12,7 @@ import { AudienciaPruebasService } from '@nna/services/audienciaPruebas.service'
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UserService } from '@admin/services/user.service';
 import { toast } from 'ngx-sonner';
-import { ArticuloMedidas, MedidasService } from '@nna/services/medidas.service';
+import { ArticuloMedidas, Medida, MedidasService } from '@nna/services/medidas.service';
 import { AvocatoriaService } from '@nna/services/avocatoria.service';
 import { Vulneracion, VulneracionService } from '@nna/services/vulneracion.service';
 import { catchError, finalize, forkJoin, Observable, of } from 'rxjs';
@@ -141,13 +141,19 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
 
   participantes: involucrados[] = [];
   vulneracionesIdentificadas: vulneracionesIdentificadas[] = [];
-  medidasPorArticulo: ArticuloMedidas[] = [];
+  todasLasMedidas: Medida[] = [];
+  medidasFiltradas: Medida[] = [];
+  cuerposLegalesDisponibles: string[] = [];
   datosAudienciaPrueba: any;
   miembrosPrincipales: any[] = [];
   pdfSrc: SafeResourceUrl | null = null;
   idAudienciaP!: number;
   editMode: boolean = false;
   existeResolucion: any = null;
+
+  // Estado de loading para PDF
+  pdfLoading: boolean = false;
+  pdfError: boolean = false;
 
   constructor(private router: Router,
     private route: ActivatedRoute,
@@ -362,6 +368,7 @@ eliminarVulneracionIdentificada(vulneracion: vulneracionesIdentificadas) {
     formularioMedidasDefinitivas() {
    this.medidasDefinitivasForm= this.fb.group({
       idAfectado: ['', Validators.required],
+      cuerpoLegalFiltro: [''], // Campo para filtrar por cuerpo legal
       idMedida: ['', Validators.required],
       medida: ['', Validators.required],
       periodo: ['', Validators.required],
@@ -377,10 +384,8 @@ seleccionarMEdida() {
     .valueChanges
     .subscribe((id: number | string) => {
       const numId = Number(id);
-      // Busca el nombre en tu catálogo
-      const encontrado = this.medidasPorArticulo
-        .flatMap(a => a.medidas)
-        .find(m => m.id === numId);
+      // Busca el nombre en el catálogo actualizado
+      const encontrado = this.medidasFiltradas.find(m => m.id === numId);
 
       this.medidasDefinitivasForm.patchValue(
         { medida: encontrado?.medida ?? '' },
@@ -388,18 +393,55 @@ seleccionarMEdida() {
       );
     });
 
+  // Suscribirse a cambios en el filtro de cuerpo legal
+  this.medidasDefinitivasForm.get('cuerpoLegalFiltro')?.valueChanges.subscribe(cuerpoLegal => {
+    this.filtrarMedidasPorCuerpoLegal(cuerpoLegal);
+  });
+
 }
 
   cargarMedidas() {
     this.medidasService.getAllMedidas().subscribe({
       next: (response) => {
-          this.medidasPorArticulo = response.data;
-          console.log(this.medidasPorArticulo);
+          this.todasLasMedidas = response.data;
+
+          // Inicializar lista de cuerpos legales únicos para el filtro
+          this.cuerposLegalesDisponibles = [...new Set(this.todasLasMedidas.map(medida => medida.cuerpoLegal))];
+
+          // Inicializar medidas filtradas con todas las medidas
+          this.inicializarMedidasFiltradas();
+
+          console.log('medidas cargadas:', this.todasLasMedidas);
       },
       error: () => {
         console.error('Error al cargar medidas:');
       }
     });
+  }
+
+  // Métodos para el filtrado de medidas
+  inicializarMedidasFiltradas(): void {
+    // Mostrar todas las medidas disponibles
+    this.medidasFiltradas = [...this.todasLasMedidas];
+  }
+
+  filtrarMedidasPorCuerpoLegal(cuerpoLegalNombre: string): void {
+    if (!cuerpoLegalNombre || cuerpoLegalNombre === '') {
+      // Si no hay filtro seleccionado, mostrar todas las medidas
+      this.inicializarMedidasFiltradas();
+    } else {
+      // Filtrar medidas del cuerpo legal seleccionado
+      this.medidasFiltradas = this.todasLasMedidas.filter(medida =>
+        medida.cuerpoLegal === cuerpoLegalNombre
+      );
+    }
+    // Limpiar selección de medida cuando cambie el filtro
+    this.medidasDefinitivasForm.get('idMedida')?.setValue('');
+  }
+
+  // Método helper para obtener el nombre del cuerpo legal seleccionado
+  getNombreCuerpoLegalSeleccionado(): string {
+    return this.medidasDefinitivasForm.get('cuerpoLegalFiltro')?.value || '';
   }
 
     //-------guardar formualrio---------------//
@@ -1520,14 +1562,33 @@ get participantesArray(): FormArray {
   }
   //-----------PDF------------------//
   generarPdf(){
-    this.actionsConfig[2].disabled = true
+    this.pdfLoading = true;
+    this.pdfError = false;
+    this.actionsConfig[2].disabled = true;
 
-    this.audienciaPruebasService.crearpdfBlob(this.idAudienciaP).subscribe((res: Blob) => {
-      const url = URL.createObjectURL(res);
-      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
-      this.actionsConfig[2].disabled = false
+    this.audienciaPruebasService.crearpdfBlob(this.idAudienciaP).subscribe({
+      next: (res: Blob) => {
+        const url = URL.createObjectURL(res);
+        this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+        this.pdfLoading = false;
+        this.actionsConfig[2].disabled = false;
+        this.cambiarTab(5);
+      },
+      error: (err: any) => {
+        console.error('Error al generar PDF:', err);
+        this.pdfLoading = false;
+        this.pdfError = true;
+        this.actionsConfig[2].disabled = false;
+        toast.error('Error al generar PDF', {
+          duration: 4000,
+          description: 'No se pudo generar el PDF. Intenta nuevamente.'
+        });
+      }
     });
-    this.cambiarTab(5);
+  }
+
+  retryGenerarPdf(): void {
+    this.generarPdf();
   }
 
 

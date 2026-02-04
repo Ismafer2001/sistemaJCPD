@@ -66,6 +66,12 @@ export class ReportesNnaComponent implements OnInit {
     link: 'impugnacion-reporte'
   },
   {
+    title: 'Desestimiento',
+    description: 'Casos con procesos de desestimiento',
+    icon: 'rotate-ccw',
+    link: 'desestimiento-reporte'
+  },
+  {
     title: 'Cierre de Caso',
     description: 'Cierres formales de expedientes',
     icon: 'check-circle',

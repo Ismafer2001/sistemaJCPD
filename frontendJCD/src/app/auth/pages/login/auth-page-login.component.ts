@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { AuthService } from '@auth/services/auth.service';
 import { jwtDecode } from 'jwt-decode';
 import { JwtPayload, login } from '@auth/interfaces/login.interface';
+import { WebSocketService } from '@shared/services/web-socket.service';
 
 
 
@@ -28,7 +29,8 @@ export class AuthPageLoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private webSocketService: WebSocketService
   ) {
     this.loginform = this.fb.group({
       usuario:['',[Validators.required,]],
@@ -60,13 +62,7 @@ togglePasswordVisibility() {
 
   login(): void {
 
-
-
-
-
   this.loading = true;
-
-
 
     // Construir el objeto final
     const {recordar, ...body}:login =this.loginform.value
@@ -82,11 +78,26 @@ togglePasswordVisibility() {
 
     const token = this.authService.getToken();
   const decoded = jwtDecode<JwtPayload>(token!);
+  const idCanton = this.authService.getIdCanton();
+
+      // 4. ✅ Conectar al socket INMEDIATAMENTE después del login
+      this.webSocketService.conectar(idCanton);
+
+      // 5. Empezar a escuchar notificaciones
+      this.webSocketService.escucharNuevosCasos().subscribe({
+        next: (notificacion) => {
+          console.log('🔔 Notificación recibida:', notificacion);
+          // Aquí puedes mostrar un toast o guardar en un servicio de notificaciones
+        }
+      });
+
 
   if (decoded.rol === 'admin') {
     this.router.navigate(['/admin/usuarios']);
+
   } else {
     this.router.navigate(['/']);
+
   }
   },
   error: err => {

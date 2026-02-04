@@ -82,6 +82,11 @@ export class FormatoCitacionComponent implements OnInit {
   idInvolucrado: number =0;
   isCitado: boolean = false;
   estadoCitado: string ='';
+  
+  // Propiedades de loading
+  initialLoading: boolean = false;
+  pdfLoading: boolean = false;
+  pdfError: string | null = null;
 
   constructor(private CitacionesService:CitacionesService,
      private route:ActivatedRoute,
@@ -90,6 +95,7 @@ export class FormatoCitacionComponent implements OnInit {
     private sanitizer: DomSanitizer ) {}
 
   ngOnInit() {
+    this.initialLoading = true;
     this.formularioFormatoCitacion();
     // Para parámetros de matriz (;nombres=valor;estado=valor;parte=valor)
     this.route.paramMap.subscribe(paramMap => {
@@ -146,6 +152,13 @@ export class FormatoCitacionComponent implements OnInit {
     })
   }
 
+  private checkInitialLoadingComplete(): void {
+    // Verificar si todos los datos necesarios están cargados
+    if (this.citar && this.datosPersonas && this.citacionForm.get('codigoTramite')?.value) {
+      this.initialLoading = false;
+    }
+  }
+
 
   cambiarTab(valor: number) {
   this.currentTab = valor;
@@ -179,33 +192,37 @@ formularioFormatoCitacion(){
 
     console.log('Cargando datos de citación con:', id, tipoInvolucrado, idInvolucrado, idCitacion);
 
-    this.CitacionesService.getcitacioenesDTO(id,tipoInvolucrado,idInvolucrado,idCitacion).subscribe(data=>{
-      this.citar=data;
-      this.datosPersonas=this.citar.datosPersona;
-      this.idCitacion=this.citar.id;
-      console.log('Citacion cargado:', this.citar);
-      console.log('Datos de la persona:', this.datosPersonas);
-      console.log('ID Citacion:', this.citar.id);
-      if (this.isCitado) {
-        this.loadCitadosEditMode(this.citar.id);
-
+    this.CitacionesService.getcitacioenesDTO(id,tipoInvolucrado,idInvolucrado,idCitacion).subscribe({
+      next: (data) => {
+        this.citar=data;
+        this.datosPersonas=this.citar.datosPersona;
+        this.idCitacion=this.citar.id;
+        console.log('Citacion cargado:', this.citar);
+        console.log('Datos de la persona:', this.datosPersonas);
+        console.log('ID Citacion:', this.citar.id);
+        if (this.isCitado) {
+          this.loadCitadosEditMode(this.citar.id);
+        } else {
+          this.citacionForm.patchValue({
+            codigoTramite: this.citar.codigoTramite,
+            diriguidoA: this.datosPersonas.nombres + ' ' + this.datosPersonas.apellidos,
+          });
+          this.checkInitialLoadingComplete();
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar datos de citación:', err);
+        this.initialLoading = false;
       }
-       this.citacionForm.patchValue({
-          codigoTramite: this.citar.codigoTramite,
-          diriguidoA: this.datosPersonas.nombres + ' ' + this.datosPersonas.apellidos,
-
-
-        });
-
-
     })
   }
 
   loadCitadosEditMode(id:number){
-    this.CitacionesService.getCitacionEditMode(id).subscribe(data=>{
-      this.citacionCargada=data;
-      console.log('Citacion cargada para edición:', this.citacionCargada);
-       this.citacionForm.patchValue({
+    this.CitacionesService.getCitacionEditMode(id).subscribe({
+      next: (data) => {
+        this.citacionCargada=data;
+        console.log('Citacion cargada para edición:', this.citacionCargada);
+        this.citacionForm.patchValue({
           codigoTramite: this.citacionCargada.codigoTramite,
           diriguidoA: this.citacionCargada.diriguidoA,
           idUsuario: this.citacionCargada.idUsuario,
@@ -215,13 +232,14 @@ formularioFormatoCitacion(){
           hora: this.citacionCargada.hora,
           local: this.citacionCargada.local,
           razon: this.citacionCargada.razon,
-
-
-
           id: this.citacionCargada.id
         });
-
-
+        this.checkInitialLoadingComplete();
+      },
+      error: (err) => {
+        console.error('Error al cargar citación en modo edición:', err);
+        this.initialLoading = false;
+      }
     })
   }
 
@@ -324,10 +342,26 @@ submitCitacion() {
 }
 
   generarPdf(){
+    this.pdfLoading = true;
+    this.pdfError = null;
+    this.pdfSrc = null;
 
-    this.CitacionesService.crearpdfBlob(this.idCitacion).subscribe((res: Blob) => {
-      const url = URL.createObjectURL(res);
-      this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+    this.CitacionesService.crearpdfBlob(this.idCitacion).subscribe({
+      next: (res: Blob) => {
+        if (res && res.size > 0) {
+          const url = URL.createObjectURL(res);
+          this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
+          this.pdfLoading = false;
+        } else {
+          this.pdfError = 'No se pudo generar el PDF. No hay datos suficientes.';
+          this.pdfLoading = false;
+        }
+      },
+      error: (err) => {
+        console.error('Error al generar PDF:', err);
+        this.pdfError = 'Error al generar el PDF. Por favor intente nuevamente.';
+        this.pdfLoading = false;
+      }
     });
     this.cambiarTab(1);
   }

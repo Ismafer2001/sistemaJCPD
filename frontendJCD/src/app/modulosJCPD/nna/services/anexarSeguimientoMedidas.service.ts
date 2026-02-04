@@ -29,6 +29,9 @@ getAfectados(id: number): Observable<any> {
   getMedidasporCumplir(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/medidas-pendientes/${id}`);
   }
+  getMedidasDeAfectados(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/medidas-definitivas/${id}`);
+  }
 
   getMedidasCumplidas(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/medidas-cumplidas/${id}`);
@@ -41,6 +44,15 @@ descargarArchivoSeguro(codigoTramite: string, nombreArchivo: string) {
   // Usamos responseType: 'blob' para recibir el archivo binario
   return this.http.get(url, { responseType: 'blob' });
 }
+
+ updateseguimiento(data: any, codigoTramite: string, tipoCarpeta: string): Observable<any> {
+
+    const params = new HttpParams()
+      .set('codigoTramite', codigoTramite)
+      .set('tipoCarpeta', tipoCarpeta);
+
+    return this.http.put(`${this.apiUrl}/cumplimiento-medidas`, data, { params });
+  }
 
 
 
