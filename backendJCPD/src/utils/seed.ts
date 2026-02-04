@@ -47,7 +47,7 @@ export async function seedInitialData() {
     contrasena: hashedPassword,
     rol: 'admin',
     isactivo: true,
-    id_canton: 1,
+    id_canton: NaN
   });
       const vulneraciones = [
    { vulneracion: 'Vulneraciones contra el Derecho a la vida (art 20)', cuerpoLegal: 'CONNA' },
