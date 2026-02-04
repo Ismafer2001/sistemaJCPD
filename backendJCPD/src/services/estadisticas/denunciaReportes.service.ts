@@ -1,4 +1,3 @@
-import { group } from 'console';
 import { Afectado, Denuncia } from '../../models';
 import { col, fn, Op } from 'sequelize';
 
@@ -130,8 +129,8 @@ export const contarAfectadosPorSexo = async (filtros: {
   // Convertimos el resultado a un objeto más legible
   const conteo: Record<string, number> = {};
   for (const r of resultado) {
-    const sexo = (r.get('sexo') as string)?.toLowerCase() || 'otro';
-    conteo[sexo] = parseInt(r.get('cantidad') as string, 10);
+    const sexo = ((r as any).sexo as string)?.toLowerCase() || 'otro';
+    conteo[sexo] = parseInt((r as any).cantidad as string, 10);
   }
 
   return conteo;
@@ -178,9 +177,9 @@ export const contarAfectadosPorEdad = async (filtros: FiltroReporte) => {
 
   const conteo: Record<string, number> = {};
   for (const r of resultado) {
-    const edad = r.get('edad') as number;
+    const edad = (r as any).edad as number;
     const edadKey = edad !== null && edad !== undefined ? edad.toString() : 'sin_edad';
-    conteo[edadKey] = parseInt(r.get('cantidad') as string, 10);
+    conteo[edadKey] = parseInt((r as any).cantidad as string, 10);
   }
 
   return conteo;
@@ -225,8 +224,8 @@ export const contarAfectadosPorNacionalidad = async (filtros: FiltroReporte) => 
 
   const conteo: Record<string, number> = {};
   for (const r of resultado) {
-    const nacionalidad = (r.get('nacionalidad') as string)?.toLowerCase() || 'desconocido';
-    conteo[nacionalidad] = parseInt(r.get('cantidad') as string, 10);
+    const nacionalidad = ((r as any).nacionalidad as string)?.toLowerCase() || 'desconocido';
+    conteo[nacionalidad] = parseInt((r as any).cantidad as string, 10);
   }
 
   return conteo;
