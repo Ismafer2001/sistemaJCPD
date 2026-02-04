@@ -123,7 +123,8 @@ export const contarAfectadosPorSexo = async (filtros: {
         where: whereDenuncia
       }
     ],
-    group: ['sexo']
+    group: ['Afectado.sexo'],
+    raw: true
   });
 
   // Convertimos el resultado a un objeto más legible
@@ -170,8 +171,9 @@ export const contarAfectadosPorEdad = async (filtros: FiltroReporte) => {
       attributes: [],
       where: whereDenuncia
     }],
-    group: ['edad'],
-    order: [['edad', 'ASC']]
+    group: ['Afectado.edad'],
+    order: [['edad', 'ASC']],
+    raw: true
   });
 
   const conteo: Record<string, number> = {};
@@ -217,7 +219,8 @@ export const contarAfectadosPorNacionalidad = async (filtros: FiltroReporte) => 
       attributes: [],
       where: whereDenuncia
     }],
-    group: ['nacionalidad']
+    group: ['Afectado.nacionalidad'],
+    raw: true
   });
 
   const conteo: Record<string, number> = {};

@@ -107,8 +107,8 @@ export  async function  otrosACitar(id:string){
 } 
 //servicio para crear otros citados
 export async function crearOtrosCitados(data: any) {
-  // params: { nombres, apellidos, cedula, parte, idDenuncia }
-  const { nombres, apellidos, cedula, cargo, institucion, idDenuncia,tipoParticipante } = data;
+  // params: { nombres, apellidos, cedula, cargo, institucion, idDenuncia, tipoParticipante }
+  const { nombres, apellidos, cedula, cargo, institucion, idDenuncia, tipoParticipante } = data;
   
   const nuevoOtro = await Otros.create({
     nombres,
@@ -118,7 +118,7 @@ export async function crearOtrosCitados(data: any) {
     institucion,
     idDenuncia,
     tipoParticipante,
-    fase:'Citacion'
+    fase: 'Citacion'
   });
   return nuevoOtro;
 }
@@ -167,7 +167,7 @@ export async function citacionesDTO(id:string, tipoInvolucrado?:string, idInvolu
         });
         break;
       case 'otros':
-        const whereClauseOtros: any = { fase: { [Op.or]: ['Citacion', 'Citacion'] } };
+        const whereClauseOtros: any = { fase: 'Citacion' };
         if (idInvolucrado) {
           whereClauseOtros.id = idInvolucrado;
         }
@@ -180,7 +180,7 @@ export async function citacionesDTO(id:string, tipoInvolucrado?:string, idInvolu
         });
         break;
       case 'representante institucional':
-        const whereClauseInstitucion: any = { fase: { [Op.or]: ['Citacion', 'Citacion'] } };
+        const whereClauseInstitucion: any = { fase: 'Citacion' };
         if (idInvolucrado) {
           whereClauseInstitucion.id = idInvolucrado;
         }

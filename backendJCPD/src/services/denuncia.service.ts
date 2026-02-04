@@ -55,24 +55,24 @@ export async function obtenertodasLasDenuncias({
   if (search && searchBy) {
     switch (searchBy) {
       case 'codigoTramite':
-        where.codigoTramite = { [Op.like]: `%${search}%` };
+        where.codigoTramite = { [Op.iLike]: `%${search}%` };
         break;
       case 'cedula':
         where.id = {
           [Op.in]: sequelize.literal(`(
-            SELECT DISTINCT idDenuncia 
+            SELECT DISTINCT "idDenuncia" 
             FROM afectado 
-            WHERE cedula LIKE '%${search.replace(/'/g, "''")}%'
+            WHERE cedula ILIKE '%${search.replace(/'/g, "''")}%'
           )`)
         };
         break;
       case 'nombre':
         where.id = {
           [Op.in]: sequelize.literal(`(
-            SELECT DISTINCT idDenuncia 
+            SELECT DISTINCT "idDenuncia" 
             FROM afectado 
-            WHERE nombres LIKE '%${search.replace(/'/g, "''")}%'
-               OR apellidos LIKE '%${search.replace(/'/g, "''")}%'
+            WHERE nombres ILIKE '%${search.replace(/'/g, "''")}%'
+               OR apellidos ILIKE '%${search.replace(/'/g, "''")}%'
           )`)
         };
         break;

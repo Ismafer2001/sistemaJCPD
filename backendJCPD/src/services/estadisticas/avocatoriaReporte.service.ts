@@ -165,7 +165,7 @@ export const contarMedidasAgrupadasPorArticulo = async (filtro: FiltroAvocatoria
       },
       
     ],
-  // usar alias de include para GROUP BY compatible con Sequelize/MySQL
+  // Ajustado para PostgreSQL - incluir tabla en GROUP BY
   group: ['Med.id', 'Med.medidas', 'Med->articulo.id', 'Med->articulo.articulo'],
     raw: true,
     nest: true
@@ -254,7 +254,7 @@ export async function vulneracionesagrupadas(filtro: FiltroAvocatoria) {
         ]
       }
     ],
-    group: ['Vulneracion.id', 'Vulneracion.vulneracion'],
+    group: ['vulneracion.id', 'vulneracion.vulneracion'],
     raw: true,
     nest: true
   });

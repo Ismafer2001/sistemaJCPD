@@ -154,7 +154,7 @@ export const contarMedidasDefinitivasAgrupadasPorArticulo = async (filtro: Filtr
       },
       
     ],
-  // usar alias de include para GROUP BY compatible con Sequelize/MySQL
+  // Ajustado para PostgreSQL - incluir tabla en GROUP BY
   group: ['MedidasD.id', 'MedidasD.medidas', 'MedidasD->articulo.id', 'MedidasD->articulo.articulo'],
     raw: true,
     nest: true

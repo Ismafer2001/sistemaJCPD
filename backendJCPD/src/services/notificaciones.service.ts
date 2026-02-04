@@ -147,8 +147,8 @@ export  async function  otrosANotificacion(id:string){
 
 //servicio para crear otros notificados
 export async function crearOtrosNotificados(data: any) {
-  // params: { nombres, apellidos, cedula, parte, idDenuncia }
-  const { nombres, apellidos, cedula, cargo, institucion, idDenuncia,tipoParticipante } = data;
+  // params: { nombres, apellidos, cedula, cargo, institucion, idDenuncia, tipoParticipante }
+  const { nombres, apellidos, cedula, cargo, institucion, idDenuncia, tipoParticipante } = data;
   
   const nuevoOtro = await Otros.create({
     nombres,
@@ -158,7 +158,7 @@ export async function crearOtrosNotificados(data: any) {
     institucion,
     idDenuncia,
     tipoParticipante,
-    fase:'notificacion'
+    fase: 'notificacion'
   });
   return nuevoOtro;
 }
