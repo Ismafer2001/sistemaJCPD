@@ -5,7 +5,7 @@ import { routes } from './app.routes';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { errorInterceptor } from '@shared/interceptors/error.interceptor';
 import { authInterceptor } from '@shared/interceptors/auth.interceptor';
-import { environment } from 'environments/environment';
+
 
 
 export const appConfig: ApplicationConfig = {
