@@ -21,6 +21,8 @@ import { toast } from 'ngx-sonner';
 export class Control_desestimientoComponent implements OnInit {
   controlDesestimientoForm!: FormGroup;
   denunciaId!:number;
+  loading: boolean = false; // Loader principal para guardar
+  loadingMessage: string = ''; // Mensaje del loader principal
 
   constructor(
     private fb: FormBuilder,
@@ -71,6 +73,10 @@ export class Control_desestimientoComponent implements OnInit {
       return;
     }
 
+    // Activar loader
+    this.loading = true;
+    this.loadingMessage = 'Guardando control de desestimiento...';
+
     const body = {
       ...this.controlDesestimientoForm.value
     };
@@ -79,11 +85,13 @@ export class Control_desestimientoComponent implements OnInit {
 
    this.desestimientoService.postControlDesestimiento(body).subscribe({
       next: (response) => {
+        this.loading = false; // Desactivar loader
         toast.success('Control de Desestimiento creado con éxito', {
           duration: 3000
         });
       },
       error: (error) => {
+        this.loading = false; // Desactivar loader
         toast.error('Error al crear el Control de Desestimiento', {
           duration: 3000
         });

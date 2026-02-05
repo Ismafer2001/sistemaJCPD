@@ -13,6 +13,21 @@
   </div>
 }
 
+<!-- Overlay transparente para operaciones principales -->
+@if (loading) {
+  <div class="fixed inset-0 z-50"
+       style="backdrop-filter: blur(3px); background-color: rgba(255, 255, 255, 0.3);">
+    <div class="flex items-center justify-center h-full">
+      <div class="bg-white bg-opacity-90 backdrop-blur-md rounded-lg p-6 border shadow-xl">
+        <div class="flex flex-col items-center space-y-3">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
+          <p class="text-sm font-medium text-gray-700">{{ loadingMessage }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
 <div class="pl-2 py-2 mb-1 flex items-center gap-2">
   <a
     [routerLink]="[`../../../fases/${denunciaId}`]"
@@ -591,13 +606,13 @@
 
           <!-- Lista de medidas con filtro por cuerpo legal -->
           <div class="flex col-span-2 my-4 gap-2 h-60 flex-col">
-            
+
             <!-- Selector de Cuerpo Legal para filtro -->
             <div class="flex items-center gap-2 mb-4">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 text-gray-500 flex-shrink-0">
                 <path d="M14 2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v2.172a2 2 0 0 0 .586 1.414l2.828 2.828A2 2 0 0 1 6 9.828v4.363a.5.5 0 0 0 .724.447l2.17-1.085A2 2 0 0 0 10 11.763V9.829a2 2 0 0 1 .586-1.414l2.828-2.828A2 2 0 0 0 14 4.172V2Z" />
               </svg>
-              
+
               <select
                 formControlName="cuerpoLegalFiltro"
                 class="flex-1 text-sm py-1.5 px-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none"
@@ -613,7 +628,7 @@
             <div *ngIf="medidasDefinitivasForm.get('cuerpoLegalFiltro')?.value" class="mb-3 p-2 bg-blue-50 rounded-lg">
               <p class="text-xs text-blue-600">
                 <i class="fas fa-filter"></i>
-                Mostrando medidas de: 
+                Mostrando medidas de:
                 <strong>{{ getNombreCuerpoLegalSeleccionado() }}</strong>
               </p>
             </div>
@@ -702,7 +717,7 @@
 
 
   </div>
-  
+
   <!-- Sección PDF con loading -->
   <div [hidden]="currentTab !== 5" class="pdf-section">
     @if (pdfLoading) {

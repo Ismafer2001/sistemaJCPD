@@ -21,6 +21,15 @@
   <app-card-Form [hidden]="currentTab!='0'"  >
      <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
         <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> involucrados Principales</h3>
+
+        @if (loadingInvolucrados) {
+          <div class="w-full flex flex-col items-center justify-center py-20 bg-gray-50 rounded-lg">
+            <!-- Spinner -->
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-6"></div>
+            <p class="text-gray-600 text-xl font-medium">Cargando involucrados principales...</p>
+            <p class="text-gray-500 text-sm mt-2">Por favor espere mientras se cargan los datos</p>
+          </div>
+        } @else {
          <tablaNavigator
      [columnas]="['nombres','parte','estado']"
     [encabezados]="['Nombres','Parte','Estado']"
@@ -32,10 +41,20 @@
     >
 
     </tablaNavigator>
+        }
 
            </div>
            <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
         <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> otros notificados</h3>
+
+        @if (loadingOtrosInvolucrados) {
+          <div class="w-full flex flex-col items-center justify-center py-20 bg-gray-50 rounded-lg">
+            <!-- Spinner -->
+            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-6"></div>
+            <p class="text-gray-600 text-xl font-medium">Cargando otros notificados...</p>
+            <p class="text-gray-500 text-sm mt-2">Por favor espere mientras se cargan los datos</p>
+          </div>
+        } @else {
          <tablaNavigator
     [columnas]="['nombresCompletos','parte','estado']"
     [encabezados]="['Nombres','Parte','Estado']"
@@ -51,6 +70,7 @@
     >
 
     </tablaNavigator>
+        }
            </div>
            <h2 class="text-xl text-blue-500 font-semibold my-4">Agregar Notificado</h2>
            <div class="bg-white rounded-xl shadow-md p-6 border   ">

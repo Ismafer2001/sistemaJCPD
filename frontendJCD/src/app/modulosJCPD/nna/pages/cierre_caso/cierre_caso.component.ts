@@ -97,6 +97,8 @@ export class Cierre_casoComponent implements OnInit {
     // Estado de loading para PDF
     pdfLoading: boolean = false;
     pdfError: boolean = false;
+    loading: boolean = false; // Loader principal para guardar/actualizar
+    loadingMessage: string = ''; // Mensaje del loader principal
 
     //quillModule//
   modules = {
@@ -496,6 +498,11 @@ export class Cierre_casoComponent implements OnInit {
         });
         return;
       }
+
+      // Activar loader
+      this.loading = true;
+      this.loadingMessage = 'Guardando cierre de caso...';
+
       this.actionsConfig[1].disabled = true
 
       const body ={
@@ -505,7 +512,7 @@ export class Cierre_casoComponent implements OnInit {
   this.cierreCasoService.crearCierreCaso(body).subscribe({
     next: (body) => {
 
-
+          this.loading = false; // Desactivar loader
           console.log('ID de avocatoria guardada:', body)
           this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
 
@@ -515,8 +522,8 @@ export class Cierre_casoComponent implements OnInit {
 
 
         },
-        error(err) {
-
+        error: (err) => {
+          this.loading = false; // Desactivar loader
           toast.error('Error al guardar', {
             duration: 3000,
           description:`${err}`
@@ -529,12 +536,17 @@ export class Cierre_casoComponent implements OnInit {
   }
   updateCierreCaso() {
 
+    // Activar loader
+    this.loading = true;
+    this.loadingMessage = 'Actualizando cierre de caso...';
+
     const body ={
     ...this.CierreCasoForm.value,
 
   }
   this.cierreCasoService.actualizarCierreCaso(this.idCierreCaso, body).subscribe({
     next: () => {
+      this.loading = false; // Desactivar loader
       toast.success('cierre de Caso Actualizada con Éxito', {
                 duration: 3000,
               });
@@ -546,6 +558,7 @@ export class Cierre_casoComponent implements OnInit {
     this.informesPresentadosForm.disable();
     },
     error: (err) => {
+      this.loading = false; // Desactivar loader
       toast.error('Error al actualizar la avocatoria', {
         duration: 3000,
       });

@@ -57,6 +57,8 @@ export class Crear_providenciaComponent implements OnInit {
   initialLoading: boolean = false;
   pdfLoading: boolean = false;
   pdfError: string | null = null;
+  loading: boolean = false; // Loader principal para guardar/actualizar
+  loadingMessage: string = ''; // Mensaje del loader principal
   //--- Configuración de tabs------//
   tabsConfig: any[] = [
     {
@@ -559,12 +561,17 @@ regresar(): void {
 
 
   updateProvidencia(){
+    // Activar loader
+    this.loading = true;
+    this.loadingMessage = 'Actualizando providencia...';
+
     const body ={
         ...this.providenciaForm.value,
 
       }
       this.providenciaService.actualizarProvidencia(this.idProvidencia, body).subscribe({
         next: () => {
+          this.loading = false; // Desactivar loader
           toast.success('avocatoria Actualizada con Éxito', {
                     duration: 3000,
                   });
@@ -576,6 +583,7 @@ regresar(): void {
         this.medidasEmergentesForm.disable();
         },
         error: (err) => {
+          this.loading = false; // Desactivar loader
           toast.error('Error al actualizar la avocatoria', {
             duration: 3000,
           });
@@ -594,27 +602,31 @@ regresar(): void {
         });
         return;
       }
+
+      // Activar loader
+      this.loading = true;
+      this.loadingMessage = 'Guardando providencia...';
+
       this.actionsConfig[1].disabled = true
       const body ={
         ...this.providenciaForm.value,
       }
       this.providenciaService.postprovidencia(body).subscribe({
         next: (data) => {
-
+         this.loading = false; // Desactivar loader
          this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
       toast.success('providencia Guardada con Éxito', {
                 duration: 3000,
               });
 
     },
-    error(err) {
-
+    error: (err) => {
+      this.loading = false; // Desactivar loader
       toast.error('Error al guardar', {
         duration: 3000,
       description:`${err}`
       });
-
-  }
+    }
       })
 
 

@@ -40,6 +40,11 @@ export class CrearCitacionesComponent implements OnInit {
   currentTab='0'
     involucrados:involucrados[]=[]
     otrosInvolucrados: involucrados[] = [];
+
+    // Estados de loading para las tablas
+    loadingInvolucrados: boolean = false;
+    loadingOtrosInvolucrados: boolean = false;
+
     tipoNotificado: 'persona' | 'Representante Institucional' | '' = '';
 
     modoEdicionCitados: boolean = false;
@@ -139,18 +144,34 @@ export class CrearCitacionesComponent implements OnInit {
 
   loadinvolucrados(id:number){
 
-  this.CitacionesService.getinvolucradosCitaciones(id).subscribe(data=>{
-    this.involucrados=data;
-    console.log(this.involucrados)
-  })
+  this.loadingInvolucrados = true;
+  this.CitacionesService.getinvolucradosCitaciones(id).subscribe({
+    next: (data) => {
+      this.involucrados = data;
+      this.loadingInvolucrados = false;
+      console.log(this.involucrados);
+    },
+    error: (error) => {
+      this.loadingInvolucrados = false;
+      console.error('Error al cargar involucrados:', error);
+    }
+  });
 
   }
   loadOtrosInvolucrados(id:number){
 
-  this.CitacionesService.getOtrosInvolucrados(id).subscribe(data=>{
-    this.otrosInvolucrados=data;
-    console.log('aquiiiiiii'+this.otrosInvolucrados);
-  })
+  this.loadingOtrosInvolucrados = true;
+  this.CitacionesService.getOtrosInvolucrados(id).subscribe({
+    next: (data) => {
+      this.otrosInvolucrados = data;
+      this.loadingOtrosInvolucrados = false;
+      console.log('aquiiiiiii'+this.otrosInvolucrados);
+    },
+    error: (error) => {
+      this.loadingOtrosInvolucrados = false;
+      console.error('Error al cargar otros involucrados:', error);
+    }
+  });
 
   }
   loadCitados(id:number){

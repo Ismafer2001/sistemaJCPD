@@ -325,7 +325,7 @@ submitNotificacion() {
       this.loading = false;
       this.idNotificacion = body.id;
       this.notificacionForm.patchValue({ id: this.idNotificacion })
-      this.router.navigate(['../../'+ this.denunciaId+ '/formulario', {idUsuario: this.idInvolucrado, estado: 'Notificado', parte: body.parte}], { relativeTo: this.route });
+      this.router.navigate(['../../'+ this.denunciaId+ '/formulario', {idUsuario: this.idInvolucrado, estado: 'Notificado', parte: body.parte, idformulario: this.idNotificacion}], { relativeTo: this.route });
       toast.success('Notificación Guardada con Éxito', {
                 duration: 3000,
               });

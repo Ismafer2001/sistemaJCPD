@@ -124,6 +124,8 @@ export class Crear_audienciaComponent implements OnInit {
   initialLoading: boolean = false;
   pdfLoading: boolean = false;
   pdfError: string | null = null;
+  loading: boolean = false; // Loader principal para guardar/actualizar
+  loadingMessage: string = ''; // Mensaje del loader principal
 
   // Propiedades para manejar tipos de participantes
   private _tipoParticipante: 'persona' | 'institucion' | 'proyecto' | '' = '';
@@ -606,11 +608,16 @@ regresar(): void {
 
    //--editar
     updateAudiencia() {
+    // Activar loader
+    this.loading = true;
+    this.loadingMessage = 'Actualizando audiencia...';
+
     const body ={
       ...this.audienciaForm.value,idDenuncia: this.denunciaId
     }
     this.audienciaContestacionService.actualizarAudienciaContestacion(this.idAudienciaC, body).subscribe({
       next: () => {
+        this.loading = false; // Desactivar loader
         toast.success('Audiencia Actualizada con Éxito', {
           duration: 3000,
         });
@@ -623,6 +630,7 @@ regresar(): void {
 
       },
       error: (err) => {
+        this.loading = false; // Desactivar loader
         toast.error('Error al actualizar la audiencia', {
           duration: 3000,
         });
@@ -642,6 +650,11 @@ regresar(): void {
     });
     return;
   }
+
+  // Activar loader
+  this.loading = true;
+  this.loadingMessage = 'Guardando audiencia...';
+
   const body ={
     ...this.audienciaForm.value,idDenuncia: this.denunciaId
 
@@ -649,6 +662,7 @@ regresar(): void {
 
   this.audienciaContestacionService.postaudienciaContestacion(body).subscribe({
     next: (body) => {
+      this.loading = false; // Desactivar loader
       this.idAudienciaC = body.id;
       toast.success('Audiencia Guardada con Éxito', {
                 duration: 3000,
@@ -660,8 +674,8 @@ regresar(): void {
 
 
     },
-    error(err) {
-
+    error: (err) => {
+      this.loading = false; // Desactivar loader
       toast.error('Error al guardar', {
         duration: 3000,
       description:`${err}`

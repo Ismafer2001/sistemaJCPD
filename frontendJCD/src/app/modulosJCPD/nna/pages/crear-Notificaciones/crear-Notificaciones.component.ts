@@ -39,6 +39,10 @@ export class CrearNotificacionesComponent implements OnInit {
   involucradosPrincipales: involucrados[] = [];
    otrosInvolucrados: involucrados[] = [];
 
+  // Estados de loading para las tablas
+  loadingInvolucradosPrincipales: boolean = false;
+  loadingOtrosInvolucrados: boolean = false;
+
   denunciaId = 0;
   nuevoNotificadoForm!: FormGroup;
   nuevaInstitucionForm!: FormGroup;
@@ -176,20 +180,34 @@ export class CrearNotificacionesComponent implements OnInit {
 
   loadInvolucradosPrincipales(id:number){
 
-  this.notificacionServices.getInvolucradosPrincipales(id).subscribe(data=>{
-    this.involucradosPrincipales=data;
-    console.log('aquiiiiiii'+this.involucradosPrincipales);
-
-  })
+  this.loadingInvolucradosPrincipales = true;
+  this.notificacionServices.getInvolucradosPrincipales(id).subscribe({
+    next: (data) => {
+      this.involucradosPrincipales = data;
+      this.loadingInvolucradosPrincipales = false;
+      console.log('aquiiiiiii'+this.involucradosPrincipales);
+    },
+    error: (error) => {
+      this.loadingInvolucradosPrincipales = false;
+      console.error('Error al cargar involucrados principales:', error);
+    }
+  });
 
   }
   loadOtrosInvolucrados(id:number){
 
-  this.notificacionServices.getOtrosPrincipales(id).subscribe(data=>{
-    this.otrosInvolucrados=data;
-    console.log('aquiiiiiii'+this.otrosInvolucrados);
-  })
-
+  this.loadingOtrosInvolucrados = true;
+  this.notificacionServices.getOtrosPrincipales(id).subscribe({
+    next: (data) => {
+      this.otrosInvolucrados = data;
+      this.loadingOtrosInvolucrados = false;
+      console.log('aquiiiiiii'+this.otrosInvolucrados);
+    },
+    error: (error) => {
+      this.loadingOtrosInvolucrados = false;
+      console.error('Error al cargar otros involucrados:', error);
+    }
+  });
   }
 
 //------------submit-----//

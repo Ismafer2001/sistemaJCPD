@@ -82,11 +82,13 @@ export class FormatoCitacionComponent implements OnInit {
   idInvolucrado: number =0;
   isCitado: boolean = false;
   estadoCitado: string ='';
-  
+
   // Propiedades de loading
   initialLoading: boolean = false;
   pdfLoading: boolean = false;
   pdfError: string | null = null;
+  loading: boolean = false; // Loader principal para guardar/actualizar
+  loadingMessage: string = ''; // Mensaje del loader principal
 
   constructor(private CitacionesService:CitacionesService,
      private route:ActivatedRoute,
@@ -276,6 +278,10 @@ formularioFormatoCitacion(){
 
      //--editar
   updateCitacion() {
+  // Activar loader
+  this.loading = true;
+  this.loadingMessage = 'Actualizando citación...';
+
   const body ={
     ...this.citacionForm.value,
 
@@ -283,6 +289,7 @@ formularioFormatoCitacion(){
   }
   this.CitacionesService.actualizarCitacion(this.idCitacion, body).subscribe({
       next: () => {
+        this.loading = false; // Desactivar loader
         toast.success('Citacion Actualizada con Éxito', {
                   duration: 3000,
                 });
@@ -296,6 +303,7 @@ formularioFormatoCitacion(){
 
       },
       error: (err) => {
+        this.loading = false; // Desactivar loader
         toast.error('Error al actualizar la citacion', {
           duration: 3000,
         });
@@ -313,32 +321,39 @@ submitCitacion() {
       });
       return;
     }
-  const body ={
-    ...this.citacionForm.value,
 
-  }
+  // Activar loader
+  this.loading = true;
+  this.loadingMessage = 'Guardando citación...';
+
+  const body = {
+    ...this.citacionForm.value
+  };
+  this.actionsConfig[1].disabled = true
+
   this.CitacionesService.postCitar(body).subscribe({
-    next: (body) => {
-      this.idCitacion = body.id;
-      this.citacionForm.patchValue({ id: this.idCitacion })
-      this.router.navigate(['../../'+ this.denunciaId+ '/formulario', {idUsuario: this.idInvolucrado, estado: 'Citado', parte: body.parte}], { relativeTo: this.route });
+    next: (response) => {
+      this.loading = false; // Desactivar loader
+      this.idCitacion = response.id;
+      this.citacionForm.patchValue({ id: this.idCitacion });
+      this.router.navigate(['../../'+ this.denunciaId+ '/formulario', {
+        idUsuario: this.idInvolucrado,
+        estado: 'Citado',
+        parte: response.parte,
+        idformulario: this.idCitacion
+      }], { relativeTo: this.route });
       toast.success('Citacion Guardada con Éxito', {
-                duration: 3000,
-              });
-
-
-
-          },error(err) {
-
+        duration: 3000
+      });
+    },
+    error: (err) => {
+      this.loading = false; // Desactivar loader
       toast.error('Error al guardar', {
         duration: 3000,
-      description:`${err}`
+        description: `${err}`
       });
-
-  }
-
-  })
-
+    }
+  });
 }
 
   generarPdf(){

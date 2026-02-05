@@ -154,6 +154,8 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
   // Estado de loading para PDF
   pdfLoading: boolean = false;
   pdfError: boolean = false;
+  loading: boolean = false; // Loader principal para guardar/actualizar
+  loadingMessage: string = ''; // Mensaje del loader principal
 
   constructor(private router: Router,
     private route: ActivatedRoute,
@@ -1307,11 +1309,16 @@ get participantesArray(): FormArray {
   }
    //--editar
       updateAudiencia() {
+      // Activar loader
+      this.loading = true;
+      this.loadingMessage = 'Actualizando audiencia...';
+
       const body ={
       ...this.audienciaPruebaForm.value,idDenuncia: this.denunciaId
     }
       this.audienciaPruebasService.actualizarAudienciaPrueba(this.idAudienciaP, body).subscribe({
         next: () => {
+          this.loading = false; // Desactivar loader
           toast.success('Audiencia Actualizada con Éxito', {
             duration: 3000,
           });
@@ -1325,6 +1332,7 @@ get participantesArray(): FormArray {
 
         },
         error: (err) => {
+          this.loading = false; // Desactivar loader
           toast.error('Error al actualizar la audiencia', {
             duration: 3000,
           });
@@ -1343,12 +1351,18 @@ get participantesArray(): FormArray {
     });
     return;
   }
+
+  // Activar loader
+  this.loading = true;
+  this.loadingMessage = 'Guardando audiencia...';
+
   const body ={
     ...this.audienciaPruebaForm.value,
 
   }
   this.audienciaPruebasService.postaudienciaPrueba(body).subscribe({
     next: (body) => {
+      this.loading = false; // Desactivar loader
       this.idAudienciaP = body.id;
       toast.success('Audiencia Guardada con Éxito', {
                 duration: 3000,
@@ -1358,8 +1372,8 @@ get participantesArray(): FormArray {
 
 
     },
-    error(err) {
-
+    error: (err) => {
+      this.loading = false; // Desactivar loader
       toast.error('Error al guardar', {
         duration: 3000,
       description:`${err}`

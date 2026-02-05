@@ -33,6 +33,8 @@ export class Anexar_seguimientoComponent implements OnInit {
   tablaMedidasCumplidas: any[] = []; // Array para la tabla de informes guardados
   editMode: boolean = false; // Controlar si estamos en modo edición
   editingItemId: number | null = null; // ID del item que estamos editando
+  loading: boolean = false; // Controlar el estado de carga
+  loadingMessage: string = ''; // Mensaje del loader
 
   medidasEjemplo = [{
       idMedida: 7,
@@ -335,6 +337,10 @@ export class Anexar_seguimientoComponent implements OnInit {
       return;
     }
 
+    // Activar loader
+    this.loading = true;
+    this.loadingMessage = 'Guardando informe...';
+
     const formData = new FormData();
     const formValue = this.seguimientoMedidasForm.value;
 
@@ -367,6 +373,7 @@ export class Anexar_seguimientoComponent implements OnInit {
     this.anexarSeguimientoMedidasService.uploadArchivo(formData, formValue.codigoTramite, formValue.tipoCarpeta).subscribe({
       next: (response) => {
         console.log('Archivo subido con éxito:', response);
+        this.loading = false; // Desactivar loader
         // Recargar la tabla después de subir
         this.cargarInformesCumplimiento();
         // Opcional: resetear formulario
@@ -374,6 +381,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al subir el archivo:', error);
+        this.loading = false; // Desactivar loader
       }
     });
   }
@@ -384,6 +392,10 @@ export class Anexar_seguimientoComponent implements OnInit {
       return;
     }
 
+    // Activar loader
+    this.loading = true;
+    this.loadingMessage = 'Actualizando informe...';
+
     const formData = new FormData();
     const formValue = this.seguimientoMedidasForm.value;
     const medidasParaEnviar = this.medidasArray.value.map((medida: any) => ({
@@ -391,8 +403,6 @@ export class Anexar_seguimientoComponent implements OnInit {
       idAfectado: this.afectadoSeleccionado,
       cumple: medida.cumple
     }));
-
-
 
     formData.append('archivo', this.archivo);
     formData.append('codigoTramite', formValue.codigoTramite);
@@ -405,11 +415,10 @@ export class Anexar_seguimientoComponent implements OnInit {
 
     formData.append('medidas', JSON.stringify(medidasParaEnviar));
 
-
-
     this.anexarSeguimientoMedidasService.updateseguimiento(formData, formValue.codigoTramite, formValue.tipoCarpeta).subscribe({
       next: (response) => {
         console.log('Archivo subido con éxito:', response);
+        this.loading = false; // Desactivar loader
         // Recargar la tabla después de subir
         this.cargarInformesCumplimiento();
         // Opcional: resetear formulario
@@ -417,6 +426,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error al subir el archivo:', error);
+        this.loading = false; // Desactivar loader
       }
     });
 

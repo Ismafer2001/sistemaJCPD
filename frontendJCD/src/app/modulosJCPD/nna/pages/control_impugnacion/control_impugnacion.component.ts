@@ -19,6 +19,8 @@ import { toast } from 'ngx-sonner';
 export class Control_impugnacionComponent implements OnInit {
   controlInpugnacionForm!: FormGroup;
   denunciaId!:number;
+  loading: boolean = false; // Loader principal para guardar
+  loadingMessage: string = ''; // Mensaje del loader principal
 
   constructor(private fb: FormBuilder,
      private route: ActivatedRoute,
@@ -70,17 +72,24 @@ export class Control_impugnacionComponent implements OnInit {
             });
             return;
           }
+
+          // Activar loader
+          this.loading = true;
+          this.loadingMessage = 'Guardando control de impugnación...';
+
              const body ={
     ...this.controlInpugnacionForm.value,
 
   };
     this.controlImpugnacionService.postControlImpugnacion(body).subscribe({
       next: (response) => {
+        this.loading = false; // Desactivar loader
         toast.success('Control de Impugnación creado con éxito', {
           duration: 3000
         });
       },
       error: (error) => {
+        this.loading = false; // Desactivar loader
         toast.error('Error al crear el Control de Impugnación', {
           duration: 3000
         });
