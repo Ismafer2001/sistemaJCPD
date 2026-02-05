@@ -51,7 +51,7 @@ export async function crearPdfavocatoriaNNA(res: Response, idAvocatoria: any): P
 						for (const v of af.vulneraciones) {
 							tableBody.push([
 								{ text: String(num), fontSize: 11 },
-								{ text: v.vulneracion || '—', fontSize: 11 }
+								{ text: v.nombreVulneracion || '—', fontSize: 11 }
 							]);
 							num++;
 						}
@@ -147,9 +147,9 @@ export async function crearPdfavocatoriaNNA(res: Response, idAvocatoria: any): P
 
 					// Sección de firmas
 					contentBlocks.push({ text: 'SECCIÓN FIRMAS', style: 'section', margin: [0, 20, 0, 8] });
-					const miembros = Array.isArray(data.usuariosPrincipales) ? data.usuariosPrincipales.slice(0, 3) : [];
+					const miembros: any[] = Array.isArray(data.usuariosPrincipales) ? [...data.usuariosPrincipales.slice(0, 3)] : [];
 					while (miembros.length < 3) {
-						miembros.push({ nombres: '', apellidos: '', cargo: '' });
+						miembros.push({ nombres: '', apellidos: '' });
 					}
 					const tableFirmas: any[] = [];
 					tableFirmas.push([

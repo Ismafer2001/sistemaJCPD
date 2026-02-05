@@ -136,7 +136,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
     include: [
       {
         model: Denuncia,
-         as: "denunciaAvocatoria",
+        as: "denunciaAvocatoria",
         include: [
           { model: Canton, as: 'canton', attributes: ['id', 'canton'] },
           { model: Notificacion, attributes: ['id'], limit: 1 },
@@ -148,14 +148,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
               {
                 model: VulneracionesIdentificadas,
                 as: 'vulneracionesI',
-                attributes: ['id', 'idAfectado', 'idVulneracion'],
-                include: [
-                  {
-                    model: Vulneracion,
-                    as: "vulneracion",
-                    attributes: ['id', 'vulneracion']
-                  }
-                ]
+                attributes: ['id', 'idAfectado', 'idVulneracion']
               },
               {
                 model: MedidasEmergentes,
@@ -164,7 +157,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
                 include: [
                   {
                     model: medida,
-                    as:'Med',
+                    as: 'Med',
                     attributes: ['medidas']
                   }
                 ]
@@ -177,43 +170,86 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
       }
     ]
   });
+  
   if (!avocatoria) throw new Error('Avocatoria no encontrada');
 
-  // Usuarios principales activos del canton
-  let usuariosPrincipales: any[] = [];
-  if (avocatoria.denunciaAvocatoria?.id_canton) {
-
-    usuariosPrincipales = await usuarios.findAll({
-      where: {
-        id_canton: avocatoria.denunciaAvocatoria.id_canton,
-        isactivo: true,
-        rol: 'principal'
-      },
-      attributes: ['id', 'nombres', 'apellidos', 'rol']
-    });
-  }
-
   const denuncia = avocatoria.denunciaAvocatoria;
-  
-  // Recopilar todas las medidas emergentes de todos los afectados
+
+  // Ejecutar queries en paralelo para mejor rendimiento
+  const [usuariosPrincipales, vulneraciones] = await Promise.all([
+    // Query de usuarios principales
+    denuncia?.id_canton 
+      ? usuarios.findAll({
+          where: {
+            id_canton: denuncia.id_canton,
+            isactivo: true,
+            rol: 'principal'
+          },
+          attributes: ['id', 'nombres', 'apellidos', 'rol']
+        })
+      : Promise.resolve([]),
+    
+    // Query de vulneraciones únicas
+    (async () => {
+      if (!denuncia?.afectados || denuncia.afectados.length === 0) return [];
+      
+      const idsVulneraciones = new Set<number>();
+      denuncia.afectados.forEach((afectado: any) => {
+        afectado.vulneracionesI?.forEach((vulnId: any) => {
+          idsVulneraciones.add(vulnId.idVulneracion);
+        });
+      });
+
+      return idsVulneraciones.size > 0
+        ? Vulneracion.findAll({
+            where: { id: Array.from(idsVulneraciones) },
+            attributes: ['id', 'vulneracion']
+          })
+        : [];
+    })()
+  ]);
+
+  // Crear mapa de vulneraciones para acceso rápido
+  const vulneracionesMap = new Map();
+  vulneraciones.forEach((vuln: any) => {
+    vulneracionesMap.set(vuln.id, vuln);
+  });
+
+  // Procesar medidas emergentes y vulneraciones por afectado
   const medidasEmergentes: any[] = [];
-  if (denuncia?.afectados) {
-    denuncia.afectados.forEach((afectado: any) => {
-      if (afectado.medidasE) {
-        afectado.medidasE.forEach((medida: any) => {
-          medidasEmergentes.push({
-            id: medida.id,
-            idMedida: medida.idMedida,
-            medida: medida.Med?.medidas || '',
-            idAfectado: medida.idAfectado,
-            periodo: medida.periodo,
-            observaciones: medida.observaciones
-          });
+  const vulneracionesPorAfectado: any = {};
+
+  denuncia?.afectados?.forEach((afectado: any) => {
+    // Procesar medidas emergentes
+    afectado.medidasE?.forEach((medida: any) => {
+      medidasEmergentes.push({
+        id: medida.id,
+        idMedida: medida.idMedida,
+        medida: medida.Med?.medidas || '',
+        idAfectado: medida.idAfectado,
+        periodo: medida.periodo,
+        observaciones: medida.observaciones
+      });
+    });
+
+    // Procesar vulneraciones
+    const vulneracionesAfectado: any[] = [];
+    afectado.vulneracionesI?.forEach((vulnId: any) => {
+      const vulneracion = vulneracionesMap.get(vulnId.idVulneracion);
+      if (vulneracion) {
+        vulneracionesAfectado.push({
+          id: vulnId.id,
+          idVulneracion: vulneracion.id,
+          nombreVulneracion: vulneracion.vulneracion
         });
       }
     });
-  }
+    vulneracionesPorAfectado[afectado.id] = vulneracionesAfectado;
+  });
 
+  
+ 
+      
   return {
     id: avocatoria.id,
     codigoTramite: avocatoria.codigoTramite,
@@ -233,11 +269,7 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
         nombres: af.nombres,
         apellidos: af.apellidos,
         edad: af.edad,
-        vulneraciones: (af.vulneracionesI || []).map((v: any) => ({
-          id: v.id,
-          idVulneracion: v.idVulneracion,
-          vulneracion: v.vulneracion?.vulneracion
-        }))
+        vulneraciones: vulneracionesPorAfectado[af.id] || []
       })),
       denunciante: (denuncia.Denunciantes || []).map((d: any) => ({
         nombres: d.nombres,

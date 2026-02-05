@@ -26,7 +26,7 @@ export const getAvocatoriaCompletaController = async (req: Request, res: Respons
   try {
     const { id } = req.params;
     const avocatoria = await getAvocatoriaCompleta(Number(id));
-    console.log(avocatoria);
+    
     res.json(avocatoria);
   } catch (error) {
     handlehttp(res, 'get_error_avocatoria_completa', error);

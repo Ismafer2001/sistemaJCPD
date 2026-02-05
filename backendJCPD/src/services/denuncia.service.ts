@@ -145,11 +145,10 @@ export async function countDenuncias(id_canton:number, grupoPrioritario:string) 
 
 // Consulta una denuncia y devuelve el mismo formato que espera insertDenuncia
 export async function getDenunciaCompleta(idDenuncia: number) {
-  console.log("ID Denuncia:", idDenuncia); // Línea de depuración
   const denuncia = await Denuncia.findByPk(idDenuncia, {
     include: [
-      { model: Denunciante, },
-      { model: Denunciado,  },
+      { model: Denunciante },
+      { model: Denunciado },
       { model: Afectado, as: 'afectados' },
       { model: Avocatoria, as: 'avocatoria' },
       { model: DenunciaMujeres, as: 'DM', required: false }
@@ -158,46 +157,90 @@ export async function getDenunciaCompleta(idDenuncia: number) {
 
   if (!denuncia) throw new Error('Denuncia no encontrada');
 
-  // Formatear afectados (evitar acceso a null)
   const afectados = Array.isArray((denuncia as any).afectados)
     ? (denuncia as any).afectados.map((a: any) => ({ ...a.get() }))
     : [];
 
-  // Obtener vulneraciones y medidas identificadas por separado
-  const VulneracionesIdentificadas = await (await import('../models/vulneracionesidentificadas.models')).VulneracionesIdentificadas.findAll({
-    where: { idAfectado: afectados.map((a: any) => a.id) }
-  });
-  const medidasIdentificadas = await (await import('../models/medidasIdentificada.models')).medidasIdentificadas.findAll({
-    where: { idAfectado: afectados.map((a: any) => a.id) }
-  });
+  const idsAfectados = afectados.map((a: any) => a.id);
 
+  // Queries en paralelo para mejor rendimiento
+  const [vulneracionesIdent, medidasIdent, vulneracionesUnicas, medidasUnicas] = await Promise.all([
+    // Obtener relaciones vulneraciones-afectados
+    VulneracionesIdentificadas.findAll({
+      where: { idAfectado: idsAfectados },
+      attributes: ['idAfectado', 'idVulneracion']
+    }),
+    // Obtener relaciones medidas-afectados
+    medidasIdentificadas.findAll({
+      where: { idAfectado: idsAfectados },
+      attributes: ['idAfectado', 'idMedida']
+    }),
+    // Obtener vulneraciones (se ejecutará después de tener los IDs)
+    (async () => {
+      const vulnIds = await VulneracionesIdentificadas.findAll({
+        where: { idAfectado: idsAfectados },
+        attributes: ['idVulneracion']
+      });
+      const idsUnicos = [...new Set(vulnIds.map(v => v.idVulneracion))];
+      if (idsUnicos.length === 0) return [];
+      
+      const { Vulneracion } = await import('../models/vulneraciones.models');
+      return Vulneracion.findAll({
+        where: { id: idsUnicos },
+        attributes: ['id', 'vulneracion']
+      });
+    })(),
+    // Obtener medidas
+    (async () => {
+      const medIds = await medidasIdentificadas.findAll({
+        where: { idAfectado: idsAfectados },
+        attributes: ['idMedida']
+      });
+      const idsUnicos = [...new Set(medIds.map(m => m.idMedida))];
+      if (idsUnicos.length === 0) return [];
+      
+      const { medida } = await import('../models/medidas_proteccion.models');
+      return medida.findAll({
+        where: { id: idsUnicos },
+        attributes: ['id', 'medidas']
+      });
+    })()
+  ]);
 
+  // Crear mapas para acceso O(1)
+  const vulneracionesMap = new Map(vulneracionesUnicas.map((v: any) => [v.id, v.vulneracion]));
+  const medidasMap = new Map(medidasUnicas.map((m: any) => [m.id, m.medidas]));
+  const afectadosMap = new Map(afectados.map((a: any) => [a.id, `${a.nombres} ${a.apellidos}`]));
 
-
-  // Agrupar vulneraciones por afectado en formato { id, nombre, vulneracion: [desc1, desc2, ...] }
+  // Agrupar vulneraciones por afectado
   const mapVuln = new Map();
-  for (const v of VulneracionesIdentificadas) {
-    const afectado = afectados.find((a: any) => a.id === v.idAfectado);
-    const nombre = afectado ? `${afectado.nombres} ${afectado.apellidos}` : '';
-    const idAfectado = afectado ? afectado.id : v.idAfectado;
-    const vulnDesc = await (await import('../models/vulneraciones.models')).Vulneracion.findByPk(v.idVulneracion);
-    if (!mapVuln.has(idAfectado)) mapVuln.set(idAfectado, {  idAfectado, nombre, vulneraciones: [] });
-    if (vulnDesc) mapVuln.get(idAfectado).vulneraciones.push(vulnDesc.vulneracion);
-  }
+  vulneracionesIdent.forEach((v: any) => {
+    if (!mapVuln.has(v.idAfectado)) {
+      mapVuln.set(v.idAfectado, {
+        idAfectado: v.idAfectado,
+        nombre: afectadosMap.get(v.idAfectado) || '',
+        vulneraciones: []
+      });
+    }
+    const vulnDesc = vulneracionesMap.get(v.idVulneracion);
+    if (vulnDesc) mapVuln.get(v.idAfectado).vulneraciones.push(vulnDesc);
+  });
   const vulneraciones = Array.from(mapVuln.values());
 
-  // Agrupar medidas por afectado en formato { id, nombre, medida: [desc1, desc2, ...] }
+  // Agrupar medidas por afectado
   const mapMed = new Map();
-  for (const m of medidasIdentificadas) {
-    const afectado = afectados.find((a: any) => a.id === m.idAfectado);
-    const nombre = afectado ? `${afectado.nombres} ${afectado.apellidos}` : '';
-    const idAfectado = afectado ? afectado.id : m.idAfectado;
-    const medidaDesc = await (await import('../models/medidas_proteccion.models')).medida.findByPk(m.idMedida);
-    if (!mapMed.has(idAfectado)) mapMed.set(idAfectado, { idAfectado, nombre, medidas: [] });
-    if (medidaDesc) mapMed.get(idAfectado).medidas.push(medidaDesc.medidas);
-  }
+  medidasIdent.forEach((m: any) => {
+    if (!mapMed.has(m.idAfectado)) {
+      mapMed.set(m.idAfectado, {
+        idAfectado: m.idAfectado,
+        nombre: afectadosMap.get(m.idAfectado) || '',
+        medidas: []
+      });
+    }
+    const medDesc = medidasMap.get(m.idMedida);
+    if (medDesc) mapMed.get(m.idAfectado).medidas.push(medDesc);
+  });
   const medidas = Array.from(mapMed.values());
-  console.log("Medidas agrupadas:", medidas);
 
   // Extraer arrays de relaciones
   // Tipado explícito y solo alias Sequelize
