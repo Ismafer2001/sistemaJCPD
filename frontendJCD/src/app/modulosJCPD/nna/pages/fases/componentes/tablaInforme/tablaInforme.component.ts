@@ -12,6 +12,9 @@ export class TablaInformeComponent {
  @Input() columnas:string[]=[];
 @Input() encabezados:string[]=[];
 @Input() datos:any[]=[];
+ @Input() isLoading: boolean = false;
+@Input() emptyMessage: string = 'No se encontraron registros';
+@Input() loadingMessage: string = 'Cargando datos...';
 
 @Input() RouterLink:string=""
 @Input() RouterLinkparam:string=""

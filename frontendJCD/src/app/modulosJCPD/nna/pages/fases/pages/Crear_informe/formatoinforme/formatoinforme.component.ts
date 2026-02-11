@@ -28,6 +28,8 @@ import { toast } from 'ngx-sonner';
 
 })
 export class FormatoinformeComponent implements OnInit {
+    loading: boolean = false; // Loader for save
+    loadingMessage: string = ''; // Loader message
    denunciaId = 0;
     editMode: boolean = false;
     grupo:string ='';
@@ -237,69 +239,72 @@ export class FormatoinformeComponent implements OnInit {
 
 
   submitInforme() {
-     if (this.informeForm.invalid) {
-        this.informeForm.markAllAsTouched();
-        toast.error('Formulario inválido', {
+    if (this.informeForm.invalid) {
+      this.informeForm.markAllAsTouched();
+      toast.error('Formulario inválido', {
+        duration: 3000,
+        description: 'Por Favor, Completa Todos los Campos Requeridos'
+      });
+      return;
+    }
+    this.loading = true;
+    this.loadingMessage = 'Guardando informe...';
+    const body = {
+      ...this.informeForm.value,
+    };
+    this.informesService.crearInforme(body).subscribe({
+      next: (body) => {
+        this.idInforme = body.id;
+        this.informeForm.patchValue({ id: this.idInforme });
+        this.router.navigate(['../../' + this.denunciaId + '/editar', this.idInforme], { relativeTo: this.route });
+        toast.success('Informe Guardado con Éxito', {
           duration: 3000,
-          description: 'Por Favor, Completa Todos los Campos Requeridos'
         });
-        return;
+        this.loading = false;
+        this.loadingMessage = '';
+      },
+      error: (err) => {
+        toast.error('Error al guardar', {
+          duration: 3000,
+          description: `${err}`
+        });
+        this.loading = false;
+        this.loadingMessage = '';
       }
-      const body ={
-        ...this.informeForm.value,
-
-      }
-      this.informesService.crearInforme(body).subscribe({
-       next: (body) => {
-          this.idInforme = body.id;
-          this.informeForm.patchValue({ id: this.idInforme })
-          this.router.navigate(['../../'+ this.denunciaId+ '/editar',this.idInforme], { relativeTo: this.route });
-          toast.success('Informe Guardado con Éxito', {
-                    duration: 3000,
-                  });
-
-
-        },
-        error(err) {
-
-          toast.error('Error al guardar', {
-            duration: 3000,
-          description:`${err}`
-          });
-
-      }
-
-      })
-
+    });
   }
   updateInforme() {
-     const body ={
-        ...this.informeForm.value,
-
-      }
-      this.informesService.actualizarInforme(this.idInforme, body).subscribe({
-        next: () => {
-          toast.success('Informe Actualizado con Éxito', {
-                    duration: 3000,
-                  });
-                  this.actionsConfig[1].disabled = true
-        this.actionsConfig[2].disabled = false
+    this.loading = true;
+    this.loadingMessage = 'Actualizando informe...';
+    const body = {
+      ...this.informeForm.value,
+    };
+    this.informesService.actualizarInforme(this.idInforme, body).subscribe({
+      next: () => {
+        toast.success('Informe Actualizado con Éxito', {
+          duration: 3000,
+        });
+        this.actionsConfig[1].disabled = true;
+        this.actionsConfig[2].disabled = false;
         this.actionsConfig[0].disabled = false;
-        this.isEditInformeActivate=false;
+        this.isEditInformeActivate = false;
         this.informeForm.disable();
-
-        },
-        error: (err) => {
-          toast.error('Error al actualizar la avocatoria', {
-            duration: 3000,
-          });
-        }
-
-      })
+        this.loading = false;
+        this.loadingMessage = '';
+      },
+      error: (err) => {
+        toast.error('Error al actualizar la avocatoria', {
+          duration: 3000,
+        });
+        this.loading = false;
+        this.loadingMessage = '';
+      }
+    });
   }
-  generarPdf(){
-    this.actionsConfig[2].disabled = true
+  generarPdf() {
+    this.actionsConfig[2].disabled = true;
     this.pdfLoading = true;
+    this.loadingMessage = 'Generando PDF...';
     this.pdfError = false;
     this.cambiarTab(1); // Cambiar al tab PDF inmediatamente para mostrar el loader
 
@@ -308,11 +313,13 @@ export class FormatoinformeComponent implements OnInit {
         const url = URL.createObjectURL(res);
         this.pdfSrc = this.sanitizer.bypassSecurityTrustResourceUrl(url);
         this.pdfLoading = false;
+        this.loadingMessage = '';
         this.actionsConfig[2].disabled = false;
       },
       error: (error) => {
         console.error('Error al generar PDF:', error);
         this.pdfLoading = false;
+        this.loadingMessage = '';
         this.pdfError = true;
         this.actionsConfig[2].disabled = false;
         toast.error('Error', {

@@ -128,7 +128,7 @@ export async function estatus(id:string) {
     notificacion: estadoPlano.Notificacions?.[0]?.estatus || '',
     audienciaC: estadoPlano.ac?.estatus || '',
     audienciaP: estadoPlano.ap?.estatus || '',
-    resoluciones: estadoPlano.resoluciones?.[0]?.estatus || '',
+    resoluciones: estadoPlano.resoluciones?.estatus || '',
     cumplimientoMedidas: cumplimientoMedidas,
     desestimiento: estadoPlano.Desestimiento?.estatus || '',
     controlImpugnacion: controlImpugnacion,

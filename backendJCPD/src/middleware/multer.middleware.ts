@@ -6,10 +6,7 @@ import fs from 'fs';
 const storage = multer.diskStorage({
     
 	destination: (req, file, cb) => {
-		console.log('fileeeeeeeee:', file)
-		console.log('MULTER req:', req)
-        console.log('MULTER req.body:', req.body);
-    console.log('MULTER req.query:', req.query);
+		
 		// Espera que el código de trámite y el tipo de carpeta vengan en el body o query
 		const codigoTramite = req.body.codigoTramite || req.query.codigoTramite||'otros';
 		const tipoCarpeta = req.body.tipoCarpeta || req.query.tipoCarpeta || 'otros';

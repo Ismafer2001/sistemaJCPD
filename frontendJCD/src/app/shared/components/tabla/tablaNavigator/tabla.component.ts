@@ -10,6 +10,13 @@ import { Router } from '@angular/router';
 
 })
 export class TablaNavigatorComponent {
+    // Format ISO date string to dd/MM/yyyy
+    formatFecha(fecha: string): string {
+      if (!fecha) return '';
+      const d = new Date(fecha);
+      if (isNaN(d.getTime())) return fecha;
+      return d.toLocaleDateString('es-EC', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    }
   @Input() columnas:string[]=[];
 @Input() encabezados:string[]=[];
 @Input() datos:any[]=[];

@@ -29,6 +29,10 @@ interface ParticipanteData {
 	pruebas?: string;
 	testimonio?: string;
 	parte: string;
+	archivo?: {
+		path: string;
+		fileName: string;
+	};
 }
 interface medidaDefinitivaData {
 	 idAfectado: number;
@@ -48,6 +52,7 @@ interface AudienciaPruebasData {
 	pdf_audiencia_pruebas: string;
 	articulo: string;
 	participantes: ParticipanteData[];
+	archivos?: { [key: string]: Express.Multer.File }; // archivos por índice de participante
 	
 	estatus: "pendiente"|"en_proceso"|"completada";
 }
@@ -73,7 +78,7 @@ export async function obtenerAudienciaPruebasCompleta(idAudiencia: number) {
 					model: Resoluciones,
 					as: 'resoluciones',
 					attributes: ['id'],
-					limit: 1
+					
 				}
 			]
 		});
@@ -99,7 +104,7 @@ export async function obtenerAudienciaPruebasCompleta(idAudiencia: number) {
 	// Participantes de la audiencia de pruebas
 	const participantes = await ParticipantesAudienciaPruebas.findAll({
 		where: { idAP: idAudiencia },
-		attributes: ['id', 'nombres', 'apellidos', 'cedula', 'tipoParticipante', 'parte', 'pruebas']
+		attributes: ['id', 'nombres', 'apellidos', 'cedula', 'tipoParticipante', 'parte', 'pruebas','pathPruebas']
 	});
 
 	// Participantes con testimonio
@@ -200,7 +205,9 @@ export async function obtenerAudienciaPruebasCompleta(idAudiencia: number) {
 				cedula: p.cedula,
 				tipoParticipante: p.tipoParticipante,
 				parte: p.parte,
-				pruebas: p.pruebas
+				pruebas: p.pruebas,
+				pathPruebas: p.pathPruebas? "archivo disponible": "sin archivo",
+				ruta: p.pathPruebas || null
 			})),
 			medidasDefinitivas: medidasDefinitivasPorAfectado,
 			usuariosPrincipalesCanton: usuariosPrincipales,
@@ -297,7 +304,7 @@ export async function actualizarAudienciaPruebas(idAudiencia: number, data: Audi
 					cedula: participante.cedula,
 					tipoParticipante: participante.tipoParticipante,
 					parte: participante.parte ?? '',
-					pruebas: participante.pruebas ?? ''
+					pruebas: participante.pruebas ?? ' null'
 				}, { transaction: t });
 
 				if (participante.testimonio && participante.testimonio.trim() !== '') {
@@ -497,4 +504,286 @@ export async function AgregarOtrosParticipantes(data: any) {
     fase: 'audienciaPruebas'
   });
   return nuevoParticipante;
+}
+
+//---- FUNCIONES PARA MANEJO DE ARCHIVOS POR ABOGADO ----//
+
+// Función para procesar archivos específicos por abogado
+export function procesarArchivosAbogados(files: Express.Multer.File[], participantes: ParticipanteData[]): ParticipanteData[] {
+	const participantesConArchivos = [...participantes];
+	
+	if (files && files.length > 0) {
+		files.forEach((file) => {
+			// Extraer índice del participante del nombre del campo
+			// Formato esperado: "archivo_abogado_0", "archivo_abogado_1", etc.
+			const match = file.fieldname.match(/archivo_abogado_(\d+)/);
+			
+			if (match) {
+				const participanteIndex = parseInt(match[1]);
+				
+				// Verificar que el índice sea válido y que sea tipo "Abogado"
+				if (participanteIndex < participantesConArchivos.length && 
+					participantesConArchivos[participanteIndex].tipoParticipante === 'Abogado') {
+					
+					// Normalizar ruta para evitar problemas con barras invertidas
+					const filePath = (file.path || `${file.destination}/${file.filename}`).replace(/\\/g, '/');
+					
+					// Asignar archivo al abogado específico
+					participantesConArchivos[participanteIndex].archivo = {
+						path: filePath,
+						fileName: file.originalname || file.filename
+					};
+					
+					console.log(`Archivo asignado a abogado ${participanteIndex}: ${file.originalname}`);
+				} else {
+					console.warn(`Archivo para participante índice ${participanteIndex}: no es abogado o índice inválido`);
+				}
+			} else {
+				console.warn(`Nombre de campo no válido para archivo: ${file.fieldname}`);
+			}
+		});
+	}
+	
+	return participantesConArchivos;
+}
+
+// Función para crear audiencia con archivos específicos por abogado
+export async function crearAudienciaPruebasConArchivos(data: AudienciaPruebasData, files: Express.Multer.File[]) {
+	const t = await sequelize.transaction();
+	try {
+		// Crear audiencia principal
+		const audiencia = await AudienciaPruebas.create({
+			idDenuncia: data.idDenuncia,
+			codigoTramite: data.codigoTramite,
+			fecha: data.fecha,
+			hora: data.hora,
+			instalacionAudiencia: data.instalacionAudiencia,
+			afectadoManifiesta: data.afectadoManifiesta,
+			pdf_audiencia_pruebas: data.pdf_audiencia_pruebas,
+			articulo: data.articulo,
+			estatus: 'completada',
+		}, { transaction: t });
+
+		// Procesar archivos específicos por abogado
+		const participantesConArchivos = procesarArchivosAbogados(files, data.participantes);
+
+		if (Array.isArray(participantesConArchivos)) {
+			for (const participante of participantesConArchivos) {
+				// Determinar pathPruebas basado en si es abogado y tiene archivo
+				let pathPruebas = null;
+				if (participante.tipoParticipante === 'Abogado' && participante.archivo) {
+					pathPruebas = participante.archivo.path;
+				}
+
+				// Crear participante con su archivo específico
+				const nuevoParticipante = await ParticipantesAudienciaPruebas.create({
+					idAP: audiencia.id,
+					nombres: participante.nombres,
+					apellidos: participante.apellidos,
+					cedula: participante.cedula,
+					tipoParticipante: participante.tipoParticipante,
+					parte: participante.parte ?? '',
+					pruebas: participante.pruebas ?? '',
+					pathPruebas: pathPruebas
+				}, { transaction: t });
+
+				// Si hay testimonio, crear registro en tabla Testimonio
+				if (participante.testimonio && participante.testimonio.trim() !== "") {
+					await Testimonio.create({
+						testimonio: participante.testimonio,
+						idParticipante: nuevoParticipante.id,
+						parte: participante.parte
+					}, { transaction: t });
+				}
+			}
+		}
+
+		await t.commit();
+		return { success: true, audienciaId: audiencia.id };
+	} catch (error) {
+		await t.rollback();
+		throw error;
+	}
+}
+
+// Función para procesar archivos específicos por abogado en edición
+export function procesarArchivosAbogadosEdicion(files: Express.Multer.File[], participantes: ParticipanteData[], participantesExistentes: any[]): ParticipanteData[] {
+	const participantesConArchivos = [...participantes];
+	
+	// Crear un mapa de archivos existentes por índice para conservarlos
+	const archivosExistentes = new Map();
+	participantesExistentes.forEach((participante, index) => {
+		if (participante.pathPruebas && participante.tipoParticipante === 'Abogado') {
+			archivosExistentes.set(index, {
+				path: participante.pathPruebas,
+				fileName: participante.pathPruebas.split('/').pop() || participante.pathPruebas.split('\\').pop()
+			});
+		}
+	});
+
+	// Si no hay archivos nuevos, conservar los existentes
+	if (!Array.isArray(files) || files.length === 0) {
+		// Aplicar archivos existentes a participantes que no tienen archivos nuevos
+		participantesConArchivos.forEach((participante, index) => {
+			if (participante.tipoParticipante === 'Abogado' && archivosExistentes.has(index)) {
+				participante.archivo = archivosExistentes.get(index);
+			}
+		});
+		return participantesConArchivos;
+	}
+
+	// Crear set de índices que tendrán archivos nuevos
+	const indicesConArchivosNuevos = new Set();
+	
+	// Procesar cada archivo subido
+	files.forEach(file => {
+		if (file.fieldname && file.fieldname.startsWith('archivo_abogado_')) {
+			const index = parseInt(file.fieldname.split('_')[2]);
+			if (!isNaN(index) && participantesConArchivos[index] && participantesConArchivos[index].tipoParticipante === 'Abogado') {
+				// Normalizar la ruta del archivo (cambiar backslashes por forward slashes)
+				const normalizedPath = file.path.replace(/\\/g, '/');
+				
+				participantesConArchivos[index].archivo = {
+					path: normalizedPath,
+					fileName: file.filename
+				};
+				
+				indicesConArchivosNuevos.add(index);
+			}
+		}
+	});
+
+	// Para participantes que no tienen archivos nuevos, conservar los existentes
+	participantesConArchivos.forEach((participante, index) => {
+		if (participante.tipoParticipante === 'Abogado' && 
+			!indicesConArchivosNuevos.has(index) && 
+			archivosExistentes.has(index)) {
+			participante.archivo = archivosExistentes.get(index);
+		}
+	});
+
+	return participantesConArchivos;
+}
+
+// Función para actualizar audiencia con archivos específicos por abogado
+export async function actualizarAudienciaPruebasConArchivos(id: number, data: AudienciaPruebasData, files: Express.Multer.File[]) {
+	const t = await sequelize.transaction();
+	const fs = require('fs');
+	const path = require('path');
+	
+	try {
+		// Verificar que la audiencia existe
+		const audienciaExistente = await AudienciaPruebas.findByPk(id);
+		if (!audienciaExistente) {
+			throw new Error('Audiencia de pruebas no encontrada');
+		}
+
+		// PRIMERO: Obtener participantes existentes con sus archivos completos
+		const participantesExistentes = await ParticipantesAudienciaPruebas.findAll({
+			where: { idAP: id },
+			attributes: ['id', 'nombres', 'apellidos', 'cedula', 'tipoParticipante', 'parte', 'pruebas', 'pathPruebas'],
+			transaction: t
+		});
+
+		// Identificar qué archivos nuevos se están subiendo
+		const indicesConArchivosNuevos = new Set();
+		if (Array.isArray(files) && files.length > 0) {
+			files.forEach(file => {
+				if (file.fieldname && file.fieldname.startsWith('archivo_abogado_')) {
+					const index = parseInt(file.fieldname.split('_')[2]);
+					if (!isNaN(index)) {
+						indicesConArchivosNuevos.add(index);
+					}
+				}
+			});
+		}
+
+		// Eliminar SOLO los archivos que van a ser reemplazados
+		for (let i = 0; i < participantesExistentes.length; i++) {
+			const participante = participantesExistentes[i];
+			if (participante.pathPruebas && indicesConArchivosNuevos.has(i)) {
+				try {
+					// Convertir ruta relativa a absoluta
+					const rutaAbsoluta = path.resolve(participante.pathPruebas);
+					if (fs.existsSync(rutaAbsoluta)) {
+						fs.unlinkSync(rutaAbsoluta);
+						console.log(`Archivo reemplazado eliminado: ${rutaAbsoluta}`);
+					}
+				} catch (error) {
+					console.error(`Error al eliminar archivo ${participante.pathPruebas}:`, error);
+					// No detenemos la transacción por errores de archivos
+				}
+			}
+		}
+
+		// Actualizar datos principales de la audiencia
+		await AudienciaPruebas.update({
+			fecha: data.fecha,
+			hora: data.hora,
+			instalacionAudiencia: data.instalacionAudiencia,
+			afectadoManifiesta: data.afectadoManifiesta,
+			pdf_audiencia_pruebas: data.pdf_audiencia_pruebas,
+			articulo: data.articulo,
+			estatus: data.estatus
+		}, { 
+			where: { id },
+			transaction: t 
+		});
+
+		// Eliminar testimonios asociados a los participantes
+		if (participantesExistentes.length > 0) {
+			const participantesIds = participantesExistentes.map(p => p.id);
+			await Testimonio.destroy({
+				where: { idParticipante: participantesIds },
+				transaction: t
+			});
+		}
+
+		// Eliminar participantes existentes
+		await ParticipantesAudienciaPruebas.destroy({
+			where: { idAP: id },
+			transaction: t
+		});
+
+		// Procesar archivos específicos por abogado
+		const participantesConArchivos = procesarArchivosAbogadosEdicion(files, data.participantes, participantesExistentes);
+
+		// Crear nuevos participantes con archivos actualizados
+		if (Array.isArray(participantesConArchivos)) {
+			for (const participante of participantesConArchivos) {
+				// Determinar pathPruebas basado en si es abogado y tiene archivo
+				let pathPruebas = null;
+				if (participante.tipoParticipante === 'Abogado' && participante.archivo) {
+					pathPruebas = participante.archivo.path;
+				}
+
+				// Crear participante con su archivo específico
+				const nuevoParticipante = await ParticipantesAudienciaPruebas.create({
+					idAP: id,
+					nombres: participante.nombres,
+					apellidos: participante.apellidos,
+					cedula: participante.cedula,
+					tipoParticipante: participante.tipoParticipante,
+					parte: participante.parte ?? '',
+					pruebas: participante.pruebas ?? '',
+					pathPruebas: pathPruebas
+				}, { transaction: t });
+
+				// Si hay testimonio, crear registro en tabla Testimonio
+				if (participante.testimonio && participante.testimonio.trim() !== "") {
+					await Testimonio.create({
+						testimonio: participante.testimonio,
+						idParticipante: nuevoParticipante.id,
+						parte: participante.parte
+					}, { transaction: t });
+				}
+			}
+		}
+
+		await t.commit();
+		return { success: true, message: 'Audiencia de pruebas actualizada exitosamente' };
+	} catch (error) {
+		await t.rollback();
+		throw error;
+	}
 }

@@ -8,7 +8,7 @@ import { getAfectadosYDirigidoAController,
          getAudienciaContestacionCompleta,
           getAudienciaContestacionPdf,
            putAudienciaContestacion } from '../controllers/audienciaContestacion.controller';
-import { getAudienciasContestacionTotales } from '../controllers/estadisticas/audienciaContestacionReporte.controller';
+
 import { verificarToken } from '../middleware/auth.middleware';
 import { verificarCantonDenuncia } from '../middleware/canton.middleware';
 

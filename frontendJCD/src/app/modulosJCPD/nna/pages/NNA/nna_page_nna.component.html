@@ -109,8 +109,8 @@
 
     <div class="overflow-auto bg-white shadow-xl rounded-xl max-h-[60vh] md:max-h-[55vh]">
       <tablaNavigator
-        [columnas]="['idDenuncia','codigoTramite','Afectado','cedulasAfectados','fecha']"
-        [encabezados]="['ID','Código Trámite','Nombre','Cédula','Fecha']"
+        [columnas]="['idDenuncia','estado','codigoTramite','Afectado','cedulasAfectados','fecha']"
+        [encabezados]="['ID','Estado','Código Trámite','Nombre','Cédula','Fecha']"
         [datos]="pagedDenuncias"
         [isLoading]="loading"
         [emptyMessage]="'No se encontraron denuncias registradas'"

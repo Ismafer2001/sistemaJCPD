@@ -3,16 +3,14 @@ import { Denuncia } from "../models";
 import { Deprecatoria } from "../models/deprecatoria.models";
 import { Canton } from "../models/cantones.models";
 import { Afectado } from "../models/afectado.models";
-import { Denunciante } from "../models/denunciante.models";
-import { Denunciado } from "../models/denunciado.models";
+
 import { AudienciaContestacion } from "../models/audiencia_constestacion.model";
 import { AudienciaPruebas } from "../models/audiencia_prueba.model";
 import { Citacion } from "../models/citaciones.model";
 import { Notificacion } from "../models/notificacion.model";
 import { Providencias } from "../models/providencia.model";
 import { Resoluciones } from "../models/resoluciones.models";
-import { MedidasEmergentes } from "../models/medidas_emergentes.model";
-import { MedidasDefinitivas } from "../models/medidasDefinitivas.models";
+
 import { CierreCaso } from "../models/cierreCaso.models";
 import { Desestimiento } from "../models/desestimiento.models";
 import { ControlImpugnacion } from "../models/controlImpugnacion.model";
@@ -32,6 +30,20 @@ export interface InhibicionDTO {
 export async function crearInhibicion(data: InhibicionDTO) {
   const t = await sequelize.transaction();
   try {
+    // Validar si ya existe una inhibición para la denuncia
+    const existe = await Deprecatoria.findOne({
+      where: {
+        idDenuncia: data.idDenuncia,
+        estadoRecepcion: 'pendiente'
+      },
+      transaction: t
+    });
+    if (existe) {
+      const error = new Error("Denuncia ya inhibida");
+    error.name = "denunciayainhibida";
+    throw error;
+    }
+
     const inhibicion = await Deprecatoria.create({
       idDenuncia: data.idDenuncia,
       idCantonOrigen: data.idCantonOrigen,

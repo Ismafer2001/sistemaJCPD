@@ -8,19 +8,25 @@ import { CardFormComponent } from '@shared/components/card-Form/card-Form.compon
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 import { CumpleMedidasTablaComponent } from './cumpleMedidasTabla/cumpleMedidasTabla.component';
 import { environment } from 'environments/environment';
+import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 
 @Component({
   selector: 'app-anexar_seguimiento',
   templateUrl: './anexar_seguimiento.component.html',
-  imports: [CardFormComponent,
-     CommonModule,
-      ReactiveFormsModule,
-
+  imports: [
+    CardFormComponent,
+    CommonModule,
+    ReactiveFormsModule,
     CumpleMedidasTablaComponent,
-  RouterLink]
+    RouterLink,
+    ButtonSubmitComponent
+  ]
 
 })
 export class Anexar_seguimientoComponent implements OnInit {
+  // Loader para botón de informe
+  loadingBtnSeguimiento: boolean = false;
+  loadingBtnSeguimientoMsg: string = '';
 
   afectados: any[] = [{id: 0, nombres: ''}];
   denunciaId: number = 0;
@@ -395,6 +401,8 @@ export class Anexar_seguimientoComponent implements OnInit {
     // Activar loader
     this.loading = true;
     this.loadingMessage = 'Actualizando informe...';
+    this.loadingBtnSeguimiento = true;
+    this.loadingBtnSeguimientoMsg = 'Actualizando informe...';
 
     const formData = new FormData();
     const formValue = this.seguimientoMedidasForm.value;
@@ -419,6 +427,8 @@ export class Anexar_seguimientoComponent implements OnInit {
       next: (response) => {
         console.log('Archivo subido con éxito:', response);
         this.loading = false; // Desactivar loader
+        this.loadingBtnSeguimiento = false;
+        this.loadingBtnSeguimientoMsg = '';
         // Recargar la tabla después de subir
         this.cargarInformesCumplimiento();
         // Opcional: resetear formulario
@@ -427,6 +437,8 @@ export class Anexar_seguimientoComponent implements OnInit {
       error: (error) => {
         console.error('Error al subir el archivo:', error);
         this.loading = false; // Desactivar loader
+        this.loadingBtnSeguimiento = false;
+        this.loadingBtnSeguimientoMsg = '';
       }
     });
 

@@ -13,7 +13,7 @@ import { InformesService } from '@nna/services/informes.service';
   templateUrl: './Crear_informe.component.html',
    imports: [CardFormComponent,
      TablaInformeComponent,
-     
+
       CommonModule,
       ReactiveFormsModule,
        FormsModule,
@@ -30,6 +30,7 @@ export class Crear_informeComponent implements OnInit {
   columnasTabla: string[] = ['id','diriguidoA'];
   encabezadosTabla: string[] = ['id','Nombre'];
   datosTabla: any[] = [];
+  isLoadingInformes: boolean = false; // Loader para la tabla de informes
 
   constructor(private route:ActivatedRoute,
      private router:Router,
@@ -54,9 +55,11 @@ export class Crear_informeComponent implements OnInit {
 
   // Método para cargar los informes existentes
   cargarInformes(): void {
+    this.isLoadingInformes = true;
     console.log('Cargando informes para denunciaId:', this.denunciaId);
     this.informesService.obtenerInformesPorDenuncia(this.denunciaId).subscribe(data => {
       this.datosTabla = data;
+      this.isLoadingInformes = false;
     });
   }
 

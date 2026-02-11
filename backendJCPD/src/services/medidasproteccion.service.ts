@@ -40,7 +40,7 @@ export const medidasIdentificadasPorAfectado = async (afectadoId: number) => {
       });
     }
   }
-  console.log("Medidas identificadas:", resultadoFormateado);
+  
   return resultadoFormateado;
 };
 
@@ -69,7 +69,7 @@ export const medidasEmergentesPorAfectado = async (afectadoId: number) => {
      return [];
 
   }
-  console.log("Afectado encontrado:", afectado.toJSON());
+  
 
   const resultadoFormateado = [];
 
@@ -88,7 +88,7 @@ export const medidasEmergentesPorAfectado = async (afectadoId: number) => {
       });
     }
   }
-  console.log("Medidas Emergentes:", resultadoFormateado);
+  
   return resultadoFormateado;
 };
 
@@ -205,7 +205,7 @@ export const medidasDefinitivasPorAfectado = async (afectadoId: number) => {
      return [];
 
   }
-  console.log("Afectado encontrado:", afectado.toJSON());
+  
 
   const resultadoFormateado = [];
 
@@ -223,7 +223,7 @@ export const medidasDefinitivasPorAfectado = async (afectadoId: number) => {
       });
     }
   }
-  console.log("Medidas definitivas:", resultadoFormateado);
+  
   return resultadoFormateado;
 };
 

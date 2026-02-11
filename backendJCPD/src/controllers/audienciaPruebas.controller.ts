@@ -9,7 +9,9 @@ import {
 	vulneracionesPorAfectado,
 	agregarVulneracionIdentificada,
 	eliminarVulneracionIdentificada,
-	actualizarVulneracionIdentificada
+	actualizarVulneracionIdentificada,
+	crearAudienciaPruebasConArchivos,
+	actualizarAudienciaPruebasConArchivos
 } from '../services/audienciaPrueba.service';
 
 import { handlehttp } from "../utils/error.handle";
@@ -22,7 +24,25 @@ export const postAudienciaPruebas = async (req: Request, res: Response) => {
 	} catch (error) {
 		handlehttp(res,'Error al crear audiencia de pruebas' , error);
 	}
-};
+}; 
+
+
+// Crear audiencia de pruebas CON archivos específicos por abogado
+export const postAudienciaPruebasConArchivos = async (req: Request, res: Response) => {
+	try {
+		console.log('Files recibidos:', req.files);
+		console.log('Body recibido:', req.body.data);
+		
+		const files = req.files as Express.Multer.File[];
+		const data = JSON.parse(req.body.data); // Los datos JSON vienen en req.body.data cuando se usa FormData
+		
+		const result = await crearAudienciaPruebasConArchivos(data, files);
+		res.status(201).json(result);
+	} catch (error) {
+		console.error('Error en postAudienciaPruebasConArchivos:', error);
+		handlehttp(res,'Error al crear audiencia de pruebas con archivos' , error);
+	}
+}; 
 
 // Actualizar audiencia de pruebas
 export const putAudienciaPruebas = async (req: Request, res: Response) => {
@@ -32,6 +52,30 @@ export const putAudienciaPruebas = async (req: Request, res: Response) => {
 		res.json(result);
 	} catch (error) {
 		handlehttp(res,'Error al actualizar audiencia de pruebas' , error);
+	}
+};
+
+// Actualizar audiencia de pruebas CON archivos específicos por abogado
+export const putAudienciaPruebasConArchivos = async (req: Request, res: Response) => {
+	try {
+		console.log('Files recibidos para edición:', req.files);
+		console.log('Body recibido para edición:', req.body.data);
+		
+		const { id } = req.params;
+		const files = req.files as Express.Multer.File[];
+		
+		let data;
+		if (typeof req.body.data === 'string') {
+			data = JSON.parse(req.body.data);
+		} else {
+			data = req.body.data;
+		}
+		
+		const result = await actualizarAudienciaPruebasConArchivos(Number(id), data, files || []);
+		res.json(result);
+	} catch (error) {
+		console.error('Error en putAudienciaPruebasConArchivos:', error);
+		handlehttp(res,'Error al actualizar audiencia de pruebas con archivos' , error);
 	}
 };
 

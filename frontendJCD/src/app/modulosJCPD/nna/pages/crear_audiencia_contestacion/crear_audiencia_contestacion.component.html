@@ -1,10 +1,10 @@
 <!-- Loader de carga inicial -->
 @if (initialLoading) {
-  <div class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-600"></div>
-      <p class="mt-4 text-lg font-medium text-gray-600">Cargando audiencia de contestación...</p>
-    </div>
+  <div class="w-full flex flex-col items-center justify-center py-20 bg-gray-50 rounded-lg">
+    <!-- Spinner -->
+    <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-6"></div>
+    <p class="text-gray-600 text-xl font-medium">Inicializando audiencia de contestación...</p>
+    <p class="text-gray-500 text-sm mt-2">Cargando datos </p>
   </div>
 }
 
@@ -242,22 +242,30 @@
 
               <!-- Botones condicionales -->
               <div class="ml-8 grid grid-cols-1 gap-1">
-                <app-button-submit
-                  type="button"
-                  [label]="modoEdicionParticipante ? 'Actualizar' : 'Agregar'"
-                  [color]="'submit'"
-                  [icon]="modoEdicionParticipante ? 'edit' : 'plus'"
-                  [disabled]="participantesForm.invalid"
-                  (clicked)="modoEdicionParticipante ? actualizarParticipante() : onSubmitParticipante()">
-                </app-button-submit>
+                <div class="flex items-center gap-2">
+                  <app-button-submit
+                    type="button"
+                    [label]="modoEdicionParticipante ? 'Actualizar' : 'Agregar'"
+                    [color]="'submit'"
+                    [icon]="modoEdicionParticipante ? 'edit' : 'plus'"
+                    [disabled]="participantesForm.invalid || loadingBtnParticipante"
+                    [loading]="loadingBtnParticipante"
+                    [loadingText]="loadingBtnParticipanteMsg"
+                    (clicked)="modoEdicionParticipante ? actualizarParticipante() : onSubmitParticipante()">
+                  </app-button-submit>
+                </div>
 
-                <app-button-submit
-                  *ngIf="modoEdicionParticipante"
-                  label="Cancelar"
-                  type="button"
-                  color="cancelar"
-                  (clicked)="cancelarEdicionParticipante()">
-                </app-button-submit>
+                <div class="flex items-center gap-2" *ngIf="modoEdicionParticipante">
+                  <app-button-submit
+                    label="Cancelar"
+                    type="button"
+                    color="cancelar"
+                    [disabled]="loadingBtnParticipante"
+                    [loading]="loadingBtnParticipante"
+                    [loadingText]="loadingBtnParticipanteMsg"
+                    (clicked)="cancelarEdicionParticipante()">
+                  </app-button-submit>
+                </div>
               </div>
             </form>
 
@@ -338,7 +346,15 @@
                 <textarea formControlName="manifiesta" rows="3" placeholder="Escriba aquí la intervención..." class="w-full  border border-dotted border-gray-300 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 "></textarea>
               </div>
               <div class="flex items-end">
-                <button type="button" (click)="agregarManifestacionParticipante()" class="h-10 px-6 rounded-lg bg-gradient-to-r from-blue-500 to-blue-700 text-white font-semibold shadow hover:from-blue-600 hover:to-blue-800 transition">+ Agregar</button>
+                <app-button-submit
+                  type="button"
+                  label="Agregar"
+                  color="submit"
+                  [disabled]="formManifestacion.invalid "
+                  [loading]="loadingBtnParticipante"
+                  [loadingText]="loadingBtnParticipanteMsg"
+                  (clicked)="agregarManifestacionParticipante()">
+                </app-button-submit>
               </div>
             </form>
           </div>

@@ -17,6 +17,7 @@ export class ButtonSubmitComponent  {
   @Input() icon: string = ''; // Nuevo input para el icono
 
   @Input() loading: boolean = false; // Para estado de carga
+  @Input() loadingText: string = '';
 
   @Input() disabled: boolean = false;
   @Input() link: string[] | undefined;

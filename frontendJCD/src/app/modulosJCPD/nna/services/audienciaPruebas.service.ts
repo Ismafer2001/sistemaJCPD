@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from 'environments/environment';
 
@@ -28,6 +28,23 @@ export class AudienciaPruebasService {
   }
 
 
+  descargarArchivoSeguro(codigoTramite: string, nombreArchivo: string) {
+  const url = `${this.apiUrl}/files/${codigoTramite}/pruebas/${nombreArchivo}`;
+
+  // Usamos responseType: 'blob' para recibir el archivo binario
+  return this.http.get(url, { responseType: 'blob' });
+}
+
+  // Método para enviar FormData con archivos (patrón anexar_seguimiento)
+  postAudienciaPruebasConArchivos(formData: FormData, codigoTramite: string, tipoCarpeta: string): Observable<any> {
+    const params = new HttpParams()
+      .set('codigoTramite', codigoTramite)
+      .set('tipoCarpeta', tipoCarpeta);
+
+    return this.http.post(`${this.apiUrl}/con-archivos`, formData, { params });
+  }
+
+
   getVulneracionesIdentificadas(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/vulneraciones/${id}`);
   }
@@ -48,8 +65,11 @@ export class AudienciaPruebasService {
   crearpdfBlob(id: number): Observable<Blob> {
     return this.http.get(`${this.apiUrl}/crearpdf/${id}`, { responseType: 'blob' });
   }
-  actualizarAudienciaPrueba(id: number, audienciaPrueba: Partial<any>): Observable<{ success: boolean; message: string }> {
-      return this.http.put<any>(`${this.apiUrl}/${id}`, audienciaPrueba);
+  actualizarAudienciaPrueba(id: number, audienciaPrueba: Partial<any>, codigoTramite: string, tipoCarpeta: string): Observable<{ success: boolean; message: string }> {
+       const params = new HttpParams()
+      .set('codigoTramite', codigoTramite)
+      .set('tipoCarpeta', tipoCarpeta);
+    return this.http.put<any>(`${this.apiUrl}/con-archivos/${id}`, audienciaPrueba,{ params });
     }
 
 

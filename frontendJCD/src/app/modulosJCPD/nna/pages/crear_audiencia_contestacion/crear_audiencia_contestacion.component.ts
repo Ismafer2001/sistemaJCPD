@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
+import { finalize } from 'rxjs/operators';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder,
@@ -42,6 +43,9 @@ RouterLink]
 
 })
 export class Crear_audienciaComponent implements OnInit {
+    // Loader para botones de Participantes
+    loadingBtnParticipante: boolean = false;
+    loadingBtnParticipanteMsg: string = '';
   // Propiedades para manejar tipos de participantes
 
 //--- Configuración de tabs------//
@@ -696,22 +700,28 @@ regresar(): void {
       return;
     }
 
+    this.loadingBtnParticipante = true;
+    this.loadingBtnParticipanteMsg = 'Agregando participante...';
     const body = {
       ...this.participantesForm.value,
     };
 
-    console.log(body);
-    this.audienciaContestacionService.postCrearParticipante(body).subscribe(() => {
-      // Agregar al FormArray de audienciaForm
-      this.participantesArray.push(this.fb.group({ ...this.participantesForm.value }));
-      // Actualizar el array participantes para reflejar el cambio en la tabla
-      this.participantes = this.participantesArray.getRawValue();
-
-      // Reset del formulario
-      this.resetFormularioParticipantes();
-
-      toast.success('Participante agregado correctamente');
-    });
+    this.audienciaContestacionService.postCrearParticipante(body)
+      .pipe(finalize(() => {
+        this.loadingBtnParticipante = false;
+        this.loadingBtnParticipanteMsg = '';
+      }))
+      .subscribe({
+        next: () => {
+          this.participantesArray.push(this.fb.group({ ...this.participantesForm.value }));
+          this.participantes = this.participantesArray.getRawValue();
+          this.resetFormularioParticipantes();
+          toast.success('Participante agregado correctamente');
+        },
+        error: (err) => {
+          toast.error('Error al agregar participante', { duration: 3000, description: err });
+        }
+      });
   }
 
   resetFormularioParticipantes() {
@@ -799,45 +809,55 @@ regresar(): void {
       return;
     }
 
-    // Obtener el control del participante en edición
-    const participanteControl = this.participantesArray.at(this.participanteEnEdicionIndex);
-
-    // Actualizar con todos los valores del formulario
-    participanteControl.patchValue(this.participantesForm.value);
-    // Salir del modo edición
-    this.cancelarEdicionParticipante();
-
-    toast.success('Participante actualizado correctamente', {
-      duration: 3000,
-      description: 'Los cambios han sido guardados'
-    });
+    this.loadingBtnParticipante = true;
+    this.loadingBtnParticipanteMsg = 'Actualizando participante...';
+    setTimeout(() => {
+      // Obtener el control del participante en edición
+      const participanteControl = this.participantesArray.at(this.participanteEnEdicionIndex);
+      // Actualizar con todos los valores del formulario
+      participanteControl.patchValue(this.participantesForm.value);
+      // Salir del modo edición
+      this.cancelarEdicionParticipante();
+      this.loadingBtnParticipante = false;
+      this.loadingBtnParticipanteMsg = '';
+      toast.success('Participante actualizado correctamente', {
+        duration: 3000,
+        description: 'Los cambios han sido guardados'
+      });
+    }, 800);
   }
 
   /**
    * Cancelar edición - Restaura el formulario y sale del modo edición
    */
   cancelarEdicionParticipante() {
-    // Restaurar datos originales si es necesario
-    if (this.datosOriginalesParticipante && this.participanteEnEdicionIndex !== -1) {
-      const participanteControl = this.participantesArray.at(this.participanteEnEdicionIndex);
-      participanteControl.patchValue(this.datosOriginalesParticipante);
-    }
+    this.loadingBtnParticipante = true;
+    this.loadingBtnParticipanteMsg = 'Cancelando...';
+    setTimeout(() => {
+      // Restaurar datos originales si es necesario
+      if (this.datosOriginalesParticipante && this.participanteEnEdicionIndex !== -1) {
+        const participanteControl = this.participantesArray.at(this.participanteEnEdicionIndex);
+        participanteControl.patchValue(this.datosOriginalesParticipante);
+      }
 
-    // Resetear el formulario único
-    this.resetFormularioParticipantes();
+      // Resetear el formulario único
+      this.resetFormularioParticipantes();
 
-    // Limpiar el tipo de participante para ocultar formularios
-    this.tipoParticipante = '';
+      // Limpiar el tipo de participante para ocultar formularios
+      this.tipoParticipante = '';
 
-    // Salir del modo edición
-    this.modoEdicionParticipante = false;
-    this.participanteEnEdicionIndex = -1;
-    this.datosOriginalesParticipante = null;
+      // Salir del modo edición
+      this.modoEdicionParticipante = false;
+      this.participanteEnEdicionIndex = -1;
+      this.datosOriginalesParticipante = null;
 
-    // Actualizar array local
-    this.participantes = this.participantesArray.getRawValue();
+      // Actualizar array local
+      this.participantes = this.participantesArray.getRawValue();
 
-    toast.info('Edición cancelada');
+      this.loadingBtnParticipante = false;
+      this.loadingBtnParticipanteMsg = '';
+      toast.info('Edición cancelada');
+    }, 600);
   }
   /**
    * Eliminar participante del array

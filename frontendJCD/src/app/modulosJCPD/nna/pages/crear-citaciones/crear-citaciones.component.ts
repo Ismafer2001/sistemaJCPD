@@ -63,6 +63,8 @@ export class CrearCitacionesComponent implements OnInit {
 
     itemEnEdicion: any = null;
 
+    loadingBtnCitado: boolean = false;
+    loadingBtnCitadoMsg: string = '';
 
   constructor(private CitacionesService:CitacionesService,
        private route:ActivatedRoute,
@@ -252,58 +254,49 @@ seleccionarParaEditarNotificado(item: any){
     console.log('Editando notificado:', item);
     console.log('Tipo seleccionado:', this.tipoNotificado);
   }
-  editarnotificados(): void{
+  editarnotificados(finalize?: () => void): void{
     if (!this.itemEnEdicion) return;
-
     const formData = this.tipoNotificado === 'Representante Institucional'
       ? this.nuevaInstitucionForm.value
       : this.nuevoCitadoForm.value;
-
     this.CitacionesService.putOtroCitado(this.itemEnEdicion.idUsuario, formData).subscribe({
       next: (response) => {
-        console.log('Notificado actualizado exitosamente:', response);
-        toast.success('Notificado actualizado correctamente');
-
-        // Recargar listas y resetear modo edición
         this.loadinvolucrados(this.denunciaId);
         this.loadOtrosInvolucrados(this.denunciaId);
         this.cancelarEdicionNotificado();
+        if (finalize) finalize();
       },
-      error: (error) => {
-        console.error('Error al actualizar notificado:', error);
-        toast.error('Error al actualizar el notificado');
-      }
+      error: () => { if (finalize) finalize(); }
     });
   }
-  agregarNotificado(): void{
+  agregarNotificado(finalize?: () => void): void {
     if (this.tipoNotificado === 'persona') {
       const body = {
-      ...this.nuevoCitadoForm.value,
-
-    };
-    console.log(body);
-    this.CitacionesService.postCrearCitados(body).subscribe(() => {
-      this.loadOtrosInvolucrados(this.denunciaId);
-      this.nuevoCitadoForm.reset();
-      this.nuevoCitadoForm.get('idDenuncia')?.setValue(this.denunciaId);
-
-    });
-
-    }else{
+        ...this.nuevoCitadoForm.value,
+      };
+      this.CitacionesService.postCrearCitados(body).subscribe({
+        next: () => {
+          this.loadOtrosInvolucrados(this.denunciaId);
+          this.nuevoCitadoForm.reset();
+          this.nuevoCitadoForm.get('idDenuncia')?.setValue(this.denunciaId);
+          if (finalize) finalize();
+        },
+        error: () => { if (finalize) finalize(); }
+      });
+    } else if (this.tipoNotificado === 'Representante Institucional') {
       const body = {
-      ...this.nuevaInstitucionForm.value,
-
-    };
-    console.log(body);
-    this.CitacionesService.postCrearCitados(body).subscribe(() => {
-      this.loadOtrosInvolucrados(this.denunciaId);
-      this.nuevaInstitucionForm.reset();
-      this.nuevaInstitucionForm.get('idDenuncia')?.setValue(this.denunciaId);
-
-    });
-
+        ...this.nuevaInstitucionForm.value,
+      };
+      this.CitacionesService.postCrearCitados(body).subscribe({
+        next: () => {
+          this.loadOtrosInvolucrados(this.denunciaId);
+          this.nuevaInstitucionForm.reset();
+          this.nuevaInstitucionForm.get('idDenuncia')?.setValue(this.denunciaId);
+          if (finalize) finalize();
+        },
+        error: () => { if (finalize) finalize(); }
+      });
     }
-
   }
   cancelarEdicionNotificado(): void{
     this.modoEdicionCitados = false;
@@ -327,30 +320,26 @@ seleccionarParaEditarNotificado(item: any){
     if (confirm('¿Estás seguro de que deseas eliminar este notificado?')) {
       this.CitacionesService.deleteOtroCitado(item.idUsuario).subscribe({
         next: (response) => {
-          console.log('Notificado eliminado exitosamente:', response);
           toast.success('Notificado eliminado correctamente');
-
-          // Recargar ambas listas para reflejar los cambios
           this.loadinvolucrados(this.denunciaId);
           this.loadOtrosInvolucrados(this.denunciaId);
         },
         error: (error) => {
-          console.error('Error al eliminar notificado:', error);
           toast.error('Error al eliminar el notificado');
         }
       });
     }
   }
  onSubmit(): void {
+    this.loadingBtnCitado = true;
+    this.loadingBtnCitadoMsg = this.modoEdicionCitados ? 'Actualizando...' : 'Agregando...';
+    const finalize = () => { this.loadingBtnCitado = false; this.loadingBtnCitadoMsg = ''; };
     switch (this.modoEdicionCitados) {
       case true:
-        this.editarnotificados();
-
+        this.editarnotificados(finalize);
         break;
-
       case false:
-        this.agregarNotificado();
-
+        this.agregarNotificado(finalize);
         break;
     }
 

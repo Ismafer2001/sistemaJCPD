@@ -21,14 +21,7 @@
     <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
         <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> involucrados Principales</h3>
 
-        @if (loadingInvolucradosPrincipales) {
-          <div class="w-full flex flex-col items-center justify-center py-20 bg-gray-50 rounded-lg">
-            <!-- Spinner -->
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-6"></div>
-            <p class="text-gray-600 text-xl font-medium">Cargando involucrados principales...</p>
-            <p class="text-gray-500 text-sm mt-2">Por favor espere mientras se cargan los datos</p>
-          </div>
-        } @else {
+
          <tablaNavigator
     [columnas]="['nombres','parte','estado']"
     [encabezados]="['Nombres','Parte','Estado']"
@@ -36,22 +29,16 @@
     [RouterLinkparam]=" 'idDenuncia'"
     [RouterLink]="grupo+'/notificaciones'"
     [queryParams]="['idUsuario','estado','parte','idNotificacion']"
+    [isLoading]="loadingInvolucradosPrincipales"
     >
 
     </tablaNavigator>
-        }
+
            </div>
            <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
         <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> otros notificados</h3>
 
-        @if (loadingOtrosInvolucrados) {
-          <div class="w-full flex flex-col items-center justify-center py-20 bg-gray-50 rounded-lg">
-            <!-- Spinner -->
-            <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-6"></div>
-            <p class="text-gray-600 text-xl font-medium">Cargando otros notificados...</p>
-            <p class="text-gray-500 text-sm mt-2">Por favor espere mientras se cargan los datos</p>
-          </div>
-        } @else {
+
          <tablaNavigator
     [columnas]="['nombresCompletos','parte','estado']"
     [encabezados]="['Nombres','Parte','Estado']"
@@ -60,13 +47,14 @@
     [RouterLink]="grupo+'/notificaciones'"
     [queryParams]="['idUsuario','estado','parte','idNotificacion']"
     [acciones]="true"
+    [isLoading]="loadingOtrosInvolucrados"
 
         [eliminar]="eliminarNotificado.bind(this)"
         [editar]="seleccionarParaEditarNotificado.bind(this)"
     >
 
     </tablaNavigator>
-        }
+
            </div>
            <h2 class="text-xl text-blue-500 font-semibold my-4">Agregar Notificado</h2>
 
@@ -125,15 +113,22 @@
 
       <div class="ml-8 grid grid-cols-1 gap-1">
           <!-- Botón principal: Agregar o Actualizar según el modo -->
-          <app-button-submit
-            type="submit"
-            [label]="modoEdicionNotificados ? 'Actualizar' : 'Agregar'"
-            [color]=" 'submit'"
-            [icon]="modoEdicionNotificados ? 'edit' : 'plus'"
-            [disabled]="modoEdicionNotificados && !nuevoNotificadoForm.valid"
+          <div class="relative">
+            <app-button-submit
+              type="submit"
+              [label]="modoEdicionNotificados ? 'Actualizar' : 'Agregar'"
+              [color]=" 'submit'"
+              [icon]="modoEdicionNotificados ? 'edit' : 'plus'"
+              [disabled]="loadingBtnNotificado || (modoEdicionNotificados && !nuevoNotificadoForm.valid)"
             >
-          </app-button-submit>
-
+            </app-button-submit>
+            <div *ngIf="loadingBtnNotificado" class="absolute inset-0 flex items-center justify-center z-10" style="backdrop-filter: blur(3px); background-color: rgba(255,255,255,0.5);">
+              <div class="bg-white bg-opacity-80 rounded-lg p-2 shadow-md flex items-center gap-2">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <span class="text-sm text-gray-700">{{ loadingBtnNotificadoMsg }}</span>
+              </div>
+            </div>
+          </div>
           <!-- Botón Cancelar: Solo visible en modo edición -->
           <app-button-submit
             *ngIf="modoEdicionNotificados"
@@ -208,15 +203,22 @@
 
   <div class="ml-8 grid grid-cols-1 gap-1">
           <!-- Botón principal: Agregar o Actualizar según el modo -->
-          <app-button-submit
-            type="submit"
-            [label]="modoEdicionNotificados ? 'Actualizar' : 'Agregar'"
-            [color]=" 'submit'"
-            [icon]="modoEdicionNotificados ? 'edit' : 'plus'"
-            [disabled]="modoEdicionNotificados && !nuevoNotificadoForm.valid"
+          <div class="relative">
+            <app-button-submit
+              type="submit"
+              [label]="modoEdicionNotificados ? 'Actualizar' : 'Agregar'"
+              [color]=" 'submit'"
+              [icon]="modoEdicionNotificados ? 'edit' : 'plus'"
+              [disabled]="loadingBtnNotificado || (modoEdicionNotificados && !nuevoNotificadoForm.valid)"
             >
-          </app-button-submit>
-
+            </app-button-submit>
+            <div *ngIf="loadingBtnNotificado" class="absolute inset-0 flex items-center justify-center z-10" style="backdrop-filter: blur(3px); background-color: rgba(255,255,255,0.5);">
+              <div class="bg-white bg-opacity-80 rounded-lg p-2 shadow-md flex items-center gap-2">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                <span class="text-sm text-gray-700">{{ loadingBtnNotificadoMsg }}</span>
+              </div>
+            </div>
+          </div>
           <!-- Botón Cancelar: Solo visible en modo edición -->
           <app-button-submit
             *ngIf="modoEdicionNotificados"

@@ -89,9 +89,13 @@
     <!-- Botón de envío -->
     <div class="pt-4 border-t border-gray-200 flex justify-end">
       <app-button-submit
-        [label]="'Guardar Control de Desestimiento'"
-        (clicked)="crearControlDesestimiento()">
-      </app-button-submit>
+        [label]="'Guardar '"
+        color="submit"
+        [loading]="loading"
+        
+        [disabled]="controlDesestimientoForm.invalid"
+        (clicked)="crearControlDesestimiento()"
+      ></app-button-submit>
     </div>
   </form>
 </app-card-Form>

@@ -16,8 +16,13 @@ export const crearInhibicion = async (req: Request, res: Response) => {
       origen: idCantonOrigen
     });
     res.status(201).json(resultado);
-  } catch (error) {
-    console.error('Error al crear inhibición:', error);
+  } catch (error:any) {
+    if ( error.name === "denunciayainhibida") {
+      return res.status(400).json({ message: error.message });
+    }
+
+
+    
     handlehttp(res, 'Error interno del servidor', error);
   }
 };

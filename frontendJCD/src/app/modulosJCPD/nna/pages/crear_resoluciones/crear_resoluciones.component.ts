@@ -52,6 +52,9 @@ export class Crear_resolucionesComponent implements OnInit {
     }
   ];
   currentTab = 0; //variable para cambiar pestañas del formulario
+  // Loader para guardar resolución
+  loadingSave = false;
+  loadingMessage = '';
 // Configuración de botones de acción
   actionsConfig: any[] = [
     {
@@ -130,6 +133,9 @@ pdfSrc: SafeResourceUrl | null = null;
 // Estado de loading para PDF
 pdfLoading: boolean = false;
 pdfError: boolean = false;
+ // Loader para botones de medidas definitivas
+  loadingBtnMedidas: boolean = false;
+  loadingBtnMedidasMsg: string = '';
 
   constructor(private fb: FormBuilder,
     private medidasService:MedidasService,
@@ -350,37 +356,36 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
 }
   agregarMedidasDefinitivas() {
   const body = {
-      ...this.medidasDefinitivasForm.value,
-    };
-    this.medidasService.agregarMedidasDefinitivas(body).subscribe({
+    ...this.medidasDefinitivasForm.value,
+  };
+  this.loadingBtnMedidas = true;
+  this.loadingBtnMedidasMsg = 'Guardando medida...';
+  this.medidasService.agregarMedidasDefinitivas(body)
+    .pipe(finalize(() => {
+      this.loadingBtnMedidas = false;
+      this.loadingBtnMedidasMsg = '';
+    }))
+    .subscribe({
       next: () => {
-
-          this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
-          this.resetEditor();
-          toast.success('Medida agregada con éxito', {
-              duration: 3000,
-              description: 'La medida se agregó correctamente.',
-
-            });
-
-        },
-        error: (error:any) => {
-          if (error) {
-            toast.warning(error, {
+        this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
+        this.resetEditor();
+        toast.success('Medida agregada con éxito', {
+          duration: 3000,
+          description: 'La medida se agregó correctamente.',
+        });
+      },
+      error: (error:any) => {
+        if (error) {
+          toast.warning(error, {
             duration: 3000,
-
           });
-
-          }else{
-            toast.error('Error al agregar medida ', {
-              duration: 3000,
-              description: 'Intente nuevamente más tarde.',
-
-            });
-          }
+        } else {
+          toast.error('Error al agregar medida ', {
+            duration: 3000,
+            description: 'Intente nuevamente más tarde.',
+          });
         }
-
-
+      }
     });
 }
   eliminarMedida(registro: any): void {
@@ -428,24 +433,29 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
     fg.markAllAsTouched();
     return;
   }
-      this.medidasService.actualizarMedidasDefinitivas(this.medidasDefinitivasForm.get('id')?.value, this.medidasDefinitivasForm.value).subscribe({
-      next: () => {
-        toast.success('Medida actualizada con éxito', {
-          duration: 3000,
-        });
-        this.resetEditor();
-        this.editMedidasMode = false;
-
-
-        this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
-      },
-      error: (err) => {
-        toast.error('Error al actualizar medida', {
-          duration: 3000,
-          description: err
-        });
-      }
-    });
+    this.loadingBtnMedidas = true;
+    this.loadingBtnMedidasMsg = 'Actualizando medida...';
+    this.medidasService.actualizarMedidasDefinitivas(this.medidasDefinitivasForm.get('id')?.value, this.medidasDefinitivasForm.value)
+      .pipe(finalize(() => {
+        this.loadingBtnMedidas = false;
+        this.loadingBtnMedidasMsg = '';
+      }))
+      .subscribe({
+        next: () => {
+          toast.success('Medida actualizada con éxito', {
+            duration: 3000,
+          });
+          this.resetEditor();
+          this.editMedidasMode = false;
+          this.obtenerMedidasDefinitivasPorAfectado(this.medidasDefinitivasForm.get('idAfectado')?.value);
+        },
+        error: (err) => {
+          toast.error('Error al actualizar medida', {
+            duration: 3000,
+            description: err
+          });
+        }
+      });
   }
    medidaDefinitiva(event: Event) {
     const target = event.target as HTMLSelectElement;
@@ -720,42 +730,40 @@ Por lo que este organismo en uso de nuestras atribuciones legales …………�
   }
 
   submitResoluciones(){
-     if (this.resolucionesForm.invalid) {
-        this.resolucionesForm.markAllAsTouched();
-        toast.error('Formulario inválido', {
-          duration: 3000,
-          description: 'Por Favor, Completa Todos los Campos Requeridos'
-        });
-        return;
-      }
-       const body ={
-    ...this.resolucionesForm.value,
-
-  }
-  this.resolucionesService.postResolucion(body).subscribe({
+    if (this.resolucionesForm.invalid) {
+      this.resolucionesForm.markAllAsTouched();
+      toast.error('Formulario inválido', {
+        duration: 3000,
+        description: 'Por Favor, Completa Todos los Campos Requeridos'
+      });
+      return;
+    }
+    this.loadingSave = true;
+    this.loadingMessage = 'Guardando resolución...';
+    const body = {
+      ...this.resolucionesForm.value,
+    };
+    this.resolucionesService.postResolucion(body).pipe(
+      finalize(() => {
+        this.loadingSave = false;
+        this.loadingMessage = '';
+      })
+    ).subscribe({
       next: (response) => {
         this.idResolucion = response.id;
         this.editMode = true;
         toast.success('Resolución Guardada con Éxito', {
           duration: 3000,
         });
-         this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
-
-
-
+        this.router.navigate(['../../editar/' + this.denunciaId], { relativeTo: this.route });
       },
-
-      error(err) {
-
+      error: (err) => {
         toast.error('Error al guardar', {
           duration: 3000,
-        description:`${err}`
+          description: `${err}`
         });
-
-    }})
-
-
-
+      }
+    });
   }
 
    generarPdf(){

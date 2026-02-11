@@ -102,6 +102,7 @@ export async function obtenertodasLasDenuncias({
   return {
     data: denuncias.map(denuncia => ({
       codigoTramite: denuncia.codigoTramite,
+      estado: denuncia.estado,
       fecha: denuncia.fechaCreado,
       id_canton: denuncia.id_canton,
       idDenuncia: denuncia.id,

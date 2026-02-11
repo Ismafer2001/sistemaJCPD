@@ -125,8 +125,14 @@
 
     <!-- Botón de envío -->
     <div class="pt-4 border-t border-gray-200 flex justify-end">
-      <app-button-submit [label]="'Guardar Control de Impugnación'"
-      (click)="crearControlImpugnacion()"></app-button-submit>
+      <app-button-submit
+        [label]="'Guardar'"
+        color="submit"
+        [loading]="loading"
+
+        [disabled]="controlInpugnacionForm.invalid"
+        (clicked)="crearControlImpugnacion()"
+      ></app-button-submit>
     </div>
   </form>
 </app-card-Form>

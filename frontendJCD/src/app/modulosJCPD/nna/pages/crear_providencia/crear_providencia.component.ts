@@ -59,6 +59,9 @@ export class Crear_providenciaComponent implements OnInit {
   pdfError: string | null = null;
   loading: boolean = false; // Loader principal para guardar/actualizar
   loadingMessage: string = ''; // Mensaje del loader principal
+  loadingMedida: boolean = false;
+  loadingMedidaMessage: string = '';
+  loadingtablasmedidas: boolean = false;
   //--- Configuración de tabs------//
   tabsConfig: any[] = [
     {
@@ -331,10 +334,21 @@ export class Crear_providenciaComponent implements OnInit {
       //Carga de datos de vulneraciones identificadas
   loadMedidasEmergentes(id:number){
     if (!id) return;
+  this.loadingtablasmedidas = true;
   this.medidasService.getMedidasEmergentes(id)
-    .subscribe((data) => {
-      this.medidasEmergentes = data.afectado;
-      console.log('Medidas Emergentes:', this.medidasEmergentes);
+    .subscribe({
+      next: (data) => {
+        this.medidasEmergentes = data.afectado;
+        this.loadingtablasmedidas = false;
+        console.log('Medidas Emergentes:', this.medidasEmergentes);
+      },
+      error: (err) => {
+        this.loadingtablasmedidas = false;
+        toast.error('Error al cargar medidas emergentes', {
+          duration: 3000,
+          description: err
+        });
+      }
     });
   }
     resetEditor() {
@@ -349,39 +363,35 @@ export class Crear_providenciaComponent implements OnInit {
   this.selectedIndex = null;
 }
   agregarMedidasEmergentes() {
+  this.loadingMedida = true;
+  this.loadingMedidaMessage = 'Agregando medida...';
   const body = {
-      ...this.medidasEmergentesForm.value,
-    };
-    this.medidasService.agregarMedidasEmergentes(body).subscribe({
-      next: () => {
-
-          this.loadMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
-          this.resetEditor();
-          toast.success('Medida agregada con éxito', {
-              duration: 3000,
-              description: 'La medida se agregó correctamente.',
-
-            });
-
-        },
-        error: (error:any) => {
-          if (error) {
-            toast.warning(error, {
-            duration: 3000,
-
-          });
-
-          }else{
-            toast.error('Error al agregar medida ', {
-              duration: 3000,
-              description: 'Intente nuevamente más tarde.',
-
-            });
-          }
-        }
-
-
-    });
+    ...this.medidasEmergentesForm.value,
+  };
+  this.medidasService.agregarMedidasEmergentes(body).subscribe({
+    next: () => {
+      this.loadMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
+      this.resetEditor();
+      this.loadingMedida = false;
+      toast.success('Medida agregada con éxito', {
+        duration: 3000,
+        description: 'La medida se agregó correctamente.',
+      });
+    },
+    error: (error: any) => {
+      this.loadingMedida = false;
+      if (error) {
+        toast.warning(error, {
+          duration: 3000,
+        });
+      } else {
+        toast.error('Error al agregar medida ', {
+          duration: 3000,
+          description: 'Intente nuevamente más tarde.',
+        });
+      }
+    }
+  });
 }
   eliminarMedida(registro: any): void {
 
@@ -423,30 +433,32 @@ export class Crear_providenciaComponent implements OnInit {
 
   }
    actualizarMedida(){
-    const fg = this.medidasEmergentesForm;
+  const fg = this.medidasEmergentesForm;
   if (fg.invalid) {
     fg.markAllAsTouched();
     return;
   }
-      this.medidasService.actualizarMedidasEmergentes(this.medidasEmergentesForm.get('id')?.value, this.medidasEmergentesForm.value).subscribe({
-      next: () => {
-        toast.success('Medida actualizada con éxito', {
-          duration: 3000,
-        });
-        this.resetEditor();
-        this.editMedidasMode = false;
-
-
-        this.loadMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
-      },
-      error: (err) => {
-        toast.error('Error al actualizar medida', {
-          duration: 3000,
-          description: err
-        });
-      }
-    });
-  }
+  this.loadingMedida = true;
+  this.loadingMedidaMessage = 'Actualizando medida...';
+  this.medidasService.actualizarMedidasEmergentes(this.medidasEmergentesForm.get('id')?.value, this.medidasEmergentesForm.value).subscribe({
+    next: () => {
+      this.loadingMedida = false;
+      toast.success('Medida actualizada con éxito', {
+        duration: 3000,
+      });
+      this.resetEditor();
+      this.editMedidasMode = false;
+      this.loadMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
+    },
+    error: (err) => {
+      this.loadingMedida = false;
+      toast.error('Error al actualizar medida', {
+        duration: 3000,
+        description: err
+      });
+    }
+  });
+}
    medidaEmergentes(event: Event) {
     const target = event.target as HTMLSelectElement;
   const afectadoId = parseInt(target.value, 10);

@@ -1,3 +1,17 @@
+<!-- Overlay loader for save and PDF generation -->
+@if (pdfLoading || loading) {
+  <div class="fixed inset-0 z-50"
+       style="backdrop-filter: blur(3px); background-color: rgba(255, 255, 255, 0.3);">
+    <div class="flex items-center justify-center h-full">
+      <div class="bg-white bg-opacity-90 backdrop-blur-md rounded-lg p-6 border shadow-xl">
+        <div class="flex flex-col items-center space-y-3">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
+          <p class="text-sm font-medium text-gray-700">{{ loadingMessage }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 <div class="pl-2 py-2 mb-1 flex items-center gap-2">
   <a
     [routerLink]="editMode ? [`../../../${denunciaId}`] : [`../../${denunciaId}`]"
@@ -91,26 +105,14 @@
 
   <!-- Sección PDF -->
   <div class="pdf-container relative" [hidden]="currentTab !== 1">
-    @if (pdfLoading) {
-      <div class="fixed inset-0 z-50"
-           style="backdrop-filter: blur(3px); background-color: rgba(255, 255, 255, 0.3);">
-        <div class="flex items-center justify-center h-full">
-          <div class="bg-white bg-opacity-90 backdrop-blur-md rounded-lg p-6 border shadow-xl">
-            <div class="flex flex-col items-center space-y-3">
-              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
-              <p class="text-sm font-medium text-gray-700">Generando PDF...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    } @else if (pdfError) {
+    @if (pdfError) {
       <div class="error-container bg-red-50 p-6 rounded-lg border border-red-200 text-center space-y-4">
         <div class="text-red-600">
           <i class="fas fa-exclamation-circle text-2xl mb-2"></i>
           <p class="font-medium">Error al generar el PDF</p>
           <p class="text-sm text-red-500">Ha ocurrido un error al generar el documento</p>
         </div>
-        <button 
+        <button
           type="button"
           (click)="retryGenerarPdf()"
           class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"

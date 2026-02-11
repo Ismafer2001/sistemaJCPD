@@ -216,7 +216,7 @@ volver(): void {
     this.router.navigate(['/nna/fases/' + this.denunciaId]);
   }
 
-  editarnotificados(): void{
+  editarnotificados(finalize?: () => void): void{
     if (!this.itemEnEdicion) return;
 
     const formData = this.tipoNotificado === 'Representante Institucional'
@@ -239,33 +239,35 @@ volver(): void {
       }
     });
   }
-  agregarNotificado(): void{
+  agregarNotificado(finalize?: () => void): void{
     if (this.tipoNotificado === 'persona') {
       const body = {
       ...this.nuevoNotificadoForm.value,
 
     };
-    console.log(body);
-    this.notificacionServices.postCrearnotificado(body).subscribe(() => {
-      this.loadOtrosInvolucrados(this.denunciaId);
-      this.nuevoNotificadoForm.reset();
-      this.nuevoNotificadoForm.get('idDenuncia')?.setValue(this.denunciaId);
-
+    this.notificacionServices.postCrearnotificado(body).subscribe({
+      next: () => {
+        this.loadOtrosInvolucrados(this.denunciaId);
+        this.nuevoNotificadoForm.reset();
+        this.nuevoNotificadoForm.get('idDenuncia')?.setValue(this.denunciaId);
+        if (finalize) finalize();
+      },
+      error: () => { if (finalize) finalize(); }
     });
-
     }else{
       const body = {
       ...this.nuevaInstitucionForm.value,
 
     };
-    console.log(body);
-    this.notificacionServices.postCrearnotificado(body).subscribe(() => {
-      this.loadOtrosInvolucrados(this.denunciaId);
-      this.nuevaInstitucionForm.reset();
-      this.nuevaInstitucionForm.get('idDenuncia')?.setValue(this.denunciaId);
-
+    this.notificacionServices.postCrearnotificado(body).subscribe({
+      next: () => {
+        this.loadOtrosInvolucrados(this.denunciaId);
+        this.nuevaInstitucionForm.reset();
+        this.nuevaInstitucionForm.get('idDenuncia')?.setValue(this.denunciaId);
+        if (finalize) finalize();
+      },
+      error: () => { if (finalize) finalize(); }
     });
-
     }
 
   }
@@ -289,15 +291,15 @@ volver(): void {
   }
 
   onSubmit(): void {
+    this.loadingBtnNotificado = true;
+    this.loadingBtnNotificadoMsg = this.modoEdicionNotificados ? 'Actualizando...' : 'Agregando...';
+    const finalize = () => { this.loadingBtnNotificado = false; this.loadingBtnNotificadoMsg = ''; };
     switch (this.modoEdicionNotificados) {
       case true:
-        this.editarnotificados();
-
+        this.editarnotificados(finalize);
         break;
-
       case false:
-        this.agregarNotificado();
-
+        this.agregarNotificado(finalize);
         break;
     }
 
@@ -305,6 +307,9 @@ volver(): void {
 
 
   }
+
+  loadingBtnNotificado: boolean = false;
+  loadingBtnNotificadoMsg: string = '';
 
 }
 export default CrearNotificacionesComponent

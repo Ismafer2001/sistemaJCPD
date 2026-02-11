@@ -7,16 +7,17 @@ import ButtonSubmitComponent from '@shared/components/button-submit/button-submi
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
 import { InputsComponent } from '@shared/components/inputs/inputs.component';
-import { TablaParticipantesComponent } from '../crear_audiencia_contestacion/tablaParticipantes/tablaParticipantes.component';
+
 import { AudienciaPruebasService } from '@nna/services/audienciaPruebas.service';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { UserService } from '@admin/services/user.service';
 import { toast } from 'ngx-sonner';
-import { ArticuloMedidas, Medida, MedidasService } from '@nna/services/medidas.service';
+import {  Medida, MedidasService } from '@nna/services/medidas.service';
 import { AvocatoriaService } from '@nna/services/avocatoria.service';
 import { Vulneracion, VulneracionService } from '@nna/services/vulneracion.service';
 import { catchError, finalize, forkJoin, Observable, of } from 'rxjs';
 import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Formulario.component';
+import TablaprubeasComponent from './tablaprubeas/tablaprubeas.component';
 
 interface involucrados{
   nombres: string,
@@ -44,7 +45,8 @@ interface vulneracionesIdentificadas{
   ReactiveFormsModule,
   NavFormularioComponent,
   InputsComponent,
-  RouterLink
+  RouterLink,
+  TablaprubeasComponent
 
 ]
 
@@ -157,6 +159,10 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
   loading: boolean = false; // Loader principal para guardar/actualizar
   loadingMessage: string = ''; // Mensaje del loader principal
 
+  // Loader para botones de Participantes
+  loadingBtnParticipante: boolean = false;
+  loadingBtnParticipanteMsg: string = '';
+
   constructor(private router: Router,
     private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -192,6 +198,7 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
 
      // Cargar afectados y dirigidoA cuando tengamos el idDenuncia
        if(!this.editMode){
+        console.log('Modo crear activado, cargando afectados y dirigidoA');
         this.cargarAfectadosYDirigidoA();
 
       }
@@ -701,7 +708,7 @@ resetEditor() {
   });
   this.selectedIndex = null;
 }
- // -----------Eliminar una medida aceptando índice o item (flexible)
+
 
 
   //-----SECCION PARTICIPANTES-----//
@@ -731,7 +738,9 @@ resetEditor() {
       cedula: ['', Validators.required],
       tipoParticipante: ['', Validators.required],
       pruebas: [''],
+      testimonio: [''],
       parte: [''],
+      archivos: [null], // Control para archivos
       idDenuncia: [this.denunciaId]
     });
   }
@@ -802,26 +811,69 @@ get participantesArray(): FormArray {
       return [];
     }
   }
-   // Getter para la tabla de pruebas (nombre completo y pruebas)
+   // Getter para la tabla de pruebas (actualizada para mostrar archivos solo de abogados)
   get pruebasTabla() {
     if (!this.participantesArray) {
       return [];
     }
     try {
-      return this.participantesArray.getRawValue()
-        .filter((p: any) => p && p.pruebas && p.pruebas.trim() !== '')
-        .map((p: any) => ({
-          nombreCompleto: (p.nombres || '') + ' ' + (p.apellidos || ''),
-          pruebas: p.pruebas || '',
-          parte: p.parte || ''
-        }));
+      const participantesRaw = this.participantesArray.getRawValue();
+      console.log('Participantes para pruebasTabla:', participantesRaw);
+
+      return participantesRaw
+        .map((p: any, index: number) => {
+          // Solo incluir participantes que tengan pruebas
+          if (!p || !p.pruebas || p.pruebas.trim() === '') {
+            return null;
+          }
+
+          const esAbogado = p.tipoParticipante === 'Abogado';
+
+          // Usar el método getParticipanteArchivo para obtener el archivo correctamente
+          const participanteIndex = this.participantesArray.controls.findIndex(ctrl =>
+            ctrl.get('nombres')?.value === p.nombres &&
+            ctrl.get('apellidos')?.value === p.apellidos &&
+            ctrl.get('cedula')?.value === p.cedula
+          );
+
+          let archivoInfo: any = { texto: 'N/A', descargable: false };
+
+          if (esAbogado) {
+            if (this.editMode && p.archivos) {
+              // En modo edición, mostrar archivo descargable
+              archivoInfo = {
+                texto: ' Descargar',
+                descargable: true,
+                nombreArchivo: p.ruta?.split('/').pop() || p.ruta,
+                codigoTramite: this.audienciaPruebaForm.get('codigoTramite')?.value || ''
+              };
+              console.log(`Archivo para abogado ${p.nombres} ${p.apellidos}:`, archivoInfo);
+            } else if (!this.editMode) {
+              // En modo creación, mostrar estado del archivo
+              const archivoFile = this.getParticipanteArchivo(participanteIndex);
+              archivoInfo = {
+                texto: archivoFile ? '1 archivo' : 'Sin archivo',
+                descargable: false
+              };
+            } else {
+              archivoInfo = { texto: 'Sin archivo', descargable: false };
+            }
+          }
+
+          return {
+            index: participanteIndex,
+            nombreCompleto: (p.nombres || '') + ' ' + (p.apellidos || ''),
+            pruebas: p.pruebas || '',
+            parte: p.parte || '',
+            archivos: archivoInfo
+          };
+        })
+        .filter(item => item !== null); // Remover elementos null
     } catch (error) {
       console.error('Error al obtener pruebasTabla:', error);
       return [];
     }
   }
-
-
 
   // Método para agregar el testimonio al participante seleccionado
   agregarTestimoniosParticipante() {
@@ -966,7 +1018,7 @@ get participantesArray(): FormArray {
           this.pruebasForm.reset();
         }
       }
-      console.log('aquiiiiiii'+this.pruebasTabla);
+      console.log('aquiiiiiii',this.pruebasTabla);
     }
   }
 
@@ -1122,6 +1174,7 @@ get participantesArray(): FormArray {
             pruebas: [p.pruebas || ''],
             testimonio: [p.testimonio || ''],
             parte: [p.parte || ''],
+            archivos: [null], // Control para archivos
             idDenuncia: [p.idDenuncia || this.denunciaId]
           }));
         });
@@ -1198,6 +1251,7 @@ get participantesArray(): FormArray {
 
       // Populate participantes FormArray if provided
       const posibles = data?.participantes ?? data?.asistentes ?? data?.participantesRegistrados ?? [];
+
       const arr = this.participantesArray;
       while (arr.length) arr.removeAt(0);
       if (Array.isArray(posibles) && posibles.length) {
@@ -1210,9 +1264,13 @@ get participantesArray(): FormArray {
             pruebas: [p.pruebas ?? ''],
             testimonio: [p.testimonio ?? ''],
             parte: [p.parte ?? ''],
+            archivos: [p.pathPruebas ?? null], // Control para archivos
+            ruta: [p.ruta ?? ''], // Control
             idDenuncia: [p.idDenuncia ?? this.denunciaId]
           }));
         });
+
+
       }
 
       // sync local copy
@@ -1254,6 +1312,7 @@ get participantesArray(): FormArray {
               pruebas: [''],
               testimonio: [t.testimonio ?? t.texto ?? ''],
               parte: [t.parte ?? ''],
+              archivos: [t.pathPruebas ?? null], // Control para archivos
               idDenuncia: [this.denunciaId]
             }));
           }
@@ -1313,10 +1372,17 @@ get participantesArray(): FormArray {
       this.loading = true;
       this.loadingMessage = 'Actualizando audiencia...';
 
-      const body ={
-      ...this.audienciaPruebaForm.value,idDenuncia: this.denunciaId
-    }
-      this.audienciaPruebasService.actualizarAudienciaPrueba(this.idAudienciaP, body).subscribe({
+      const formValue = this.audienciaPruebaForm.value;
+
+    // Siempre usar FormData y el método con archivos
+    const formData = new FormData();
+
+    // Enviar todos los datos como JSON en el campo 'data' (como espera el backend)
+    formData.append('data', JSON.stringify(formValue));
+
+    // Agregar archivos usando el método establecido (si los hay)
+    this.agregarArchivosAlFormData(formData);
+      this.audienciaPruebasService.actualizarAudienciaPrueba(this.idAudienciaP, formData,this.audienciaPruebaForm.value.codigoTramite,'pruebas').subscribe({
         next: () => {
           this.loading = false; // Desactivar loader
           toast.success('Audiencia Actualizada con Éxito', {
@@ -1328,6 +1394,7 @@ get participantesArray(): FormArray {
     this.isEditAudienciaPruebasActivate=false;
     this.audienciaPruebaForm.disable();
     this.participantesForm.disable();
+    this.audienciaPruebasEditMode(this.idAudienciaP); // Recargar
 
 
         },
@@ -1343,62 +1410,84 @@ get participantesArray(): FormArray {
     }
       //------------GUARDAR AUDIENCIA PRUEBA---///
   submitAudienciaPrueba() {
-  if (this.audienciaPruebaForm.invalid) {
-    this.audienciaPruebaForm.markAllAsTouched();
-    toast.error('Formulario inválido', {
-      duration: 3000,
-      description: 'Por Favor, Completa Todos los Campos Requeridos'
-    });
-    return;
-  }
-
-  // Activar loader
-  this.loading = true;
-  this.loadingMessage = 'Guardando audiencia...';
-
-  const body ={
-    ...this.audienciaPruebaForm.value,
-
-  }
-  this.audienciaPruebasService.postaudienciaPrueba(body).subscribe({
-    next: (body) => {
-      this.loading = false; // Desactivar loader
-      this.idAudienciaP = body.id;
-      toast.success('Audiencia Guardada con Éxito', {
-                duration: 3000,
-              });
-
-              this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
-
-
-    },
-    error: (err) => {
-      this.loading = false; // Desactivar loader
-      toast.error('Error al guardar', {
+    if (this.audienciaPruebaForm.invalid) {
+      this.audienciaPruebaForm.markAllAsTouched();
+      toast.error('Formulario inválido', {
         duration: 3000,
-      description:`${err}`
+        description: 'Por Favor, Completa Todos los Campos Requeridos'
       });
+      return;
+    }
 
-  }})
+    // Activar loader
+    this.loading = true;
+    this.loadingMessage = 'Guardando audiencia...';
 
-}
+    const formValue = this.audienciaPruebaForm.value;
+
+    // Siempre usar FormData y el método con archivos
+    const formData = new FormData();
+
+    // Enviar todos los datos como JSON en el campo 'data' (como espera el backend)
+    formData.append('data', JSON.stringify(formValue));
+
+    // Agregar archivos usando el método establecido (si los hay)
+    this.agregarArchivosAlFormData(formData);
+
+    // Usar siempre el método del servicio que maneja archivos
+    this.audienciaPruebasService.postAudienciaPruebasConArchivos(formData,this.audienciaPruebaForm.value.codigoTramite,'pruebas').subscribe({
+      next: (response) => {
+        this.loading = false;
+        this.idAudienciaP = response.id;
+        toast.success('Audiencia Guardada con Éxito', {
+          duration: 3000,
+        });
+        this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
+      },
+      error: (err) => {
+        this.loading = false;
+        toast.error('Error al guardar', {
+          duration: 3000,
+          description: `${err}`
+        });
+      }
+    });
+  }
 //------------SUBMIT PARTICIPANTES---///
   onSubmitParticipante(): void {
     if (this.isActivateModoEdicionParticipante && this.indexParticipanteEditando !== null) {
       this.actualizarParticipante();
     } else {
+      if (this.participantesForm.invalid) {
+        this.participantesForm.markAllAsTouched();
+        toast.error('Formulario inválido', {
+          duration: 3000,
+          description: 'Por favor, completa todos los campos requeridos'
+        });
+        return;
+      }
+      this.loadingBtnParticipante = true;
+      this.loadingBtnParticipanteMsg = 'Agregando participante...';
       const body = {
         ...this.participantesForm.value,
       };
-      console.log(body);
-      this.audienciaPruebasService.postCrearParticipante(body).subscribe(() => {
-        // Agregar al FormArray de audienciaForm
-        this.participantesArray.push(this.fb.group({ ...this.participantesForm.value }));
-        // Actualizar el array participantes para reflejar el cambio en la tabla
-        this.participantes = this.participantesArray.getRawValue();
-        this.participantesForm.reset();
-        this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
-      });
+      this.audienciaPruebasService.postCrearParticipante(body)
+        .pipe(finalize(() => {
+          this.loadingBtnParticipante = false;
+          this.loadingBtnParticipanteMsg = '';
+        }))
+        .subscribe({
+          next: () => {
+            this.participantesArray.push(this.fb.group({ ...this.participantesForm.value }));
+            this.participantes = this.participantesArray.getRawValue();
+            this.participantesForm.reset();
+            this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+            toast.success('Participante agregado correctamente', { duration: 2000 });
+          },
+          error: (err) => {
+            toast.error('Error al agregar participante', { duration: 3000, description: err });
+          }
+        });
     }
   }
 
@@ -1477,20 +1566,28 @@ get participantesArray(): FormArray {
       return;
     }
 
+    this.loadingBtnParticipante = true;
+    this.loadingBtnParticipanteMsg = 'Actualizando participante...';
     try {
       const participanteActualizado = this.participantesForm.value;
-      this.participantesArray.at(this.indexParticipanteEditando).patchValue(participanteActualizado);
-      this.participantes = this.participantesArray.getRawValue();
+      setTimeout(() => {
+        this.participantesArray.at(this.indexParticipanteEditando!).patchValue(participanteActualizado);
+        this.participantes = this.participantesArray.getRawValue();
 
-      const nombreCompleto = `${participanteActualizado.nombres || ''} ${participanteActualizado.apellidos || ''}`.trim();
+        const nombreCompleto = `${participanteActualizado.nombres || ''} ${participanteActualizado.apellidos || ''}`.trim();
 
-      this.cancelarEdicionParticipante();
+        this.cancelarEdicionParticipante();
 
-      toast.success('Participante actualizado correctamente', {
-        duration: 3000,
-        description: `Los cambios de ${nombreCompleto} han sido guardados`
-      });
+        toast.success('Participante actualizado correctamente', {
+          duration: 3000,
+          description: `Los cambios de ${nombreCompleto} han sido guardados`
+        });
+        this.loadingBtnParticipante = false;
+        this.loadingBtnParticipanteMsg = '';
+      }, 800); // Simula un pequeño delay visual
     } catch (error) {
+      this.loadingBtnParticipante = false;
+      this.loadingBtnParticipanteMsg = '';
       console.error('Error al actualizar participante:', error);
       toast.error('Error al actualizar el participante', {
         duration: 3000,
@@ -1501,14 +1598,19 @@ get participantesArray(): FormArray {
 
   // Cancelar edición participante
   cancelarEdicionParticipante(): void {
-    this.isActivateModoEdicionParticipante = false;
-    this.indexParticipanteEditando = null;
-    this.participantesForm.reset();
-    this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
-
-    toast.info('Edición cancelada', {
-      duration: 2000
-    });
+    this.loadingBtnParticipante = true;
+    this.loadingBtnParticipanteMsg = 'Cancelando...';
+    setTimeout(() => {
+      this.isActivateModoEdicionParticipante = false;
+      this.indexParticipanteEditando = null;
+      this.participantesForm.reset();
+      this.participantesForm.get('idDenuncia')?.setValue(this.denunciaId);
+      this.loadingBtnParticipante = false;
+      this.loadingBtnParticipanteMsg = '';
+      toast.info('Edición cancelada', {
+        duration: 2000
+      });
+    }, 600);
   }
 
   // Eliminar participante
@@ -1605,6 +1707,140 @@ get participantesArray(): FormArray {
     this.generarPdf();
   }
 
+  // Método para descargar archivo de prueba
+  descargarArchivoPrueba(codigoTramite: string, nombreArchivo: string): void {
+    if (!codigoTramite || !nombreArchivo) {
+      toast.error('Información de archivo incompleta', { duration: 3000 });
+      return;
+    }
+
+    console.log('Descargando archivo:', { codigoTramite, nombreArchivo });
+
+    this.audienciaPruebasService.descargarArchivoSeguro(codigoTramite, nombreArchivo)
+      .subscribe({
+        next: (blob: Blob) => {
+          // Crear URL del blob y descargar
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = nombreArchivo;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          toast.success('Archivo descargado exitosamente', { duration: 3000 });
+        },
+        error: (error) => {
+          console.error('Error al descargar archivo:', error);
+          toast.error('Error al descargar el archivo', {
+            duration: 4000,
+            description: 'Verifique que el archivo existe en el servidor'
+          });
+        }
+      });
+  }
+
+  // Método para manejar selección de archivos (patrón anexar_seguimiento)
+  onFileSelected(event: any): void {
+    const files = Array.from(event.target.files) as File[];
+    const participanteIndex = this.pruebasForm.get('participanteIndex')?.value;
+
+    console.log('Archivo seleccionado - Índice participante:', participanteIndex);
+    console.log('Total participantes:', this.participantesArray.length);
+
+    if (participanteIndex === null || participanteIndex === '' || participanteIndex < 0 || participanteIndex >= this.participantesArray.length) {
+      toast.error('Selecciona un abogado primero', { duration: 3000 });
+      return;
+    }
+
+    const participanteCtrl = this.participantesArray.at(participanteIndex);
+    const tipoParticipante = participanteCtrl?.get('tipoParticipante')?.value;
+
+    console.log('Tipo de participante:', tipoParticipante);
+
+    // Solo permitir archivos para abogados
+    if (tipoParticipante !== 'Abogado') {
+      toast.error('Solo los abogados pueden subir archivos', { duration: 3000 });
+      event.target.value = '';
+      return;
+    }
+
+    if (files.length > 0) {
+      // Solo tomar el primer archivo (un archivo por abogado)
+      const archivo = files[0];
+      participanteCtrl.get('archivos')?.setValue(archivo);
+      console.log(`Archivo seleccionado para abogado ${participanteIndex}:`, archivo.name);
+      console.log('Archivo guardado en control:', participanteCtrl.get('archivos')?.value);
+
+      // Forzar detección de cambios
+      this.participantesArray.updateValueAndValidity();
+
+      // Mostrar confirmación
+      toast.success(`Archivo "${archivo.name}" seleccionado`, { duration: 3000 });
+    }
+
+    // Limpiar input para permitir seleccionar el mismo archivo de nuevo si es necesario
+    event.target.value = '';
+  }
+
+  // Método para remover archivo
+  removeFile(participanteIndex: number): void {
+    if (participanteIndex < 0 || participanteIndex >= this.participantesArray.length) return;
+
+    const participanteCtrl = this.participantesArray.at(participanteIndex);
+    const archivo = participanteCtrl?.get('archivos')?.value;
+
+    if (archivo) {
+      participanteCtrl?.get('archivos')?.setValue(null);
+
+      // Forzar detección de cambios
+      this.participantesArray.updateValueAndValidity();
+
+      toast.success('Archivo eliminado', { duration: 2000 });
+      console.log(`Archivo eliminado del participante ${participanteIndex}`);
+    }
+  }
+
+  // Método para obtener archivo de un participante
+  getParticipanteArchivo(participanteIndex: number): File | null {
+    if (participanteIndex < 0 || participanteIndex >= this.participantesArray.length) {
+      console.log('Índice inválido para getParticipanteArchivo:', participanteIndex, 'Total:', this.participantesArray.length);
+      return null;
+    }
+
+    const participanteCtrl = this.participantesArray.at(participanteIndex);
+    const tipoParticipante = participanteCtrl?.get('tipoParticipante')?.value;
+    const archivo = participanteCtrl?.get('archivos')?.value;
+
+    console.log(`getParticipanteArchivo - Índice: ${participanteIndex}, Tipo: ${tipoParticipante}`);
+    console.log('Control archivos value:', archivo);
+    console.log('¿Es File?:', archivo instanceof File);
+
+    // Solo mostrar archivos si es abogado
+    if (tipoParticipante === 'Abogado') {
+      console.log('Archivo encontrado:', archivo?.name || 'null');
+      return archivo instanceof File ? archivo : null;
+    }
+
+    console.log('No es abogado, retornando null');
+    return null;
+  }
+
+  // Método para agregar archivos al FormData (formato específico para backend)
+  private agregarArchivosAlFormData(formData: FormData): void {
+    this.participantesArray.controls.forEach((participante, index) => {
+      const archivo = participante.get('archivos')?.value;
+      const tipoParticipante = participante.get('tipoParticipante')?.value;
+
+      // Solo procesar archivos de abogados
+      if (tipoParticipante === 'Abogado' && archivo instanceof File) {
+        // Usar el formato específico que espera el backend: archivo_abogado_INDEX
+        formData.append(`archivo_abogado_${index}`, archivo);
+        console.log(`Archivo agregado para abogado ${index}:`, archivo.name);
+      }
+    });
+  }
 
 }
 export default Crear_audiencia_pruebaComponent;

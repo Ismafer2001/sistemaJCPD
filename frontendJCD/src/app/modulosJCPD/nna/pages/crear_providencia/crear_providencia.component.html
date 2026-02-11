@@ -1,10 +1,10 @@
 <!-- Loader de carga inicial -->
 @if (initialLoading) {
-  <div class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
-    <div class="text-center">
-      <div class="animate-spin rounded-full h-32 w-32 border-b-2 border-yellow-600"></div>
-      <p class="mt-4 text-lg font-medium text-gray-600">Cargando providencia...</p>
-    </div>
+  <div class="w-full flex flex-col items-center justify-center py-20 bg-gray-50 rounded-lg">
+    <!-- Spinner -->
+    <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-600 mb-6"></div>
+    <p class="text-gray-600 text-xl font-medium">Inicializando providencias</p>
+    <p class="text-gray-500 text-sm mt-2">Cargando datos</p>
   </div>
 }
 
@@ -312,16 +312,26 @@
            </div>
           <div class="flex gap-2 mt-2">
             <!-- Botón principal: Agregar o Actualizar según el modo -->
-            <app-button-submit
-              type="button"
-              [label]="editMedidasMode ? 'Actualizar' : 'Agregar'"
-              [color]="'submit' "
-              [icon]="editMedidasMode ? 'edit' : 'plus'"
-              (clicked)="editMedidasMode ? actualizarMedida() : agregarMedidasEmergentes()">
-            </app-button-submit>
+            <div class="relative">
+              <app-button-submit
+                type="button"
+                [label]="editMedidasMode ? 'Actualizar' : 'Agregar'"
+                [color]="'submit' "
+                [icon]="editMedidasMode ? 'edit' : 'plus'"
+                [disabled]="loadingMedida"
+                (clicked)="editMedidasMode ? actualizarMedida() : agregarMedidasEmergentes()"
+              >
+              </app-button-submit>
+              <!-- Loader overlay for button -->
+              <div *ngIf="loadingMedida" class="absolute inset-0 flex items-center justify-center z-10" style="backdrop-filter: blur(3px); background-color: rgba(255,255,255,0.5);">
+                <div class="bg-white bg-opacity-80 rounded-lg p-2 shadow-md flex items-center gap-2">
+                  <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                  <span class="text-sm text-gray-700">{{ loadingMedidaMessage }}</span>
+                </div>
+              </div>
+            </div>
 
             <!-- Botón Cancelar: Solo visible en modo edición -->
-
             <app-button-submit
               *ngIf="editMedidasMode"
               label="Cancelar"
@@ -338,17 +348,19 @@
 
           class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2"
         >
-          <app-tablaEdit
-            [encabezados]="['ID', 'Medida ', 'Periodo', 'Observaciones']"
-            [columnas]="['idMedida', 'medida', 'periodo', 'observaciones']"
-            [datos]="medidasEmergentes"
-            [acciones]="true"
-            [mostrarEditar]="true"
-            [eliminar]="eliminarMedida.bind(this)"
-            [editar]="SeleccionarParaEditar.bind(this)"
 
 
-          ></app-tablaEdit>
+            <app-tablaEdit
+              [encabezados]="['ID', 'Medida ', 'Periodo', 'Observaciones']"
+              [columnas]="['idMedida', 'medida', 'periodo', 'observaciones']"
+              [datos]="medidasEmergentes"
+              [acciones]="true"
+              [mostrarEditar]="true"
+              [eliminar]="eliminarMedida.bind(this)"
+              [editar]="SeleccionarParaEditar.bind(this)"
+              [isLoading]="loadingtablasmedidas"
+            ></app-tablaEdit>
+
         </div>
       </app-card-Form>
 

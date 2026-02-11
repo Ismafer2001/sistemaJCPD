@@ -13,6 +13,7 @@ import { Canton } from './cantones.models';
 parte: string;
  
  pruebas: string;
+ pathPruebas: string| null;
 
  idAP: number;
   }
@@ -31,6 +32,7 @@ declare tipoParticipante: string;
 
 declare parte: string;
 declare pruebas: string;
+declare pathPruebas: string | null;
 
 declare idAP: number;
 
@@ -45,7 +47,7 @@ declare idAP: number;
     tipoParticipante: { type: DataTypes.STRING },
     parte: { type: DataTypes.STRING },
     pruebas:{type: DataTypes.TEXT},
-   
+    pathPruebas: { type: DataTypes.STRING, allowNull: true },
     idAP:{type: DataTypes.INTEGER},
     
     

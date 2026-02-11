@@ -24,17 +24,21 @@
         </thead>
         <tbody>
           @for (item of datos; track $index) {
-            <tr (click)="RouterLink && RouterLinkparam && !queryParams? navegar(item) : tabs(item)" 
+            <tr (click)="RouterLink && RouterLinkparam && !queryParams? navegar(item) : tabs(item)"
                 class="hover:bg-gray-50 cursor-pointer border-t border-gray-100 transition-colors duration-150">
               @for (col of columnas; track $index) {
                 <td class="overflow-hidden truncate p-3 text-gray-800">
-                  {{obtenerValorAnidado(item, col) || item[col] }}
+                  @if (col === 'fecha') {
+                    {{ formatFecha(obtenerValorAnidado(item, col) || item[col]) }}
+                  } @else {
+                    {{ obtenerValorAnidado(item, col) || item[col] }}
+                  }
                 </td>
               }
               @if (acciones) {
                 <td class="p-3">
                   <div class="flex space-x-2">
-                    <button type="button" 
+                    <button type="button"
                             (click)="editar(item); $event.stopPropagation()"
                             class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-white hover:bg-blue-600 rounded-md transition-all duration-200"
                             title="Editar">
@@ -43,7 +47,7 @@
                         <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
                       </svg>
                     </button>
-                    <button type="button" 
+                    <button type="button"
                             (click)="eliminar(item); $event.stopPropagation()"
                             class="w-8 h-8 flex items-center justify-center text-gray-600 hover:text-white hover:bg-red-600 rounded-md transition-all duration-200"
                             title="Eliminar">
@@ -62,14 +66,14 @@
       <!-- Empty State -->
       <div class="w-full flex flex-col items-center justify-center py-16 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
         <!-- Empty State Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" 
-             class="h-16 w-16 text-gray-400 mb-4" 
-             fill="none" 
-             viewBox="0 0 24 24" 
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="h-16 w-16 text-gray-400 mb-4"
+             fill="none"
+             viewBox="0 0 24 24"
              stroke="currentColor">
-          <path stroke-linecap="round" 
-                stroke-linejoin="round" 
-                stroke-width="1.5" 
+          <path stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="1.5"
                 d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
         <h3 class="text-lg font-medium text-gray-600 mb-2">{{ emptyMessage }}</h3>

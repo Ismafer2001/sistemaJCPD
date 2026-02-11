@@ -24,7 +24,7 @@ router.get('/resolucion-completa/:id', verificarToken, getResolucionCompleta);
 // Ruta para actualizar una resolución
 router.put('/:id', verificarToken, putActualizarResolucion);
 
-router.get('/crearpdf/:id',  getResolucionPdf);
+router.get('/crearpdf/:id',verificarToken,  getResolucionPdf);
 
 
 export default router;

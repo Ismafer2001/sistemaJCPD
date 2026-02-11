@@ -60,13 +60,14 @@
 
     <!-- Botones -->
     <div class="flex gap-3 pt-4">
-      <button
+      <app-button-submit
         type="submit"
+        label="Guardar Inhibición"
+        color="afirmar"
+        [loading]="loading"
+        [loadingText]="loadingMessage"
         [disabled]="inhibirseForm.invalid"
-        class="px-4 py-2 bg-blue-600 text-white rounded-md shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
-      >
-        Guardar Inhibición
-      </button>
+      ></app-button-submit>
 
       <button
         type="button"

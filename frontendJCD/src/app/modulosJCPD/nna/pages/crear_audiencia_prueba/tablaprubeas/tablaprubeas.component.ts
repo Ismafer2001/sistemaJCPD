@@ -1,40 +1,32 @@
-// ...existing code...
-// ...existing code...
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, Input, Output, EventEmitter} from '@angular/core';
 
 @Component({
-  selector: 'app-tablaEdit',
-  templateUrl: './tablaEdit.component.html',
+  selector: 'app-tablapruebas',
+  templateUrl: './tablaprubeas.component.html',
   imports: [CommonModule]
-})
-export class TablaEditComponent  {
 
-  @Input() columnas: string[] = [];
+})
+export class TablaprubeasComponent {
+ @Input() columnas: string[] = [];
   @Input() encabezados: string[] = [];
   @Input() datos: any[] = [];
   @Input() acciones: boolean = false;
   @Input() mostrarEditar = false;
   @Input() botonEstado: boolean = false;
-  @Input() isLoading: boolean = false;
-@Input() emptyMessage: string = 'No se encontraron registros';
-@Input() loadingMessage: string = 'Cargando datos...';
-
   @Input() estado: (user: any) => void = () => {};
   @Input() eliminar: (item: any) => void = () => {};
   @Input() editar: (item: any) => void = () => {};
+  @Output() archivoDescarga = new EventEmitter<any>();
 
-
-
-
-  constructor(private router: Router) {}
-
-
+  descargarArchivo(archivoInfo: any): void {
+    this.archivoDescarga.emit(archivoInfo);
+  }
 
   obtenerValorAnidado(obj: any, path: string): any {
     if (!obj || !path) return null;
     return path.split('.').reduce((acc, prop) => acc?.[prop], obj);
   }
+
 }
-export default TablaEditComponent;
+export default TablaprubeasComponent;

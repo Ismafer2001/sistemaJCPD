@@ -5,6 +5,7 @@ import { InhibirseService, Canton } from '@nna/services/inhibirse.service';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@auth/services/auth.service';
 import { toast } from 'ngx-sonner';
+import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 
 @Component({
   selector: 'app-inhibirse',
@@ -12,10 +13,13 @@ import { toast } from 'ngx-sonner';
   imports: [
     RouterLink,
     ReactiveFormsModule,
-    CommonModule
+    CommonModule,
+    ButtonSubmitComponent
   ]
 })
 export class InhibirseComponent implements OnInit {
+    loading: boolean = false;
+    loadingMessage: string = '';
   inhibirseForm: FormGroup = new FormGroup({});
   cantones: Canton[] = [];
   denunciaId: number = 0;
@@ -86,30 +90,36 @@ export class InhibirseComponent implements OnInit {
   }
 
   onSubmit() {
-   if (this.inhibirseForm.invalid) {
-               this.inhibirseForm.markAllAsTouched();
-               toast.error('Formulario inválido', {
-                 duration: 3000,
-                 description: 'Por Favor, Completa Todos los Campos Requeridos'
-               });
-               return;
-             }
-                const body ={
-       ...this.inhibirseForm.value,
-
-     };
-       this.inhibirseService.IniciarInhibirse(body).subscribe({
-         next: (response) => {
-           toast.success('denuncia remitida con exito', {
-             duration: 3000
-           });
-         },
-         error: (error) => {
-           toast.error('Error al remitir la denuncia', {
-             duration: 3000
-           });
-         }
-       });
+    if (this.inhibirseForm.invalid) {
+      this.inhibirseForm.markAllAsTouched();
+      toast.error('Formulario inválido', {
+        duration: 3000,
+        description: 'Por Favor, Completa Todos los Campos Requeridos'
+      });
+      return;
+    }
+    this.loading = true;
+    this.loadingMessage = 'Guardando inhibición...';
+    const body = {
+      ...this.inhibirseForm.value,
+    };
+    this.inhibirseService.IniciarInhibirse(body).subscribe({
+      next: (response) => {
+        toast.success('denuncia remitida con exito', {
+          duration: 3000
+        });
+        this.loading = false;
+        this.loadingMessage = '';
+      },
+      error: (error) => {
+        toast.error('Error al remitir la denuncia', {
+          duration: 3000,
+          description:error
+        });
+        this.loading = false;
+        this.loadingMessage = '';
+      }
+    });
   }
 
 }

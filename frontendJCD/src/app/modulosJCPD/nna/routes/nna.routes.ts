@@ -74,13 +74,7 @@ export const nnaRoutes: Routes = [
 
 
       },
-      {
-        path:'detalle-vocatoria/:id',
-        loadComponent:()=>
-          import('@nna/pages/fases/pages/avocatoriaDetalles/avocatoriaDetalles.component')
-
-
-      },
+      
       {
         path:'notificaciones/:id',
         loadComponent:()=>

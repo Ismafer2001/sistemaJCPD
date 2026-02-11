@@ -17,7 +17,7 @@ router.get('/informes/:idDenuncia',verificarCantonDenuncia, informesController.o
 // GET /informes/avocatoria/:idDenuncia - Obtener avocatoria por denuncia
 router.get('/datosinforme/:idDenuncia', verificarCantonDenuncia, informesController.obtenerDatosParaInforme);
 
-router.get('/crearpdf/:id',verificarToken,informesController.getInformePdf); 
+router.get('/crearpdf/:id',informesController.getInformePdf); 
 
 // GET /informes/:id - Obtener informe por ID
 router.get('/informe-completo/:id', informesController.obtenerInformePorId);

@@ -30,6 +30,10 @@ import InputsComponent from '@shared/components/inputs/inputs.component';
 InputsComponent],
 })
 export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
+      // Loader para la tabla de medidas emergentes
+      loadingTablaMedidas = false;
+    // Loader para botón Agregar/Actualizar medida
+    loadingMedida = false;
   @ViewChild('formContainer', { static: false }) formContainerRef?: ElementRef<HTMLElement>;
   private destroy$ = new Subject<void>();
   //variables formulario//----------
@@ -438,12 +442,11 @@ CUARTO.-<p>`,
 
    onAfectadoSeleccionado(event: Event) {
     const target = event.target as HTMLSelectElement;
-
     const afectadoId = parseInt(target.value, 10);
     if (!afectadoId) return;
-  // reset editor to avoid leftover selection from other afectado
+    // reset editor to avoid leftover selection from other afectado
     this.resetEditorMedida();
-
+    this.loadingTablaMedidas = true;
     this.consolidateMedidasLoading(afectadoId);
 
   }
@@ -456,22 +459,21 @@ CUARTO.-<p>`,
     if (!afectadoId) {
       console.warn('No se puede cargar medidas: ID de afectado no disponible');
       this.medidasEmergentesArray = [];
+      this.loadingTablaMedidas = false;
       return;
     }
-
     console.log('Cargando medidas para afectado:', afectadoId);
-
     // Verificar primero si ya existen medidas emergentes
     this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
       next: (responseMedidasEmergentes: any) => {
         const medidasEmergentesExistentes = Array.isArray(responseMedidasEmergentes.afectado)
           ? responseMedidasEmergentes.afectado
           : [];
-
         if (medidasEmergentesExistentes.length > 0) {
           // Si ya existen medidas emergentes, cargarlas directamente
           console.log('Medidas emergentes existentes encontradas:', medidasEmergentesExistentes.length);
           this.medidasEmergentesArray = medidasEmergentesExistentes;
+          this.loadingTablaMedidas = false;
         } else {
           // Si no existen, procesar medidas identificadas
           console.log('No hay medidas emergentes, procesando medidas identificadas...');
@@ -493,18 +495,19 @@ CUARTO.-<p>`,
     this.medidasService.getMedidasidentificadas(afectadoId).subscribe({
       next: (response: any) => {
         const medidasIdentificadas = Array.isArray(response?.afectado) ? response.afectado : [];
-
         if (medidasIdentificadas.length > 0) {
           console.log(`Procesando ${medidasIdentificadas.length} medidas identificadas`);
           this.convertirMedidasIdentificadasAEmergentes(medidasIdentificadas, afectadoId);
         } else {
           console.log('No se encontraron medidas identificadas');
           this.medidasEmergentesArray = [];
+          this.loadingTablaMedidas = false;
         }
       },
       error: (error: any) => {
         console.error('Error al cargar medidas identificadas:', error);
         this.medidasEmergentesArray = [];
+        this.loadingTablaMedidas = false;
       }
     });
   }
@@ -521,7 +524,6 @@ CUARTO.-<p>`,
         periodo: medida.periodo || '',
         observaciones: medida.observaciones || 'Medida agregada automáticamente desde medidas identificadas'
       };
-
       return this.medidasService.agregarMedidasEmergentes(medidaEmergente).pipe(
         catchError((error) => {
           console.error('Error al agregar medida emergente:', error);
@@ -529,16 +531,16 @@ CUARTO.-<p>`,
         })
       );
     });
-
     forkJoin(requests).pipe(
-      finalize(() => console.log('Procesamiento de medidas emergentes completado'))
+      finalize(() => {
+        console.log('Procesamiento de medidas emergentes completado');
+        this.loadingTablaMedidas = false;
+      })
     ).subscribe({
       next: (responses) => {
         const exitosos = responses.filter(r => !r.error).length;
         const errores = responses.filter(r => r.error).length;
-
         console.log(`✅ Resultado: ${exitosos} exitosas, ${errores} con errores`);
-
         if (exitosos > 0) {
           // Recargar la lista actualizada desde el servidor
           this.recargarMedidasEmergentes(afectadoId);
@@ -558,54 +560,54 @@ CUARTO.-<p>`,
    * Recarga las medidas emergentes desde el servidor
    */
   private recargarMedidasEmergentes(afectadoId: number): void {
-    this.medidasService.getMedidasEmergentes(afectadoId).subscribe({
-      next: (response: any) => {
-        if (response && Array.isArray(response.afectado)) {
-          this.medidasEmergentesArray = response.afectado;
-          console.log('Lista de medidas emergentes actualizada:', this.medidasEmergentesArray.length);
-        } else {
-          console.warn('Respuesta inesperada al recargar:', response);
+    this.loadingTablaMedidas = true;
+    this.medidasService.getMedidasEmergentes(afectadoId)
+      .pipe(finalize(() => { this.loadingTablaMedidas = false; }))
+      .subscribe({
+        next: (response: any) => {
+          if (response && Array.isArray(response.afectado)) {
+            this.medidasEmergentesArray = response.afectado;
+            console.log('Lista de medidas emergentes actualizada:', this.medidasEmergentesArray.length);
+          } else {
+            console.warn('Respuesta inesperada al recargar:', response);
+            this.medidasEmergentesArray = [];
+          }
+        },
+        error: (error: any) => {
+          console.error('Error al recargar medidas emergentes:', error);
           this.medidasEmergentesArray = [];
         }
-      },
-      error: (error: any) => {
-        console.error('Error al recargar medidas emergentes:', error);
-        this.medidasEmergentesArray = [];
-      }
-    });
+      });
   }
 
 agregarMedida(fg: FormGroup){
 
+  this.loadingMedida = true;
   const body = { ...fg.value };
-  this.medidasService.agregarMedidasEmergentes(body).subscribe({
-    next: () => {
-
-      this.recargarMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
-      this.resetEditorMedida();
-      toast.success('Medida agregada con éxito', {
+  this.medidasService.agregarMedidasEmergentes(body)
+    .pipe(finalize(() => { this.loadingMedida = false; }))
+    .subscribe({
+      next: () => {
+        this.recargarMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
+        this.resetEditorMedida();
+        toast.success('Medida agregada con éxito', {
           duration: 3000,
           description: 'La medida se agregó correctamente.',
-
         });
-
-    },
-    error: (error:any) => {
-      if (error) {
-        toast.warning(error, {
-        duration: 3000,
-
-      });
-
-      }else{
-        toast.error('Error al agregar medida ', {
-          duration: 3000,
-          description: 'Intente nuevamente más tarde.',
-
-        });
+      },
+      error: (error: any) => {
+        if (error) {
+          toast.warning(error, {
+            duration: 3000,
+          });
+        } else {
+          toast.error('Error al agregar medida ', {
+            duration: 3000,
+            description: 'Intente nuevamente más tarde.',
+          });
+        }
       }
-    }
-  });
+    });
 }
 
 resetEditorMedida() {
@@ -624,6 +626,7 @@ resetEditorMedida() {
   eliminarMedida(registro: any): void {
 
 
+    this.loadingTablaMedidas = true;
     this.medidasService.eliminarMedidasEmergentes(registro.id).subscribe({
       next: () => {
         toast.success('Medida eliminada con éxito', {
@@ -636,6 +639,7 @@ resetEditorMedida() {
           duration: 3000,
           description: err
         });
+        this.loadingTablaMedidas = false;
       }
     })
 
@@ -689,28 +693,29 @@ resetEditorMedida() {
   }
   actualizarMedida(){
     const fg = this.medidasEmergentesForm;
-  if (fg.invalid) {
-    fg.markAllAsTouched();
-    return;
-  }
-      this.medidasService.actualizarMedidasEmergentes(this.medidasEmergentesForm.get('id')?.value, this.medidasEmergentesForm.value).subscribe({
-      next: () => {
-        toast.success('Medida actualizada con éxito', {
-          duration: 3000,
-        });
-        this.resetEditorMedida();
-        this.editMediasMode = false;
-
-
-        this.recargarMedidasEmergentes(this.medidasEmergentesForm.get('idAfectado')?.value);
-      },
-      error: (err) => {
-        toast.error('Error al actualizar medida', {
-          duration: 3000,
-          description: err
-        });
-      }
-    });
+    if (fg.invalid) {
+      fg.markAllAsTouched();
+      return;
+    }
+    this.loadingMedida = true;
+    this.medidasService.actualizarMedidasEmergentes(fg.get('id')?.value, fg.value)
+      .pipe(finalize(() => { this.loadingMedida = false; }))
+      .subscribe({
+        next: () => {
+          toast.success('Medida actualizada con éxito', {
+            duration: 3000,
+          });
+          this.resetEditorMedida();
+          this.editMediasMode = false;
+          this.recargarMedidasEmergentes(fg.get('idAfectado')?.value);
+        },
+        error: (err) => {
+          toast.error('Error al actualizar medida', {
+            duration: 3000,
+            description: err
+          });
+        }
+      });
   }
 //---------Botones de la navegacion ------------------//\
 

@@ -182,7 +182,7 @@ ParticipantesAudienciaPruebas.hasMany(Testimonio, {
 });
 
 Resoluciones.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
-Denuncia.hasMany(Resoluciones, { foreignKey: "idDenuncia", as: "resoluciones" });
+Denuncia.hasOne(Resoluciones, { foreignKey: "idDenuncia", as: "resoluciones" });
 
 // Relación uno a muchos entre medida y cumplimiento de medidas
 medida.hasMany(CumpleMedidas, { foreignKey: "idMedida", as: "cumpleM" });
@@ -210,7 +210,7 @@ CierreCaso.hasMany(InformesPresentados, { foreignKey: "idCierraCaso", as: "Infor
 
 //relacion control impugnacion -- resoluciones
 ControlImpugnacion.belongsTo(Resoluciones, { foreignKey: "idResolucion", as: "Resolucion" });
-Resoluciones.hasMany(ControlImpugnacion, { foreignKey: "idResolucion", as: "ControlImpugnaciones" });
+Resoluciones.hasOne(ControlImpugnacion, { foreignKey: "idResolucion", as: "ControlImpugnaciones" });
 
 //relacion desestimiento -- denuncia
 Desestimiento.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "DenunciaDes" });

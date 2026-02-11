@@ -127,6 +127,8 @@
          [label]="modoEdicionInforme ? 'Actualizar' : 'Agregar'"
          [color]="modoEdicionInforme ? 'afirmar' : 'submit'"
          [icon]="modoEdicionInforme ? 'edit' : 'plus'"
+         [loading]="loading"
+
          [disabled]="informesPresentadosForm.invalid"
          (clicked)="agregarInforme()">
        </app-button-submit>
@@ -142,9 +144,10 @@
      </div>
    </form>
    <!-- Tabla de informes agregados -->
-  <div *ngIf="informesPresentadosData.length > 0" class=" bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
-    <h3 class="text-lg font-medium text-gray-900 mb-4">Informes Agregados</h3>
-    <app-tablaEdit
+
+   <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2">
+    <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Informes registrados</h3>
+        <app-tablaEdit
       [encabezados]="encabezadosInformes"
       [columnas]="columnasInformes"
       [datos]="informesPresentadosData"
@@ -155,8 +158,13 @@
     >
     </app-tablaEdit>
 
+   </div>
 
-  </div>
+
+
+
+
+
 
 
   </app-card-Form>

@@ -13,6 +13,22 @@
   </div>
 }
 
+<!-- Overlay transparente para guardar resolución -->
+@if (loadingSave) {
+  <div class="fixed inset-0 z-50"
+       style="backdrop-filter: blur(3px); background-color: rgba(255, 255, 255, 0.3);">
+    <div class="flex items-center justify-center h-full">
+      <div class="bg-white bg-opacity-90 backdrop-blur-md rounded-lg p-6 border shadow-xl">
+        <div class="flex flex-col items-center space-y-3">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-600"></div>
+          <p class="text-sm font-medium text-gray-700">{{ loadingMessage || 'Guardando resolución...' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+}
+
 <div class="pl-2 py-2 mb-1 flex items-center gap-2">
   <a
     [routerLink]="[`../../../fases/${denunciaId}`]"
@@ -226,19 +242,22 @@
               [label]="editMedidasMode ? 'Actualizar' : 'Agregar'"
               [color]="'submit' "
               [icon]="editMedidasMode ? 'edit' : 'plus'"
+              [loading]="loadingBtnMedidas"
+              
               (clicked)="editMedidasMode ? actualizarMedida() : agregarMedidasDefinitivas()">
             </app-button-submit>
 
             <!-- Botón Cancelar: Solo visible en modo edición -->
 
-            <app-button-submit
-              *ngIf="editMedidasMode"
-              label="Cancelar"
-              type="button"
-              color="cancelar"
-              (clicked)="cancelarEdicionMedidas()"
-              >
-            </app-button-submit>
+<app-button-submit
+  *ngIf="editMedidasMode"
+  label="Cancelar"
+  type="button"
+  color="cancelar"
+
+  (clicked)="cancelarEdicionMedidas()"
+>
+</app-button-submit>
           </div>
 
 
