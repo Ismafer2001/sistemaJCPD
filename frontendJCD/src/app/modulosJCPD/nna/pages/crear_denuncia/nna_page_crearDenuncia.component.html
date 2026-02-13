@@ -187,7 +187,7 @@
 
 
 
-  <section  class="bg-gray-50 p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)] ">
+  <section id="mainSectionDenuncia"  class="bg-gray-50 p-4 shadow-lg border-t-1 border-t-blue-300 overflow-y-scroll h-[calc(100vh-8rem)] ">
      <!--------------- Sección del Denunciante------------- -->
 
     <app-card-Form [titulo]="'Datos del Denunciante'" [hidden]="currentTab !== 0" id="datosGenerales" [class]="((existeAvocatoria && !isEditDenunciaActivate ) || (!isEditDenunciaActivate && editMode) ? ' opacity-45 bg bg-gray-50' : '')">

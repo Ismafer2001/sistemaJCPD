@@ -721,6 +721,8 @@ resetEditorMedida() {
 
  cambiarTab(tab: number) {
     this.currentTab = tab;
+    const section = document.getElementById('mainSectionAvocatoria');
+if (section) section.scrollTop = 0;
   }
 regresar(): void {
     this.router.navigate([`/${this.grupo}/fases/`+ this.denunciaAvocatoria?.id]);

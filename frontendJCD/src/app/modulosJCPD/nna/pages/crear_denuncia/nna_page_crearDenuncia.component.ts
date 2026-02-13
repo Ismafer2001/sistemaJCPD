@@ -667,6 +667,8 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
   cambiarTab(tab: number) {
     this.currentTab = tab;
+    const section = document.getElementById('mainSectionDenuncia');
+if (section) section.scrollTop = 0;
   }
   bloquearNumTramite(): void {
     if (!this.numTramiteDisabled) {
@@ -766,7 +768,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       //codigoTramite,
       status: 'completada',
     };
-    
+
 
     this.loading = true;
 
