@@ -65,7 +65,7 @@ export const getResolucionesPorDenuncia = async (req: Request, res: Response) =>
     
 
     const resultado = await obtenerResolucionesPorDenuncia(idDenuncia);
-    console.log( 'aquiiiiiiiiiiii',resultado)
+    
     res.json(resultado);
 
   } catch (error) {

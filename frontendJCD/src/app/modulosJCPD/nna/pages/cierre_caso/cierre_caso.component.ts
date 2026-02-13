@@ -152,24 +152,13 @@ export class Cierre_casoComponent implements OnInit {
       }
       this.loadDatosCierreCaso(this.denunciaId)
       this.formularioCierreCaso();
-      setTimeout(() => {
-        console.log('CierreCasoForm inicial:', this.DatosCierreCaso);
 
-      }, 10000);
 
 
     });
 
 
 
-
-
-    this.CierreCasoForm.valueChanges.subscribe(value => {
-      console.log('CierreCasoForm value changed:', value);
-    });
-    this.informesPresentadosForm.valueChanges.subscribe(value => {
-      console.log('InformesPresentadosForm value changed:', value);
-    });
   }
 
   //FORMULARIO CIEERRE CASO//
@@ -193,15 +182,15 @@ export class Cierre_casoComponent implements OnInit {
       personaEvaluada:['', Validators.required],
       fecha:['', Validators.required],
     });
-    console.log('Formulario informes creado:', this.informesPresentadosForm);
+
   }
 
   loadDatosCierreCaso(denunciaId: number){
     this.cierreCasoService.obtenerDatosParaCierreCaso(denunciaId).subscribe(data=>{
 
-      console.log('datos cierre caso',data);
+
       this.DatosCierreCaso=data;
-      console.log('iDDDDDDDDDDDDDD:', this.DatosCierreCaso);
+
       if(this.editMode){
         this.idCierreCaso=data.id;
 
@@ -230,7 +219,7 @@ export class Cierre_casoComponent implements OnInit {
   }
   cierreCasoEditMode(idCierreCaso: number){
     this.cierreCasoService.getCierreCasoEditMode(idCierreCaso).subscribe(data=>{
-      console.log('Cierre caso en modo edición:', data);
+
 
       // Llenar el formulario principal con los datos del cierreCaso
       if (data.cierreCaso) {
@@ -278,8 +267,7 @@ export class Cierre_casoComponent implements OnInit {
           });
         });
 
-        console.log('Informes cargados en FormArray:', this.informesPresentadosArray.value);
-        console.log('Informes cargados en tabla:', this.informesPresentadosData);
+
       }
     })
 
@@ -321,9 +309,7 @@ export class Cierre_casoComponent implements OnInit {
         // Limpiar el formulario
         this.informesPresentadosForm.reset();
 
-        console.log('Informe agregado:', informeData);
-        console.log('FormArray actual:', this.informesPresentadosArray.value);
-        console.log('Datos tabla:', this.informesPresentadosData);
+
       } else {
         console.log('Formulario inválido');
         // Marcar todos los campos como touched para mostrar errores
@@ -349,7 +335,7 @@ export class Cierre_casoComponent implements OnInit {
       this.cancelarEdicionInforme();
     }
 
-    console.log('Informe eliminado, FormArray actual:', this.informesPresentadosArray.value);
+
   }
 
   // Método para editar informe
@@ -383,8 +369,7 @@ export class Cierre_casoComponent implements OnInit {
       }
     }
 
-    console.log('Datos a editar:', informeData);
-    console.log('Índice encontrado:', index);
+
 
     // Verificar que informeData existe
     if (!informeData) {
@@ -405,7 +390,7 @@ export class Cierre_casoComponent implements OnInit {
     this.modoEdicionInforme = true;
     this.indexInformeEditando = index;
 
-    console.log('Formulario después de patchValue:', this.informesPresentadosForm.value);
+    
   }
 
   // Método para actualizar informe

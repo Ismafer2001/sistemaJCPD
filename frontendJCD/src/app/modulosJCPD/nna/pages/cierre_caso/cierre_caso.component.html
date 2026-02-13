@@ -191,18 +191,14 @@
       </div>
 
     <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700">
-          Actúe el Secretario Auxiliar  <span class="text-red-500">*</span>
-        </label>
-        <select formControlName="secretariaAuxiliar"
-          class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none transition-colors"
-          [ngClass]="{
-            'border-red-500 focus:border-red-500': CierreCasoForm.get('secretariaAuxiliar')?.invalid && CierreCasoForm.get('secretariaAuxiliar')?.touched
-          }">
-          <option value=""  disabled selected hidden >Seleccione...</option>
-          <option value="secretaria"  d >Secretarioa</option>
 
-        </select>
+      <app-inputs
+           label="Actúe el Secretario Auxiliar "
+           type="text"
+           [control]="$any(informesPresentadosForm.get('secretariaAuxiliar')!)"
+         ></app-inputs>
+
+       
       </div>
 
   </app-card-Form>

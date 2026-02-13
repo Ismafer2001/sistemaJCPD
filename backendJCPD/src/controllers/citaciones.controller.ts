@@ -119,12 +119,7 @@ export const getCitacionesDTO = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { tipoInvolucrado, idInvolucrado, idCitacion } = req.query;
-    console.log("Parametros recibidos:", {
-      id,
-      tipoInvolucrado,
-      idInvolucrado,
-      idCitacion,
-    });
+    
 
     const datos = await citacionesDTO(
       id,

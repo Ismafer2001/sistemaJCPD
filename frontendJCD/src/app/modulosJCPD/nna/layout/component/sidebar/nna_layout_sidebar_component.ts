@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '@auth/services/auth.service';
+
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ModalComponent, ModalConfig } from '@shared/components/modal/modal.component';
 import { WebSocketService } from '@shared/services/web-socket.service';
@@ -29,7 +29,7 @@ export class SidebarComponent  implements OnInit {
   // Configuración de grupos válidos
   private gruposValidos = ['nna', 'adultos', 'mujeres'];
 
-  constructor(private authService: AuthService,private router: Router,
+  constructor(private router: Router,
     private route: ActivatedRoute,
     private webSocketService: WebSocketService
   ){

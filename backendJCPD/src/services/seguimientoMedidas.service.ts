@@ -322,7 +322,7 @@ export async function obtenerMedidasCumplidasPorAfectado(idAfectado: number) {
         }
       }
     });
-    console.log(informesPorArchivo);
+    
 
     return Array.from(informesPorArchivo.values());
 

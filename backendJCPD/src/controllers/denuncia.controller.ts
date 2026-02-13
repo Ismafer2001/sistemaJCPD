@@ -51,7 +51,7 @@ export const getDenunciaCompletaCtrl = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'ID de denuncia inválido' });
     }
     const resultado = await getDenunciaCompleta(idDenuncia);
-    console.log(resultado)
+    
     res.json(resultado);
   } catch (error) {
     handlehttp(res, 'ERROR_AL_OBTENER_DENUNCIA_COMPLETA', error);

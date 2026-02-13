@@ -59,7 +59,7 @@ export class Control_desestimientoComponent implements OnInit {
         idDenuncia: data.idDenuncia
       })
 
-      console.log(data);
+      
     });
   }
 

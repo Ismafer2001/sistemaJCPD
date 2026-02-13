@@ -134,7 +134,7 @@ export async function estatus(id:string) {
     controlImpugnacion: controlImpugnacion,
     cierreCaso: estadoPlano.CierreCaso?.estatus || '',
   };
-  console.log(respuestaFormateada);
+  
     return respuestaFormateada;
 
 

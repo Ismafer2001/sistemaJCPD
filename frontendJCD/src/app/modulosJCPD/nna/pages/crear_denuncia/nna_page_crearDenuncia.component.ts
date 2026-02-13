@@ -19,7 +19,7 @@ import { Crear_denuncia_medidasComponent } from './componentes/medidas/crear_den
 import { AuthService } from '@auth/services/auth.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 import { validarCedulaEcuador } from '@shared/validators/cedula.validators';
-import {ButtonSubmitComponent} from '@shared/components/button-submit/button-submit.component';
+
 import { toast } from 'ngx-sonner';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { NavFormularioComponent } from '@shared/components/nav-Formulario/nav-Formulario.component';
@@ -255,15 +255,11 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       this.cargarDatosEdicion(this.idDenuncia);
 
     }
-    // Suscripción para modo creación
-      this.denunciaForm.valueChanges.subscribe((data) => {
-        console.log('Formulario cambiado:', data);
-      });
 
 
       this.denunciaForm.get('tipo_denuncia')?.valueChanges.subscribe((value) => {
         this.tipoDenunciaSeleccionado = value;
-        console.log('Tipo de denuncia seleccionado:', this.tipoDenunciaSeleccionado);
+
          const denuncianteGroup = this.denunciaForm.get('denunciante') as FormGroup;
     Object.keys(denuncianteGroup.controls).forEach(key => {
       denuncianteGroup.get(key)?.updateValueAndValidity();
@@ -565,7 +561,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         const medidasArray = this.denunciaForm.get('medidas') as FormArray;
         medidasArray.clear();
         data.medidas.forEach((item: any) => {
-          console.log('Item medida a procesar:', item);
+
           // ids_medidas puede venir como array de numbers, strings (descripciones) o objetos
           // Normalizamos para que el FormArray almacene IDs como strings
           let ids_medidas: string[] = [];
@@ -640,7 +636,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
           } else {
             indexAfectado = 0;
           }
-          console.log( 'con medidas IDs:', item.medida);
+
 
           if ((typeof item === 'object' && item !== null) && Array.isArray(ids_medidas)) {
             medidasArray.push(this.fb.group({
@@ -770,7 +766,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       //codigoTramite,
       status: 'completada',
     };
-    console.log('Cuerpo de la denuncia a enviar:', body);
+    
 
     this.loading = true;
 

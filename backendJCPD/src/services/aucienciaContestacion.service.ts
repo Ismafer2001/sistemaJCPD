@@ -247,7 +247,7 @@ export async function obtenerAudienciaContestacionCompleta(idAudiencia: number) 
 
 // Servicio para actualizar la audiencia de contestación
 export async function actualizarAudienciaContestacion(idAudiencia: number, data: AudienciaContestacionData) {
-	console.log("data recibida", data);
+	
 	const t = await sequelize.transaction();
 	try {
 		const audiencia = await AudienciaContestacion.findByPk(idAudiencia);
@@ -381,7 +381,7 @@ export async function getAfectadosYDirigidoA(idDenuncia: number) {
 		});
 	}
 
-	console.log("Resultado participantes:", resultado);
+	
 	return resultado;
 }
 

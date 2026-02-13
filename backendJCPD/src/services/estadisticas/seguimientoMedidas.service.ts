@@ -12,7 +12,7 @@ export interface FiltroSeguimientoMedidas {
 
 export const contarMedidasCumplidasYNoCumplidas = async (filtro: FiltroSeguimientoMedidas) => {
   const whereFecha: any = {};
-  console.log('entrando a servicio con ');
+ 
   
   if (filtro.desde && filtro.hasta) {
     // Si hay ambas fechas, crear rango inclusivo

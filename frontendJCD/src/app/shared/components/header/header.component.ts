@@ -66,7 +66,7 @@ export class headerComponent implements OnInit, OnDestroy {
         if (this.idCantonUsuario && this.rolUsuario.toLowerCase() !== 'admin') {
           this.inicializarWebSocket();
         } else if (this.rolUsuario.toLowerCase() === 'admin') {
-          console.log('👨‍💼 Usuario admin detectado - No se conecta al WebSocket');
+
         }
       });
   }
@@ -106,7 +106,7 @@ export class headerComponent implements OnInit, OnDestroy {
   }
 
   private inicializarWebSocket(): void {
-    console.log('🔗 Inicializando WebSocket para cantón:', this.idCantonUsuario);
+
 
     // Conectar al WebSocket
     this.webSocketService.conectar(this.idCantonUsuario);
@@ -119,7 +119,7 @@ export class headerComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          console.log('🔔 Datos recibidos en header:', data);
+
           this.procesarNuevosDatos(data);
         },
         error: (error) => {
@@ -129,22 +129,22 @@ export class headerComponent implements OnInit, OnDestroy {
   }
 
   private cargarDeprecatoriasPendientes(): void {
-    console.log('📋 Cargando deprecatorias pendientes para cantón:', this.idCantonUsuario);
+
 
     this.inhibirseService.getDeprecatoriasPendientes(this.idCantonUsuario)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (deprecatoriasPendientes) => {
-          console.log('📥 Deprecatorias pendientes cargadas:', deprecatoriasPendientes);
+
 
           if (deprecatoriasPendientes && deprecatoriasPendientes.length > 0) {
             // Procesar cada deprecatoria pendiente como notificación
-            console.log(`📦 Procesando ${deprecatoriasPendientes.length} deprecatorias pendientes`);
+
             deprecatoriasPendientes.forEach((deprecatoria: any) => {
               this.agregarNotificacionPendiente(deprecatoria);
             });
 
-            console.log(`✅ Se cargaron ${deprecatoriasPendientes.length} notificaciones pendientes`);
+
           } else {
             console.log('ℹ️ No hay deprecatorias pendientes');
           }
@@ -156,8 +156,7 @@ export class headerComponent implements OnInit, OnDestroy {
   }
 
   private agregarNotificacionPendiente(deprecatoria: any): void {
-    console.log('🔎 Procesando deprecatoria pendiente:', deprecatoria);
-    console.log('📁 Notificaciones actuales antes:', this.notificaciones.length);
+
 
     // Agregar notificación de deprecatoria pendiente
     const notificacionExistente = this.notificaciones.find(n =>
@@ -165,7 +164,7 @@ export class headerComponent implements OnInit, OnDestroy {
     );
 
     if (!notificacionExistente) {
-      console.log('✅ Agregando nueva notificación pendiente:', deprecatoria.codigoTramite);
+
       this.notificaciones.push({
         id: deprecatoria.id || Date.now() + Math.random(),
         mensaje: `Tiene una denuncia remitida: ${deprecatoria.codigoTramite || 'Sin número'}`,
@@ -176,7 +175,7 @@ export class headerComponent implements OnInit, OnDestroy {
 
       // Incrementar contador para casos pendientes
       this.notificacionesNoLeidas++;
-      console.log('📈 Contador actualizado:', this.notificacionesNoLeidas, 'Total notificaciones:', this.notificaciones.length);
+
     } else {
       console.log('⚠️ Notificación pendiente duplicada ignorada:', deprecatoria.codigoTramite || deprecatoria.id);
     }
@@ -185,19 +184,18 @@ export class headerComponent implements OnInit, OnDestroy {
   private procesarNuevosDatos(data: any): void {
     // Verificar si es un array o un objeto individual
     if (Array.isArray(data)) {
-      console.log(`📦 Procesando ${data.length} notificaciones del array`);
+
       data.forEach((caso: any) => {
         this.agregarNotificacionNueva(caso);
       });
     } else {
-      console.log('📝 Procesando notificación individual');
+
       this.agregarNotificacionNueva(data);
     }
   }
 
   private agregarNotificacionNueva(caso: any): void {
-    console.log('🔎 Procesando caso nuevo:', caso);
-    console.log('📁 Notificaciones actuales antes:', this.notificaciones.length);
+
 
     // Verificar si ya existe esta notificación para evitar duplicados
     const notificacionExistente = this.notificaciones.find(n =>
@@ -205,7 +203,7 @@ export class headerComponent implements OnInit, OnDestroy {
     );
 
     if (!notificacionExistente) {
-      console.log('✅ Agregando nueva notificación:', caso.codigoTramite);
+
       // Agregar la nueva notificación al inicio del array
       this.notificaciones.unshift({
         id: caso.id || Date.now(),
@@ -223,15 +221,12 @@ export class headerComponent implements OnInit, OnDestroy {
         this.notificaciones = this.notificaciones.slice(0, 50);
       }
 
-      console.log(`📊 Nueva notificación agregada. Total: ${this.notificaciones.length}, No leídas: ${this.notificacionesNoLeidas}`);
-    } else {
-      console.log('⚠️ Notificación duplicada ignorada:', caso.codigoTramite || caso.id);
-      console.log('🔍 Notificación existente encontrada:', notificacionExistente);
+
     }
   }
 
   ngOnDestroy(): void {
-    console.log('🔄 Desconectando WebSocket desde header...');
+    
     this.destroy$.next();
     this.destroy$.complete();
     this.webSocketService.desconectar();

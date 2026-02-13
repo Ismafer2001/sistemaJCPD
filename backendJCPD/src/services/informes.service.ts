@@ -72,7 +72,7 @@ export async function obtenerInformePorId(id: number) {
       }
     ]
   });
-  console.log('aquiiiiIIIII MIRAAAAAAAAAAAAAAAAAAAAAAA'+informe);
+  
   
   if (!informe) {
     throw new Error('Informe no encontrado');

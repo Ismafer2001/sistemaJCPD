@@ -200,7 +200,7 @@ export const contarMedidasDefinitivasAgrupadasPorArticulo = async (filtro: Filtr
     resumen[articuloKey][nombreMedida] = cantidad;
   }
 
-  console.log("Resumen de medidas agrupadas por artículo:", resumen);
+ 
 
   return {
     medidas: resumen,

@@ -30,7 +30,12 @@ import { DenunciaMujeres } from "./denunciaMujeres.model";
 import { Providencias } from "./providencia.model";
 import { Desestimiento } from "./desestimiento.models";
 import { Informe } from "./informe.models";
+
+import { Expediente } from "./expedientes.models";
 import { Deprecatoria } from "./deprecatoria.models";
+// Relación Denuncia - Expediente (uno a muchos)
+Denuncia.hasMany(Expediente, { foreignKey: "idDenuncia", as: "expedientes" });
+Expediente.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
 
 //relacion usuario -- canton
 usuarios.belongsTo(Canton, { foreignKey: "id_canton" });

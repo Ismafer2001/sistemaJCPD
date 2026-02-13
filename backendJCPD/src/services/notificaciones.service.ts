@@ -229,7 +229,7 @@ export async function actualizarOtrosNotificados(id: number, data: any) {
 
 //servicio para obtener los datos para la notificacion
 export async function notifiacionesDTO(id:string, tipoInvolucrado?:string,idInvolucrado?:string, idNotificacion?:string) {
-  console.log("Entrando a notifiacionesDTO con parámetros:", { id, tipoInvolucrado, idInvolucrado, idNotificacion });
+  
   const existeAvocatoria = await Avocatoria.findOne({ where: { idDenuncia: id } });
 
   if(!existeAvocatoria) {
@@ -321,7 +321,7 @@ export async function notifiacionesDTO(id:string, tipoInvolucrado?:string,idInvo
     include: includes
   });
 
-  console.log("Resultado de la consulta:", resultado);
+  
 
   const { codigoTramite, avocatoria:avo, canton:can, Notificacions:notif, Denunciantes, Denunciados, otros } = resultado as any;
   
@@ -384,7 +384,7 @@ export async function notifiacionesDTO(id:string, tipoInvolucrado?:string,idInvo
         break;
     }
   }
-  console.log("Respuesta formateada:", respuestaFormateada);
+  
 
   return respuestaFormateada;
 }

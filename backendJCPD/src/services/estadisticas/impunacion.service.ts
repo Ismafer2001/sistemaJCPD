@@ -94,7 +94,7 @@ export const contarTotalPorReposicionYApelacion = async (filtro: FiltroImpugnaci
       }
     ]
   });
-  console.log('Reposiciones:', reposiciones, 'Apelaciones:', apelaciones);
+  
 
   return {
     reposiciones,

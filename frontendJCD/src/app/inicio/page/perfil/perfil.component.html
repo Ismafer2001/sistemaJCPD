@@ -1,4 +1,12 @@
 <div class="pl-2 py-2 mb-1 flex items-center gap-2">
+  <a
+    [routerLink]="[`/`]"
+      class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
+    >
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"  class=" size-5 ">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" />
+        </svg>
+    </a>
   <h3 class="text-2xl font-bold">Mi perfil</h3>
 </div>
 
@@ -25,27 +33,67 @@
           Información Personal
         </h4>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div *ngIf="!editPersonalInfoMode" class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-1">
             <label class="text-sm font-medium text-gray-500">Nombres</label>
             <p class="text-gray-900 font-medium">{{ usuarioData.nombres }}</p>
           </div>
-
           <div class="space-y-1">
             <label class="text-sm font-medium text-gray-500">Apellidos</label>
             <p class="text-gray-900 font-medium">{{ usuarioData.apellidos }}</p>
           </div>
-
           <div class="space-y-1">
             <label class="text-sm font-medium text-gray-500">Correo Electrónico</label>
             <p class="text-gray-900 font-medium">{{ usuarioData.correo }}</p>
           </div>
-
           <div class="space-y-1">
             <label class="text-sm font-medium text-gray-500">Usuario</label>
             <p class="text-gray-900 font-medium">{{ usuarioData.usuario }}</p>
           </div>
         </div>
+
+        <div *ngIf="!editPersonalInfoMode" class="flex justify-end mt-4">
+          <app-button-submit
+            [type]="'button'"
+            [label]="'Editar'"
+            [color]="'afirmar'"
+            (clicked)="startEditPersonalInfo()"
+          ></app-button-submit>
+        </div>
+
+        <form *ngIf="editPersonalInfoMode" [formGroup]="personalInfoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Nombres</label>
+            <app-inputs [type]="'text'" [placeholder]="'Nombres'" [control]="$any(personalInfoForm.get('nombres'))"></app-inputs>
+          </div>
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Apellidos</label>
+            <app-inputs [type]="'text'" [placeholder]="'Apellidos'" [control]="$any(personalInfoForm.get('apellidos'))"></app-inputs>
+          </div>
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Correo Electrónico</label>
+            <app-inputs [type]="'email'" [placeholder]="'Correo Electrónico'" [control]="$any(personalInfoForm.get('correo'))"></app-inputs>
+          </div>
+          <div class="space-y-1">
+            <label class="text-sm font-medium text-gray-500">Usuario</label>
+            <app-inputs [type]="'text'" [placeholder]="'Usuario'" [control]="$any(personalInfoForm.get('usuario'))"></app-inputs>
+          </div>
+          <div class="col-span-2 flex justify-end mt-4 gap-2">
+            <app-button-submit
+              [type]="'button'"
+              [label]="'Cancelar'"
+              [color]="'cancelar'"
+              (clicked)="cancelEditPersonalInfo()"
+            ></app-button-submit>
+            <app-button-submit
+              [type]="'button'"
+              [label]="'Guardar'"
+              [color]="'afirmar'"
+              [disabled]="personalInfoForm.invalid"
+              (clicked)="savePersonalInfo()"
+            ></app-button-submit>
+          </div>
+        </form>
       </div>
 
       <!-- Información del Sistema -->

@@ -17,6 +17,7 @@ import { cambiarEstadoUsuario } from '../services/user.service';
 
 const router = Router();
 router.get('/activos',verificarToken, obtenerActivosPorCantonPrincipal);
+router.put('/:id', putUsuario);  
 //----------rutas solo admin-------------//
 router.use(verificarToken, soloAdmin); 
 
@@ -27,7 +28,7 @@ router.get('/', getObtenerUsuarios); // Listar usuarios activos
 router.post('/', postRegistrarUsuario); // Crear usuario
 
 //----------RUTAS PUT ----------//
-router.put('/:id', putUsuario);              // Actualizar usuario
+            // Actualizar usuario
 router.put('/desactivar/:id', putEstadoUsuario);   // Desactivar (soft delete)
 
 //----------RUTAS DELETE ----------//

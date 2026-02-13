@@ -124,7 +124,7 @@ export async function crearOtrosCitados(data: any) {
 }
 // secivio para obtener los datos para la citacion 
 export async function citacionesDTO(id:string, tipoInvolucrado?:string, idInvolucrado?:string, idCitacion?:string) {
-  console.log("Entrando a citacionesDTO con parámetros:", { id, tipoInvolucrado, idInvolucrado, idCitacion });
+ 
   // Configurar includes dinámicamente según el tipoInvolucrado
   const includes: any[] = [
     {

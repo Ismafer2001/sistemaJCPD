@@ -10,7 +10,7 @@ export const errorInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      //console.log('Error capturado por el interceptor:', error);
+      console.log('Error capturado por el interceptor:', error);
 
       // Extraer mensaje del servidor
       const serverMessage = error.error?.message || error.message || error.statusText;

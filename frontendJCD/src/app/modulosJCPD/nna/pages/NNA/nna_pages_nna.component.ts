@@ -90,7 +90,7 @@ export class NnaPageNnaComponent implements OnInit {
     this.error = null;
     this.denunciaService.obtenerDenunciasPaginadas(this.grupo, page, this.pageSize, search, searchBy).subscribe({
       next: (resp) => {
-        console.log('Denuncias paginadas recibidas:', resp);
+
         this.denuncias = resp.data || [];
         this.totalDenuncias = resp.total || 0;
         this.currentPage = resp.page || page;
@@ -208,7 +208,7 @@ export class NnaPageNnaComponent implements OnInit {
   principalesActivos(){
     this.UserService.usuariosActivos().subscribe(n=>{
       this.miembrosPrincipales=n;
-      console.log('Miembros principales:', this.miembrosPrincipales);
+      
     })
   }
 

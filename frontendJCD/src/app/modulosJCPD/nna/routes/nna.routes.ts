@@ -39,6 +39,13 @@ export const nnaRoutes: Routes = [
 
       },
       {
+        path:'expediente/:id',
+        loadComponent:()=>
+          import('@nna/pages/fases/pages/subirExpediente/subirExpediente.component')
+
+
+      },
+      {
         path:'informes/:id',
         loadComponent:()=>
           import('@nna/pages/fases/pages/Crear_informe/Crear_informe.component')
@@ -74,7 +81,7 @@ export const nnaRoutes: Routes = [
 
 
       },
-      
+
       {
         path:'notificaciones/:id',
         loadComponent:()=>

@@ -5,7 +5,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AnexarSeguimientoMedidasService } from '@nna/services/anexarSeguimientoMedidas.service';
 import { DenunciaService } from '@nna/services/denuncia.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
-import TablaEditComponent from '@shared/components/tabla/tablaEdit/tablaEdit.component';
+
 import { CumpleMedidasTablaComponent } from './cumpleMedidasTabla/cumpleMedidasTabla.component';
 import { environment } from 'environments/environment';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
@@ -64,9 +64,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       this.cargarInformesCumplimiento(); // Cargar informes existentes
     });
     this.formularioSeguimientoMedidas();
-    this.seguimientoMedidasForm.valueChanges.subscribe(val=>{
-      console.log('Formulario cambiado:', val);
-    })
+
   }
 
   // Getter para acceder al FormArray de medidas
@@ -76,7 +74,7 @@ export class Anexar_seguimientoComponent implements OnInit {
    loadDenunciaDetails(id: number) {
     this.denunciaService.obtenerDenuncia(id).subscribe(data => {
       // Aquí puedes manejar los detalles de la denuncia
-      console.log('Detalles de la denuncia:', data);
+
 
       // Almacenar el código de trámite para usar en las URLs de descarga
       this.codigoTramite = data.codigoTramite || '';
@@ -137,7 +135,7 @@ export class Anexar_seguimientoComponent implements OnInit {
   loadMediadasPorCumplir(idAfectado: number) {
     this.anexarSeguimientoMedidasService.getMedidasporCumplir(idAfectado).subscribe({
       next: (data) => {
-        console.log('Medidas por cumplir recibidas:', data);
+
         this.medidasPorCumplir = data;
         this.construirFormularioMedidas(data);
       },
@@ -152,7 +150,7 @@ export class Anexar_seguimientoComponent implements OnInit {
     this.anexarSeguimientoMedidasService.getMedidasCumplidas(idAfectado).subscribe({
       next: (data) => {
 
-        console.log('idPath cargado en el formulario:', this.seguimientoMedidasForm.value.idPath);
+
         // Procesar datos y actualizar tabla
         this.procesarMedidasCumplidasReales(data);
 
@@ -169,7 +167,7 @@ export class Anexar_seguimientoComponent implements OnInit {
   loadMedidasDefinitivas(idAfectado: number) {
     this.anexarSeguimientoMedidasService.getMedidasDeAfectados(idAfectado).subscribe({
       next: (data) => {
-        console.log('Medidas definitivas recibidas:', data);
+
         // El servicio ya retorna el formato correcto: [{ idMedida, medida, idAfectado }]
         this.construirFormularioMedidasDefinitivas(data.data);
       },
@@ -187,7 +185,7 @@ export class Anexar_seguimientoComponent implements OnInit {
 
       return;
     }
-    console.log('Datos reales de medidas cumplidas recibidos:', data);
+
 
     this.tablaMedidasCumplidas = data.map((item, index) => {
       // Extraer información del archivo
@@ -221,7 +219,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       };
     });
 
-    console.log('Tabla de medidas cumplidas procesada:', this.tablaMedidasCumplidas);
+
   }
 
    construirFormularioMedidas(medidas: any) {
@@ -248,7 +246,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       return;
     }
 
-    console.log(`Construyendo formulario con ${medidasArray.length} medidas`);
+
 
     // Crear un FormGroup para cada medida
     medidasArray.forEach((medida, index) => {
@@ -261,7 +259,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       this.medidasArray.push(medidaFormGroup);
     });
 
-    console.log('FormArray de medidas construido con', this.medidasArray.length, 'elementos');
+
   }
 
   // Método específico para construir formulario con medidas definitivas
@@ -275,7 +273,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       return;
     }
 
-    console.log(`Construyendo formulario definitivo con ${medidas.length} medidas`);
+
 
     // Crear un FormGroup para cada medida usando el formato del servicio
     medidas.forEach((medida, index) => {
@@ -288,7 +286,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       this.medidasArray.push(medidaFormGroup);
     });
 
-    console.log('FormArray definitivo construido con', this.medidasArray.length, 'elementos');
+
   }
 
   limpiarMedidas() {
@@ -308,7 +306,7 @@ export class Anexar_seguimientoComponent implements OnInit {
     const medidaControl = this.medidasArray.at(index);
     if (medidaControl) {
       medidaControl.patchValue({ cumple });
-      console.log(`Medida ${index} actualizada - Cumple: ${cumple}`);
+
     }
   }
 
@@ -448,12 +446,8 @@ export class Anexar_seguimientoComponent implements OnInit {
   cargarInformesCumplimiento() {
     if (this.afectadoSeleccionado) {
       // Si hay un afectado seleccionado, cargar sus medidas cumplidas reales
-      console.log('Cargando informes reales para afectado:', this.afectadoSeleccionado);
-      this.loadMedidasCumplidas(this.afectadoSeleccionado);
-    } else {
-      // Si no hay afectado seleccionado, usar datos de prueba
-      console.log('No hay afectado seleccionado, usando datos de prueba...');
 
+      this.loadMedidasCumplidas(this.afectadoSeleccionado);
     }
   }
 
@@ -517,9 +511,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       console.warn('Nombre de archivo no válido');
       return;
     }
-    console.log('evento:', event);
-    console.log('Nombre del archivo a descargar:', nombreArchivo);
-    console.log('Código de trámite actual:', this.codigoTramite);
+    
 
     if (!this.codigoTramite) {
       console.warn('Código de trámite no disponible');

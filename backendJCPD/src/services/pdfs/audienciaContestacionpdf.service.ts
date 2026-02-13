@@ -37,7 +37,7 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
   const fecha = datos.fechaAvocatoria || '';
   const canton = datos.canton || '';
   const hora = datos.hora || '';
-  console.log('horaaaa'+hora)
+ 
 
   // Extraer nombres de participantes por tipo
     const getNombresPorTipo = (tipo: string) => {

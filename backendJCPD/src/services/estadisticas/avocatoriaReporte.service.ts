@@ -187,7 +187,7 @@ export const contarMedidasAgrupadasPorArticulo = async (filtro: FiltroAvocatoria
     resumen[articuloKey][nombreMedida] = cantidad;
   }
 
-  console.log("Resumen de medidas agrupadas por artículo:", resumen);
+  
 
   return resumen;
 };

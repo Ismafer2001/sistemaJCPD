@@ -362,7 +362,7 @@ export async function AudienciaPruebasDTO(id:string) {
 		id: audienciaPruebas?.id || null
 
 	};
-	console.log(respuestaFormateada);
+	
 
 	return respuestaFormateada;
 }
@@ -389,7 +389,7 @@ export const vulneracionesPorAfectado = async (afectadoId: number) => {
   });
 
   if (!afectado) return [];
-  console.log("Afectado encontrado:", afectado.toJSON());
+  
 
   const resultadoFormateado = [];
 

@@ -45,7 +45,7 @@ export const obtenerResumenDenuncias = async (filtros: {
       baseWhere.fechaCreado = { [Op.lte]: hastaDate };
     }
   }
-  console.log('Base Where after date filter:', baseWhere);
+  
   
 
   const totalDenuncias = await Denuncia.count({ where: baseWhere  });

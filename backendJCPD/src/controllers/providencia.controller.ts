@@ -43,7 +43,7 @@ export const createProvidencia = async (req: Request, res: Response) => {
         res.status(201).json(nuevaProvidencia);
 
     } catch (error: any) {
-        console.error('Error al crear providencia:', error);
+        
         handlehttp(res, 'ERROR_CREATE_PROVIDENCIA', error);
     }
 };
@@ -73,7 +73,7 @@ export const getProvidenciaById = async (req: Request, res: Response) => {
         res.json(providencia);
 
     } catch (error: any) {
-        console.error('Error al obtener providencia:', error);
+        
         handlehttp(res, 'ERROR_GET_PROVIDENCIA', error);
     }
 };
@@ -103,7 +103,7 @@ export const getProvidenciaIdByDenunciaId = async (req: Request, res: Response) 
         res.json({ idProvidencia });
 
     } catch (error: any) {
-        console.error('Error al obtener ID de providencia por denuncia:', error);
+        
         handlehttp(res, 'ERROR_GET_PROVIDENCIA_ID_BY_DENUNCIA', error);
     }
 };
@@ -152,7 +152,7 @@ export const updateProvidencia = async (req: Request, res: Response) => {
         res.json(providenciaActualizada);
 
     } catch (error: any) {
-        console.error('Error al actualizar providencia:', error);
+       
         handlehttp(res, 'ERROR_UPDATE_PROVIDENCIA', error);
     }
 };

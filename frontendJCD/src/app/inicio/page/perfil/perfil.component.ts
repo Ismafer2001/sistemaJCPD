@@ -3,17 +3,21 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { CardFormComponent } from "@shared/components/card-Form/card-Form.component";
 import { AuthService } from '@auth/services/auth.service';
-import { perfil } from '@shared/interfaces/perfil.interface';
+
 import { toast } from 'ngx-sonner';
 import InputsComponent from '@shared/components/inputs/inputs.component';
 import { ButtonSubmitComponent } from '@shared/components/button-submit/button-submit.component';
+import { UserService } from '@admin/services/user.service';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-perfil',
   templateUrl: './perfil.component.html',
-  imports: [CardFormComponent, CommonModule, ReactiveFormsModule, InputsComponent, ButtonSubmitComponent],
+  imports: [CardFormComponent, CommonModule, ReactiveFormsModule, InputsComponent, ButtonSubmitComponent,RouterLink],
 })
 export class PerfilComponent implements OnInit {
+    editPersonalInfoMode = false;
+    personalInfoForm!: FormGroup;
   usuarioData: any | null = null;
   cargando = true;
 
@@ -21,13 +25,66 @@ export class PerfilComponent implements OnInit {
   passwordForm!: FormGroup;
   cambiandoPassword = false;
 
-  constructor(private AuthService: AuthService, private fb: FormBuilder) {
+  constructor(private AuthService: AuthService, private fb: FormBuilder,private userService: UserService) {
     this.initPasswordForm();
   }
 
   ngOnInit() {
     this.loadUsuarioData();
+    this.initPersonalInfoForm();
+
   }
+  initPersonalInfoForm() {
+      this.personalInfoForm = this.fb.group({
+        nombres: ['', Validators.required],
+        apellidos: ['', Validators.required],
+        correo: ['', [Validators.required, Validators.email]],
+        usuario: ['', Validators.required]
+      });
+    }
+
+    startEditPersonalInfo() {
+      if (!this.usuarioData) return;
+      this.editPersonalInfoMode = true;
+      this.personalInfoForm.patchValue({
+        nombres: this.usuarioData.nombres,
+        apellidos: this.usuarioData.apellidos,
+        correo: this.usuarioData.correo,
+        usuario: this.usuarioData.usuario
+      });
+    }
+
+    cancelEditPersonalInfo() {
+      this.editPersonalInfoMode = false;
+      this.personalInfoForm.reset();
+    }
+
+    savePersonalInfo() {
+      if (this.personalInfoForm.invalid) {
+        this.personalInfoForm.markAllAsTouched();
+        toast.error('Por favor, complete correctamente todos los campos');
+        return;
+      }
+      // Aquí deberías llamar a tu servicio para actualizar la info personal
+      // Ejemplo:
+      // this.AuthService.actualizarPerfil(this.personalInfoForm.value).subscribe(...)
+      // Simulación:
+       const datosActualizacion = {...this.personalInfoForm.value};
+
+      this.userService.actualizarUsuario(this.usuarioData.id, datosActualizacion).subscribe({
+      next: () => {
+
+        toast.success('¡Datos actualizados exitosamente!');
+        this.loadUsuarioData();
+      },
+      error: (error) => {
+        console.error('Error al actualizar usuario:', error);
+        toast.error('Error al actualizar el usuario. Inténtelo nuevamente.');
+      }
+    });
+
+      this.editPersonalInfoMode = false;
+    }
 
   initPasswordForm() {
     this.passwordForm = this.fb.group({
@@ -52,9 +109,10 @@ export class PerfilComponent implements OnInit {
     this.cargando = true;
     this.AuthService.getUsuarioActual().subscribe({
       next: (user) => {
+        console.log('Datos del usuario cargados', user);
         this.usuarioData = user;
         this.cargando = false;
-        console.log('Datos del usuario:', user);
+
       },
       error: (error) => {
         console.error('Error al cargar datos del usuario:', error);
@@ -78,7 +136,7 @@ export class PerfilComponent implements OnInit {
     // Usar el servicio actualizarContrasenia
     this.AuthService.actualizarContrasenia(passwordActual, nuevaPassword).subscribe({
       next: (response) => {
-        console.log('Respuesta del cambio de contraseña:', response);
+
         toast.success('Contraseña cambiada exitosamente');
         this.passwordForm.reset();
         this.cambiandoPassword = false;

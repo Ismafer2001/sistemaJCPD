@@ -277,7 +277,7 @@ export async function getDenunciaCompleta(idDenuncia: number) {
 //servicio para insertar denuncia completa
 export async function insertDenuncia(denunciajson: datosDenuncia) {
   const t: Transaction = await sequelize.transaction(); //iniciallizams transaccion
-  console.log("Denuncia JSON recibida:", denunciajson);
+  
 
   try {
     const {
@@ -290,7 +290,7 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
       
     } = denunciajson;
 
-    console.log("Denuncia a insertar:", denuncia);
+    
 
 
   

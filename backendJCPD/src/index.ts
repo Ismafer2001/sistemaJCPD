@@ -21,7 +21,7 @@ import estatusRoutes from './routes/estatus.routes';
 import path from 'path';
 import audienciaContestacionRoutes from './routes/audienciaContestacion.routes';
 import audienciaPruebaRoutes from './routes/audienciaPruebas.routes';
-import uploadRoutes from './routes/upload.routes';
+
 import seguimientoMedidasRoutes from './routes/seguimientoMedidas.routes';
 import resolucionesRoutes from './routes/resoluciones.routes';
 import  ControlImpugnacionRoutes  from './routes/controlImpugnacion.routes';
@@ -29,6 +29,7 @@ import desestimiento from './routes/desestimiento.routes'
 import cierreCasoRoutes from './routes/cierreCaso.routes';
 import informesRoutes from './routes/informes.routes';
 import inhibirseRoutes from './routes/inhibirse.routes';
+import expedientesRoutes from './routes/subirExpediente.routes';
 
 
 const app = express();
@@ -39,7 +40,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middlewares
 app.use(cors()); // Permite todas las conexiones
-app.use('/api/upload', uploadRoutes);
+
 app.use(express.json());
 
 // Rutas
@@ -65,7 +66,7 @@ app.use('/api/cierre-caso', cierreCasoRoutes);
 app.use('/api/desestimiento', desestimiento);
 app.use('/api/informes', informesRoutes);
 app.use('/api/inhibirse', inhibirseRoutes);
-
+app.use('/api/expedientes', expedientesRoutes);
 app.use('/files', express.static(path.join(__dirname, '../uploads')));
 
 

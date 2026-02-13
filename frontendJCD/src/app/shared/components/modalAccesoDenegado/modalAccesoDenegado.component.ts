@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
-import { CommonModule, Location } from '@angular/common';
-import { ErrorModalService, AuthErrorData } from '../../services/error-modal.service';
+import { CommonModule } from '@angular/common';
+import { ErrorModalService } from '../../services/error-modal.service';
 import { Subject, takeUntil } from 'rxjs';
 import { Router } from '@angular/router';
 
@@ -17,7 +17,7 @@ export class ModalAccesoDenegadoComponent implements OnInit, OnDestroy {
   errorType: '401' | '403' | null = null;
   private destroy$ = new Subject<void>();
   private errorModalService = inject(ErrorModalService);
-  private location = inject(Location);
+
   private router = inject(Router);
 
   ngOnInit() {

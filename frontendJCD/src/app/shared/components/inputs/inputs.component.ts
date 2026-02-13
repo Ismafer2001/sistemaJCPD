@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { Component, Input } from '@angular/core';
+import {  FormControl,  ReactiveFormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-inputs',
@@ -8,7 +8,7 @@ import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule } from '@a
   imports: [CommonModule,ReactiveFormsModule]
 
 })
-export class InputsComponent implements OnInit {
+export class InputsComponent  {
 
   @Input() label!: string;
    @Input() control!: FormControl;
@@ -19,8 +19,7 @@ export class InputsComponent implements OnInit {
 
 
 
-  ngOnInit() {
-  }
+
 
    get isInvalid(): boolean {
     return !!(this.control?.invalid && this.control?.touched);

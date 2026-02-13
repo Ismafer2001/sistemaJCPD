@@ -20,8 +20,8 @@ const storage = multer.diskStorage({
 		cb(null, baseDir);
 	},
 	filename: (req, file, cb) => {
-		const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-		cb(null, uniqueSuffix + '-' + file.originalname);
+		const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E5);
+		cb(null,uniqueSuffix + '-' +file.originalname  );
 	}
 });
 
@@ -32,14 +32,14 @@ export const upload = multer({
 	},
 	fileFilter: (req, file, cb) => {
 		// Permitir solo PDFs, imágenes y documentos
-		const allowedTypes = /pdf|jpg|jpeg|png|doc|docx/;
+		const allowedTypes = /pdf|jpg|jpeg/;
 		const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
 		const mimetype = allowedTypes.test(file.mimetype);
 		
 		if (mimetype && extname) {
 			return cb(null, true);
 		} else {
-			cb(new Error('Solo se permiten archivos PDF, imágenes y documentos'));
+			cb(new Error('Solo se permiten archivos PDF e imágenes '));
 		}
 	}
 });

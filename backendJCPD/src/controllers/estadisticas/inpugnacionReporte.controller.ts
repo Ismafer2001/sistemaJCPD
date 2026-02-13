@@ -11,9 +11,9 @@ const getImpugnacionesTotales = async (req: Request, res: Response) => {
             desde: req.query.desde as string,
             hasta: req.query.hasta as string,
         };
-        console.log('llegue al controlador de impugnacion', filtros);
+        
         const response = await contarTotalPorReposicionYApelacion(filtros);
-        console.log('respuesta del servicio de impugnacion', response);
+        
         res.json(response);
     } catch (e) {
         handlehttp(res, "ERROR_GET_IMPUGNACIONES_TOTALES");

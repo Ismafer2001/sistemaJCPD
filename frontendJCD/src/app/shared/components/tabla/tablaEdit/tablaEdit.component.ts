@@ -1,8 +1,7 @@
-// ...existing code...
-// ...existing code...
+
 import { CommonModule } from '@angular/common';
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, Input } from '@angular/core';
+
 
 @Component({
   selector: 'app-tablaEdit',
@@ -25,10 +24,12 @@ export class TablaEditComponent  {
   @Input() eliminar: (item: any) => void = () => {};
   @Input() editar: (item: any) => void = () => {};
 
+      @Input() descargar: (item: any) => void = () => {};
 
 
 
-  constructor(private router: Router) {}
+
+  constructor() {}
 
 
 

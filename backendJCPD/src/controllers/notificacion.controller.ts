@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import {  Otros } from "../models";
+
 import { crearNotificacion,
    crearOtrosNotificados,
     notifiacionesDTO,
@@ -100,7 +100,7 @@ export const getNotificacionDTO = async(req:Request, res:Response) =>{
     const { id } = req.params;
     const { tipoInvolucrado, idInvolucrado,idNotificacion } = req.query;
     
-    console.log("Parametros recibidos:", { id, tipoInvolucrado, idInvolucrado, idNotificacion });
+    
 
     // Si se proporcionan parámetros, validar que ambos estén presentes
     if ((tipoInvolucrado && !idInvolucrado) || (!tipoInvolucrado && idInvolucrado)) {

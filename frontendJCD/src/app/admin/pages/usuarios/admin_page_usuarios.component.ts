@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -90,12 +90,12 @@ export class Admin_page_usuariosComponent implements OnInit  {
   }
 
   editar(usuario: Usuario) {
-    console.log('Iniciando edición para el usuario:', usuario);
+
     // Guardar el usuario que se va a editar
     this.usuarioEnEdicion = usuario;
     // Mostrar modal de validación de contraseña
     this.mostrarModalValidacion = true;
-    console.log('Solicitando validación para editar usuario:', this.mostrarModalValidacion);
+
     this.passwordValidacion = '';
   }
 
@@ -111,7 +111,7 @@ export class Admin_page_usuariosComponent implements OnInit  {
     // Validar contraseña con el backend
     this.authService.validarPasswordAdmin(password).subscribe({
       next: (esValida) => {
-        console.log('Resultado de la validación de contraseña:', esValida);
+
         if (esValida) {
           toast.success('Contraseña validada correctamente');
           // Cerrar el modal programáticamente solo si la validación es exitosa
@@ -152,7 +152,7 @@ export class Admin_page_usuariosComponent implements OnInit  {
     // Hacer que la contraseña no sea requerida en modo edición
     this.userForm.get('contrasena')?.clearValidators();
     this.userForm.get('contrasena')?.updateValueAndValidity();
-    console.log('Editando usuario:', this.usuarioEnEdicion);
+    
   }
 
   cerrarModalValidacion() {

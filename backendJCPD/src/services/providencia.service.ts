@@ -96,7 +96,7 @@ export async function obtenerDatosProvidenciaCompleta(id: number): Promise<any |
                 }
             ]
         });
-        console.log('Providencia encontrada:', providencia);
+        
         
         if (!providencia) {
             return null;

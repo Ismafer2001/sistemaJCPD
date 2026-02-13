@@ -44,7 +44,7 @@ export const postAgregarCumplimientoMedidas = async (req: Request, res: Response
       medidas: req.body.medidas ? JSON.parse(req.body.medidas) : []
     };
 
-    console.log('Payload recibido en el controlador:', payload);
+    
     
     const resultado = await agregarCumplimientoMedidas(payload);
     res.status(201).json(resultado);
@@ -79,10 +79,10 @@ export const putActualizarCumplimientoMedidas = async (req: Request, res: Respon
       medidas: req.body.medidas ? JSON.parse(req.body.medidas) : []
     };
 
-    console.log('Payload para actualizar recibido en el controlador:', payload);
+    
     
     const resultado = await actualizarCumplimientoMedidas(payload);
-    console.log('fileName anterior:', resultado.informeanterior.fileName)
+   
     if(resultado.informeanterior.fileName){
       const rutaAnterior =path.resolve(resultado.informeanterior.pathInforme);
       fs.unlinkSync(rutaAnterior);

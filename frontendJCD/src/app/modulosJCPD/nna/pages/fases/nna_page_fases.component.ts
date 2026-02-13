@@ -59,7 +59,7 @@ ngOnInit() {
   const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
     if (this.gruposValidos.includes(grupo || '')) {
       this.grupo = grupo!;
-      console.log('Grupo válido asignado en crear denuncia:', this.grupo);
+      
     } else {
       console.error('Grupo no válido:', grupo);
       this.grupo = '';
@@ -70,7 +70,7 @@ ngOnInit() {
     this.error = null;
 
     // 🔥 DELAY ARTIFICIAL PARA TESTING DEL LOADER (REMOVER EN PRODUCCIÓN)
-   
+
       forkJoin({
         denuncia: this.denunciaServices.obtenerDenuncia(this.denunciaId),
         estatus: this.fasesService.getEstatus(this.denunciaId),
@@ -109,7 +109,7 @@ ngOnInit() {
 
 }
 ngOnDestroy() {
-    console.log('✅ Limpiando todas las suscripciones');
+
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -283,14 +283,20 @@ ngOnDestroy() {
   }
 
   onInhibirse(): void {
-    console.log('Acción: Inhibirse');
+
   this.router.navigate([`/${this.grupo}/inhibicion`, this.denunciaId]);
     this.isDropdownOpen = false;
   }
 
   onCrearOficio(): void {
-    console.log('Acción: Crear Oficio');
+
     this.router.navigate([`/${this.grupo}/informes`, this.denunciaId]);
+    this.isDropdownOpen = false;
+  }
+
+   onSubirExpediente(): void {
+
+    this.router.navigate([`/${this.grupo}/expediente`, this.denunciaId]);
     this.isDropdownOpen = false;
   }
 

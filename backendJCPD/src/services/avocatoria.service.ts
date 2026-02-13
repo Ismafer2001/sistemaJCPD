@@ -329,7 +329,7 @@ export const medidasPorAfectado = async (afectadoId: number) => {
       });
     }
   }
-  console.log("Medidas identificadas:", resultadoFormateado);
+  
   return resultadoFormateado;
 };
 

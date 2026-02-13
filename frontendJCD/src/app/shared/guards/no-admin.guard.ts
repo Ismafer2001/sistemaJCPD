@@ -31,7 +31,7 @@ export class NoAdminGuard implements CanActivate {
 
       // Si es admin, NO debe acceder a estas rutas
       if (decoded.rol === 'admin') {
-        console.log('👨‍💼 Admin intentando acceder a ruta de grupos - Redirigiendo a /admin');
+        
         this.router.navigate(['/admin/usuarios']);
         return false;
       }

@@ -44,9 +44,7 @@ export class Nna_creardenuncia_vulneracionesComponent implements OnInit {
       this.filtrarVulneraciones(cuerpoLegal);
     });
 
-    this.vulneracionesForm.valueChanges.subscribe(nna => {
-      console.log(this.formArray.value)
-    });
+    
   }
 
 
@@ -72,7 +70,7 @@ get mapeoAfectados() {
       next: (data) => {
         this.vulneraciones = data;
         this.vulneracionesFiltradas = data; // Inicialmente mostrar todas
-        console.log(data)
+
         // Inicializar los controles del formulario para cada vulneración
 
       },
