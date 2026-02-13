@@ -44,17 +44,18 @@ export async function crearCierreCaso(data: CierreCasoData) {
         }
 
         // Confirmar la transacción
-        await transaction.commit();
+       
 
         // Retornar el cierre de caso creado con los informes
         const cierreCasoCompleto = await CierreCaso.findByPk(cierreCaso.id, {
             include: [
                 {
                     model: InformesPresentados,
-                    as: 'informesPresentados'
+                    as: 'InformesPresentados'
                 }
             ]
         });
+         await transaction.commit();
 
         return cierreCasoCompleto;
 

@@ -153,6 +153,10 @@ export class Cierre_casoComponent implements OnInit {
       this.loadDatosCierreCaso(this.denunciaId)
       this.formularioCierreCaso();
 
+      this.CierreCasoForm.valueChanges.subscribe((data) => {
+        console.log('Cambios en el formulario:', data);
+      })
+
 
 
     });
@@ -390,7 +394,7 @@ export class Cierre_casoComponent implements OnInit {
     this.modoEdicionInforme = true;
     this.indexInformeEditando = index;
 
-    
+
   }
 
   // Método para actualizar informe
