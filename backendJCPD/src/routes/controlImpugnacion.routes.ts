@@ -1,10 +1,9 @@
 import { Router } from 'express';
 import { 
-  postCrearControlImpugnacion, 
-  getControlImpugnacionPorResolucion, 
-  getControlImpugnacionPorId, 
-  putActualizarControlImpugnacion, 
-  getTodosLosControlesImpugnacion,
+  postCrearControlImpugnacion,  
+  putActualizarControlImpugnacion,
+  getControlImpugnacionPorDenuncia, 
+  
   getCodigoTramiteDenuncia 
 } from '../controllers/controlImpugnacion.controller';
 import { verificarToken } from '../middleware/auth.middleware';
@@ -18,14 +17,12 @@ router.get('/codigo-tramite/:id',verificarToken,verificarCantonDenuncia, getCodi
 // Ruta para crear un nuevo control de impugnación
 router.post('/', verificarToken, postCrearControlImpugnacion);
 
-// Ruta para obtener todos los controles de impugnación
-router.get('/', getTodosLosControlesImpugnacion);
+
 
 // Ruta para obtener controles de impugnación por resolución
-router.get('/resolucion/:idResolucion', getControlImpugnacionPorResolucion);
+router.get('/:idResolucion', getControlImpugnacionPorDenuncia);
 
-// Ruta para obtener un control de impugnación por ID
-router.get('/:id', getControlImpugnacionPorId);
+
 
 // Ruta para actualizar un control de impugnación
 router.put('/:id', verificarToken, putActualizarControlImpugnacion);

@@ -45,7 +45,7 @@ export const PDFnotificacion = async (res: Response,idNotificacion: any) => {
   contentBlocks.push({ text: 'MIEMBROS DE LA JUNTA CANTONAL DE PROTECCION DE DERECHOS', style: 'section', margin: [0, 10, 0, 10] });
   contentBlocks.push({ text: 'RECIBIDO: ____________________________________________' });
   contentBlocks.push({ text: 'FECHA: _______________' });
-  contentBlocks.push({ text: 'DIRECCIÓN: ____________________________________________' });
+  contentBlocks.push({ text: [{ text: 'DIRECCIÓN:' }, { text: pdfData.direccion || '', bold: true }] });
   contentBlocks.push({ text: 'NOTA: Se adjunta Avocatoria de Conocimiento, medidas de protección y boleta de auxilio', margin: [0, 10, 0, 0] });
 
   const docDefinition: any = {

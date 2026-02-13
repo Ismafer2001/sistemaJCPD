@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ControlImpugnacionService } from '@nna/services/controlImpugnacion.service';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
@@ -21,14 +21,18 @@ export class Control_impugnacionComponent implements OnInit {
   denunciaId!:number;
   loading: boolean = false; // Loader principal para guardar
   loadingMessage: string = ''; // Mensaje del loader principal
+  editMode=false;
 
   constructor(private fb: FormBuilder,
      private route: ActivatedRoute,
-     private controlImpugnacionService: ControlImpugnacionService) { }
+     private controlImpugnacionService: ControlImpugnacionService,
+    private router: Router) { }
 
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
+      if (params['modo'] === 'editar') {
+        this.editMode = true;}
       this.loadDatosResolucion();
     });
 
@@ -42,18 +46,38 @@ export class Control_impugnacionComponent implements OnInit {
   formularioControlImpugnacion() {
     this.controlInpugnacionForm = this.fb.group({
       codigoTramite: [''],
-      recurso_impugnacion: [''],
+      recurso_impugnacion: ['', Validators.required],
       idResolucion:[this.denunciaId],
-      resolucionImpugnada: [''],
-      periodo: [''],
-      resultado: [''],
+      resolucionImpugnada: ['',    Validators.required],
+      periodo: ['', Validators.required],
+      resultado: ['', Validators.required],
       // Define los controles del formulario aquí
     });
   }
 
+  loadimpugnacionEditMode(){
+    this.controlImpugnacionService.getcontrolinpugnacion(this.denunciaId).subscribe(data=>{
+
+      this.controlInpugnacionForm.patchValue({
+        recurso_impugnacion: data[0].recurso_impugnacion,
+        resolucionImpugnada: data[0].resolucionImpugnada,
+      periodo:data[0].periodo ,
+      resultado:data[0].resultado ,
+      })
+
+      console.log(data);
+    });
+
+  }
+
   loadDatosResolucion() {
-    console.log(this.denunciaId)
     this.controlImpugnacionService.getCodigoTramite(this.denunciaId).subscribe(data=>{
+      console.log('Datos de resolución obtenidos:', data);
+      if(this.editMode){
+      this.loadimpugnacionEditMode()
+
+
+    }
       this.controlInpugnacionForm.patchValue({
         codigoTramite: data.codigoTramite,
         idResolucion: data.idResolucion
@@ -61,6 +85,13 @@ export class Control_impugnacionComponent implements OnInit {
 
       console.log(data);
     });
+
+
+
+
+
+
+
   }
 
   crearControlImpugnacion() {
@@ -84,6 +115,7 @@ export class Control_impugnacionComponent implements OnInit {
     this.controlImpugnacionService.postControlImpugnacion(body).subscribe({
       next: (response) => {
         this.loading = false; // Desactivar loader
+         this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
         toast.success('Control de Impugnación creado con éxito', {
           duration: 3000
         });

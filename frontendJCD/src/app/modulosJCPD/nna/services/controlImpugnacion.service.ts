@@ -16,4 +16,7 @@ getCodigoTramite(id: number) {
 postControlImpugnacion(controlImpugnacion: any) {
     return this.http.post<any>(`${this.apiUrl}/`, controlImpugnacion);
 }
+getcontrolinpugnacion(id: number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+}
 }

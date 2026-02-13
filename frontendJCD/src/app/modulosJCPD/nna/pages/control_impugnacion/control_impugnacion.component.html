@@ -130,7 +130,7 @@
         color="submit"
         [loading]="loading"
 
-        [disabled]="controlInpugnacionForm.invalid"
+        [disabled]="controlInpugnacionForm.invalid || editMode"
         (clicked)="crearControlImpugnacion()"
       ></app-button-submit>
     </div>

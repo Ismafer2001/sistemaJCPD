@@ -131,7 +131,7 @@ export async function estatus(id:string) {
     resoluciones: estadoPlano.resoluciones?.estatus || '',
     cumplimientoMedidas: cumplimientoMedidas,
     desestimiento: estadoPlano.Desestimiento?.estatus || '',
-    controlImpugnacion: controlImpugnacion,
+    controlImpugnacion: estadoPlano.resoluciones?.ControlImpugnaciones?.estatus || '',
     cierreCaso: estadoPlano.CierreCaso?.estatus || '',
   };
   

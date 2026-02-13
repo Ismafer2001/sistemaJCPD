@@ -1,3 +1,4 @@
+
 import sequelize from '../config/database';
 import { ControlImpugnacion, Resoluciones, Denuncia } from "../models";
 
@@ -53,58 +54,41 @@ export async function crearControlImpugnacion(data: {
   }
 }
 
-// Servicio para obtener controles de impugnación por resolución
-export async function obtenerControlImpugnacionPorResolucion(idResolucion: number) {
+// Servicio para obtener controles de impugnación por denuncia
+export async function obtenerControlImpugnacionPorDenuncia(idDenuncia: number) {
   try {
-    const controles = await ControlImpugnacion.findAll({
-      where: { idResolucion },
-      include: [
-        {
-          model: Resoluciones,
-          as: 'Resolucion',
-          attributes: ['codigoTramite', 'resolucion']
-        }
-      ],
-      order: [['fechaCreado', 'DESC']]
+    // Buscar todas las resoluciones asociadas a la denuncia
+    const resoluciones = await Resoluciones.findAll({
+      where: { idDenuncia },
+      attributes: ['id']
     });
 
-    return {
-      success: true,
-      data: controles,
-      count: controles.length
-    };
-
-  } catch (error) {
-    throw error;
-  }
-}
-
-// Servicio para obtener un control de impugnación por ID
-export async function obtenerControlImpugnacionPorId(id: number) {
-  try {
-    const control = await ControlImpugnacion.findByPk(id, {
-      include: [
-        {
-          model: Resoluciones,
-          as: 'Resolucion',
-          attributes: ['codigoTramite', 'resolucion', 'consideraciones']
-        }
-      ]
-    });
-
-    if (!control) {
-      throw new Error('Control de impugnación no encontrado');
+    const idsResoluciones = resoluciones.map((r: any) => r.id);
+    if (idsResoluciones.length === 0) {
+      return { success: true, data: [], count: 0 };
     }
 
-    return {
-      success: true,
-      data: control
-    };
+    // Buscar todos los controles de impugnación asociados a esas resoluciones
+    const controles = await ControlImpugnacion.findAll({
+      where: { idResolucion: idsResoluciones },
+      include: [
+        {
+          model: Resoluciones,
+          as: 'Resolucion',
+          attributes: []
+        }
+      ],
+      
+    });
+
+    return controles;
 
   } catch (error) {
     throw error;
   }
 }
+
+
 
 // Servicio para actualizar un control de impugnación
 export async function actualizarControlImpugnacion(id: number, data: {
@@ -153,30 +137,7 @@ export async function actualizarControlImpugnacion(id: number, data: {
   }
 }
 
-// Servicio para obtener todos los controles de impugnación
-export async function obtenerTodosLosControlesImpugnacion() {
-  try {
-    const controles = await ControlImpugnacion.findAll({
-      include: [
-        {
-          model: Resoluciones,
-          as: 'Resolucion',
-          attributes: ['codigoTramite', 'resolucion']
-        }
-      ],
-      order: [['fechaCreado', 'DESC']]
-    });
 
-    return {
-      success: true,
-      data: controles,
-      count: controles.length
-    };
-
-  } catch (error) {
-    throw error;
-  }
-}
 
 // Servicio para obtener el código de trámite de una denuncia específica
 export async function obtenerCodigoTramiteDenuncia(id: number) {
@@ -201,8 +162,8 @@ export async function obtenerCodigoTramiteDenuncia(id: number) {
     const denunciaData = denuncia as any;
     
     // Formatear respuesta con solo idResolucion y codigoTramite
-    const resolucion = denunciaData.resoluciones && denunciaData.resoluciones.length > 0 
-      ? denunciaData.resoluciones[0] 
+    const resolucion = denunciaData.resoluciones
+      ? denunciaData.resoluciones 
       : null;
 
     return {

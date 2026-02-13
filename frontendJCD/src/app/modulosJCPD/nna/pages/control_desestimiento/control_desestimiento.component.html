@@ -92,8 +92,8 @@
         [label]="'Guardar '"
         color="submit"
         [loading]="loading"
-        
-        [disabled]="controlDesestimientoForm.invalid"
+
+        [disabled]="controlDesestimientoForm.invalid || editMode"
         (clicked)="crearControlDesestimiento()"
       ></app-button-submit>
     </div>

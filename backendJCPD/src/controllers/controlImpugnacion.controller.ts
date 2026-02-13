@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
 import { 
   crearControlImpugnacion, 
-  obtenerControlImpugnacionPorResolucion, 
-  obtenerControlImpugnacionPorId, 
+ 
   actualizarControlImpugnacion, 
-  obtenerTodosLosControlesImpugnacion,
-  obtenerCodigoTramiteDenuncia
+  
+  obtenerCodigoTramiteDenuncia,
+  obtenerControlImpugnacionPorDenuncia
 } from '../services/controlImpugnacion.service';
 import { handlehttp } from '../utils/error.handle';
 
@@ -42,7 +42,7 @@ export const postCrearControlImpugnacion = async (req: Request, res: Response) =
 
 
 // Controlador para obtener controles de impugnación por resolución
-export const getControlImpugnacionPorResolucion = async (req: Request, res: Response) => {
+export const getControlImpugnacionPorDenuncia = async (req: Request, res: Response) => {
   try {
     const idResolucion = parseInt(req.params.idResolucion);
 
@@ -53,7 +53,7 @@ export const getControlImpugnacionPorResolucion = async (req: Request, res: Resp
       });
     }
 
-    const controles = await obtenerControlImpugnacionPorResolucion(idResolucion);
+    const controles = await obtenerControlImpugnacionPorDenuncia(idResolucion);
     res.json(controles);
 
   } catch (error) {
@@ -61,25 +61,7 @@ export const getControlImpugnacionPorResolucion = async (req: Request, res: Resp
   }
 };
 
-// Controlador para obtener un control de impugnación por ID
-export const getControlImpugnacionPorId = async (req: Request, res: Response) => {
-  try {
-    const id = parseInt(req.params.id);
 
-    if (isNaN(id)) {
-      return res.status(400).json({
-        success: false,
-        message: 'ID de control de impugnación inválido'
-      });
-    }
-
-    const control = await obtenerControlImpugnacionPorId(id);
-    res.json(control);
-
-  } catch (error) {
-    handlehttp(res, 'Error al obtener control de impugnación', error);
-  }
-};
 
 // Controlador para actualizar un control de impugnación
 export const putActualizarControlImpugnacion = async (req: Request, res: Response) => {
@@ -116,16 +98,7 @@ export const putActualizarControlImpugnacion = async (req: Request, res: Respons
   }
 };
 
-// Controlador para obtener todos los controles de impugnación
-export const getTodosLosControlesImpugnacion = async (req: Request, res: Response) => {
-  try {
-    const controles = await obtenerTodosLosControlesImpugnacion();
-    res.json(controles);
 
-  } catch (error) {
-    handlehttp(res, 'Error al obtener controles de impugnación', error);
-  }
-};
 
 // Controlador para obtener el código de trámite de una denuncia
 export const getCodigoTramiteDenuncia = async (req: Request, res: Response) => {
@@ -142,6 +115,7 @@ export const getCodigoTramiteDenuncia = async (req: Request, res: Response) => {
     }
 
     const resultado = await obtenerCodigoTramiteDenuncia(idDenuncia);
+    
     res.json(resultado);
 
   } catch (error) {

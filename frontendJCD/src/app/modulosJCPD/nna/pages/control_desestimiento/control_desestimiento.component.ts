@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DesestimientoService } from '@nna/services/desestimiento.service';
 import { ButtonSubmitComponent } from '@shared/components/button-submit/button-submit.component';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
@@ -23,16 +23,21 @@ export class Control_desestimientoComponent implements OnInit {
   denunciaId!:number;
   loading: boolean = false; // Loader principal para guardar
   loadingMessage: string = ''; // Mensaje del loader principal
+  editMode=false;
 
   constructor(
     private fb: FormBuilder,
      private route: ActivatedRoute,
-     private desestimientoService: DesestimientoService
+     private desestimientoService: DesestimientoService,
+     private router: Router
   ) { }
 
   ngOnInit() {
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
+      if (params['modo'] === 'editar') {
+        this.editMode = true;
+      }
       this.loadDatosDenuncia();
     });
 
@@ -59,7 +64,7 @@ export class Control_desestimientoComponent implements OnInit {
         idDenuncia: data.idDenuncia
       })
 
-      
+
     });
   }
 
@@ -81,11 +86,12 @@ export class Control_desestimientoComponent implements OnInit {
       ...this.controlDesestimientoForm.value
     };
 
-    console.log('Datos del desestimiento:', body);
+
 
    this.desestimientoService.postControlDesestimiento(body).subscribe({
       next: (response) => {
         this.loading = false; // Desactivar loader
+        this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
         toast.success('Control de Desestimiento creado con éxito', {
           duration: 3000
         });

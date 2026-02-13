@@ -231,8 +231,8 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
           table: {
             widths: ['*', '*'],
             body: [
-              [ { text: 'SI', bold: true, fillColor: Number(datos.seRatifica) === 1 ? '#B6D7A8' : undefined } as any,
-                { text: 'NO', bold: true, fillColor: Number(datos.seRatifica) === 0 ? '#F4CCCC' : undefined } as any ]
+              [ { text: 'SI', bold: true, fillColor: datos.seRatifica === 'si' ? '#B6D7A8' : undefined } as any,
+                { text: 'NO', bold: true, fillColor: datos.seRatifica === 'no' ? '#F4CCCC' : undefined } as any ]
             ]
           },
           layout: 'box',
@@ -332,20 +332,31 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
           fontSize: 14,
           bold: true
         },
-        {
-          columns: [
-            { width: '*', text: '' },
-            {
-              width: 'auto',
-              stack: (datos.usuariosPrincipalesCanton || []).slice(0, 3).map((u: any) => [
-                { text: u.nombres + ' ' + u.apellidos, alignment: 'center', margin: [0, 20, 0, 0] }
-              ])
+          {
+            table: {
+              widths: ['33%', '33%', '34%'],
+              body: [
+                ['', '', ''],
+                [
+                  { text: '________________________', alignment: 'center', margin: [0, 40, 0, 5] },
+                  { text: '________________________', alignment: 'center', margin: [0, 40, 0, 5] },
+                  { text: '________________________', alignment: 'center', margin: [0, 40, 0, 5] }
+                ],
+                [
+                  { text: (datos.usuariosPrincipalesCanton && datos.usuariosPrincipalesCanton[0]) ? `${datos.usuariosPrincipalesCanton[0].nombres || ''} ${datos.usuariosPrincipalesCanton[0].apellidos || ''}`.trim() : '', bold: true, alignment: 'center' },
+                  { text: (datos.usuariosPrincipalesCanton && datos.usuariosPrincipalesCanton[1]) ? `${datos.usuariosPrincipalesCanton[1].nombres || ''} ${datos.usuariosPrincipalesCanton[1].apellidos || ''}`.trim() : '', bold: true, alignment: 'center' },
+                  { text: (datos.usuariosPrincipalesCanton && datos.usuariosPrincipalesCanton[2]) ? `${datos.usuariosPrincipalesCanton[2].nombres || ''} ${datos.usuariosPrincipalesCanton[2].apellidos || ''}`.trim() : '', bold: true, alignment: 'center' }
+                ],
+                [
+                  { text: datos.usuariosPrincipalesCanton?.[0]?.cargo || '', alignment: 'center' },
+                  { text: datos.usuariosPrincipalesCanton?.[1]?.cargo || '', alignment: 'center' },
+                  { text: datos.usuariosPrincipalesCanton?.[2]?.cargo || '', alignment: 'center' }
+                ]
+              ]
             },
-            { width: '*', text: '' }
-          ],
-          columnGap: 10,
-          margin: [0, 40, 0, 0]
-        },
+            layout: 'noBorders',
+            margin: [0, 40, 0, 0]
+          },
   ],
   defaultStyle: {
   fontSize: 12,

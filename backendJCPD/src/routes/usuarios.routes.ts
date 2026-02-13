@@ -10,7 +10,7 @@ import {
 import { obtenerActivosPorCantonPrincipal } from '../controllers/usuarios.controller';
 import { verificarToken } from '../middleware/auth.middleware';
 import { soloAdmin } from '../middleware/rol.middleware';
-import { cambiarEstadoUsuario } from '../services/user.service';
+
 
 
 

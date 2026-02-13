@@ -33,7 +33,7 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
             { text: ' minutos, ante la Junta Cantonal de Protección de Derechos de ' }, { text: pdfData.canton || '', bold: true },
             { text: ' integrada por los miembros principales' }
           ],
-          margin: [0, 0, 0, 20]
+          margin: [0, 0, 0, 10]
         },
         {
           columns: [
@@ -42,7 +42,7 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
               width: 'auto',
               text: u.nombres + ' ' + u.apellidos,
               alignment: 'center',
-              margin: [10, 20, 10, 0]
+              margin: [10, 10, 10, 0]
             }))),
             { width: '*', text: '' }
           ],
@@ -106,13 +106,13 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
             },
             {
               text: 'Para constancia de lo expuesto en su testimonio firma:',
-              margin: [0, 0, 0, 10]
+              margin: [0, 0, 0, 30]
             },
             {
               canvas: [
                 { type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }
               ],
-              margin: [0, 0, 0, 2]
+              margin: [0, 30, 0, 2]
             },
             {
               text: `${p.nombres} ${p.apellidos}`,
@@ -159,13 +159,13 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
             },
             {
               text: 'Para constancia de lo expuesto en su testimonio firma:',
-              margin: [0, 0, 0, 10]
+              margin: [0, 0, 0, 30]
             },
             {
               canvas: [
                 { type: 'line', x1: 0, y1: 0, x2: 250, y2: 0, lineWidth: 1 }
               ],
-              margin: [0, 0, 0, 2]
+              margin: [0, 30, 0, 2]
             },
             {
               text: `${p.nombres} ${p.apellidos}`,
@@ -262,19 +262,30 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
         margin: [0, 30, 0, 20]
       },
       {
-        columns: [
-          { width: '*', text: '' },
-          {
-            width: 'auto',
-            stack: (pdfData.usuariosPrincipalesCanton || []).map((u: any) => [
-              { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 1 } ], margin: [0, 10, 0, 0] },
-              { text: u.nombres + ' ' + u.apellidos, alignment: 'center', margin: [0, 0, 0, 10] }
-            ])
-          },
-          { width: '*', text: '' }
-        ],
-        columnGap: 10,
-        margin: [0, 20, 0, 20]
+        table: {
+          widths: ['33%', '33%', '34%'],
+          body: [
+            
+            
+            [
+              {   text:'',margin: [0, 40, 0, 5] },
+              {   text:'',margin: [0, 40, 0, 5] },
+              {   text:'',margin: [0, 40, 0, 5] }
+            ],
+            [
+              { text: (pdfData.usuariosPrincipalesCanton && pdfData.usuariosPrincipalesCanton[0]) ? `${pdfData.usuariosPrincipalesCanton[0].nombres || ''} ${pdfData.usuariosPrincipalesCanton[0].apellidos || ''}`.trim() : '', bold: true, alignment: 'center' },
+              { text: (pdfData.usuariosPrincipalesCanton && pdfData.usuariosPrincipalesCanton[1]) ? `${pdfData.usuariosPrincipalesCanton[1].nombres || ''} ${pdfData.usuariosPrincipalesCanton[1].apellidos || ''}`.trim() : '', bold: true, alignment: 'center' },
+              { text: (pdfData.usuariosPrincipalesCanton && pdfData.usuariosPrincipalesCanton[2]) ? `${pdfData.usuariosPrincipalesCanton[2].nombres || ''} ${pdfData.usuariosPrincipalesCanton[2].apellidos || ''}`.trim() : '', bold: true, alignment: 'center' }
+            ],
+            [
+              { text:  'Miembro Principal', alignment: 'center' },
+              { text:  'Miembro Principal', alignment: 'center' },
+              { text: 'Miembro Principal', alignment: 'center' }
+            ]
+          ]
+        },
+        layout: 'box',
+        margin: [0, 40, 0, 0]
       },
       {
         columns: [
@@ -282,7 +293,7 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
             width: 'auto',
             stack: [
               ...((pdfData.participantes || []).filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('denunciante')).map((p: any) => [
-                { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 1 } ], margin: [0, 10, 0, 0] },
+                { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 1 } ], margin: [0, 25, 0, 0] },
                 { text: p.nombres + ' ' + p.apellidos, alignment: 'center', margin: [0, 0, 0, 10] }
               ])).flat(),
             ]
@@ -290,9 +301,9 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
           {
             width: 'auto',
             stack: [
-              ...((pdfData.participantes || []).filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('actora')).map((p: any) => [
-                { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 1 } ], margin: [0, 10, 0, 0] },
-                { text: p.nombres + ' ' + p.apellidos, alignment: 'center', margin: [0, 0, 0, 10] }
+              ...((pdfData.participantes || []).filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('denunciante')).map((p: any) => [
+                { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 1 } ], margin: [0, 25, 0, 0] },
+                { text: 'Abg. '+p.nombres + ' ' + p.apellidos, alignment: 'center', margin: [0, 0, 0, 10] }
               ])).flat(),
             ]
           }
@@ -314,9 +325,9 @@ export async function crearPdfAudienciaPruebasNNA(res: Response, idAudienciaP: a
           {
             width: 'auto',
             stack: [
-              ...((pdfData.participantes || []).filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('accionada')).map((p: any) => [
+              ...((pdfData.participantes || []).filter((p: any) => p.tipoParticipante && p.tipoParticipante.toLowerCase().includes('abogado') && p.parte && p.parte.toLowerCase().includes('denunciado')).map((p: any) => [
                 { canvas: [ { type: 'line', x1: 0, y1: 0, x2: 150, y2: 0, lineWidth: 1 } ], margin: [0, 10, 0, 0] },
-                { text: p.nombres + ' ' + p.apellidos, alignment: 'center', margin: [0, 0, 0, 10] }
+                { text: 'Abg. '+ p.nombres + ' ' + p.apellidos, alignment: 'center', margin: [0, 0, 0, 10] }
               ])).flat(),
             ]
           }
