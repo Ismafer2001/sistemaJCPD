@@ -17,6 +17,7 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 	try { 
 
 		const pdfData = await getDenunciaCompleta(idDenuncia);
+		console.log('Datos completos para PDF:', pdfData);
 
 		const now = new Date();
 		// tipo de denuncia
@@ -56,24 +57,24 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 		if (afectadosArray.length) {
 			for (let i = 0; i < afectadosArray.length; i++) {
 				const a = afectadosArray[i];
-				afectadosBlocks.push({ text: `Afectado ${i + 1}`, style: 'subLabel', margin: [0, 6, 0, 2] });
-				afectadosBlocks.push({
-					table: {
-						widths: ['30%', '70%'],
-						body: [
-							[{ text: 'Nombres', bold: true, fontSize: 12 }, { text: a?.nombres || '', fontSize: 12 }],
-							[{ text: 'Apellidos', bold: true, fontSize: 12 }, { text: a?.apellidos || '', fontSize: 12 }],
-							[{ text: 'Cédula', bold: true, fontSize: 12 }, { text: a?.cedula || '', fontSize: 12 }],
-							[{ text: 'Nacionalidad', bold: true, fontSize: 12 },{ text: a?.nacionalidad || '', fontSize: 12 }],
-							[{ text: 'Edad', bold: true, fontSize: 12 }, { text: a?.edad || '', fontSize: 12 }],
-							[{ text: 'Sexo', bold: true, fontSize: 12 }, { text: a?.sexo || '', fontSize: 12 }],
-							[{ text: 'Dirección', bold: true, fontSize: 12 },{ text: a?.direccion || '', fontSize: 12 }],
-							
-							[{ text: 'Teléfono / Mail', bold: true, fontSize: 12 },{ text: `${a?.telefono || ''} / ${a?.mail || ''}`, fontSize: 12 }]
-						]
-					},
-					margin: [0, 4, 0, 8]
-				});
+				   afectadosBlocks.push({ text: `Afectado ${i + 1}`, style: 'subLabel', margin: [0, 6, 0, 2] });
+				   afectadosBlocks.push({
+					   table: {
+						   widths: ['30%', '70%'],
+						   body: [
+							   [{ text: 'Nombres', bold: true, fontSize: 12 }, { text: a?.nombres || '', fontSize: 12 }],
+							   [{ text: 'Apellidos', bold: true, fontSize: 12 }, { text: a?.apellidos || '', fontSize: 12 }],
+							   [{ text: 'Cédula', bold: true, fontSize: 12 }, { text: a?.cedula || '', fontSize: 12 }],
+							   [{ text: 'Nacionalidad', bold: true, fontSize: 12 },{ text: a?.nacionalidad || '', fontSize: 12 }],
+							   [{ text: 'Edad', bold: true, fontSize: 12 }, { text: (a?.edad === 0 ? (a?.meses ? a.meses + ' meses' : '0') : a?.edad) || '', fontSize: 12 }],
+							   [{ text: 'Sexo', bold: true, fontSize: 12 }, { text: a?.sexo || '', fontSize: 12 }],
+							   [{ text: 'Dirección', bold: true, fontSize: 12 },{ text: a?.direccion || '', fontSize: 12 }],
+                           
+							   [{ text: 'Teléfono / Mail', bold: true, fontSize: 12 },{ text: `${a?.telefono || ''} / ${a?.mail || ''}`, fontSize: 12 }]
+						   ]
+					   },
+					   margin: [0, 4, 0, 8]
+				   });
 			}
 		} else {
 			afectadosBlocks.push({ text: '(No especificado)', margin: [0, 4, 0, 8] });

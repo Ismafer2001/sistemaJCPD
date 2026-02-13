@@ -464,6 +464,7 @@ export async function actualizarDenuncia(idDenuncia: number, denunciajson: datos
     }
 
     // Actualizar denunciante
+    console.log('Denunciante recibido para actualización:', denunciajson.denunciante)
     if (denunciajson.denunciante) {
       await Denunciante.update(
         { ...denunciajson.denunciante },

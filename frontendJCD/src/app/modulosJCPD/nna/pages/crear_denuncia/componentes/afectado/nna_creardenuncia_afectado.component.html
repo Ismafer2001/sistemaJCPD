@@ -110,6 +110,22 @@
         >La edad debe estar entre 0 y 17 años</span
       >
     </div>
+    <!-- Input para meses si edad es 0 -->
+    <div *ngIf="afectadoForm.get('edad')?.value === 0">
+      <label class="block text-sm font-medium text-gray-700 mt-2">Meses</label>
+      <input
+        type="number"
+        formControlName="meses"
+        min="1"
+        max="11"
+        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 focus:border-2 focus:outline-none placeholder-gray-400 placeholder-opacity-75"
+        placeholder="Ingrese los meses (1-11)"
+      />
+      <div *ngIf="afectadoForm.get('meses')?.invalid && afectadoForm.get('meses')?.touched" class="text-red-500 text-sm mt-1">
+        <span *ngIf="afectadoForm.get('meses')?.errors?.['required']">Los meses son requeridos</span>
+        <span *ngIf="afectadoForm.get('meses')?.errors?.['min'] || afectadoForm.get('meses')?.errors?.['max']">Los meses deben estar entre 1 y 11</span>
+      </div>
+    </div>
   </div>
 
   <!-- Sexo -->
@@ -276,7 +292,7 @@
   </div>
  <div class="bg-gray-50 rounded-xl shadow-inner p-4 border mt-2 md:col-span-2"*ngIf="formArray && formArray.length > 0">
 
-      <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Vulneraciones registradas</h3>
+      <h3 class="font-bold mb-4 text-blue-500 text-lg flex items-center gap-2"><span class="material-icons text-blue-400">list_alt</span> Afectados registradas</h3>
     <app-tablaEdit
     [columnas]="['cedula','nombres','apellidos',   'edad']"
   [encabezados]="['cedula','Nombres ', 'Apellidos', 'Edad',]"

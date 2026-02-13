@@ -45,21 +45,29 @@ export class Nna_creardenuncia_afectadoComponent implements OnInit {
     }
 
     this.afectadoForm = this.fb.group({
-  cedula: ['', [Validators.required, Validators.pattern('^[0-9]{10}$'),validarCedulaEcuador]],
-  nombres: ['', [Validators.required, Validators.minLength(2)]],
-  apellidos: ['', [Validators.required, Validators.minLength(2)]],
-  edad: ['', [
-          Validators.required,
-          Validators.min(0),
-          Validators.max(17)
-        ]],
-  sexo: ['', Validators.required],
-  nacionalidad: ['', Validators.required],
-  direccion: ['', [Validators.required, Validators.minLength(5)]],
-  mail: ['', [Validators.required, Validators.email]],
-  telefono: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+      cedula: ['', [Validators.required, Validators.pattern('^[0-9]{10}$'), validarCedulaEcuador]],
+      nombres: ['', [Validators.required, Validators.minLength(2)]],
+      apellidos: ['', [Validators.required, Validators.minLength(2)]],
+      edad: ['', [Validators.required, Validators.min(0), Validators.max(17)]],
+      meses: [null, []],
+      sexo: ['', Validators.required],
+      nacionalidad: ['', Validators.required],
+      direccion: ['', [Validators.required, Validators.minLength(5)]],
+      mail: ['', [Validators.required, Validators.email]],
+      telefono: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
+    });
 
-});
+    // Actualizar validadores de meses según edad
+    this.afectadoForm.get('edad')?.valueChanges.subscribe(edad => {
+      const mesesControl = this.afectadoForm.get('meses');
+      if (edad === 0) {
+        mesesControl?.setValidators([Validators.required, Validators.min(1), Validators.max(11)]);
+      } else {
+        mesesControl?.clearValidators();
+        mesesControl?.setValue(null);
+      }
+      mesesControl?.updateValueAndValidity();
+    });
 this.nacionalidadesFiltradas = this.afectadoForm.get('nacionalidad')!.valueChanges.pipe(
       startWith(''),
       map(value => this._filtrarNacionalidades(value || ''))

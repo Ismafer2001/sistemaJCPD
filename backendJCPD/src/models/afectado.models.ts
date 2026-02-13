@@ -12,6 +12,7 @@ interface AfectadoAttributes {
   nombres: string;
   apellidos: string;
   edad: number;
+  meses?: number;
   sexo: string;
   genero: string;
   nacionalidad: string;
@@ -31,6 +32,7 @@ export class Afectado extends Model<AfectadoAttributes, AfectadoCreationAttribut
   declare nombres: string;
   declare apellidos: string;
   declare edad: number;
+  declare meses?: number;
   declare sexo: string;
   declare genero: string;
   declare nacionalidad: string;
@@ -68,6 +70,7 @@ Afectado.init({
     type: DataTypes.INTEGER,
     
   },
+  meses:{type: DataTypes.INTEGER,},
   sexo: {
     type: DataTypes.STRING,
     
