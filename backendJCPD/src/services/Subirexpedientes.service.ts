@@ -1,6 +1,8 @@
 import { Expediente } from '../models/expedientes.models';
-import fs from 'fs';
+import { supabase } from '../config/supabase';
+import fs from 'fs-extra';
 import path from 'path';
+
 
 
 // Servicio para guardar expediente subido
@@ -10,16 +12,57 @@ export async function guardarExpediente({ file, idDenuncia, tipoExpediente }: {
   idDenuncia: number,
   tipoExpediente: string
 }) {
+  // 1. Validaciones preventivas para evitar crashes
   if (!file) throw new Error('Archivo requerido');
   if (!idDenuncia) throw new Error('idDenuncia requerido');
   if (!tipoExpediente) throw new Error('tipoExpediente requerido');
 
+  // 2. Generamos manualmente el nombre y la ruta (Sustituimos lo que hacía Multer Disk)
+  const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E5);
+  const nombreGenerado = `${uniqueSuffix}-${file.originalname}`;
+  const rutaRelativa = `denuncia-${idDenuncia}/${tipoExpediente}/${nombreGenerado}`;
+  
+  let pathParaDB = '';
+
+  // 
+
+  // 3. Lógica de Almacenamiento
+  if (process.env.STORAGE_TYPE === 'cloud') {
+    // --- MODO NUBE (SUPABASE) ---
+    const { data, error } = await supabase.storage
+      .from('expedientes')
+      .upload(rutaRelativa, file.buffer, { // Usamos el buffer de memoria
+        contentType: file.mimetype,
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    // Obtenemos la URL de internet
+    const { data: { publicUrl } } = supabase.storage.from('expedientes').getPublicUrl(data.path);
+    pathParaDB = publicUrl;
+
+  } else {
+    // --- MODO INTRANET (LOCAL) ---
+    const baseDir = path.resolve('uploads', `denuncia-${idDenuncia}`, tipoExpediente);
+    const fullPath = path.join(baseDir, nombreGenerado);
+
+    // Creamos las carpetas físicas en el servidor local
+    await fs.ensureDir(baseDir);
+    await fs.writeFile(fullPath, file.buffer);
+    
+    // Guardamos la ruta que Express usará para servir el archivo
+    pathParaDB = `/uploads/${rutaRelativa}`;
+  }
+
+  // 4. Guardado en Sequelize (Igual que antes, pero con los nuevos valores)
   const expediente = await Expediente.create({
     idDenuncia,
-    pathExpediente: file.path,
-    filename: file.filename,
+    pathExpediente: pathParaDB,  // Reemplaza a file.path
+    filename: nombreGenerado,    // Reemplaza a file.filename
     tipoExpediente
   });
+
   return expediente;
 }
 
