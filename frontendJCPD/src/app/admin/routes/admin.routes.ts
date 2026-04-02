@@ -11,6 +11,12 @@ const AdminRoutes: Routes = [
         loadComponent: () => import ('@admin/pages/usuarios/admin_page_usuarios.component'),
 
       },
+      {
+            path: 'perfil',
+
+            loadComponent: () =>
+              import('@inicio/page/perfil/perfil.component'),
+          },
     ],
 
   },

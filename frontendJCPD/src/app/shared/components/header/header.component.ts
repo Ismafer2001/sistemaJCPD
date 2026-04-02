@@ -69,6 +69,7 @@ export class headerComponent implements OnInit, OnDestroy {
 
         }
       });
+      
   }
 
   toggleMenu() {
@@ -226,7 +227,7 @@ export class headerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    
+
     this.destroy$.next();
     this.destroy$.complete();
     this.webSocketService.desconectar();

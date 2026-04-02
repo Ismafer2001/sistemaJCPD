@@ -30,6 +30,7 @@ import cierreCasoRoutes from './routes/cierreCaso.routes';
 import informesRoutes from './routes/informes.routes';
 import inhibirseRoutes from './routes/inhibirse.routes';
 import expedientesRoutes from './routes/subirExpediente.routes';
+import archivosRoutes from './routes/expedientes.routes' 
 
 
 const app = express();
@@ -67,7 +68,7 @@ app.use('/api/desestimiento', desestimiento);
 app.use('/api/informes', informesRoutes);
 app.use('/api/inhibirse', inhibirseRoutes);
 app.use('/api/expedientes', expedientesRoutes);
-app.use('/files', express.static(path.join(__dirname, '../uploads')));
+app.use('/files', archivosRoutes);
 
 
 // Verificar conexión con la base de datos y levantar el servidor

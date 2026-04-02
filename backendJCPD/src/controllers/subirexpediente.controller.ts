@@ -7,14 +7,16 @@ export const postSubirExpediente = async (req: Request, res: Response) => {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Archivo requerido' });
     }
-    const { idDenuncia, tipoExpediente } = req.body;
-    if (!idDenuncia || !tipoExpediente) {
-      return res.status(400).json({ success: false, message: 'idDenuncia y tipoExpediente requeridos' });
+    const { idDenuncia, tipoExpediente, codigoTramite } = req.body;
+    console.log(req.body)
+    if (!idDenuncia || !tipoExpediente || !codigoTramite) {
+      return res.status(400).json({ success: false, message: 'idDenuncia, tipoExpediente  y codigo tramite requeridos' });
     }
     const expediente = await guardarExpediente({
       file: req.file,
       idDenuncia: parseInt(idDenuncia, 10),
-      tipoExpediente: String(tipoExpediente)
+      tipoExpediente: String(tipoExpediente),
+      codigoTramite: String(codigoTramite)
     });
     res.status(201).json({ success: true, expediente });
   } catch (error) {
@@ -41,20 +43,29 @@ export const getExpedientesPorDenuncia = async (req: Request, res: Response) => 
 // Controlador para editar expediente
 export const putEditarExpediente = async (req: Request, res: Response) => {
   try {
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Archivo requerido' });
+    }
     const idExpediente = parseInt(req.params.idExpediente, 10);
     if (isNaN(idExpediente)) {
       return res.status(400).json({ success: false, message: 'idExpediente inválido' });
     }
-    const { idDenuncia, tipoExpediente } = req.body;
+    const { idDenuncia, tipoExpediente,codigoTramite } = req.body;
+    console.log(req.file)
     const expedienteEditado = await actualizarExpediente({
       idExpediente,
+      
       file: req.file, // Puede ser undefined si no se sube archivo
       idDenuncia: idDenuncia ? parseInt(idDenuncia, 10) : undefined,
-      tipoExpediente: tipoExpediente ? String(tipoExpediente) : undefined
+      tipoExpediente: tipoExpediente ? String(tipoExpediente) : undefined,
+      codigoTramite
     });
     res.json({ success: true, expediente: expedienteEditado });
   } catch (error) {
     handlehttp(res, 'Error al editar expediente', error);
   }
 };
+
+
 

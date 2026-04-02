@@ -65,6 +65,10 @@ export class Anexar_seguimientoComponent implements OnInit {
     });
     this.formularioSeguimientoMedidas();
 
+    this.seguimientoMedidasForm.valueChanges.subscribe(n=>{
+      console.log('formulario actualizado',n)
+    })
+
   }
 
   // Getter para acceder al FormArray de medidas
@@ -511,7 +515,7 @@ export class Anexar_seguimientoComponent implements OnInit {
       console.warn('Nombre de archivo no válido');
       return;
     }
-    
+
 
     if (!this.codigoTramite) {
       console.warn('Código de trámite no disponible');

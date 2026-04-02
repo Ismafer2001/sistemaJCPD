@@ -43,7 +43,7 @@ export async function crearCierreCaso(data: CierreCasoData) {
             await InformesPresentados.bulkCreate(informesData, { transaction });
         }
 
-        // Confirmar la transacción
+        await Denuncia.update({estado:"finalizada"},{where:{id:data.idDenuncia}})
        
 
         // Retornar el cierre de caso creado con los informes

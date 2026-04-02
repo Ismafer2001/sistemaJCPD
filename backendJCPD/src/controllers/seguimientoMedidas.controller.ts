@@ -26,29 +26,34 @@ export const getAfectadosSeguimientoMedidas = async (req: Request, res: Response
 // Controlador para agregar cumplimiento de medidas
 export const postAgregarCumplimientoMedidas = async (req: Request, res: Response) => {
   try {
-    // El archivo viene en req.file (por multer)
+    // 1. Validar que el middleware de Multer nos dejó un archivo en memoria
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Archivo requerido' });
     }
-   
     
-    // Construir payload con la ruta del archivo subido
+    // 2. Construir el payload adaptado para el nuevo servicio
     const payload = {
-      file: { 
-        path: req.file.path,
-        fileName: req.file.filename,
-        responsable: req.body.responsable,
-        razon: req.body.razon,
-        sancion: req.body.sancion
-      },
+      // Le pasamos el objeto file COMPLETO de multer (que ahora contiene 'buffer' y 'originalname')
+      file: req.file, 
+      
+      // Pasamos los textos directamente en el primer nivel del objeto
+      responsable: req.body.responsable,
+      razon: req.body.razon,
+      sancion: req.body.sancion,
+      codigoTramite:req.body.codigoTramite,
+      
+      
+      // Parseamos las medidas (excelente práctica hacerlo aquí)
       medidas: req.body.medidas ? JSON.parse(req.body.medidas) : []
     };
-
+    console.log(req.body.codigoTramite)
     
-    
+    // 3. Ejecutar la lógica de negocio
     const resultado = await agregarCumplimientoMedidas(payload);
+    
     res.status(201).json(resultado);
   } catch (error) {
+    // Si algo falla (ej. error de base de datos o de Supabase), lo atrapamos
     handlehttp(res, 'Error al agregar cumplimiento de medidas', error);
   }
 };
@@ -56,40 +61,41 @@ export const postAgregarCumplimientoMedidas = async (req: Request, res: Response
 // Controlador para actualizar cumplimiento de medidas
 export const putActualizarCumplimientoMedidas = async (req: Request, res: Response) => {
   try {
-    // El archivo viene en req.file (por multer)
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'Archivo requerido' });
-    }
-
-    // Validar que venga el idPath
+    // 1. Validar solo lo estrictamente obligatorio (idPath)
     if (!req.body.idPath) {
       return res.status(400).json({ success: false, message: 'idPath es requerido' });
     }
-   
-    // Construir payload con la ruta del archivo subido
+    
+    // NOTA: Ya no bloqueamos si no hay req.file. Si el usuario no manda archivo, 
+    // req.file será undefined y el servicio simplemente actualizará los textos/medidas.
+
+    // 2. Construir el payload plano para el servicio
     const payload = {
-      idPath: parseInt(req.body.idPath),
-      file: { 
-        path: req.file.path,
-        fileName: req.file.filename,
-        responsable: req.body.responsable,
-        razon: req.body.razon,
-        sancion: req.body.sancion
-      },
+      idPath: parseInt(String(req.body.idPath), 10),
+      file: req.file, // Pasamos el archivo crudo (con su buffer de RAM) si es que viene
+      
+      // Textos directos
+      responsable: req.body.responsable,
+      razon: req.body.razon,
+      sancion: req.body.sancion,
+      codigoTramite: req.body.codigoTramite, // Opcional, por si lo envías para organizar carpetas
+      
+      // Parsear las medidas
       medidas: req.body.medidas ? JSON.parse(req.body.medidas) : []
     };
 
-    
-    
+    // 3. Ejecutar el servicio
+    // El servicio YA se encarga de:
+    // - Subir el archivo nuevo (si existe) a Local o Nube
+    // - Borrar el archivo viejo (si existe) de Local o Nube
+    // - Actualizar la base de datos
     const resultado = await actualizarCumplimientoMedidas(payload);
-   
-    if(resultado.informeanterior.fileName){
-      const rutaAnterior =path.resolve(resultado.informeanterior.pathInforme);
-      fs.unlinkSync(rutaAnterior);
-    }
 
+    // 4. Responder al cliente
     res.status(200).json(resultado);
+    
   } catch (error) {
+    // Si algo falló en la validación, en Supabase, o en la DB, lo capturamos aquí
     handlehttp(res, 'Error al actualizar cumplimiento de medidas', error);
   }
 };

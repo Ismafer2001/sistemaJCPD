@@ -19,6 +19,10 @@ import {
 	Testimonio, 
 	usuarios,
 	Resoluciones} from "../models";
+	import path from 'path';
+import fs from 'fs-extra';
+import { supabase } from '../config/supabase';
+import { sanitizarRuta } from '../utils/sanitizar rutas';
 
 interface ParticipanteData {
 	nombres: string;
@@ -509,281 +513,307 @@ export async function AgregarOtrosParticipantes(data: any) {
 //---- FUNCIONES PARA MANEJO DE ARCHIVOS POR ABOGADO ----//
 
 // Función para procesar archivos específicos por abogado
-export function procesarArchivosAbogados(files: Express.Multer.File[], participantes: ParticipanteData[]): ParticipanteData[] {
-	const participantesConArchivos = [...participantes];
-	
-	if (files && files.length > 0) {
-		files.forEach((file) => {
-			// Extraer índice del participante del nombre del campo
-			// Formato esperado: "archivo_abogado_0", "archivo_abogado_1", etc.
-			const match = file.fieldname.match(/archivo_abogado_(\d+)/);
-			
-			if (match) {
-				const participanteIndex = parseInt(match[1]);
-				
-				// Verificar que el índice sea válido y que sea tipo "Abogado"
-				if (participanteIndex < participantesConArchivos.length && 
-					participantesConArchivos[participanteIndex].tipoParticipante === 'Abogado') {
-					
-					// Normalizar ruta para evitar problemas con barras invertidas
-					const filePath = (file.path || `${file.destination}/${file.filename}`).replace(/\\/g, '/');
-					
-					// Asignar archivo al abogado específico
-					participantesConArchivos[participanteIndex].archivo = {
-						path: filePath,
-						fileName: file.originalname || file.filename
-					};
-					
-					console.log(`Archivo asignado a abogado ${participanteIndex}: ${file.originalname}`);
-				} else {
-					console.warn(`Archivo para participante índice ${participanteIndex}: no es abogado o índice inválido`);
-				}
-			} else {
-				console.warn(`Nombre de campo no válido para archivo: ${file.fieldname}`);
-			}
-		});
-	}
-	
-	return participantesConArchivos;
+
+
+// 1. Modificamos esta función para que solo vincule el archivo (con su buffer) al participante
+export function procesarArchivosAbogados(files: Express.Multer.File[], participantes: any[]) {
+    const participantesConArchivos = [...participantes];
+    
+    if (files && files.length > 0) {
+        files.forEach((file) => {
+            const match = file.fieldname.match(/archivo_abogado_(\d+)/);
+            
+            if (match) {
+                const participanteIndex = parseInt(match[1]);
+                
+                if (participanteIndex < participantesConArchivos.length && 
+                    participantesConArchivos[participanteIndex].tipoParticipante === 'Abogado') {
+                    
+                    // ¡En lugar de rutas, guardamos el archivo de Multer completo temporalmente!
+                    participantesConArchivos[participanteIndex].archivoCrudo = file;
+                    
+                }
+            }
+        });
+    }
+    
+    return participantesConArchivos;
 }
 
-// Función para crear audiencia con archivos específicos por abogado
-export async function crearAudienciaPruebasConArchivos(data: AudienciaPruebasData, files: Express.Multer.File[]) {
-	const t = await sequelize.transaction();
-	try {
-		// Crear audiencia principal
-		const audiencia = await AudienciaPruebas.create({
-			idDenuncia: data.idDenuncia,
-			codigoTramite: data.codigoTramite,
-			fecha: data.fecha,
-			hora: data.hora,
-			instalacionAudiencia: data.instalacionAudiencia,
-			afectadoManifiesta: data.afectadoManifiesta,
-			pdf_audiencia_pruebas: data.pdf_audiencia_pruebas,
-			articulo: data.articulo,
-			estatus: 'completada',
-		}, { transaction: t });
+// 2. La función principal ahora guarda los archivos de verdad
+export async function crearAudienciaPruebasConArchivos(data: any, files: Express.Multer.File[]) {
+    const t = await sequelize.transaction();
+    const storageType = process.env.STORAGE_TYPE || 'local';
+    
+    // Arreglo para guardar los paths de los archivos subidos (útil para limpiar si hay rollback)
+    const archivosSubidos: string[] = []; 
 
-		// Procesar archivos específicos por abogado
-		const participantesConArchivos = procesarArchivosAbogados(files, data.participantes);
+    try {
+        // 1. Crear audiencia principal
+        const audiencia = await AudienciaPruebas.create({
+            idDenuncia: data.idDenuncia,
+            codigoTramite: data.codigoTramite,
+            fecha: data.fecha,
+            hora: data.hora,
+            instalacionAudiencia: data.instalacionAudiencia,
+            afectadoManifiesta: data.afectadoManifiesta,
+            pdf_audiencia_pruebas: data.pdf_audiencia_pruebas, // Asumo que este ya viene subido de otro lado
+            articulo: data.articulo,
+            estatus: 'completada',
+        }, { transaction: t });
 
-		if (Array.isArray(participantesConArchivos)) {
-			for (const participante of participantesConArchivos) {
-				// Determinar pathPruebas basado en si es abogado y tiene archivo
-				let pathPruebas = null;
-				if (participante.tipoParticipante === 'Abogado' && participante.archivo) {
-					pathPruebas = participante.archivo.path;
-				}
+        // 2. Emparejar archivos con abogados
+        const participantesConArchivos = procesarArchivosAbogados(files, data.participantes);
 
-				// Crear participante con su archivo específico
-				const nuevoParticipante = await ParticipantesAudienciaPruebas.create({
-					idAP: audiencia.id,
-					nombres: participante.nombres,
-					apellidos: participante.apellidos,
-					cedula: participante.cedula,
-					tipoParticipante: participante.tipoParticipante,
-					parte: participante.parte ?? '',
-					pruebas: participante.pruebas ?? '',
-					pathPruebas: pathPruebas
-				}, { transaction: t });
+        if (Array.isArray(participantesConArchivos)) {
+            for (const participante of participantesConArchivos) {
+                let pathPruebasDB = null;
 
-				// Si hay testimonio, crear registro en tabla Testimonio
-				if (participante.testimonio && participante.testimonio.trim() !== "") {
-					await Testimonio.create({
-						testimonio: participante.testimonio,
-						idParticipante: nuevoParticipante.id,
-						parte: participante.parte
-					}, { transaction: t });
-				}
-			}
-		}
+                // 3. SI EL ABOGADO TIENE UN ARCHIVO, LO SUBIMOS AHORA
+                if (participante.tipoParticipante === 'Abogado' && participante.archivoCrudo) {
+                    const file = participante.archivoCrudo;
+                    const carpetaBase = data.codigoTramite ? sanitizarRuta(data.codigoTramite) : 'generales';
+                    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E5);
+                    const nombreGenerado = `${uniqueSuffix}-${file.originalname}`;
+                    const rutaRelativa =sanitizarRuta(`${data.codigoTramite}/pruebas/${nombreGenerado}`) ;
 
-		await t.commit();
-		return { success: true, audienciaId: audiencia.id };
-	} catch (error) {
-		await t.rollback();
-		throw error;
-	}
+                    if (storageType === 'cloud') {
+                        const { error: uploadError } = await supabase.storage
+                            .from('expedientes')
+                            .upload(rutaRelativa, file.buffer, { contentType: file.mimetype, upsert: false });
+                        
+                        if (uploadError) throw uploadError;
+                        
+                        pathPruebasDB = rutaRelativa;
+                        archivosSubidos.push(rutaRelativa); // Guardar para posible rollback
+                    } else {
+                        const baseDir = path.resolve('uploads', `${data.codigoTramite}`, 'pruebas');
+                        const fullPath = path.join(baseDir, nombreGenerado);
+                        
+                        await fs.ensureDir(baseDir);
+                        await fs.writeFile(fullPath, file.buffer);
+                        
+                        pathPruebasDB = `/uploads/${rutaRelativa.replace(/\\/g, '/')}`;
+                        archivosSubidos.push(fullPath); // Guardar para posible rollback
+                    }
+                }
+
+                // 4. Crear participante en DB
+                const nuevoParticipante = await ParticipantesAudienciaPruebas.create({
+                    idAP: audiencia.id,
+                    nombres: participante.nombres,
+                    apellidos: participante.apellidos,
+                    cedula: participante.cedula,
+                    tipoParticipante: participante.tipoParticipante,
+                    parte: participante.parte ?? '',
+                    pruebas: participante.pruebas ?? '',
+                    pathPruebas: pathPruebasDB // La ruta final (Local o Supabase)
+                }, { transaction: t });
+
+                // 5. Crear testimonio si existe
+                if (participante.testimonio && participante.testimonio.trim() !== "") {
+                    await Testimonio.create({
+                        testimonio: participante.testimonio,
+                        idParticipante: nuevoParticipante.id,
+                        parte: participante.parte
+                    }, { transaction: t });
+                }
+            }
+        }
+
+        await t.commit();
+        return { success: true, audienciaId: audiencia.id };
+        
+    } catch (error) {
+        await t.rollback();
+        
+        // 🧹 LIMPIEZA MULTIPLE: Si la BD falla, borramos TODOS los archivos que se hayan alcanzado a subir en el ciclo for
+        for (const pathGuardado of archivosSubidos) {
+            try {
+                if (storageType === 'local' && fs.existsSync(pathGuardado)) {
+                    fs.unlinkSync(pathGuardado);
+                } else if (storageType === 'cloud') {
+                    await supabase.storage.from('expedientes').remove([pathGuardado]);
+                }
+            } catch (cleanupError) {
+                console.error(`Error borrando archivo huérfano ${pathGuardado}:`, cleanupError);
+            }
+        }
+
+        throw error;
+    }
 }
 
 // Función para procesar archivos específicos por abogado en edición
-export function procesarArchivosAbogadosEdicion(files: Express.Multer.File[], participantes: ParticipanteData[], participantesExistentes: any[]): ParticipanteData[] {
-	const participantesConArchivos = [...participantes];
-	
-	// Crear un mapa de archivos existentes por índice para conservarlos
-	const archivosExistentes = new Map();
-	participantesExistentes.forEach((participante, index) => {
-		if (participante.pathPruebas && participante.tipoParticipante === 'Abogado') {
-			archivosExistentes.set(index, {
-				path: participante.pathPruebas,
-				fileName: participante.pathPruebas.split('/').pop() || participante.pathPruebas.split('\\').pop()
-			});
-		}
-	});
 
-	// Si no hay archivos nuevos, conservar los existentes
-	if (!Array.isArray(files) || files.length === 0) {
-		// Aplicar archivos existentes a participantes que no tienen archivos nuevos
-		participantesConArchivos.forEach((participante, index) => {
-			if (participante.tipoParticipante === 'Abogado' && archivosExistentes.has(index)) {
-				participante.archivo = archivosExistentes.get(index);
-			}
-		});
-		return participantesConArchivos;
-	}
 
-	// Crear set de índices que tendrán archivos nuevos
-	const indicesConArchivosNuevos = new Set();
-	
-	// Procesar cada archivo subido
-	files.forEach(file => {
-		if (file.fieldname && file.fieldname.startsWith('archivo_abogado_')) {
-			const index = parseInt(file.fieldname.split('_')[2]);
-			if (!isNaN(index) && participantesConArchivos[index] && participantesConArchivos[index].tipoParticipante === 'Abogado') {
-				// Normalizar la ruta del archivo (cambiar backslashes por forward slashes)
-				const normalizedPath = file.path.replace(/\\/g, '/');
-				
-				participantesConArchivos[index].archivo = {
-					path: normalizedPath,
-					fileName: file.filename
-				};
-				
-				indicesConArchivosNuevos.add(index);
-			}
-		}
-	});
+// 1. La función procesadora ahora solo clasifica qué participante lleva archivo crudo o viejo
+export function procesarArchivosAbogadosEdicion(
+    files: Express.Multer.File[], 
+    participantesNuevos: any[], 
+    participantesViejos: any[]
+) {
+    const participantesProcesados = [...participantesNuevos];
+    
+    // Mapa para ubicar rápido los archivos viejos por el índice del participante
+    // (Asumimos que el orden en el arreglo del frontend se mantiene)
+    const archivosViejos = new Map();
+    participantesViejos.forEach((p, index) => {
+        if (p.pathPruebas && p.tipoParticipante === 'Abogado') {
+            archivosViejos.set(index, p.pathPruebas);
+        }
+    });
 
-	// Para participantes que no tienen archivos nuevos, conservar los existentes
-	participantesConArchivos.forEach((participante, index) => {
-		if (participante.tipoParticipante === 'Abogado' && 
-			!indicesConArchivosNuevos.has(index) && 
-			archivosExistentes.has(index)) {
-			participante.archivo = archivosExistentes.get(index);
-		}
-	});
+    const indicesConArchivosNuevos = new Set();
+    
+    // A) Asignar los archivos NUEVOS (los crudos de multer en RAM)
+    if (Array.isArray(files) && files.length > 0) {
+        files.forEach(file => {
+            if (file.fieldname && file.fieldname.startsWith('archivo_abogado_')) {
+                const index = parseInt(file.fieldname.split('_')[2]);
+                if (!isNaN(index) && participantesProcesados[index]?.tipoParticipante === 'Abogado') {
+                    // Guardamos el buffer temporal para subirlo después
+                    participantesProcesados[index].archivoCrudo = file;
+                    indicesConArchivosNuevos.add(index);
+                }
+            }
+        });
+    }
 
-	return participantesConArchivos;
+    // B) Asignar los archivos VIEJOS a los que no subieron archivo nuevo
+    participantesProcesados.forEach((p, index) => {
+        if (p.tipoParticipante === 'Abogado' && !indicesConArchivosNuevos.has(index) && archivosViejos.has(index)) {
+            // Le decimos a la base de datos que conserve la ruta vieja
+            p.pathPruebasConservado = archivosViejos.get(index);
+        }
+    });
+
+    return { 
+        participantesProcesados, 
+        indicesReemplazados: indicesConArchivosNuevos 
+    };
 }
 
-// Función para actualizar audiencia con archivos específicos por abogado
-export async function actualizarAudienciaPruebasConArchivos(id: number, data: AudienciaPruebasData, files: Express.Multer.File[]) {
-	const t = await sequelize.transaction();
-	const fs = require('fs');
-	const path = require('path');
-	
-	try {
-		// Verificar que la audiencia existe
-		const audienciaExistente = await AudienciaPruebas.findByPk(id);
-		if (!audienciaExistente) {
-			throw new Error('Audiencia de pruebas no encontrada');
-		}
+// 2. Función Principal Híbrida
+export async function actualizarAudienciaPruebasConArchivos(id: number, data: any, files: Express.Multer.File[]) {
+    const t = await sequelize.transaction();
+    const storageType = process.env.STORAGE_TYPE || 'local';
+    const archivosNuevosSubidos: string[] = []; // Para rollback
+    
+    try {
+        const audienciaExistente = await AudienciaPruebas.findByPk(id);
+        if (!audienciaExistente) throw new Error('Audiencia de pruebas no encontrada');
 
-		// PRIMERO: Obtener participantes existentes con sus archivos completos
-		const participantesExistentes = await ParticipantesAudienciaPruebas.findAll({
-			where: { idAP: id },
-			attributes: ['id', 'nombres', 'apellidos', 'cedula', 'tipoParticipante', 'parte', 'pruebas', 'pathPruebas'],
-			transaction: t
-		});
+        const participantesExistentes = await ParticipantesAudienciaPruebas.findAll({
+            where: { idAP: id },
+            transaction: t
+        });
 
-		// Identificar qué archivos nuevos se están subiendo
-		const indicesConArchivosNuevos = new Set();
-		if (Array.isArray(files) && files.length > 0) {
-			files.forEach(file => {
-				if (file.fieldname && file.fieldname.startsWith('archivo_abogado_')) {
-					const index = parseInt(file.fieldname.split('_')[2]);
-					if (!isNaN(index)) {
-						indicesConArchivosNuevos.add(index);
-					}
-				}
-			});
-		}
+        // 1. Clasificar participantes (nuevos vs viejos archivos)
+        const { participantesProcesados, indicesReemplazados } = procesarArchivosAbogadosEdicion(
+            files, data.participantes, participantesExistentes
+        );
 
-		// Eliminar SOLO los archivos que van a ser reemplazados
-		for (let i = 0; i < participantesExistentes.length; i++) {
-			const participante = participantesExistentes[i];
-			if (participante.pathPruebas && indicesConArchivosNuevos.has(i)) {
-				try {
-					// Convertir ruta relativa a absoluta
-					const rutaAbsoluta = path.resolve(participante.pathPruebas);
-					if (fs.existsSync(rutaAbsoluta)) {
-						fs.unlinkSync(rutaAbsoluta);
-						console.log(`Archivo reemplazado eliminado: ${rutaAbsoluta}`);
-					}
-				} catch (error) {
-					console.error(`Error al eliminar archivo ${participante.pathPruebas}:`, error);
-					// No detenemos la transacción por errores de archivos
-				}
-			}
-		}
+        // 2. BORRAR FÍSICAMENTE LOS ARCHIVOS VIEJOS REEMPLAZADOS
+        for (let i = 0; i < participantesExistentes.length; i++) {
+            const pViejo = participantesExistentes[i];
+            // Si el participante tenía archivo y ahora mandaron uno nuevo (o lo borraron del todo)
+            // Asumo que si el índice está en 'indicesReemplazados' o si el abogado ya no está en el nuevo arreglo, se debe borrar
+            const fueReemplazado = indicesReemplazados.has(i);
+            const fueEliminado = !data.participantes[i]; 
 
-		// Actualizar datos principales de la audiencia
-		await AudienciaPruebas.update({
-			fecha: data.fecha,
-			hora: data.hora,
-			instalacionAudiencia: data.instalacionAudiencia,
-			afectadoManifiesta: data.afectadoManifiesta,
-			pdf_audiencia_pruebas: data.pdf_audiencia_pruebas,
-			articulo: data.articulo,
-			estatus: data.estatus
-		}, { 
-			where: { id },
-			transaction: t 
-		});
+            if (pViejo.pathPruebas && (fueReemplazado || fueEliminado)) {
+                try {
+                    if (storageType === 'local') {
+                        const rutaAbsoluta = path.join(process.cwd(), pViejo.pathPruebas);
+                        if (fs.existsSync(rutaAbsoluta)) fs.unlinkSync(rutaAbsoluta);
+                    } else if (storageType === 'cloud') {
+                        await supabase.storage.from('expedientes').remove([pViejo.pathPruebas]);
+                    }
+                } catch (error) {
+                    console.error(`Error no fatal borrando archivo ${pViejo.pathPruebas}:`, error);
+                }
+            }
+        }
 
-		// Eliminar testimonios asociados a los participantes
-		if (participantesExistentes.length > 0) {
-			const participantesIds = participantesExistentes.map(p => p.id);
-			await Testimonio.destroy({
-				where: { idParticipante: participantesIds },
-				transaction: t
-			});
-		}
+        // 3. ACTUALIZAR AUDIENCIA
+        await audienciaExistente.update({
+            fecha: data.fecha, hora: data.hora, instalacionAudiencia: data.instalacionAudiencia,
+            afectadoManifiesta: data.afectadoManifiesta, pdf_audiencia_pruebas: data.pdf_audiencia_pruebas,
+            articulo: data.articulo, estatus: data.estatus
+        }, { transaction: t });
 
-		// Eliminar participantes existentes
-		await ParticipantesAudienciaPruebas.destroy({
-			where: { idAP: id },
-			transaction: t
-		});
+        // 4. LIMPIEZA DE TABLAS HIJAS
+        if (participantesExistentes.length > 0) {
+            const participantesIds = participantesExistentes.map(p => p.id);
+            await Testimonio.destroy({ where: { idParticipante: participantesIds }, transaction: t });
+            await ParticipantesAudienciaPruebas.destroy({ where: { idAP: id }, transaction: t });
+        }
 
-		// Procesar archivos específicos por abogado
-		const participantesConArchivos = procesarArchivosAbogadosEdicion(files, data.participantes, participantesExistentes);
+        // 5. RECREAR PARTICIPANTES Y SUBIR ARCHIVOS NUEVOS
+        if (Array.isArray(participantesProcesados)) {
+            for (const participante of participantesProcesados) {
+                let finalPathDB = participante.pathPruebasConservado || null;
 
-		// Crear nuevos participantes con archivos actualizados
-		if (Array.isArray(participantesConArchivos)) {
-			for (const participante of participantesConArchivos) {
-				// Determinar pathPruebas basado en si es abogado y tiene archivo
-				let pathPruebas = null;
-				if (participante.tipoParticipante === 'Abogado' && participante.archivo) {
-					pathPruebas = participante.archivo.path;
-				}
+                // Si es un abogado con archivo NUEVO, lo subimos ahora mismo
+                if (participante.tipoParticipante === 'Abogado' && participante.archivoCrudo) {
+                    const file = participante.archivoCrudo;
+                    const carpetaBase = data.codigoTramite ? sanitizarRuta(data.codigoTramite) : 'generales';
+                    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E5);
+                    
+					const rutaRelativa =`${data.codigoTramite}/pruebas/${uniqueSuffix}-${file.originalname}` ;
+                    const rutaSanitizada =sanitizarRuta(rutaRelativa)
+                    if (storageType === 'cloud') {
+						
+                        const { error: uploadError } = await supabase.storage
+                            .from('expedientes')
+                            .upload(rutaSanitizada, file.buffer, { contentType: file.mimetype, upsert: false });
+                        if (uploadError) throw uploadError;
+                        finalPathDB = rutaSanitizada;
+                    } else {
+                        const baseDir = path.resolve('uploads', String(data.codigoTramite),'pruebas');
+                        const fullPath = path.join(baseDir, `${uniqueSuffix}-${file.originalname}`);
+                        await fs.ensureDir(baseDir);
+                        await fs.writeFile(fullPath, file.buffer);
+                        finalPathDB = `/uploads/${rutaRelativa.replace(/\\/g, '/')}`;
+                        archivosNuevosSubidos.push(fullPath); // Guardar para posible rollback local
+                    }
+                    if(storageType === 'cloud') archivosNuevosSubidos.push(rutaSanitizada); // Guardar para posible rollback cloud
+                }
 
-				// Crear participante con su archivo específico
-				const nuevoParticipante = await ParticipantesAudienciaPruebas.create({
-					idAP: id,
-					nombres: participante.nombres,
-					apellidos: participante.apellidos,
-					cedula: participante.cedula,
-					tipoParticipante: participante.tipoParticipante,
-					parte: participante.parte ?? '',
-					pruebas: participante.pruebas ?? '',
-					pathPruebas: pathPruebas
-				}, { transaction: t });
+                // Crear el participante en DB
+                const nuevoParticipante = await ParticipantesAudienciaPruebas.create({
+                    idAP: id, nombres: participante.nombres, apellidos: participante.apellidos,
+                    cedula: participante.cedula, tipoParticipante: participante.tipoParticipante,
+                    parte: participante.parte ?? '', pruebas: participante.pruebas ?? '',
+                    pathPruebas: finalPathDB
+                }, { transaction: t });
 
-				// Si hay testimonio, crear registro en tabla Testimonio
-				if (participante.testimonio && participante.testimonio.trim() !== "") {
-					await Testimonio.create({
-						testimonio: participante.testimonio,
-						idParticipante: nuevoParticipante.id,
-						parte: participante.parte
-					}, { transaction: t });
-				}
-			}
-		}
+                // Crear testimonio
+                if (participante.testimonio && participante.testimonio.trim() !== "") {
+                    await Testimonio.create({
+                        testimonio: participante.testimonio, idParticipante: nuevoParticipante.id,
+                        parte: participante.parte
+                    }, { transaction: t });
+                }
+            }
+        }
 
-		await t.commit();
-		return { success: true, message: 'Audiencia de pruebas actualizada exitosamente' };
-	} catch (error) {
-		await t.rollback();
-		throw error;
-	}
+        await t.commit();
+        return { success: true, message: 'Audiencia de pruebas actualizada exitosamente' };
+
+    } catch (error) {
+        await t.rollback();
+        
+        // 🧹 LIMPIEZA MULTIPLE SI HAY FALLA: Borrar los archivos que se alcanzaron a subir antes del error
+        for (const pathGuardado of archivosNuevosSubidos) {
+            try {
+                if (storageType === 'local' && fs.existsSync(pathGuardado)) fs.unlinkSync(pathGuardado);
+                else if (storageType === 'cloud') await supabase.storage.from('expedientes').remove([pathGuardado]);
+            } catch (cleanupError) {
+                console.error(`Error borrando archivo huérfano ${pathGuardado}:`, cleanupError);
+            }
+        }
+        throw error;
+    }
 }

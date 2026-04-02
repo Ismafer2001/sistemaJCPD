@@ -52,6 +52,11 @@ export class SubirExpedienteComponent implements OnInit {
       });
       this.cargarExpedientes();
       this.getcodigoTramite();
+     this.expedienteForm.valueChanges.subscribe((n)=>{
+          console.log(n)
+
+        })
+
     });
   }
     descargarArchivo(exp: any) {
@@ -70,11 +75,13 @@ export class SubirExpedienteComponent implements OnInit {
    editarExpediente(expediente: any) {
         this.editMode = true;
         this.expedienteEditId = expediente.id;
+        console.log(this.expedienteEditId)
         this.expedienteForm.patchValue({
           tipoExpediente: expediente.tipoExpediente,
           idDenuncia: this.denunciaId,
           id: expediente.id
         });
+
         this.selectedFile = null;
       }
 
@@ -95,6 +102,7 @@ export class SubirExpedienteComponent implements OnInit {
   getcodigoTramite() {
     this.inhibirseService.getCodigoTramite(this.denunciaId).subscribe(data=>{
       this.codigoTramite = data.codigoTramite;
+      console.log(this.codigoTramite)
 
     })
 
@@ -107,6 +115,7 @@ export class SubirExpedienteComponent implements OnInit {
     } else {
       this.selectedFile = null;
     }
+    console.log(this.selectedFile)
   }
 
 
@@ -120,6 +129,8 @@ export class SubirExpedienteComponent implements OnInit {
     const formData = new FormData();
     formData.append('idDenuncia', this.expedienteForm.get('idDenuncia')?.value);
     formData.append('tipoExpediente', this.expedienteForm.get('tipoExpediente')?.value);
+    formData.append('codigoTramite', this.codigoTramite);
+
     if (this.selectedFile) {
       formData.append('archivo', this.selectedFile);
     }

@@ -49,7 +49,7 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     declare descripcion_hechos: string;
     declare solicitud: string;
     declare id_canton: number;
-    declare estado: 'activa' | 'finalizada';
+    declare estado: 'activa' | 'finalizada'|'remitido';
     declare estatus: 'pendiente' | 'en_proceso' | 'completada';
     declare canton?: Canton;
     declare afectados?:Afectado[];
