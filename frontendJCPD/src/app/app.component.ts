@@ -5,8 +5,6 @@ import { NgxSonnerToaster } from 'ngx-sonner';
 import { ModalAccesoDenegadoComponent } from '@shared/components/modalAccesoDenegado/modalAccesoDenegado.component';
 import { WebSocketService } from '@shared/services/web-socket.service';
 import { Component, OnInit, OnDestroy } from '@angular/core';
-
-
 import { Subscription } from 'rxjs';
 import { AuthService } from '@auth/services/auth.service';
 
@@ -28,7 +26,8 @@ export class AppComponent implements OnInit, OnDestroy {
   ) {}
 
  ngOnInit(): void {
-    // ✅ Solo conectar si el usuario YA está autenticado (cuando recarga la página)
+ console.log("iniciando appcomponent")
+    //  Solo conectar si el usuario YA está autenticado (cuando recarga la página)
     if (this.authService.isAuthenticated()) {
       const idCanton = this.authService.getIdCanton();
       this.socketService.conectar(idCanton);
@@ -42,6 +41,7 @@ export class AppComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    console.log("destruyendo appcomponent")
     this.socketService.desconectar();
   }
 }

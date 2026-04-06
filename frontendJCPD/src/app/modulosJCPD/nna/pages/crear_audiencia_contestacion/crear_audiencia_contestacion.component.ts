@@ -219,12 +219,7 @@ export class Crear_audienciaComponent implements OnInit {
 
     this.loadPrincipalesActivos();
 
-    this.audienciaForm.valueChanges.subscribe((value) => {
-      console.log('Audiencia Form Value Changes:', value);
-    });
-    this.participantesForm.valueChanges.subscribe((value) => {
-      console.log('Participantes Form Value Changes:', value);
-    });
+    ;
   }
 
   private checkInitialLoadingComplete(): void {

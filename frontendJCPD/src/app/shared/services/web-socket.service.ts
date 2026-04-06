@@ -15,11 +15,11 @@ export class WebSocketService {
   conectar(idCanton: number): void {
     // Solo conectar si no hay conexión activa
     if (this.socket?.connected) {
-      console.log('⚠️ Socket ya está conectado, saltando nueva conexión');
+      console.log(' Socket ya está conectado');
       return;
     }
 
-    
+
 
     this.socket = io(environment.CLIENT_URL, {
       query: {
@@ -62,6 +62,7 @@ export class WebSocketService {
 
   // Desconectar del socket
   desconectar(): void {
+    console.log("aqui usamos la funcion desconectar socket")
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;

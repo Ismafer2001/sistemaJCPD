@@ -153,9 +153,7 @@ export class Cierre_casoComponent implements OnInit {
       this.loadDatosCierreCaso(this.denunciaId)
       this.formularioCierreCaso();
 
-      this.CierreCasoForm.valueChanges.subscribe((data) => {
-        console.log('Cambios en el formulario:', data);
-      })
+      
 
 
 

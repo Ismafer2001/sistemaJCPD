@@ -43,9 +43,7 @@ export class Control_desestimientoComponent implements OnInit {
 
     this.formularioControlDesestimiento();
 
-    this.controlDesestimientoForm.valueChanges.subscribe(value => {
-      console.log(value);
-    });
+
   }
 
   formularioControlDesestimiento() {

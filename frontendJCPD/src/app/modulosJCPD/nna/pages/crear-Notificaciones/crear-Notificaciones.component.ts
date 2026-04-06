@@ -83,9 +83,6 @@ export class CrearNotificacionesComponent implements OnInit {
       this.nuevaInstitucionForm.get('idDenuncia')?.setValue(this.denunciaId);
      console.log('tiponotificado seleccionado: ', this.tipoNotificado)
 
-     this.nuevoNotificadoForm.valueChanges.subscribe((n) => {
-      console.log('Valor del formulario de persona:', n);
-     })
 
 
 
@@ -153,9 +150,7 @@ export class CrearNotificacionesComponent implements OnInit {
         tipoParticipante: item.parte,
         idDenuncia: this.denunciaId
       });
-      this.nuevoNotificadoForm.valueChanges.subscribe((n) => {
-        console.log('Valor del formulario de institución:', n);
-      })
+
 
     } else {
       this.tipoNotificado = 'persona';
@@ -185,7 +180,7 @@ export class CrearNotificacionesComponent implements OnInit {
     next: (data) => {
       this.involucradosPrincipales = data;
       this.loadingInvolucradosPrincipales = false;
-      console.log('aquiiiiiii'+this.involucradosPrincipales);
+
     },
     error: (error) => {
       this.loadingInvolucradosPrincipales = false;
@@ -201,7 +196,7 @@ export class CrearNotificacionesComponent implements OnInit {
     next: (data) => {
       this.otrosInvolucrados = data;
       this.loadingOtrosInvolucrados = false;
-      console.log('aquiiiiiii'+this.otrosInvolucrados);
+      
     },
     error: (error) => {
       this.loadingOtrosInvolucrados = false;

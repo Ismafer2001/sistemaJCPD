@@ -30,7 +30,7 @@ export class NnaPageNnaComponent implements OnInit {
   pageSize = 5;
   // total items from server
   totalDenuncias = 0;
-  grupo: string = "";
+  grupo: string = ""; //se asigna 'nna' si las ruta principal ya no es un parametro
 
   // Propiedades para el filtro
   filtroForm!: FormGroup;
@@ -52,6 +52,9 @@ export class NnaPageNnaComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    /*IMPORTANTE */
+    /*esta suscripcion es la que obtiene el parametro de la URL si opta por hacer las rutas separadas de nna, mujeres y adultos
+     en lo qu es el modulo de naa asignmos la variable grupo a 'nna' si es mujeres 'mujeres' y adultos 'adultos' */
     this.route.params.subscribe(params => {
       const grupo = params['grupo'];
       if (this.gruposValidos.includes(grupo)) {
@@ -76,11 +79,6 @@ export class NnaPageNnaComponent implements OnInit {
   get pagedDenuncias(): Denuncia[] {
     return this.denuncias;
   }
-
-
-
-
-
 
   /////------------------CARGAR DATOS----------------------------///
 
@@ -196,9 +194,7 @@ export class NnaPageNnaComponent implements OnInit {
         return 'Seleccione un filtro primero...';
     }
   }
-
   //------------------------------OTROS------------------//
-
 
    totalDenunciasActivas(){
     this.denunciaService.contarDenunciasActivas(this.grupo).subscribe(n=>{
@@ -208,15 +204,11 @@ export class NnaPageNnaComponent implements OnInit {
   principalesActivos(){
     this.UserService.usuariosActivos().subscribe(n=>{
       this.miembrosPrincipales=n;
-      
+
     })
   }
 
-  eliminarDenuncia(denuncia:Denuncia){
-
-        this.denunciaService.eliminarDenuncia(denuncia.idDenuncia).subscribe(() => this.cargarDenuncias());
-
-  }
+  
 }
 
 export default NnaPageNnaComponent;

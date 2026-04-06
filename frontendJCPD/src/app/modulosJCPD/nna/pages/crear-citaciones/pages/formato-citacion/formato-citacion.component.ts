@@ -149,9 +149,7 @@ export class FormatoCitacionComponent implements OnInit {
     });
     this.loadDatosCitados(this.denunciaId, this.tipoInvolucrado,this.idInvolucrado,this.idCitacion);
 
-    this.citacionForm.valueChanges.subscribe((n) => {
-      console.log('Valor del formulario de citación:', n);
-    })
+
   }
 
   private checkInitialLoadingComplete(): void {

@@ -24,6 +24,7 @@ export class AuthPageLoginComponent implements OnInit {
    passwordVisible = false;
    loading = false;
    error='';
+   hoy = new Date();
 
 
   constructor(

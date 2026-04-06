@@ -153,9 +153,7 @@ export class FormatoNotificacionComponent implements OnInit {
 
     this.loadDatosNotificados(this.denunciaId, this.tipoInvolucrado,this.idInvolucrado,this.idNotificacion);
 
-    this.notificacionForm.valueChanges.subscribe((n) => {
-      console.log('Valor del formulario de notificación:', n);
-    })
+   
 
   }
 

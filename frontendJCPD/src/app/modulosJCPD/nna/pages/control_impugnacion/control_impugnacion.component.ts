@@ -38,9 +38,7 @@ export class Control_impugnacionComponent implements OnInit {
 
     this.formularioControlImpugnacion();
 
-    this.controlInpugnacionForm.valueChanges.subscribe(value => {
-      console.log(value);
-    });
+ 
   }
 
   formularioControlImpugnacion() {

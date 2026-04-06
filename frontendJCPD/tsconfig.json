@@ -4,7 +4,7 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./src",
-    "paths": {
+    "paths": {  /*usa aqui alias de de caminos para acortar cuando importemos algo*/
       "@inicio/*": ["app/inicio/*"],
       "@nna/*": ["app/modulosJCPD/nna/*"],
       "@mujeres/*": ["app/modulosJCPD/Mujeres/*"],

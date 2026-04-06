@@ -88,11 +88,7 @@ export class CrearCitacionesComponent implements OnInit {
     this.loadOtrosInvolucrados(this.denunciaId);
     this.loadCitados(this.denunciaId)
     this.formularioFormatoCitacion();
-    this.citacionForm.valueChanges.subscribe(value => {
-      console.log('Formulario actualizado:', value);
 
-
-    })
 
   }
 
@@ -167,7 +163,7 @@ export class CrearCitacionesComponent implements OnInit {
     next: (data) => {
       this.otrosInvolucrados = data;
       this.loadingOtrosInvolucrados = false;
-      console.log('aquiiiiiii'+this.otrosInvolucrados);
+      
     },
     error: (error) => {
       this.loadingOtrosInvolucrados = false;

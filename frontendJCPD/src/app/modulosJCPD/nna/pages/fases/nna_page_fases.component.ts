@@ -59,7 +59,7 @@ ngOnInit() {
   const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
     if (this.gruposValidos.includes(grupo || '')) {
       this.grupo = grupo!;
-      
+
     } else {
       console.error('Grupo no válido:', grupo);
       this.grupo = '';
@@ -68,8 +68,6 @@ ngOnInit() {
     this.denunciaId = +params['id'];
     this.loading = true;
     this.error = null;
-
-    // 🔥 DELAY ARTIFICIAL PARA TESTING DEL LOADER (REMOVER EN PRODUCCIÓN)
 
       forkJoin({
         denuncia: this.denunciaServices.obtenerDenuncia(this.denunciaId),
@@ -89,12 +87,13 @@ ngOnInit() {
           this.controlImpugnacion = estatus.controlImpugnacion;
           this.desestimiento = estatus.desestimiento;
           this.cierreCaso = estatus.cierreCaso;
+          this.armarArrayFases();
 
-          if(this.grupo === 'mujeres'){
+          /*if(this.grupo === 'mujeres'){
             this.armararrayFasesMujeres();
           }else{
             this.armarArrayFases();
-          }
+          }*/
 
           this.loading = false;
         },
@@ -104,7 +103,7 @@ ngOnInit() {
           this.loading = false;
         }
       });
-    // 2.5 segundos de delay para ver el loader
+
   });
 
 }
@@ -229,10 +228,10 @@ ngOnDestroy() {
   }
 ];
 
-
-
   }
-  armararrayFasesMujeres(){
+
+  /*OPCIONAL si se usara el mismo componente para listar las fases*/
+  /*armararrayFasesMujeres(){
          this.tarjetasFases = [
        {
     titulo: 'Denuncia',
@@ -274,8 +273,7 @@ ngOnDestroy() {
 
 ];
 
-  }
-
+  }*/
 
   // Métodos para el dropdown
   toggleDropdown(): void {

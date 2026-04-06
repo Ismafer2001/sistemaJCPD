@@ -579,7 +579,7 @@ seleccionarMEdida() {
           const exitosos = responses.filter(r => !r.error).length;
           const errores = responses.filter(r => r.error).length;
 
-          console.log(`✅ Medidas procesadas: ${exitosos} exitosas, ${errores} con errores`);
+          console.log(` Medidas procesadas: ${exitosos} exitosas, ${errores} con errores`);
 
           if (exitosos > 0) {
             console.log('Actualizando lista de medidas definitivas...');
@@ -1018,7 +1018,7 @@ get participantesArray(): FormArray {
           this.pruebasForm.reset();
         }
       }
-      console.log('aquiiiiiii',this.pruebasTabla);
+      
     }
   }
 

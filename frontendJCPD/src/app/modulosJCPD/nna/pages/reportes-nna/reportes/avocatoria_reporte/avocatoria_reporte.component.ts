@@ -50,7 +50,7 @@ filtrar(): void {
         this.medidasCONNAart59 = data.CONNA_art_59
         this.procesarMedidas(data);
 
-        console.log('aquiiiii',data)
+        
       });
       this.reporteService.getReporteAvocatoriavulneraciones(grupo, desde, hasta)
       .subscribe(data =>{

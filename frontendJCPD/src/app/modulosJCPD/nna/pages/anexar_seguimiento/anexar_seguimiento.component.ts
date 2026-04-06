@@ -65,9 +65,7 @@ export class Anexar_seguimientoComponent implements OnInit {
     });
     this.formularioSeguimientoMedidas();
 
-    this.seguimientoMedidasForm.valueChanges.subscribe(n=>{
-      console.log('formulario actualizado',n)
-    })
+   
 
   }
 
