@@ -48,7 +48,7 @@ export class Crear_providenciaComponent implements OnInit {
   afectados: any[] = [{id: 0, nombres: ''}];
   avocatoriacargada: any;
 
-    grupo: string = '';
+    grupo: string = 'nna';
      fechaHoraActual: string = new Date().toISOString().slice(0, 16);
      fechaFormateada: string = '';
      pdfSrc: SafeResourceUrl | null = null;
@@ -146,8 +146,7 @@ export class Crear_providenciaComponent implements OnInit {
     this.initialLoading = true;
     this.formularioProvidencia();
     this.formularioMedidasEmergentes();
-     const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
 
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];

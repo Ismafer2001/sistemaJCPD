@@ -52,7 +52,7 @@ export class CrearNotificacionesComponent implements OnInit {
 
   idNotificacion!: number;
 
-  grupo:string =''
+  grupo:string ='nna'
   modoEdicionNotificados: boolean = false;
   itemEnEdicion: any = null;
 
@@ -66,8 +66,7 @@ export class CrearNotificacionesComponent implements OnInit {
      ) {}
 
   ngOnInit() {
-     const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
 
     this.route.params.subscribe(params => {   ///<-----suscirbmos para obtener paramtro de la url
 
@@ -196,7 +195,7 @@ export class CrearNotificacionesComponent implements OnInit {
     next: (data) => {
       this.otrosInvolucrados = data;
       this.loadingOtrosInvolucrados = false;
-      
+
     },
     error: (error) => {
       this.loadingOtrosInvolucrados = false;

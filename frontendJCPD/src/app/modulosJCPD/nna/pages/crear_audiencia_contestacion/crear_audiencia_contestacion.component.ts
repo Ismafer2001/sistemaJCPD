@@ -108,7 +108,7 @@ export class Crear_audienciaComponent implements OnInit {
 
   // Formulario para agregar manifestación a un participante
   formManifestacion!: FormGroup;
-  grupo: string = '';
+  grupo: string = 'nna';
   denunciaId = 0;
   audienciaForm!: FormGroup;
   participantesForm!: FormGroup;
@@ -177,8 +177,7 @@ export class Crear_audienciaComponent implements OnInit {
   }
 //suscribir a los parámetros de la ruta para determinar el modo (crear/editar) y estableer el estado de los botones iniciales
   private configureEditCreateMode(): void {
-  const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
 
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];

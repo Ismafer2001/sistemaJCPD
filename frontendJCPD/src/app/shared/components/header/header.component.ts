@@ -25,6 +25,7 @@ export class headerComponent implements OnInit, OnDestroy {
   mostrarMenuUsuario = false;
   mostrarNotificaciones = false;
   nombreModulo: string = "";
+  grupo: string ='nna'
 
   // Propiedades para notificaciones
   notificacionesNoLeidas: number = 0;
@@ -45,12 +46,11 @@ export class headerComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      const grupo = params['grupo'];
-      this.nombreModulo = this.modulosConfig[grupo as keyof typeof this.modulosConfig] || 'Junta Cantonal de Protección de Derechos';
+    const segment = this.route.snapshot.pathFromRoot[1]?.routeConfig?.path;
 
-      console.log('Grupo actual:', grupo);
-    });
+      this.nombreModulo = (segment == 'nna')?'Niñez y Adolescencia': 'Junta Cantonal de Protección de Derechos';
+
+
 
     this.AuthService.getUsuarioActual()
       .pipe(takeUntil(this.destroy$))
@@ -230,7 +230,7 @@ export class headerComponent implements OnInit, OnDestroy {
 
     this.destroy$.next();
     this.destroy$.complete();
-    
+
   }
 
 }

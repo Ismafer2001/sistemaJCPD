@@ -23,7 +23,7 @@ export class InhibirseComponent implements OnInit {
   inhibirseForm: FormGroup = new FormGroup({});
   cantones: Canton[] = [];
   denunciaId: number = 0;
-  grupo: string = '';
+  grupo: string = 'nna';
 
   constructor(
     private route: ActivatedRoute,
@@ -33,8 +33,7 @@ export class InhibirseComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
     this.route.params.subscribe(params => {   ///<-----suscirbmos para obtener paramtro de la url
       this.denunciaId = +params['id'];
     });

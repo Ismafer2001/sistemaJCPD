@@ -76,7 +76,7 @@ export class Cierre_casoComponent implements OnInit {
       disabled: true
     }
   ];
-  grupo: string = '';
+  grupo: string = 'nna';
   isEditCierreCasoActivate:boolean=false;
   idCierreCaso!:number;
     denunciaId!:number;
@@ -131,8 +131,7 @@ export class Cierre_casoComponent implements OnInit {
   ngOnInit() {
 
     this.formularioInformesPresentados();
-   const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+   
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
       if (params['modo'] === 'editar') {
@@ -153,7 +152,7 @@ export class Cierre_casoComponent implements OnInit {
       this.loadDatosCierreCaso(this.denunciaId)
       this.formularioCierreCaso();
 
-      
+
 
 
 

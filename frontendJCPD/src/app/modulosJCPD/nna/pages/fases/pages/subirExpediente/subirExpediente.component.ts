@@ -23,7 +23,7 @@ export class SubirExpedienteComponent implements OnInit {
     loading: boolean = false;
     loadingMessage: string = '';
   denunciaId: number = 0;
-  grupo: string = '';
+  grupo: string = 'nna';
   expedienteForm!: FormGroup;
   selectedFile: File | null = null;
   uploadSuccess: boolean = false;
@@ -40,8 +40,7 @@ export class SubirExpedienteComponent implements OnInit {
   ) { }
 
   ngOnInit() {
-    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
       // Inicializar el formulario con el idDenuncia

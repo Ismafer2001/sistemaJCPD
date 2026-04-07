@@ -1,7 +1,8 @@
 // src/app/guards/grupo-valido.guard.ts
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
-
+//valido si la ruta va ser dinamica y se usara parametros :grupo
+//ejemplo thhp://nna,ejemplo thhp://mujeres, ejemplo thhp://adultos
 export const grupoValidoGuard: CanActivateFn = (route) => {
   const router = inject(Router);
 

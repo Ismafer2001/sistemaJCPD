@@ -114,7 +114,7 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
     }
   ];
   denunciaId = 0;
-  grupo: string = '';
+  grupo: string = 'nna';
   isEditAudienciaPruebasActivate: boolean = false;
   editMedidasMode: boolean = false;
   isActivateModoEdicionParticipante: boolean = false;
@@ -175,8 +175,7 @@ export class Crear_audiencia_pruebaComponent implements OnInit {
 
     //suscribir a los parámetros de la ruta para determinar el modo (crear/editar) y estableer el estado de los botones iniciales
   private configureEditCreateMode(): void {
-  const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
 
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
@@ -1018,7 +1017,7 @@ get participantesArray(): FormArray {
           this.pruebasForm.reset();
         }
       }
-      
+
     }
   }
 

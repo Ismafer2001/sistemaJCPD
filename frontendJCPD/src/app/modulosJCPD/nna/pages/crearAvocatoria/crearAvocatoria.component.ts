@@ -107,7 +107,7 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
       disabled: true
     }
   ];
-  grupo: string = '';
+  grupo: string = 'nna';
   fechaHoraActual: Date = new Date();
   pdfSrc: SafeResourceUrl | null = null;
 
@@ -157,8 +157,7 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
     this.initialLoading = true;
     this.formularioAvocatoria();
     this.formularioMedidasEmergentes();
-    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
       if (params['modo'] === 'editar') {

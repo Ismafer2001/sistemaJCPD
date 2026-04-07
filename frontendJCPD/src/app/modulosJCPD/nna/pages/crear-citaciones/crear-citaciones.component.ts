@@ -36,7 +36,7 @@ interface notificacion{
 })
 export class CrearCitacionesComponent implements OnInit {
 
-  grupo:string =''
+  grupo:string ='nna'
   currentTab='0'
     involucrados:involucrados[]=[]
     otrosInvolucrados: involucrados[] = [];
@@ -74,8 +74,7 @@ export class CrearCitacionesComponent implements OnInit {
 
   ngOnInit() {
 
-     const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+     
     this.route.params.subscribe(params => {   ///<-----suscirbmos para obtener paramtro de la url
 
       this.denunciaId = +params['id'];
@@ -163,7 +162,7 @@ export class CrearCitacionesComponent implements OnInit {
     next: (data) => {
       this.otrosInvolucrados = data;
       this.loadingOtrosInvolucrados = false;
-      
+
     },
     error: (error) => {
       this.loadingOtrosInvolucrados = false;

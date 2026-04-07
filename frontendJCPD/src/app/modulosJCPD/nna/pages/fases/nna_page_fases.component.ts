@@ -23,7 +23,7 @@ export class NnaPageFasesComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   denunciaId: number = 0;
   denuncia:any =null
-  grupo:string =''
+  grupo:string ='nna'
 
   loading: boolean = true;
   error: string | null = null;
@@ -56,14 +56,7 @@ export class NnaPageFasesComponent implements OnInit, OnDestroy {
 
 ngOnInit() {
 
-  const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    if (this.gruposValidos.includes(grupo || '')) {
-      this.grupo = grupo!;
 
-    } else {
-      console.error('Grupo no válido:', grupo);
-      this.grupo = '';
-    }
   this.route.params.subscribe(params => {
     this.denunciaId = +params['id'];
     this.loading = true;

@@ -16,7 +16,7 @@ import { WebSocketService } from '@shared/services/web-socket.service';
 export class SidebarComponent  implements OnInit {
   @ViewChild(ModalComponent) modalComponent!: ModalComponent;
 
-  grupo: string = '';
+  grupo: string = 'nna';
 
   // Modal de confirmación de cierre de sesión
   mostrarModalLogout = false;
@@ -37,15 +37,7 @@ export class SidebarComponent  implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.params.subscribe(params => {
-      const grupo = params['grupo'];
-      if (this.gruposValidos.includes(grupo)) {
-        this.grupo = grupo;
-      } else {
-        console.error('Grupo no válido:', grupo);
-        this.grupo = '';
-      }
-    });
+
   }
 
 

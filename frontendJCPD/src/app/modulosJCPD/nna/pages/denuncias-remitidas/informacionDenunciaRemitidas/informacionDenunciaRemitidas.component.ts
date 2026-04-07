@@ -14,7 +14,7 @@ import { toast } from 'ngx-sonner';
 
 })
 export class InformacionDenunciaRemitidasComponent implements OnInit {
-  grupo: string = '';
+  grupo: string = 'nna';
   deprecatoriaID: number = 0;
   deprecatoriaForm!: FormGroup;
   cantones: any[] = [];
@@ -32,8 +32,7 @@ export class InformacionDenunciaRemitidasComponent implements OnInit {
   }
 
   ngOnInit() {
-    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
     this.formulario();
      this.route.params.subscribe(params => {   ///<-----suscirbmos para obtener paramtro de la url
 

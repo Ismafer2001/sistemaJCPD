@@ -112,11 +112,8 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   canton!: string;
   pdfSrc: SafeResourceUrl | null = null;
   idDenuncia!: number;
-  grupo: string = "";
+  grupo: string = "nna";
   isEditDenunciaActivate:boolean=false;
-
-  // Configuración de grupos válidos
-  private gruposValidos = ['nna', 'adultos', 'mujeres'];
 
   // Variables para controlar campos condicionales
   mostrarCamposMujeres = false;
@@ -189,14 +186,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
         this.checkInitialLoadingComplete();
       }
     });
-    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    if (this.gruposValidos.includes(grupo || '')) {
-      this.grupo = grupo!;
-      console.log('Grupo válido asignado en crear denuncia:', this.grupo);
-    } else {
-      console.error('Grupo no válido:', grupo);
-      this.grupo = '';
-    }
+
 
     // Crear el formulario primero
     this.denunciaFormulario();

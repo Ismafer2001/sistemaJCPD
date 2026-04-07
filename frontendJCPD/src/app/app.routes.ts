@@ -32,8 +32,8 @@ export const routes: Routes = [
   /*por lo cual debria para la ruta a nna y revisar todos los componentes relacionados
    a nna ya que hay funciones que extraen el paramtro de la URL */
 
-    path: ':grupo',//cambiar a rutas individuales de ser necesario
-    canActivate: [authGuard, NoAdminGuard, grupoValidoGuard],
+    path:'nna',//cambiar a rutas individuales de ser necesario
+    canActivate: [authGuard, NoAdminGuard],
     loadChildren: () => import('@nna/routes/nna.routes'),
   },
   /*AGREGAR Si necesitas las rutas de los otros mudulos si se van hacer por separado

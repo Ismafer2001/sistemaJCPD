@@ -24,7 +24,7 @@ import { InformesService } from '@nna/services/informes.service';
 export class Crear_informeComponent implements OnInit {
 
  denunciaId = 0;
-    grupo:string = ''
+    grupo:string = 'nna'
 
   // Propiedades para la tabla
   columnasTabla: string[] = ['id','diriguidoA'];
@@ -38,8 +38,7 @@ export class Crear_informeComponent implements OnInit {
   private informesService: InformesService) { }
 
   ngOnInit() {
-     const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
 
     this.route.params.subscribe(params => {   ///<-----suscirbmos para obtener paramtro de la url
 

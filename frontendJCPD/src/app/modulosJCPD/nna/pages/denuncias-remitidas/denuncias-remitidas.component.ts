@@ -21,24 +21,17 @@ export class DenunciasRemitidasComponent implements OnInit {
   // Configuración de la tabla
   columnasTabla = ['codigoTramite', 'estadoRecepcion', 'cantonOrigen.nombre', 'afectadosNombres'];
   encabezadosTabla = ['Código Trámite', 'Estado', 'Cantón Origen', 'Afectados'];
-
+   grupo:string ='nna'
+   
   constructor(
     private route: ActivatedRoute,
     private inhibirseService: InhibirseService,
     private authService: AuthService
   ) { }
-private gruposValidos = ['nna', 'adultos', 'mujeres'];
- grupo:string =''
+
 
   ngOnInit() {
-    const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    if (this.gruposValidos.includes(grupo || '')) {
-      this.grupo = grupo!;
-      console.log('Grupo válido asignado en crear denuncia:', this.grupo);
-    } else {
-      console.error('Grupo no válido:', grupo);
-      this.grupo = '';
-    }
+
 
     // Cargar deprecatorias
     this.cargarDeprecatorias();

@@ -32,7 +32,7 @@ export class FormatoinformeComponent implements OnInit {
     loadingMessage: string = ''; // Loader message
    denunciaId = 0;
     editMode: boolean = false;
-    grupo:string ='';
+    grupo:string ='nna';
        fechaHoraActual = new Date();
   // Propiedades para el formulario de informe
   informeForm!: FormGroup;
@@ -121,9 +121,6 @@ export class FormatoinformeComponent implements OnInit {
    private sanitizer: DomSanitizer){}
 
   ngOnInit() {
-     const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
-
 
     this.route.params.subscribe(params => {   ///<-----suscirbmos para obtener paramtro de la url
 

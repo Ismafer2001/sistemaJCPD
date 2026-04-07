@@ -94,7 +94,7 @@ export class Crear_resolucionesComponent implements OnInit {
   codigoTramite: string ='';
   isEditResolucionesActivate: boolean = false;
   editMedidasMode: boolean = false;
-grupo: string = '';
+grupo: string = 'nna';
  medidasDefinitivasForm!:FormGroup;
     todasLasMedidas: Medida[] = [];
     medidasFiltradas: Medida[] = [];
@@ -147,8 +147,7 @@ pdfError: boolean = false;
   ) { }
 
    private configureEditCreateMode(): void {
-  const grupo = this.route.parent?.snapshot.paramMap.get('grupo');
-    this.grupo = grupo === 'nna' ? 'nna' : 'adultos';
+
 
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];

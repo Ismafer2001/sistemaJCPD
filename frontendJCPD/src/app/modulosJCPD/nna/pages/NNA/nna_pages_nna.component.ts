@@ -30,7 +30,7 @@ export class NnaPageNnaComponent implements OnInit {
   pageSize = 5;
   // total items from server
   totalDenuncias = 0;
-  grupo: string = ""; //se asigna 'nna' si las ruta principal ya no es un parametro
+  grupo: string = "nna";
 
   // Propiedades para el filtro
   filtroForm!: FormGroup;
@@ -41,8 +41,6 @@ export class NnaPageNnaComponent implements OnInit {
     { value: 'cedula', label: 'Cédula del Afectado' }
   ];
 
-  // Configuración de grupos válidos
-  private gruposValidos = ['nna', 'adultos', 'mujeres'];
 
   constructor(private denunciaService: DenunciaService,
      private UserService:UserService,
@@ -52,19 +50,7 @@ export class NnaPageNnaComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    /*IMPORTANTE */
-    /*esta suscripcion es la que obtiene el parametro de la URL si opta por hacer las rutas separadas de nna, mujeres y adultos
-     en lo qu es el modulo de naa asignmos la variable grupo a 'nna' si es mujeres 'mujeres' y adultos 'adultos' */
-    this.route.params.subscribe(params => {
-      const grupo = params['grupo'];
-      if (this.gruposValidos.includes(grupo)) {
-        this.grupo = grupo;
-      } else {
-        console.error('Grupo no válido:', grupo);
-        // No asignar valor por defecto, dejarlo vacío o manejar el error
-        this.grupo = '';
-      }
-    });
+
 
     this.cargarDenuncias();
     this.totalDenunciasActivas();
@@ -208,7 +194,7 @@ export class NnaPageNnaComponent implements OnInit {
     })
   }
 
-  
+
 }
 
 export default NnaPageNnaComponent;
