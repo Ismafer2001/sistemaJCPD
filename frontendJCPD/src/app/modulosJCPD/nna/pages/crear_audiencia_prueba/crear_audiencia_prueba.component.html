@@ -266,7 +266,7 @@
       <!-- Archivos de pruebas - Solo para abogados (patrón anexar_seguimiento) -->
       @if(pruebasForm.get('participanteIndex')?.value !== '' &&
           pruebasForm.get('participanteIndex')?.value !== null &&
-          participantesArray.at(pruebasForm.get('participanteIndex')?.value || -1)?.get('tipoParticipante')?.value === 'Abogado') {
+          participantesArray.at(pruebasForm.get('participanteIndex')?.value || -1).get('tipoParticipante')?.value === 'Abogado') {
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700 mb-2">
             Archivo de prueba (solo uno por abogado):

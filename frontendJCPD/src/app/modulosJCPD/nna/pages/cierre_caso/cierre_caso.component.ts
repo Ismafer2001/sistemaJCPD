@@ -91,7 +91,7 @@ export class Cierre_casoComponent implements OnInit {
     // Propiedades para la tabla
     informesPresentadosData: any[] = [];
     encabezadosInformes = ['Informe', 'Técnico/Institución', 'Fecha', 'Lugar', 'Persona Evaluada'];
-    columnasInformes = ['informe', 'nombreTecnico', 'fecha', 'lugar', 'personaEvaluada'];
+    columnasInformes = ['informe', 'nombreTecnico', 'fechaCreado', 'lugar', 'personaEvaluada'];
     pdfSrc: SafeResourceUrl | null = null;
 
     // Estado de loading para PDF
@@ -131,7 +131,7 @@ export class Cierre_casoComponent implements OnInit {
   ngOnInit() {
 
     this.formularioInformesPresentados();
-   
+
     this.route.params.subscribe(params => {
       this.denunciaId = +params['id'];
       if (params['modo'] === 'editar') {
@@ -151,6 +151,10 @@ export class Cierre_casoComponent implements OnInit {
       }
       this.loadDatosCierreCaso(this.denunciaId)
       this.formularioCierreCaso();
+
+      this.CierreCasoForm.valueChanges.subscribe(n=>{
+        console.log('cambios aquiii', n)
+      })
 
 
 
@@ -249,7 +253,7 @@ export class Cierre_casoComponent implements OnInit {
             id: [informe.id],
             informe: [informe.informe],
             nombreTecnico: [informe.nombreTecnico],
-            fecha: [informe.fecha],
+            fecha: [informe.fechaCreado],
             lugar: [informe.lugar],
             personaEvaluada: [informe.personaEvaluada]
           });
@@ -499,7 +503,7 @@ export class Cierre_casoComponent implements OnInit {
     next: (body) => {
 
           this.loading = false; // Desactivar loader
-          console.log('ID de avocatoria guardada:', body)
+          console.log('ID de cierre de caso guardada:', body)
           this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
 
           toast.success('cierre de caso Guardada con Éxito', {
@@ -545,7 +549,7 @@ export class Cierre_casoComponent implements OnInit {
     },
     error: (err) => {
       this.loading = false; // Desactivar loader
-      toast.error('Error al actualizar la avocatoria', {
+      toast.error('Error al actualizar cierre de caso', {
         duration: 3000,
       });
     }

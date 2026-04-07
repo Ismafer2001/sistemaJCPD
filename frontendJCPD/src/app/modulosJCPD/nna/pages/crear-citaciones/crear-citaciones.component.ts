@@ -74,7 +74,7 @@ export class CrearCitacionesComponent implements OnInit {
 
   ngOnInit() {
 
-     
+
     this.route.params.subscribe(params => {   ///<-----suscirbmos para obtener paramtro de la url
 
       this.denunciaId = +params['id'];
@@ -91,9 +91,9 @@ export class CrearCitacionesComponent implements OnInit {
 
   }
 
+   //============0000FORMULARIOS=============0//
 
-   //----------------------FORMULARIOS-------------------------//
-
+//========0Formulario del formato general de citaciones===========//
   formularioFormatoCitacion(){
     this.citacionForm = this.fb.group({
       idDenuncia:[this.denunciaId],
@@ -113,7 +113,7 @@ export class CrearCitacionesComponent implements OnInit {
 
     })
   }
-
+//=========Formulario para agregar mas personas a citar=======//
    formularioCitarPersona(){
     this.nuevoCitadoForm = this.fb.group({
       nombres: ['', Validators.required],
@@ -124,6 +124,7 @@ export class CrearCitacionesComponent implements OnInit {
       idDenuncia: [this.denunciaId]
     });
   }
+  //==========Formulario para agregar mas instituciones a citar=========//
   formularioCitarInstituciones(){
     this.nuevaInstitucionForm = this.fb.group({
       nombres: ['', Validators.required],
@@ -137,10 +138,11 @@ export class CrearCitacionesComponent implements OnInit {
     });
   }
 
-  //--------------------CARGA DE DATOS------------//
+  //=================CARGA DE DATOS=================//
 
+
+  //========Cargar las primeras personas agregadas con anteriodidad o que fueron notificadas=======//
   loadinvolucrados(id:number){
-
   this.loadingInvolucrados = true;
   this.CitacionesService.getinvolucradosCitaciones(id).subscribe({
     next: (data) => {
@@ -155,6 +157,7 @@ export class CrearCitacionesComponent implements OnInit {
   });
 
   }
+  //=============cargar los datos de los involucrados que se agregaron en esta fase
   loadOtrosInvolucrados(id:number){
 
   this.loadingOtrosInvolucrados = true;
@@ -171,6 +174,7 @@ export class CrearCitacionesComponent implements OnInit {
   });
 
   }
+  //========carga de datos de informacion ya registrada para autocompletar elformato de citaciones=============//
   loadCitados(id:number){
     this.CitacionesService.getcitacioenesDTO(id).subscribe(data=>{
       this.citar=data;
@@ -182,37 +186,11 @@ export class CrearCitacionesComponent implements OnInit {
   }
 
 
-  //-----------*-----------OTROS--------------//
-
-
-//---------------------submit---------------------//
 volver(): void {
     this.router.navigate(['/nna/fases/' + this.denunciaId]);
   }
-updateCitacion() {
-  const body ={
-    ...this.citacionForm.value,
 
 
-  }
-  this.CitacionesService.actualizarCitacion(this.idCitacion, body).subscribe({
-      next: () => {
-        toast.success('Citacion Actualizada con Éxito', {
-                  duration: 3000,
-                });
-          this.pdfDisabled = false;
-          this.editarDisabled = true;
-
-      },
-      error: (err) => {
-        toast.error('Error al actualizar la notificación', {
-          duration: 3000,
-        });
-      }
-
-    })
-
-}
 
 seleccionarParaEditarNotificado(item: any){
     this.modoEdicionCitados = true;
@@ -259,6 +237,7 @@ seleccionarParaEditarNotificado(item: any){
         this.loadinvolucrados(this.denunciaId);
         this.loadOtrosInvolucrados(this.denunciaId);
         this.cancelarEdicionNotificado();
+        toast.success('actualizado Exitoso')
         if (finalize) finalize();
       },
       error: () => { if (finalize) finalize(); }
@@ -274,6 +253,7 @@ seleccionarParaEditarNotificado(item: any){
           this.loadOtrosInvolucrados(this.denunciaId);
           this.nuevoCitadoForm.reset();
           this.nuevoCitadoForm.get('idDenuncia')?.setValue(this.denunciaId);
+          toast.success('Agregado Exitoso')
           if (finalize) finalize();
         },
         error: () => { if (finalize) finalize(); }
@@ -287,6 +267,7 @@ seleccionarParaEditarNotificado(item: any){
           this.loadOtrosInvolucrados(this.denunciaId);
           this.nuevaInstitucionForm.reset();
           this.nuevaInstitucionForm.get('idDenuncia')?.setValue(this.denunciaId);
+          toast.success('Agregado Exitoso')
           if (finalize) finalize();
         },
         error: () => { if (finalize) finalize(); }
@@ -327,7 +308,7 @@ seleccionarParaEditarNotificado(item: any){
   }
  onSubmit(): void {
     this.loadingBtnCitado = true;
-    this.loadingBtnCitadoMsg = this.modoEdicionCitados ? 'Actualizando...' : 'Agregando...';
+
     const finalize = () => { this.loadingBtnCitado = false; this.loadingBtnCitadoMsg = ''; };
     switch (this.modoEdicionCitados) {
       case true:
@@ -342,9 +323,6 @@ seleccionarParaEditarNotificado(item: any){
 
 
   }
-
-
-
 
 
 }

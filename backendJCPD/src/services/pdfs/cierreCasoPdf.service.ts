@@ -60,7 +60,7 @@ export async function crearPdfCierreCaso(res: Response, idCierreCaso: any): Prom
                         { text: ') por ' },
                         { text: informe.nombreTecnico || '', bold: true },
                         { text: ', con fecha ' },
-                        { text: informe.fecha ? new Date(informe.fecha).toLocaleDateString('es-ES') : '', bold: true },
+                        { text: informe.fechaCreado ? new Date(informe.fechaCreado).toLocaleDateString('es-ES') : '', bold: true },
                         { text: ' del presente año, en donde manifiestan que: "se ha venido realizando visitas de seguimiento al ' },
                         { text: informe.lugar || '', bold: true },
                         { text: ' de manera imprevista donde se verifica que ' },

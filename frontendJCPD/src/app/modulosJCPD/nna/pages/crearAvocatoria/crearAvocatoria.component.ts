@@ -166,7 +166,6 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
         this.medidasEmergentesForm.disable()
         this.isBotonDesactivated=true;
 
-
         // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
          this.actionsConfig[1].disabled = true
        this.actionsConfig[2].disabled = false // PDF habilitado
@@ -181,25 +180,11 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
 
       this.LoadAfectados(this.denunciaId);
 
-
     });
-
 
     this.cargarListaDeMedidas();
 
     this.seleccionarMedida();
-
-
-
-    //----escucha cambios en los formularios para debug----//
-
-
-    this.medidasEmergentesForm.valueChanges.subscribe((data) => {
-      console.log( data);
-    });
-
-    this.avocatoriaForm.valueChanges.subscribe((data) => { console.log('cambios del formulario avocatoria', data);})
-
 
   }
    ngOnDestroy() {
@@ -215,8 +200,8 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
     }
   }
 
-  //--------CREAcion de FORMULARIO DE AVOCATORIA-----------------//
-
+  //================REACION DE FORMULARIO==============00//
+//==================Formulario general de la avocartoria)===============//
   formularioAvocatoria() {
     this.avocatoriaForm=this.fb.group({
       codigoTramite: ['', Validators.required],
@@ -252,6 +237,7 @@ CUARTO.-<p>`,
     })
 
   }
+  //==========Formulario para las medidas de proteccion=============00========//
   formularioMedidasEmergentes() {
    this.medidasEmergentesForm= this.fb.group({
       idAfectado: ['', Validators.required],
@@ -265,9 +251,9 @@ CUARTO.-<p>`,
     });
   }
 
+  //=====================CARAGA DE DATOS===================0//
 
-  //--------------carga de datos---------//
-
+  //=========carga de datos de la avocatoria cuando ya esta creada y asociada a una denuncia
   avocaroriaEditMode(idAvocatoria: number){
 
     this.avocatoriaService.getAvocatoriaEditMode(idAvocatoria).subscribe(data=>{
@@ -317,16 +303,10 @@ CUARTO.-<p>`,
           dispocisiones: this.avocatoriacargada.dispocisiones ?? this.avocatoriacargada.disposiciones ?? this.avocatoriacargada.disposicion ?? this.avocatoriacargada.dispocisiones ?? this.avocatoriaForm.get('dispocisiones')?.value,
           articulo: this.avocatoriacargada.articulo ?? this.avocatoriacargada.articulo ?? this.avocatoriaForm.get('articulo')?.value,
          }, { emitEvent: false });
-
-
       }
-
-
     });
-
-
   }
-
+//=========== Carga de datos de una denuncia necesarios para llenar informacion en avocatoria ================//
   loadDenunciaParaAvocatoria(id: number) {
     console.log('Cargando denuncia para avocatoria con ID:', id);
     this.avocatoriaService.obtenerDenunciaParaAvocatoria(id).subscribe({
@@ -390,9 +370,8 @@ CUARTO.-<p>`,
   });
 
 }
-//cargar listado de la medidas de poroteccion por articulo
+//=============cargar listado de la medidas de poroteccion por articulo===========//
   cargarListaDeMedidas() {
-
     this.medidasService.getAllMedidas().subscribe({
       next: (response) => {
 
@@ -449,7 +428,6 @@ CUARTO.-<p>`,
     this.consolidateMedidasLoading(afectadoId);
 
   }
-
   /**
    * Método consolidado para manejar la carga de medidas emergentes
    * Verifica si existen medidas emergentes, si no las hay, carga e integra las medidas identificadas
@@ -716,17 +694,19 @@ resetEditorMedida() {
         }
       });
   }
-//---------Botones de la navegacion ------------------//\
+//============00Botones de la navegacion ====================00//\
 
  cambiarTab(tab: number) {
     this.currentTab = tab;
     const section = document.getElementById('mainSectionAvocatoria');
 if (section) section.scrollTop = 0;
   }
+
 regresar(): void {
     this.router.navigate([`/${this.grupo}/fases/`+ this.denunciaAvocatoria?.id]);
   }
 
+  // =========== Handle para botones de guardar editar y generar pdf ============//
    handleActionButton(actionId: string) {
     switch (actionId) {
       case 'update':
@@ -745,6 +725,8 @@ regresar(): void {
         break;
     }
   }
+
+//===================Habilitar ediciion completa de la avocarotia =============//
   habilitarEdicion(){
     this.isEditAvocatoriaActivate=true;
     this.avocatoriaForm.enable();
@@ -754,7 +736,7 @@ regresar(): void {
     this.actionsConfig[2].disabled = true
     this.actionsConfig[0].disabled = true;
   }
-  //--editar
+  //============Funcion para actualizar la avocatoria===============//
   updateAvocatoria() {
   const body ={
     ...this.avocatoriaForm.value,
@@ -786,8 +768,7 @@ regresar(): void {
   })
 
 }
-
-//------------submit-----//
+//=============(Submit) guadar o crear la avocatoria a la base de datos===============//
 submitAvocatoria() {
 
   if (this.avocatoriaForm.invalid) {
@@ -827,7 +808,7 @@ submitAvocatoria() {
   }})
 
 }
-
+//===========Generar pdf con los datos de la avocatoria=============///
 generarPdf(){
   this.actionsConfig[2].disabled = true;
   this.pdfLoading = true;

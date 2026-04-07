@@ -138,9 +138,12 @@
             [type]="'submit'"
             [label]="'Crear Usuario'"
             [color]="'submit'"
-            [disabled]="userForm.invalid"
+            [disabled]="userForm.invalid || buttonCrearUsuario"
+            [loading]="buttonCrearUsuario"
             (clicked)="crearUsuario()"
-          ></app-button-submit>
+          >
+        
+        </app-button-submit>
 
 
         </div>
@@ -152,7 +155,7 @@
             [label]="'Actualizar Usuario'"
             [color]="'afirmar'"
             [icon]="'edit'"
-            [disabled]="userForm.invalid"
+            [disabled]="userForm.invalid || buttonCrearUsuario"
             (clicked)="actualizarUsuario()"
           ></app-button-submit>
 

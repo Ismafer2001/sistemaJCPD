@@ -211,7 +211,7 @@ Denuncia.hasOne(CierreCaso, { foreignKey: "idDenuncia", as: "CierreCaso" });
 
 //relacion informes presentados -- cierre caso
 InformesPresentados.belongsTo(CierreCaso, { foreignKey: "idCierraCaso", as: "CierreCaso" });
-CierreCaso.hasMany(InformesPresentados, { foreignKey: "idCierraCaso", as: "InformesPresentados" });
+CierreCaso.hasMany(InformesPresentados, { foreignKey: "idCierraCaso", as: "informesPresentados" });
 
 //relacion control impugnacion -- resoluciones
 ControlImpugnacion.belongsTo(Resoluciones, { foreignKey: "idResolucion", as: "Resolucion" });

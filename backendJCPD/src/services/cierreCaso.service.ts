@@ -51,7 +51,7 @@ export async function crearCierreCaso(data: CierreCasoData) {
             include: [
                 {
                     model: InformesPresentados,
-                    as: 'InformesPresentados'
+                    as: 'informesPresentados'
                 }
             ]
         });
@@ -174,8 +174,7 @@ export async function actualizarCierreCaso(idCierreCaso: number, data: CierreCas
             await InformesPresentados.bulkCreate(informesData, { transaction });
         }
 
-        // Confirmar la transacción
-        await transaction.commit();
+        
 
         // Retornar el cierre de caso actualizado con los informes
         const cierreCasoActualizado = await CierreCaso.findByPk(idCierreCaso, {
@@ -186,6 +185,8 @@ export async function actualizarCierreCaso(idCierreCaso: number, data: CierreCas
                 }
             ]
         });
+        // Confirmar la transacción
+        await transaction.commit();
 
         return cierreCasoActualizado;
 
@@ -203,7 +204,7 @@ export async function obtenerDatosCierreCasoCompleto(idCierreCaso: number) {
             include: [
                 {
                     model: InformesPresentados,
-                    as: 'InformesPresentados'
+                    as: 'informesPresentados'
                 },
                 {
                     model: Denuncia,

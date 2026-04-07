@@ -119,15 +119,11 @@
               [label]="modoEdicionNotificados ? 'Actualizar' : 'Agregar'"
               [color]=" 'submit'"
               [icon]="modoEdicionNotificados ? 'edit' : 'plus'"
-              [disabled]="loadingBtnNotificado || (modoEdicionNotificados && !nuevoNotificadoForm.valid)"
+              [disabled]="loadingBtnNotificado ||  nuevoNotificadoForm.invalid"
+              [loading]="loadingBtnNotificado"
             >
             </app-button-submit>
-            <div *ngIf="loadingBtnNotificado" class="absolute inset-0 flex items-center justify-center z-10" style="backdrop-filter: blur(3px); background-color: rgba(255,255,255,0.5);">
-              <div class="bg-white bg-opacity-80 rounded-lg p-2 shadow-md flex items-center gap-2">
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                <span class="text-sm text-gray-700">{{ loadingBtnNotificadoMsg }}</span>
-              </div>
-            </div>
+
           </div>
           <!-- Botón Cancelar: Solo visible en modo edición -->
           <app-button-submit
@@ -209,15 +205,11 @@
               [label]="modoEdicionNotificados ? 'Actualizar' : 'Agregar'"
               [color]=" 'submit'"
               [icon]="modoEdicionNotificados ? 'edit' : 'plus'"
-              [disabled]="loadingBtnNotificado || (modoEdicionNotificados && !nuevoNotificadoForm.valid)"
+              [disabled]="loadingBtnNotificado ||  nuevaInstitucionForm.invalid"
+              [loading]="loadingBtnNotificado"
             >
             </app-button-submit>
-            <div *ngIf="loadingBtnNotificado" class="absolute inset-0 flex items-center justify-center z-10" style="backdrop-filter: blur(3px); background-color: rgba(255,255,255,0.5);">
-              <div class="bg-white bg-opacity-80 rounded-lg p-2 shadow-md flex items-center gap-2">
-                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
-                <span class="text-sm text-gray-700">{{ loadingBtnNotificadoMsg }}</span>
-              </div>
-            </div>
+
           </div>
           <!-- Botón Cancelar: Solo visible en modo edición -->
           <app-button-submit

@@ -33,6 +33,7 @@ export class Admin_page_usuariosComponent implements OnInit  {
   mostrarModalValidacion = false;
   passwordValidacion = '';
   errorModal = '';
+  buttonCrearUsuario = false;
   modalConfig: ModalConfig = {
     titulo: ' Validación de Administrador',
     descripcion: 'Por motivos de seguridad, debe validar su identidad antes de editar usuarios del sistema',
@@ -152,7 +153,7 @@ export class Admin_page_usuariosComponent implements OnInit  {
     // Hacer que la contraseña no sea requerida en modo edición
     this.userForm.get('contrasena')?.clearValidators();
     this.userForm.get('contrasena')?.updateValueAndValidity();
-    
+
   }
 
   cerrarModalValidacion() {
@@ -162,6 +163,7 @@ export class Admin_page_usuariosComponent implements OnInit  {
     this.usuarioEnEdicion = null;
   }
   crearUsuario() {
+    this.buttonCrearUsuario = true
     if (this.userForm.invalid) {
       this.userForm.markAllAsTouched();
       toast.error('Por favor, complete todos los campos obligatorios');
@@ -174,10 +176,14 @@ export class Admin_page_usuariosComponent implements OnInit  {
           this.userForm.reset();
           this.formulariousuario(); // Reinicializar valores por defecto
           toast.success('¡Usuario creado exitosamente!');
+          this.buttonCrearUsuario = false
         },
         error: (error) => {
           console.error('Error al crear usuario:', error);
-          toast.error('Error al crear el usuario. Inténtelo nuevamente.');
+          toast.error('Error al crear usuario', {
+            duration: 3000,
+          description:`${error}`
+          });
         }
       });
     }

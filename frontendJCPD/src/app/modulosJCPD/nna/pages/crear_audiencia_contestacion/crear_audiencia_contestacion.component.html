@@ -350,7 +350,7 @@
                   type="button"
                   label="Agregar"
                   color="submit"
-                  [disabled]="formManifestacion.invalid "
+                  [disabled]="formManifestacion.invalid || loadingBtnParticipante "
                   [loading]="loadingBtnParticipante"
                   [loadingText]="loadingBtnParticipanteMsg"
                   (clicked)="agregarManifestacionParticipante()">
