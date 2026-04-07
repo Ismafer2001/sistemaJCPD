@@ -16,6 +16,9 @@ getCodigoTramite(id: number) {
 postControlDesestimiento(controlDesestimiento: any) {
     return this.http.post<any>(`${this.apiUrl}/`, controlDesestimiento);
 }
+getControlDesestimiento(id: number) {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+}
 
 
 }

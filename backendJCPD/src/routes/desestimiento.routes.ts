@@ -21,11 +21,7 @@ router.get('/codigo-tramite/:id',verificarCantonDenuncia, getCodigoTramiteDenunc
 
 
 // GET /desestimiento/denuncia/:idDenuncia - Obtener desestimiento por ID de denuncia
-router.get(
-  '/denuncia/:idDenuncia',
-  
-  desestimientoController.obtenerDesestimientoPorDenuncia
-);
+
 
 // GET /desestimiento/:id - Obtener desestimiento por ID
 router.get(

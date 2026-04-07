@@ -52,10 +52,7 @@ export const obtenerDesestimientoPorId = async (req: Request, res: Response) => 
   try {
     const { id } = req.params;
     const resultado = await desestimientoService.obtenerDesestimientoPorId(parseInt(id));
-    res.status(200).json({
-      message: 'Desestimiento obtenido exitosamente',
-      data: resultado
-    });
+    res.status(200).json( resultado);
   } catch (error: any) {
     if (error.name === 'DesestimientoNoEncontrado') {
       return res.status(404).json({ error: 'Desestimiento no encontrado' });
@@ -64,31 +61,6 @@ export const obtenerDesestimientoPorId = async (req: Request, res: Response) => 
     handlehttp(res, 'Error interno del servidor', error);
   }
 };
-
-// Obtener desestimiento por ID de denuncia
-export const obtenerDesestimientoPorDenuncia = async (req: Request, res: Response) => {
-  try {
-    const { idDenuncia } = req.params;
-    const resultado = await desestimientoService.obtenerDesestimientoPorDenuncia(parseInt(idDenuncia));
-    
-    if (!resultado) {
-      return res.status(404).json({
-        message: 'No se encontró desestimiento para esta denuncia',
-        data: null
-      });
-    }
-
-    res.status(200).json({
-      message: 'Desestimiento obtenido exitosamente',
-      data: resultado
-    });
-  } catch (error) {
-    console.error('Error al obtener desestimiento por denuncia:', error);
-    handlehttp(res, 'Error interno del servidor', error);
-  }
-};
-
-
 
 // Actualizar desestimiento
 export const actualizarDesestimiento = async (req: Request, res: Response) => {
@@ -110,6 +82,7 @@ export const actualizarDesestimiento = async (req: Request, res: Response) => {
     handlehttp(res, 'Error interno del servidor', error);
   }
 };
+
 
 
 

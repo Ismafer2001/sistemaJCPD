@@ -21,6 +21,7 @@ import { toast } from 'ngx-sonner';
 export class Control_desestimientoComponent implements OnInit {
   controlDesestimientoForm!: FormGroup;
   denunciaId!:number;
+  idDesestimiento!:number
   loading: boolean = false; // Loader principal para guardar
   loadingMessage: string = ''; // Mensaje del loader principal
   editMode=false;
@@ -43,6 +44,10 @@ export class Control_desestimientoComponent implements OnInit {
 
     this.formularioControlDesestimiento();
 
+    this.controlDesestimientoForm.valueChanges.subscribe(n=>{
+      console.log(n)
+    })
+
 
   }
 
@@ -50,20 +55,43 @@ export class Control_desestimientoComponent implements OnInit {
     this.controlDesestimientoForm = this.fb.group({
       codigoTramite: ['', Validators.required],
       resultado_desestimiento: ['', Validators.required],
-      idDenuncia: [this.denunciaId]
+      idDenuncia: [this.denunciaId],
+      idDesestimiento:['']
     });
   }
 
   loadDatosDenuncia() {
-   console.log(this.denunciaId)
+
     this.desestimientoService.getCodigoTramite(this.denunciaId).subscribe(data=>{
+    this.idDesestimiento= data.idDesestimiento
+
       this.controlDesestimientoForm.patchValue({
         codigoTramite: data.codigoTramite,
-        idDenuncia: data.idDenuncia
+        idDenuncia: data.idDenuncia,
+        idDesestimiento: data.idDesestimiento
+
+      })
+      if(this.editMode){
+      this.loadDesestimientoEditMode(this.idDesestimiento)
+    }
+    });
+
+
+  }
+  loadDesestimientoEditMode(id:number){
+    console.log('aquiiiii',id)
+    this.desestimientoService.getControlDesestimiento(id).subscribe(data=>{
+      this.controlDesestimientoForm.patchValue({
+        codigoTramite: data.codigoTramite,
+        idDenuncia: data.idDenuncia,
+        idDesestimiento: data.id,
+        resultado_desestimiento :data.resultado_desestimiento
+
       })
 
 
-    });
+
+    })
   }
 
   crearControlDesestimiento() {

@@ -56,17 +56,26 @@ export async function obtenerCodigoTramiteDenunciaDes(id: number) {
       
     });
 
+    const desestimiento = await Desestimiento.findOne({
+      where:{idDenuncia:id},
+      attributes:['id']
+    })
+    
+
     if (!denuncia) {
       throw new Error('Denuncia no encontrada');
     }
 
     const denunciaData = denuncia as any;
+    const idDestimiento = desestimiento as any;
+    
     
    
 
     return {
       idDenuncia: denunciaData.id,
-      codigoTramite: denunciaData.codigoTramite
+      codigoTramite: denunciaData.codigoTramite,
+      idDesestimiento:idDestimiento.id
     };
 
   } catch (error) {
@@ -82,6 +91,7 @@ export async function obtenerDesestimientoPorId(id: number) {
     include: [
       {
         model: Denuncia,
+        as:'DenunciaDes',
         attributes: ['codigoTramite'],
         include: [
           {
@@ -93,6 +103,7 @@ export async function obtenerDesestimientoPorId(id: number) {
       }
     ]
   });
+  console.log(desestimiento)
 
   if (!desestimiento) {
     const error = new Error("No se encontró el desestimiento con el id proporcionado");
@@ -109,49 +120,13 @@ export async function obtenerDesestimientoPorId(id: number) {
     fechaCreado: (desestimiento as any).fechaCreado,
     fechaActualizado: (desestimiento as any).fechaActualizado,
     denuncia: {
-      codigoTramite: (desestimiento as any).Denuncia?.codigoTramite || '',
-      canton: (desestimiento as any).Denuncia?.canton?.canton || ''
+      codigoTramite: (desestimiento as any).DenunciaDes?.codigoTramite || '',
+      canton: (desestimiento as any).DenunciaDes?.canton?.canton || ''
     }
   };
 }
 
-//servicio para obtener desestimiento por idDenuncia
-export async function obtenerDesestimientoPorDenuncia(idDenuncia: number) {
-  const desestimiento = await Desestimiento.findOne({
-    where: { idDenuncia },
-    include: [
-      {
-        model: Denuncia,
-        attributes: ['codigoTramite'],
-        include: [
-          {
-            model: Canton,
-            as: 'canton',
-            attributes: ['canton']
-          }
-        ]
-      }
-    ]
-  });
 
-  if (!desestimiento) {
-    return null; // No lanzar error, simplemente retornar null si no existe
-  }
-
-  return {
-    id: desestimiento.id,
-    idDenuncia: desestimiento.idDenuncia,
-    codigoTramite: desestimiento.codigoTramite,
-    resultado_desestimiento: desestimiento.resultado_desestimiento,
-    estatus: desestimiento.estatus,
-    fechaCreado: (desestimiento as any).fechaCreado,
-    fechaActualizado: (desestimiento as any).fechaActualizado,
-    denuncia: {
-      codigoTramite: (desestimiento as any).Denuncia?.codigoTramite || '',
-      canton: (desestimiento as any).Denuncia?.canton?.canton || ''
-    }
-  };
-}
 
 //servicio para actualizar desestimiento
 export async function actualizarDesestimiento(id: number, data: Partial<DesestimientoDTO>) {
