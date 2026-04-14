@@ -1381,7 +1381,7 @@ get participantesArray(): FormArray {
 
     // Agregar archivos usando el método establecido (si los hay)
     this.agregarArchivosAlFormData(formData);
-      this.audienciaPruebasService.actualizarAudienciaPrueba(this.idAudienciaP, formData,this.audienciaPruebaForm.value.codigoTramite,'pruebas').subscribe({
+      this.audienciaPruebasService.actualizarAudienciaPrueba(this.denunciaId, formData,this.audienciaPruebaForm.value.codigoTramite,'pruebas').subscribe({
         next: () => {
           this.loading = false; // Desactivar loader
           toast.success('Audiencia Actualizada con Éxito', {

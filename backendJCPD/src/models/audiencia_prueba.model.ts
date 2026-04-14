@@ -31,6 +31,7 @@ interface AudienciaPruebasCreationAttributes extends Optional<AudienciaPruebasAt
     declare idDenuncia: number;
     declare afectadoManifiesta?: string;
     declare articulo: string;
+    declare idAP:number;
     declare  estatus: "pendiente"|"en_proceso"|"completada";
      
 

@@ -446,6 +446,13 @@ try {
 
 // Servicio para actualizar denuncia completa
 export async function actualizarDenuncia(idDenuncia: number, denunciajson: datosDenuncia) {
+  const existeAvocatoria = await Avocatoria.findOne({where:{idDenuncia:idDenuncia}})
+  if (existeAvocatoria) {
+    const error = new Error("no se puede editar ya existe una avocatoria registrada en esta denuncia ");
+    error.name = "noSePuedeEditar";
+    throw error;
+  }
+  
   const t: Transaction = await sequelize.transaction();
   try {
     // Actualizar datos principales de la denuncia

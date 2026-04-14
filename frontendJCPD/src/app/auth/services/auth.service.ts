@@ -5,7 +5,7 @@ import { Observable, tap, map } from 'rxjs';
 import { login } from '../interfaces/login.interface';
 import { perfil } from '@shared/interfaces/perfil.interface';
 import { jwtDecode } from 'jwt-decode';
-import { environment } from 'environments/environment';
+import { environment } from '@env/environment';
 
 
 

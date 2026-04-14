@@ -270,10 +270,16 @@ export async function crearAudienciaPruebas(data: AudienciaPruebasData) {
 }
 
 // Servicio para actualizar la audiencia de pruebas
-export async function actualizarAudienciaPruebas(idAudiencia: number, data: AudienciaPruebasData) {
+export async function actualizarAudienciaPruebas(idDenuncia: number, data: AudienciaPruebasData) {
+	const existeResolucion = await Resoluciones.findOne({where:{idDenuncia:idDenuncia}})
+  if (existeResolucion) {
+    const error = new Error("no se puede editar ya existe una resolucion registrada en esta denuncia ");
+    error.name = "noSePuedeEditar";
+    throw error;
+  }
 	const t = await sequelize.transaction();
 	try {
-		const audiencia = await AudienciaPruebas.findByPk(idAudiencia);
+		const audiencia = await AudienciaPruebas.findOne({where:{idDenuncia:idDenuncia}});
 		if (!audiencia) {
 			throw new Error('No existe la audiencia de pruebas con el id proporcionado');
 		}
@@ -289,14 +295,14 @@ export async function actualizarAudienciaPruebas(idAudiencia: number, data: Audi
 
 		// Actualizar participantes: eliminar los existentes y crear los nuevos
 		// Obtener participantes existentes para limpiar testimonios relacionados
-		const participantesExistentes = await ParticipantesAudienciaPruebas.findAll({ where: { idAP: idAudiencia }, attributes: ['id'], transaction: t });
+		const participantesExistentes = await ParticipantesAudienciaPruebas.findAll({ where: { idAP: audiencia.idAP }, attributes: ['id'], transaction: t });
 		const participantesExistentesIds = participantesExistentes.map((p: any) => p.id);
 		if (participantesExistentesIds.length > 0) {
 			await Testimonio.destroy({ where: { idParticipante: participantesExistentesIds }, transaction: t });
 		}
 
 		// Eliminar participantes antiguos
-		await ParticipantesAudienciaPruebas.destroy({ where: { idAP: idAudiencia }, transaction: t });
+		await ParticipantesAudienciaPruebas.destroy({ where: { idAP: audiencia.idAP }, transaction: t });
 
 		// Crear y, si corresponde, crear testimonios para los nuevos participantes
 		if (Array.isArray(data.participantes)) {
@@ -445,6 +451,7 @@ export async function eliminarVulneracionIdentificada(id: number) {
 // Servicio para actualizar vulneración identificada por id
 export async function actualizarVulneracionIdentificada(id: number, data: { idAfectado?: number; idVulneracion?: number; detalles?: string; }) {
 	if (!id) throw new Error('ID requerido');
+	
 	const vulneracion = await VulneracionesIdentificadas.findByPk(id);
 	if (!vulneracion) throw new Error('No se encontró la vulneración identificada');
 	await vulneracion.update({
