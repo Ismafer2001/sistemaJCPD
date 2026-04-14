@@ -14,7 +14,9 @@ export interface NotificacionDTO {
   idUsuario: number;
   direccion: string;
   numOficio: string;
-  estatus: "pendiente"|"en_proceso"|"completada";
+  estatus: "pendiente"|"en_proceso"|"completada"; 
+  id_notificacion:number;
+  
   
 }
 
@@ -41,6 +43,21 @@ export async function crearNotificacion(data: NotificacionDTO) {
         estatus: 'completada',
 
       }, { transaction: t });
+
+      if(data.parte ='Denunciante'){
+        await Denunciante.update({id_notificacion:notificacion.id,estado_notificar:'Notificado'},
+          {where:{id:data.idUsuario}}
+        )
+
+      }else if(data.parte='Denunciado'){
+        await Denunciado.update({id_notificacion:notificacion.id,estado_notificar:'Notificado'},
+          {where:{id:data.idUsuario}}
+        )
+      }else{
+        await Otros.update({id_notificacion:notificacion.id,estado_notificar:'Notificado'},
+          {where:{id:data.idUsuario}}
+        )
+      }
     
 
     await t.commit();
@@ -51,7 +68,7 @@ export async function crearNotificacion(data: NotificacionDTO) {
   }
 }
 //servicio para obtener los involucrados principales a notificar
-export  async function  involucradosANotificacion(id:string){
+export  async function  involucradosPrincipalesANotificacion(id:string){
   const existeAvocatoria = await Avocatoria.findOne({ where: { idDenuncia: id } });
 
   if(!existeAvocatoria) {
@@ -63,38 +80,32 @@ export  async function  involucradosANotificacion(id:string){
     include: [
       {
         model: Denunciante,
-        attributes:['nombres', 'apellidos', 'cedula', 'id']
+        attributes:['nombres', 'apellidos', 'cedula', 'id','estado_notificar','id_notificacion']
       },
       {
         model: Denunciado,
-        attributes:['nombres', 'apellidos', 'cedula', 'id']
+        attributes:['nombres', 'apellidos', 'cedula', 'id','estado_notificar','id_notificacion']
       }
     ],
     attributes: [] 
   });
-    const personasArray: { idUsuario: number, nombres: string, parte: string }[] = [
-    ...(personas?.Denunciantes || []).map(d => ({idUsuario: d.id, nombres: [d.nombres, d.apellidos].filter(Boolean).join(' ').trim(), parte:'Denunciante'})),
-    ...(personas?.Denunciados || []).map(d => ({ idUsuario: d.id, nombres: [d.nombres, d.apellidos].filter(Boolean).join(' ').trim(), parte:'Denunciado' }))
+    const personasArray: { idUsuario: number, nombres: string, parte: string,estado:string, idNotificacion:number }[] = [
+    ...(personas?.Denunciantes || []).map(d => ({idUsuario: d.id, nombres: [d.nombres, d.apellidos].filter(Boolean).join(' ').trim(), parte:'Denunciante',estado:d.estado_notificar,idNotificacion:d.id_notificacion})),
+    ...(personas?.Denunciados || []).map(d => ({ idUsuario: d.id, nombres: [d.nombres, d.apellidos].filter(Boolean).join(' ').trim(), parte:'Denunciado',estado:d.estado_notificar,idNotificacion:d.id_notificacion }))
   ].filter(p => p.nombres);
 
     // Buscar notificación para cada persona
     const resultado = [];
     for (const persona of personasArray) {
-      // Busca notificación con diriguidoA igual al nombre completo
-      const notificado = await Notificacion.findOne({
-        where: { idDenuncia: id, diriguidoA: persona.nombres }
-      });
       resultado.push({
         ...persona,
         idDenuncia: id,
-        estado: notificado ? 'Notificado' : 'Por Notificar',
-        idNotificacion: notificado ? notificado.id : null
+        estado: persona.estado || 'Por Notificar',
+        idNotificacion: persona.idNotificacion|| null
       });
     }
     
     return resultado;
-
-  
 
 } 
 //servicio para obtener otros principales a notificar
@@ -111,7 +122,7 @@ export  async function  otrosANotificacion(id:string){
       
       {
         model: Otros,
-        attributes:['nombres','tipoParticipante','apellidos','cargo','institucion','cedula', 'id', 'fase'],
+        attributes:['nombres','tipoParticipante','apellidos','cargo','institucion','cedula', 'id', 'fase','estado_notificar','id_notificacion'],
         as:'otros',
         where: { fase: 'notificacion' },
         required: false
@@ -119,23 +130,21 @@ export  async function  otrosANotificacion(id:string){
     ],
     attributes: [] 
   });
-    const personasArray: { idUsuario: number, nombresCompletos: string, parte: string,nombres: string,apellidos: string,cargo: string,institucion: string,cedula: string }[] = [
+    const personasArray: { idUsuario: number, nombresCompletos: string, parte: string,nombres: string,apellidos: string,cargo: string,institucion: string,cedula: string,estado:string, idNotificacion:number }[] = [
     
-    ...(personas?.otros || []).map(n => ({ idUsuario: n.id, nombresCompletos: [n.nombres, n.apellidos].filter(Boolean).join(' ').trim(), parte: n.tipoParticipante, nombres: n.nombres, apellidos: n.apellidos, cargo: n.cargo, institucion: n.institucion, cedula: n.cedula }))
+    ...(personas?.otros || []).map(n => ({ idUsuario: n.id, nombresCompletos: [n.nombres, n.apellidos]
+      .filter(Boolean).join(' ').trim(), parte: n.tipoParticipante, nombres: n.nombres, apellidos: n.apellidos, cargo: n.cargo, institucion: n.institucion, cedula: n.cedula,estado:'estado_notificar',idNotificacion:n.id_notificacion }))
   ].filter(p => p.nombresCompletos);
 
     // Buscar notificación para cada persona
     const resultado = [];
     for (const persona of personasArray) {
-      // Busca notificación con diriguidoA igual al nombre completo
-      const notificado = await Notificacion.findOne({
-        where: { idDenuncia: id, diriguidoA: persona.nombresCompletos }
-      });
+      
       resultado.push({
         ...persona,
         idDenuncia: id,
-        estado: notificado ? 'Notificado' : 'Por Notificar',
-        idNotificacion: notificado ? notificado.id : null
+        estado: persona.estado || 'Por Notificar',
+        idNotificacion: persona.idNotificacion|| null
       });
     }
     

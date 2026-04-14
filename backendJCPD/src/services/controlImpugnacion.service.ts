@@ -137,8 +137,6 @@ export async function actualizarControlImpugnacion(id: number, data: {
   }
 }
 
-
-
 // Servicio para obtener el código de trámite de una denuncia específica
 export async function obtenerCodigoTramiteDenuncia(id: number) {
   try {

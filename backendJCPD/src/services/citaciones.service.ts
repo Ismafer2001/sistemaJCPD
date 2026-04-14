@@ -1,5 +1,4 @@
 import sequelize from "../config/database";
-import { Op } from "sequelize";
 import {  Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Notificacion, Otros } from "../models";
 import { Citacion } from "../models/citaciones.model";
 

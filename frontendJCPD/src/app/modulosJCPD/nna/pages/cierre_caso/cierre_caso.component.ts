@@ -83,11 +83,9 @@ export class Cierre_casoComponent implements OnInit {
     editMode: boolean = false;
     modoEdicionInforme: boolean = false;
     indexInformeEditando: number | null = null;
-
     CierreCasoForm!: FormGroup;
     informesPresentadosForm!: FormGroup;
     DatosCierreCaso:any;
-
     // Propiedades para la tabla
     informesPresentadosData: any[] = [];
     encabezadosInformes = ['Informe', 'Técnico/Institución', 'Fecha', 'Lugar', 'Persona Evaluada'];
@@ -109,7 +107,6 @@ export class Cierre_casoComponent implements OnInit {
     // Listas y sangrías
     [{ list: 'ordered' }, { list: 'bullet' }],         // Lista ordenada y con viñetas
     [{ indent: '-1' }, { indent: '+1' }],              // Sangría
-
     // Alineación
     [{ align: [] }],                                   // Izquierda, centro, derecha, justificado
 
@@ -136,10 +133,6 @@ export class Cierre_casoComponent implements OnInit {
       this.denunciaId = +params['id'];
       if (params['modo'] === 'editar') {
         this.editMode = true;
-
-
-
-
         // En modo editar, inicializar estados: PDF habilitado, Editar deshabilitado hasta detectar cambios
          this.actionsConfig[1].disabled = true
        this.actionsConfig[2].disabled = false // PDF habilitado
@@ -155,15 +148,7 @@ export class Cierre_casoComponent implements OnInit {
       this.CierreCasoForm.valueChanges.subscribe(n=>{
         console.log('cambios aquiii', n)
       })
-
-
-
-
-
     });
-
-
-
   }
 
   //FORMULARIO CIEERRE CASO//
@@ -373,15 +358,11 @@ export class Cierre_casoComponent implements OnInit {
         return;
       }
     }
-
-
-
     // Verificar que informeData existe
     if (!informeData) {
       console.error('No se encontraron datos para editar');
       return;
     }
-
     // Cargar todos los datos en el formulario
     this.informesPresentadosForm.patchValue({
       id: informeData.id || null,
@@ -394,8 +375,6 @@ export class Cierre_casoComponent implements OnInit {
 
     this.modoEdicionInforme = true;
     this.indexInformeEditando = index;
-
-
   }
 
   // Método para actualizar informe

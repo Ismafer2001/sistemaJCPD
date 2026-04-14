@@ -14,6 +14,8 @@ interface OtrosAttributes {
   fase: string;
   idDenuncia: number;
   nombre_proyecto?: string;
+  estado_notificar?:"Por notificar"|"Notificado"
+  id_notificacion?: number
   
 }
 
@@ -31,6 +33,8 @@ export class Otros extends Model<OtrosAttributes, OtrosCreationAttributes> imple
   declare cargo: string;
   declare institucion: string;
   declare nombre_proyecto: string;
+  declare estado_notificar:"Por notificar"|"Notificado";
+  declare id_notificacion:number
 }
 
 Otros.init({
@@ -79,6 +83,10 @@ Otros.init({
     type: DataTypes.STRING,
     allowNull: false,
   },
+  estado_notificar:{type: DataTypes.STRING,
+    allowNull: true},
+    id_notificacion:{type: DataTypes.INTEGER,
+    allowNull: true},
 
 }, {
   sequelize,

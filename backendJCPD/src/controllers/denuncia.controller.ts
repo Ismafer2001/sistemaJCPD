@@ -1,13 +1,14 @@
-import { actualizarDenuncia } from '../services/denuncia.service';
-// Actualizar denuncia
-
-import { getDenunciaCompleta } from '../services/denuncia.service';
-// Obtener denuncia completa para edición/duplicado/pdf
 
 import { Request, Response } from 'express';
-import { Denuncia, Denunciante, Denunciado, Afectado, Vulneracion, VulneracionesIdentificadas, medidasIdentificadas, medida } from '../models';
-
-import { insertDenuncia, datosDenuncia,  obtenerNumTramite,  countDenuncias, eliminarDenuncia, obtenertodasLasDenuncias } from '../services/denuncia.service';
+import { Denuncia,  Afectado, } from '../models';
+import { insertDenuncia,
+         datosDenuncia,
+         obtenerNumTramite,
+         countDenuncias,
+         eliminarDenuncia,
+         obtenertodasLasDenuncias,
+         getDenunciaCompleta,
+         actualizarDenuncia } from '../services/denuncia.service';
 import { crearPdfDenunciaNNA } from '../services/pdfs/denunciapdf.service.ts.service';
 import { handlehttp } from '../utils/error.handle';
 
@@ -206,7 +207,6 @@ export const deleteDenuncia = async (req:Request, res:Response) =>{
   
 }
 
-
 //-------------------controlador pdf--------------------//
 
 // crear pdf denuncia nna POST
@@ -221,7 +221,6 @@ export const getCrearPdfDenuncia = async (req: Request, res: Response) => {
       await crearPdfDenunciaNNA(res, id);
       
     
-    
   } catch (error) {
     console.error('postCrearPdfDenuncia error:', error);
     handlehttp(res, 'ERROR_post.pdf', error);
@@ -230,6 +229,3 @@ export const getCrearPdfDenuncia = async (req: Request, res: Response) => {
     }
   }
 };
-
-
-//------------------CONTROLADOR DENUNCIA ADULTOS MAYORES---------------------------------//

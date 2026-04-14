@@ -7,7 +7,7 @@ import htmlToPdfmake from "html-to-pdfmake";
 import { JSDOM } from "jsdom";
 
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
-import { text } from "stream/consumers";
+
 
 // Asegurar vfs para pdfMake
 // @ts-ignore

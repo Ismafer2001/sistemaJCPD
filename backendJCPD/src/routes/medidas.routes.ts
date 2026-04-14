@@ -11,7 +11,7 @@ router.get('/medidas-emergentes/:id',verificarToken, getMedidasEmergentesPorAfec
 router.get('/medidas-definitivas/:id',verificarToken, getMedidasDefinitivasPorAfectado);
 router.post('/medidas-definitivas', verificarToken, postMedidasDefinitivas);
 router.put('/medidas-definitivas/:id', verificarToken, putEditarMedidaDefinitiva);
-router.post('/medidas-emergentes',verificarToken, postMedidasEmergentes);
+router.post('/agregar-medidas-emergentes',verificarToken, postMedidasEmergentes);
 router.put('/medidas-emergentes/:id',verificarToken, putEditarMedidaEmergente);
 router.delete('/medidas-emergentes/:id',verificarToken, deleteMedidaEmergente);
 router.delete('/medidas-definitivas/:id',verificarToken, deleteMedidaDefinitiva);

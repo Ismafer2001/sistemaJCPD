@@ -12,7 +12,7 @@ router.get('/avocatoria-completa/:id', verificarToken , getAvocatoriaCompletaCon
 
 router.get('/afectados/:id', verificarToken,verificarCantonDenuncia, getAfectadosAvocatoria);
 router.get('/medidas/:id',verificarToken,getMedidasIdentificadasPorAfecado)
-router.post('', verificarToken,verificarCantonDenuncia, postAvocatoria);
+router.post('/registrar-avocatoria', verificarToken,verificarCantonDenuncia, postAvocatoria);
 router.get('/crearpdf/:id',verificarToken ,  getAvocatoriaPdf);
 router.put('/:id', verificarToken, putAvocatoria);
 

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from 'environments/environment';
+import { environment } from '@env/environment';
 
 export interface Medida {
   id: number;
@@ -39,7 +39,7 @@ export class MedidasService {
     return this.http.get<any>(`${this.apiUrl}/medidas-emergentes/${id}`);
   }
   agregarMedidasEmergentes(medidas: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/medidas-emergentes`, medidas);
+    return this.http.post<any>(`${this.apiUrl}/agregar-medidas-emergentes`, medidas);
   }
    eliminarMedidasEmergentes(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/medidas-emergentes/${id}`);

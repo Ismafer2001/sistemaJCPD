@@ -4,7 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AvocatoriaService } from '@nna/services/avocatoria.service';
-import { ArticuloMedidas, Medida, MedidasService } from '@nna/services/medidas.service';
+import {  Medida, MedidasService } from '@nna/services/medidas.service';
 import { ProvidenciaService } from '@nna/services/providencia.service';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';

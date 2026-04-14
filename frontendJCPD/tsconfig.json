@@ -3,18 +3,21 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./src",
+
     "paths": {  /*usa aqui alias de de caminos para acortar cuando importemos algo*/
-      "@inicio/*": ["app/inicio/*"],
-      "@nna/*": ["app/modulosJCPD/nna/*"],
-      "@mujeres/*": ["app/modulosJCPD/Mujeres/*"],
-      "@adultos/*": ["app/modulosJCPD/adultos_mayores/*"],
-      "@auth/*": ["app/auth/*"],
-      "@admin/*": ["app/admin/*"],
-      "@shared/*": ["app/shared/*"]
+      "@inicio/*": ["./src/app/inicio/*"],
+      "@nna/*": ["./src/app/modulosJCPD/nna/*"],
+      "@mujeres/*": ["./app/modulosJCPD/Mujeres/*"],
+      "@adultos/*": ["./src/app/modulosJCPD/adultos_mayores/*"],
+      "@auth/*": ["./src/app/auth/*"],
+      "@admin/*": ["./src/app/admin/*"],
+      "@shared/*": ["./src/app/shared/*"]
+      ,
+      "@env/*": ["./src/environments/*"]
 
     },
     "outDir": "./dist/out-tsc",
+    "rootDir": "./src",
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,

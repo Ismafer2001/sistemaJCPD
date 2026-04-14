@@ -56,7 +56,6 @@ app.use('/api/providencias', providenciaRoutes);
 app.use('/api/notificacion', notificacionRoutes);
 app.use('/api/citacion', citacionRoutes);
 app.use('/api/reportes', reportedenunciasRoutes);
-
 app.use('/api/estatus', estatusRoutes)
 app.use('/api/audiencia-contestacion', audienciaContestacionRoutes);
 app.use('/api/audiencia-pruebas', audienciaPruebaRoutes);

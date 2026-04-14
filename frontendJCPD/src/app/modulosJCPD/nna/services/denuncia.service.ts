@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Denuncia } from '@nna/interfaces/denuncia.interface';
-import { environment } from 'environments/environment';
+import { environment } from '@env/environment';
 
 
 
@@ -15,7 +15,7 @@ export class DenunciaService {
   constructor(private http: HttpClient) { }
 
   crearDenuncia(denuncia: Omit<Denuncia, 'id'>): Observable<{ success: boolean; message: string; data: { id: number } }> {
-    return this.http.post<{ success: boolean; message: string; data: { id: number } }>(`${this.apiUrl}`, denuncia);
+    return this.http.post<{ success: boolean; message: string; data: { id: number } }>(`${this.apiUrl}/registrar-denuncia`, denuncia);
   }
   eliminarDenuncia(id:number ): Observable<any>{
 

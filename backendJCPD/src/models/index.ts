@@ -26,7 +26,7 @@ import { InformeAnexado } from "./informeAnexado.models";
 import { CierreCaso } from "./cierreCaso.models";
 import { InformesPresentados } from "./informes_presentados.models";
 import { ControlImpugnacion } from "./controlImpugnacion.model";
-import { DenunciaMujeres } from "./denunciaMujeres.model";
+
 import { Providencias } from "./providencia.model";
 import { Desestimiento } from "./desestimiento.models";
 import { Informe } from "./informe.models";
@@ -44,9 +44,7 @@ Canton.hasMany(usuarios, { foreignKey: "id_canton" });
 //relacion denuncia  -- canton
 Denuncia.belongsTo(Canton, { foreignKey: "id_canton", as: "canton" });
 Canton.hasMany(Denuncia, { foreignKey: "id_canton" });
-//relacion denuncia mujeres y denuncia
-DenunciaMujeres.belongsTo(Denuncia, { foreignKey: "idDenuncia" });
-Denuncia.hasOne(DenunciaMujeres, { foreignKey: "idDenuncia", as: "DM" });
+
 
 //relacion providencia y denuncia
 Providencias.belongsTo(Denuncia, { foreignKey: "idDenuncia", as: "denunciaP" });

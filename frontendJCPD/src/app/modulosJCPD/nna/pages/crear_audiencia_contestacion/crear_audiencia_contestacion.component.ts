@@ -210,7 +210,7 @@ export class Crear_audienciaComponent implements OnInit {
 
 
   ngOnInit() {
-    this.initialLoading = true;
+    this.initialLoading = true;  
     // Inicializar formularios primero (para que patchValue y valueChanges funcionen)
     this.formularioAudienciaContestacion();
     this.formularioParticipantes();

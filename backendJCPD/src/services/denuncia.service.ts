@@ -315,19 +315,19 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
   // Determinar el sufijo basado en el grupo prioritario
   const sufijo = denuncia.grupoPrioritario === 'nna' ? 'NIÑOS' : 
                  denuncia.grupoPrioritario === 'mujeres' ? 'MUJERES' : 'AM';
-  denuncia.codigoTramite = `${numTramiteFormateado}-JCPD-${cantonName}-${currentYear}-${sufijo}`;
+  denuncia.codigoTramite = `${numTramiteFormateado}-JCPD-${cantonName}-${currentYear}-${sufijo}`;//codigo de tramite unico
 
 
     const nuevaDenuncia = await Denuncia.create({...denuncia, estatus:'completada', codigoTramite: denuncia.codigoTramite}, { transaction: t });//agremamos la denuncia a la base de datos
 
     // Si el grupo prioritario es 'mujer', crear registro en denuncia_mujeres
-    if (denuncia.grupoPrioritario === 'mujeres' ) {
+    /*if (denuncia.grupoPrioritario === 'mujeres' ) {
       await DenunciaMujeres.create({
         idDenuncia: nuevaDenuncia.id,
         tipoDeViolencia: denuncia.tipoDeViolencia,
         ambitoViolencia: denuncia.ambitoViolencia,
       }, { transaction: t });
-    }
+    }*/
 
     // si revicimos datos del denunciante lo agregamos denunciantes a la base de datos 
     if (denunciante) {
@@ -455,13 +455,13 @@ export async function actualizarDenuncia(idDenuncia: number, denunciajson: datos
     );
     
     // 2. Actualizar datos de violencia si es mujer
-    if (denunciajson.denuncia.grupoPrioritario === 'mujeres') {
+    /*if (denunciajson.denuncia.grupoPrioritario === 'mujeres') {
       await DenunciaMujeres.upsert({
         idDenuncia,
         tipoDeViolencia: denunciajson.denuncia.tipoDeViolencia,
         ambitoViolencia: denunciajson.denuncia.ambitoViolencia,
       }, { transaction: t });
-    }
+    }*/
 
     // Actualizar denunciante
     console.log('Denunciante recibido para actualización:', denunciajson.denunciante)

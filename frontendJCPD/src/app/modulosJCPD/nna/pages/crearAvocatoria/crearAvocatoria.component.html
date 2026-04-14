@@ -42,7 +42,7 @@
   <!-- Content -->
   <div class="pl-2 py-2 mb-1 flex items-center gap-2">
   <a
-    [routerLink]="[`../../../fases/${denunciaId}`]"
+    [routerLink]="[`../../../fases/${idDenuncia}`]"
 
       class=" px-3 py-1 font-medium rounded-xl  text-base text-left leading-tight transition-colors duration-200 flex items-center justify-center bg-gray-500 text-white hover:bg-gray-600  focus:ring-2 focus:ring-gray-500"
     >
@@ -217,23 +217,23 @@
     <div>
       <div
         *ngIf="
-          avocatoriaForm.get('dispocisiones')?.invalid &&
-          avocatoriaForm.get('dispocisiones')?.touched
+          avocatoriaForm.get('disposiciones')?.invalid &&
+          avocatoriaForm.get('disposiciones')?.touched
         "
         class="text-red-500 text-sm mt-1"
       >
-        <span *ngIf="avocatoriaForm.get('dispocisiones')?.errors?.['required']"
+        <span *ngIf="avocatoriaForm.get('disposiciones')?.errors?.['required']"
           >el campo es requerido</span
         >
       </div>
       <quill-editor
         [modules]="modules"
-        formControlName="dispocisiones"
+        formControlName="disposiciones"
         class="w-full h-50"
         [ngClass]="{
           ' border-1 border-red-500':
-            avocatoriaForm.get('dispocisiones')?.invalid &&
-            avocatoriaForm.get('dispocisiones')?.touched
+            avocatoriaForm.get('disposiciones')?.invalid &&
+            avocatoriaForm.get('disposiciones')?.touched
         }"
       >
       </quill-editor>

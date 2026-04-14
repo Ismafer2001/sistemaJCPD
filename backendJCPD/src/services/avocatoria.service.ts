@@ -1,20 +1,16 @@
 
 import {  Transaction, } from "sequelize";
-import { avocatoriaDTO } from "../interfaces/avocatoria.interface";
+
 import { Denuncia, Afectado, Denunciante, Denunciado, Vulneracion, Canton, Avocatoria, VulneracionesIdentificadas, medida, medidasIdentificadas, MedidasEmergentes, usuarios, Notificacion } from "../models";
 import sequelize from "../config/database";
 // Servicio para crear una avocatoria
-export async function crearAvocatoria(data: {
-  fechaActual: string;
-  codigoTramite: string;
-  horaActual: string;
-  dispocisiones: string;
-  articulo: string;
-  idDenuncia: number;
-  estatus: "pendiente"|"en_proceso"|"completada";
-  
-  
-}) {
+export async function crearAvocatoria(data: Avocatoria) {
+  const existeDenuncia = await Denuncia.findOne({ where: { id: data.idDenuncia } });
+  if (!existeDenuncia) {
+    const error = new Error("No hay una denuncia resgistrada ");
+    error.name = "sinDenuncia";
+    throw error;
+  }
   const existe = await Avocatoria.findOne({ where: { idDenuncia: data.idDenuncia } });
   if (existe) {
     const error = new Error("Avocatoria ya existe");
@@ -27,8 +23,8 @@ export async function crearAvocatoria(data: {
     const nuevaAvocatoria = await Avocatoria.create({
       
       codigoTramite: data.codigoTramite,
-      horaCreado: data.horaActual,
-      disposiciones: data.dispocisiones,
+      horaActual: data.horaActual,
+      disposiciones: data.disposiciones,
       articulo: data.articulo,
       idDenuncia: data.idDenuncia,
       estatus:  'completada',
@@ -44,8 +40,8 @@ export async function crearAvocatoria(data: {
   }
 }
 //servicio para obtener datos de la denuncia que tendra relacion con la avocatoria
-export async function obtenerDenunciaParaAvocatoria(id: string) {
-    const denuncia = await Denuncia.findByPk(id, {
+export async function obtenerDenunciaParaAvocatoria(idDenuncia: string) {
+    const denuncia = await Denuncia.findByPk(idDenuncia, {
         attributes: [
             'id',
             'fechaCreado',
@@ -131,15 +127,15 @@ export async function obtenerDenunciaParaAvocatoria(id: string) {
 }
 
 //servicio para obtener datos completos de una avocatoria existente
-export async function getAvocatoriaCompleta(idAvocatoria: number) {
-  const avocatoria = await Avocatoria.findByPk(idAvocatoria, {
+export async function getAvocatoriaCompleta(idDenuncia: number) {
+  const avocatoria = await Avocatoria.findOne({
+    where:{idDenuncia:idDenuncia},
     include: [
       {
         model: Denuncia,
         as: "denunciaAvocatoria",
         include: [
           { model: Canton, as: 'canton', attributes: ['id', 'canton'] },
-          { model: Notificacion, attributes: ['id'], limit: 1 },
           {
             model: Afectado,
             as: 'afectados',
@@ -286,17 +282,17 @@ export async function getAvocatoriaCompleta(idAvocatoria: number) {
   };
 }
 //servicio para obtener los afectados de una denuncia seleccionada
-export async function obtenerAfectados(id: number) { //---> se repite en audiencia de pruebas
+export async function obtenerAfectados(idDenuncia: number) { //---> se repite en audiencia de pruebas
 
   return await Afectado.findAll({
-    where: { idDenuncia: id },
+    where: { idDenuncia: idDenuncia },
     attributes: ['id', 'nombres'],
   });
 };
 
 //servicio para obtener las medidas identificadas en la fase de denuncia de un afectado seleccionado    
-export const medidasPorAfectado = async (afectadoId: number) => {
-  const afectado = await Afectado.findByPk(afectadoId, {
+export const medidasPorAfectado = async (idAfectado: number) => {
+  const afectado = await Afectado.findByPk(idAfectado, {
     attributes: ['id', 'nombres'],
     include: [
       {
@@ -336,7 +332,7 @@ export const medidasPorAfectado = async (afectadoId: number) => {
 
 
 //servicio para editar una avocatoria existente
-export async function editarAvocatoria(idAvocatoria: number, data: {
+export async function editarAvocatoria(idDenuncia: number, data: {
   codigoTramite: string;
   horaActual: string;
   dispocisiones: string;
@@ -354,11 +350,11 @@ export async function editarAvocatoria(idAvocatoria: number, data: {
   const t: Transaction = await sequelize.transaction();
   try {
     // Actualizar la avocatoria
-    const avocatoria = await Avocatoria.findByPk(idAvocatoria);
+    const avocatoria = await Avocatoria.findOne({where:{idDenuncia:idDenuncia}});
     if (!avocatoria) throw new Error('Avocatoria no encontrada');
     await avocatoria.update({
       codigoTramite: data.codigoTramite,
-      horaCreado: data.horaActual,
+      horaActual: data.horaActual,
       disposiciones: data.dispocisiones,
       articulo: data.articulo,
       idDenuncia: data.idDenuncia,
@@ -367,7 +363,7 @@ export async function editarAvocatoria(idAvocatoria: number, data: {
 
 
     await t.commit();
-    return await getAvocatoriaCompleta(idAvocatoria);
+    return await getAvocatoriaCompleta(idDenuncia);
   } catch (error) {
     await t.rollback();
     throw error;

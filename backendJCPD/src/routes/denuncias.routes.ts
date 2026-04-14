@@ -22,7 +22,7 @@ router.put('/:id',verificarToken,verificarCantonDenuncia, putDenuncia);// Actual
 
 //---------------RUTAS ESPECIFICAS PARA DENUNCIAS NNA--------------//
 
-router.post('/',verificarToken,verificarCantonDenuncia, postCrearDenuncia);// Ruta para crear denuncias
+router.post('/registrar-denuncia',verificarToken,verificarCantonDenuncia, postCrearDenuncia);// Ruta para crear denuncias
 router.delete('/:id',verificarToken,verificarCantonDenuncia, deleteDenuncia);// Ruta para eliminar denuncias
 
 //------------------- generar pdf denuncia nna---------------///

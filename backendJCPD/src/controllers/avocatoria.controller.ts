@@ -62,6 +62,10 @@ export const postAvocatoria = async (req: Request, res: Response) =>{
       console.log(error.message);
       return res.status(400).json({ message: error.message });
     }
+    if (error instanceof Error && error.name === "sinDenuncia") {
+      console.log(error.message);
+      return res.status(400).json({ message: error.message });
+    }
 
     handlehttp(res,"error_post_crearAvocatoria", error);
   }

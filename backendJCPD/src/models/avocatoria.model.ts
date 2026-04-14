@@ -5,8 +5,7 @@ import { MedidasEmergentes } from './medidas_emergentes.model';
 
 interface AvocatoriaAttributes {
   id: number;
-  
-  horaCreado: string;
+  horaActual: string;
   codigoTramite: string;
   disposiciones: string;
   idDenuncia: number;
@@ -19,7 +18,7 @@ interface AvocatoriaCreationAttributes extends Optional<AvocatoriaAttributes, 'i
 export class Avocatoria extends Model<AvocatoriaAttributes, AvocatoriaCreationAttributes> implements AvocatoriaAttributes {
   declare id: number;
 
-declare  horaCreado: string;
+declare  horaActual: string;
 declare  codigoTramite: string;
 declare  disposiciones: string;
 declare  idDenuncia: number;
@@ -38,7 +37,7 @@ Avocatoria.init({
     primaryKey: true,
   },
   
-  horaCreado: {
+  horaActual: {
     type: DataTypes.TIME,
     allowNull: false,
   },

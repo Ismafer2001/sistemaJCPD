@@ -26,7 +26,6 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "mysql2": "^3.14.1",
-    "pdfkit-table": "^0.1.99",
     "pdfmake": "^0.2.20",
     "pg": "^8.18.0",
     "pg-hstore": "^2.3.4",

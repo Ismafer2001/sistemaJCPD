@@ -5,7 +5,7 @@ import { crearNotificacion,
     notifiacionesDTO,
       obtenerDatosNotificacion,
        actualizarNotificacion,
-        involucradosANotificacion, 
+        involucradosPrincipalesANotificacion, 
         otrosANotificacion,
         eliminarOtrosNotificados,
         actualizarOtrosNotificados} from "../services/notificaciones.service";
@@ -59,7 +59,7 @@ export const putOtroNotificado = async (req: Request, res: Response) => {
       const { id } = req.params;
 
 
-        const personas = await involucradosANotificacion(id)
+        const personas = await involucradosPrincipalesANotificacion(id)
 
 if (!personas) {
   return res.status(404).json({ message: 'No se encontraron personas' });

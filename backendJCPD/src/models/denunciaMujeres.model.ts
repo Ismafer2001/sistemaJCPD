@@ -22,7 +22,7 @@ interface DenunciaMujeresCreationAttributes extends Optional<DenunciaMujeresAttr
 
   }
   
-  DenunciaMujeres.init({
+ /* DenunciaMujeres.init({
     idDenuncia: { type: DataTypes.INTEGER, primaryKey: true, // Es PK
     references: {
       model: Denuncia, // Nombre de la tabla padre
@@ -38,5 +38,5 @@ interface DenunciaMujeresCreationAttributes extends Optional<DenunciaMujeresAttr
     createdAt: 'fechaCreado',
     updatedAt: false
       
-  });
+  });*/
   

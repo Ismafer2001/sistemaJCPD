@@ -37,8 +37,23 @@ interface AudienciaContestacionData {
 //--- SERVICIOS PARA AUDIENCIA DE CONTESTACION ---//
 //crear audiencia de contestacion
 export async function crearAudienciaContestacion(data: AudienciaContestacionData) {
+	const existeCitacion = await Citacion.findOne({where:{idDenuncia:data.idDenuncia}})
+		if (existeCitacion) {
+			const error = new Error("no existe citaciones registradas");
+    error.name = "sinCitaciones";
+    throw error;
+			
+		}
+	const existe = await AudienciaContestacion.findOne({where:{idDenuncia:data.idDenuncia}})
+		if (existe) {
+			const error = new Error("Audiencia ya existe");
+    error.name = "AudienciaYaExiste";
+    throw error;
+			
+		}
 	const t = await sequelize.transaction();
 	try {
+		
 		const audiencia = await AudienciaContestacion.create({
 			idDenuncia: data.idDenuncia,
 			codigoTramite: data.codigoTramite,
@@ -80,10 +95,10 @@ export async function crearAudienciaContestacion(data: AudienciaContestacionData
 
 //obtener datos para la audiencia de contestacion
 export async function AudiencaContestacionDTO(id:string) {
-  const existeAvocatoria = await Avocatoria.findOne({ where: { idDenuncia: id } });
+  const existeCitacion = await Citacion.findOne({ where: { idDenuncia: id } });
 
-  if(!existeAvocatoria) {
-	const error = new Error("No existe una avocatoria para esta denuncia");
+  if(!existeCitacion) {
+	const error = new Error("No hay citaciones registradas");
 	error.name = "NoExisteAvocatoria";
 	throw error;
   }
@@ -384,8 +399,6 @@ export async function getAfectadosYDirigidoA(idDenuncia: number) {
 	
 	return resultado;
 }
-
-
 
 //servicio para  agregar mas participantes
 export async function AgregarOtrosParticipantes(data: any) {

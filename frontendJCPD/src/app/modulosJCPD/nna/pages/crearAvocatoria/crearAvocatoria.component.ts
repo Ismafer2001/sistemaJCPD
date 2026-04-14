@@ -53,7 +53,7 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
   cuerposLegalesDisponibles: string[] = [];
   afectados: any[] = [{id: 0, nombres: ''}];
 
-  denunciaId: number = 0;
+  idDenuncia: number = 0;
   //--- Configuración de tabs------//
   tabsConfig: any[] = [
     {
@@ -159,7 +159,7 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
     this.formularioMedidasEmergentes();
 
     this.route.params.subscribe(params => {
-      this.denunciaId = +params['id'];
+      this.idDenuncia = +params['id'];
       if (params['modo'] === 'editar') {
         this.editMode = true;
         this.avocatoriaForm.disable()
@@ -176,9 +176,9 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
 
       }
 
-      this.loadDenunciaParaAvocatoria(this.denunciaId)
+      this.loadDenunciaParaAvocatoria(this.idDenuncia)
 
-      this.LoadAfectados(this.denunciaId);
+      this.LoadAfectados(this.idDenuncia);
 
     });
 
@@ -215,7 +215,7 @@ export class CrearAvocatoriaComponent implements OnInit, OnDestroy {
 
       ],
 
-       dispocisiones: [`<p> PRIMERO.-. Se le hace conocer a…………………………………………………….
+       disposiciones: [`<p> PRIMERO.-. Se le hace conocer a…………………………………………………….
 lo que estipula
 Art            del  Código de la Niñez y Adolescencia
 Art            de la Ley de personas adultas mayores
@@ -300,7 +300,7 @@ CUARTO.-<p>`,
 
           fechaActual: fechaToUse ?? this.avocatoriacargada.fechaActual ?? this.avocatoriacargada.fecha_actual ?? this.avocatoriacargada.fecha ?? this.avocatoriaForm.get('fechaActual')?.value,
           horaActual: horaToUse ?? this.avocatoriacargada.horaActual ?? this.avocatoriacargada.hora_actual ?? this.avocatoriacargada.hora ?? this.avocatoriaForm.get('horaActual')?.value,
-          dispocisiones: this.avocatoriacargada.dispocisiones ?? this.avocatoriacargada.disposiciones ?? this.avocatoriacargada.disposicion ?? this.avocatoriacargada.dispocisiones ?? this.avocatoriaForm.get('dispocisiones')?.value,
+          dispocisiones: this.avocatoriacargada.dispocisiones ?? this.avocatoriacargada.disposiciones ?? this.avocatoriacargada.disposicion ?? this.avocatoriacargada.dispocisiones ?? this.avocatoriaForm.get('disposiciones')?.value,
           articulo: this.avocatoriacargada.articulo ?? this.avocatoriacargada.articulo ?? this.avocatoriaForm.get('articulo')?.value,
          }, { emitEvent: false });
       }
@@ -315,7 +315,7 @@ CUARTO.-<p>`,
         this.idAvocatoria=data.idAvocatoria;
         console.log('Denuncia para avocatoria cargada:', this.idAvocatoria);
         if(this.editMode){
-          this.avocaroriaEditMode(this.idAvocatoria);
+          this.avocaroriaEditMode(this.idDenuncia);
 
         }
 
@@ -745,7 +745,7 @@ regresar(): void {
 
   this.loading = true;
 
-  this.avocatoriaService.actualizarAvocatoria(this.idAvocatoria, body).subscribe({
+  this.avocatoriaService.actualizarAvocatoria(this.idDenuncia, body).subscribe({
     next: () => {
       this.loading = false;
       toast.success('avocatoria Actualizada con Éxito', {
@@ -790,9 +790,9 @@ submitAvocatoria() {
   this.avocatoriaService.postAvocatoria(body).subscribe({
     next: (body) => {
       this.loading = false;
-      this.idAvocatoria = body.id;
 
-       this.router.navigate(['../../editar/'+ this.denunciaId], { relativeTo: this.route });
+
+       this.router.navigate(['../../editar/'+ this.idDenuncia], { relativeTo: this.route });
       toast.success('avocatoria Guardada con Éxito', {
                 duration: 3000,
               });
@@ -815,7 +815,7 @@ generarPdf(){
   this.pdfError = null;
   this.pdfSrc = null;
 
-  this.avocatoriaService.crearpdfBlob(this.idAvocatoria).subscribe({
+  this.avocatoriaService.crearpdfBlob(this.idDenuncia).subscribe({
     next: (res: Blob) => {
       if (res && res.size > 0) {
         const url = URL.createObjectURL(res);

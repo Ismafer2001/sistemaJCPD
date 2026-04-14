@@ -16,24 +16,29 @@ interface DenunciadoAttributes {
   telefono: string;
   parentezco: string;
   idDenuncia: number;
+  estado_notificar:"Por notificar"|"Notificado";
+  id_notificacion: number
 }
 
 interface DenunciadoCreationAttributes extends Optional<DenunciadoAttributes, 'id'> {}
 
 export class Denunciado extends Model<DenunciadoAttributes, DenunciadoCreationAttributes> implements DenunciadoAttributes {
-  public id!: number;
-  public cedula!: string;
-  public nombres!: string;
-  public apellidos!: string;
-  public edad!: number;
-  public sexo!: string;
-  public genero!: string;
-  public nacionalidad!: string;
-  public direccion!: string;
-  public mail!: string;
-  public telefono!: string;
-  public parentezco!: string;
-  public idDenuncia!: number;
+  declare id: number;
+  declare cedula: string;
+  declare nombres: string;
+  declare apellidos: string;
+  declare edad: number;
+  declare sexo: string;
+  declare genero: string;
+  declare nacionalidad: string;
+  declare direccion: string;
+  declare mail: string;
+  declare telefono: string;
+  declare parentezco: string;
+  declare idDenuncia: number;
+  declare estado_notificar:"Por notificar"|"Notificado";
+  declare id_notificacion:number
+  
 }
 
 Denunciado.init({
@@ -88,7 +93,11 @@ Denunciado.init({
   idDenuncia: {
     type: DataTypes.INTEGER,
     allowNull: false,
-  }
+  },
+  estado_notificar:{type: DataTypes.STRING,
+    allowNull: true},
+    id_notificacion:{type: DataTypes.INTEGER,
+    allowNull: true},
 }, {
   sequelize,
   tableName: 'denunciado',

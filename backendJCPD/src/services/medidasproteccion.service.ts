@@ -101,7 +101,7 @@ export async function agregarMedidasEmergentes(data: {
 }) {
     // Validar datos mínimos
     if (!data.idAfectado || !data. idMedida ) {
-        throw new Error("Faltan datos obligatorios: idAfectado o idVulneracion");
+        throw new Error("Faltan datos obligatorios: idAfectado o idMedida");
     }
 
   // Validar que no exista la misma medida para el mismo afectado
@@ -119,7 +119,7 @@ export async function agregarMedidasEmergentes(data: {
   }
 
   // Crear la medida emergente
-  const nuevaVulneracion = await MedidasEmergentes.create({
+  const nuevaMedidaEmergente = await MedidasEmergentes.create({
     idAfectado: data.idAfectado,
     idMedida: data.idMedida,
     
@@ -127,7 +127,7 @@ export async function agregarMedidasEmergentes(data: {
     observaciones: data.observaciones
   });
 
-  return nuevaVulneracion;
+  return nuevaMedidaEmergente;
 }
 
 // Editar una medida emergente por ID

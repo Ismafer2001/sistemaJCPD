@@ -14,14 +14,12 @@ import { Notificacion } from './notificacion.model';
     medio?: "internet"|"presencial";
     tipo_denuncia?: "oficio"|"externa";
     num_tramite?: number;
-    anio?: number;
-    mes?: string;
+    anio: number;
+    
     codigoTramite?: string;
-    pdf_evidencia?: number;
-    pdf_denuncia?: number;
     usuario_creador?: number;
-    descripcion_hechos?: string;
-    solicitud?: string;
+    descripcion_hechos: string;
+    solicitud: string;
     id_canton: number;
     estado: "activa"|"finalizada"|'remitido';
     estatus: "pendiente"|"en_proceso"|"completada";
@@ -41,10 +39,7 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     declare fecha_modificado: Date;
     declare num_tramite: number;
     declare anio: number;
-    declare mes: string;
     declare codigoTramite: string;
-    declare pdf_evidencia: number;
-    declare pdf_denuncia: number;
     declare usuario_creador: number;
     declare descripcion_hechos: string;
     declare solicitud: string;
@@ -58,29 +53,26 @@ interface DenunciaCreationAttributes extends Optional<DenunciaAttributes, 'id'>{
     declare otros?: Otros[];
     declare avocatoria?: Avocatoria;
     declare Notificacions?: Notificacion[];
-    declare tipoDeViolencia?: string;
-    declare ambitoViolencia?: string;
+    
    
 
   }
   
   Denuncia.init({
     id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
-    grupoPrioritario: { type: DataTypes.STRING },
-    medio: { type: DataTypes.STRING },
-    tipo_denuncia: { type: DataTypes.STRING },
-    num_tramite: { type: DataTypes.INTEGER },
-    anio: { type: DataTypes.INTEGER },
-    mes: { type: DataTypes.TEXT },
-    codigoTramite: { type: DataTypes.STRING,unique:true },
-    pdf_evidencia: { type: DataTypes.BIGINT },
-    pdf_denuncia: { type: DataTypes.BIGINT },
-    usuario_creador: { type: DataTypes.INTEGER },
-    descripcion_hechos: { type: DataTypes.TEXT },
-    solicitud:{ type: DataTypes.TEXT},
-    id_canton:{type: DataTypes.INTEGER},
-    estado:{ type: DataTypes.STRING, defaultValue:"activa"},
-    estatus:{ type: DataTypes.STRING, defaultValue:"pendiente"},
+    grupoPrioritario: { type: DataTypes.STRING,allowNull:false },
+    medio: { type: DataTypes.STRING,allowNull:false },
+    tipo_denuncia: { type: DataTypes.STRING,allowNull:false },
+    num_tramite: { type: DataTypes.INTEGER,allowNull:false },
+    anio: { type: DataTypes.INTEGER,allowNull:false },
+    
+    codigoTramite: { type: DataTypes.STRING,unique:true,allowNull:false },
+    usuario_creador: { type: DataTypes.INTEGER,allowNull:true },
+    descripcion_hechos: { type: DataTypes.TEXT,allowNull:false },
+    solicitud:{ type: DataTypes.TEXT,allowNull:false},
+    id_canton:{type: DataTypes.INTEGER,allowNull:false},
+    estado:{ type: DataTypes.STRING, defaultValue:"activa",allowNull:false},
+    estatus:{ type: DataTypes.STRING, defaultValue:"pendiente",allowNull:false},
   }, {
     sequelize,
     modelName: 'Denuncia',
