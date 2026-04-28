@@ -1,10 +1,10 @@
 
 import {  Transaction, } from "sequelize";
-
 import { Denuncia, Afectado, Denunciante, Denunciado, Vulneracion, Canton, Avocatoria, VulneracionesIdentificadas, medida, medidasIdentificadas, MedidasEmergentes, usuarios, Notificacion } from "../models";
 import sequelize from "../config/database";
+import { RegistrarLoggs } from "./loggs.service";
 // Servicio para crear una avocatoria
-export async function crearAvocatoria(data: Avocatoria) {
+export async function crearAvocatoria(data: Avocatoria,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const existeDenuncia = await Denuncia.findOne({ where: { id: data.idDenuncia } });
   if (!existeDenuncia) {
     const error = new Error("No hay una denuncia resgistrada ");
@@ -30,7 +30,16 @@ export async function crearAvocatoria(data: Avocatoria) {
       estatus:  'completada',
     }, { transaction: t });
 
-   
+   RegistrarLoggs({
+                  idUsuario: idUsuario,
+                  usuario:usuario ,
+                  nombres: nombres,
+                  fase:'Avocatoria',
+                  accion:'CREATE' ,
+                  descripcion:` ${usuario} acaba de registrar la audiencia de pruebas con  codigo de expediente ${data.codigoTramite}` ,
+                  canton:canton
+                  
+                  });
 
     await t.commit();
     return nuevaAvocatoria;
@@ -346,7 +355,7 @@ export async function editarAvocatoria(idDenuncia: number, data: {
     periodo: string;
     observaciones: string;
   }>;
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t: Transaction = await sequelize.transaction();
   try {
     // Actualizar la avocatoria
@@ -360,6 +369,16 @@ export async function editarAvocatoria(idDenuncia: number, data: {
       idDenuncia: data.idDenuncia,
       estatus: data.estatus
     }, { transaction: t });
+    RegistrarLoggs({
+                    idUsuario: idUsuario,
+                    usuario:usuario ,
+                    nombres: nombres,
+                    fase:'Avocatoria',
+                    accion:'UPDATE' ,
+                    descripcion:` ${usuario} acaba de editar la avocatoria con  codigo de expediente ${data.codigoTramite}` ,
+                    canton:canton
+                    
+                    });
 
 
     await t.commit();

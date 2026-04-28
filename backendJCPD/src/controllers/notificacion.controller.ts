@@ -23,10 +23,15 @@ export const postCreateOtro = async (req: Request, res: Response) => {
     cedula,
     parte,
     idDenuncia} = req.body;
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombresUser = req.user.nombres
+    const canton = String(req.user.canton)
     if (!nombres || !idDenuncia) {
       return res.status(400).json({ message: 'Los campos nombres, idDenuncia y parte son requeridos' });
     }
-    const nuevoOtro = await crearOtrosNotificados(req.body);
+    const nuevoOtro = await crearOtrosNotificados(req.body,idUsuario,usuario,nombresUser,canton);
     res.status(201).json(nuevoOtro);
   } catch (error) {
     handlehttp(res,'error_post_otro_notificado',error)
@@ -36,7 +41,12 @@ export const postCreateOtro = async (req: Request, res: Response) => {
 export const deleteOtroNotificado = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const resultado = await eliminarOtrosNotificados(Number(id));
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const resultado = await eliminarOtrosNotificados(Number(id),idUsuario,usuario,nombres,canton);
     res.json(resultado);
   } catch (error) {
     handlehttp(res, 'error_delete_otro_notificado', error);
@@ -47,7 +57,13 @@ export const deleteOtroNotificado = async (req: Request, res: Response) => {
 export const putOtroNotificado = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const otroActualizado = await actualizarOtrosNotificados(Number(id), req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    console.log(nombres)
+    const otroActualizado = await actualizarOtrosNotificados(Number(id), req.body,idUsuario,usuario,nombres,canton);
     res.json(otroActualizado);
   } catch (error) {
     handlehttp(res, 'error_put_otro_notificado', error);
@@ -120,7 +136,12 @@ export const getNotificacionDTO = async(req:Request, res:Response) =>{
 
  export const postNotificacion = async (req: Request, res: Response) => {
  try {
-  const nuevaNotificacion = await crearNotificacion(req.body);
+   const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+  const nuevaNotificacion = await crearNotificacion(req.body,idUsuario,usuario,nombres,canton);
    // Agregás un nuevo valor a la instancia
 
       res.status(201).json(nuevaNotificacion);
@@ -149,7 +170,12 @@ export const getNotificacionById = async (req: Request, res: Response) => {
 export const getNotificacionPDF = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await PDFnotificacion(res, Number(id));
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    await PDFnotificacion(res, Number(id),idUsuario,usuario,nombres,canton);
   } catch (error) {
     handlehttp(res, 'error_get_notificacion_pdf', error);
   }
@@ -160,7 +186,12 @@ export const getNotificacionPDF = async (req: Request, res: Response) => {
 export const putNotificacion = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const notificacionActualizada = await actualizarNotificacion(Number(id), req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const notificacionActualizada = await actualizarNotificacion(Number(id), req.body,idUsuario,usuario,nombres,canton);
     res.json(notificacionActualizada);
   } catch (error) {
     handlehttp(res, 'error_put_notificacion', error);

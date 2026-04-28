@@ -1,5 +1,6 @@
 import { CierreCaso, InformesPresentados, Denuncia, Afectado, CumpleMedidas, InformeAnexado, Canton, usuarios } from "../models";
 import sequelize from "../config/database";
+import { RegistrarLoggs } from "./loggs.service";
 
 interface InformeData {
     informe: string;
@@ -17,7 +18,7 @@ interface CierreCasoData {
     estatus?: "pendiente"|"en_proceso"|"completada";
 }
 
-export async function crearCierreCaso(data: CierreCasoData) {
+export async function crearCierreCaso(data: CierreCasoData,idUsuario:number,usuario:string,nombres:string,canton:string) {
     const transaction = await sequelize.transaction();
     
     try {
@@ -55,6 +56,16 @@ export async function crearCierreCaso(data: CierreCasoData) {
                 }
             ]
         });
+        RegistrarLoggs({
+                                        idUsuario: idUsuario,
+                                        usuario:usuario ,
+                                        nombres: nombres,
+                                        fase:'Cierre de caso',
+                                        accion:'CREATE' ,
+                                        descripcion:` ${usuario} acaba de registrar el cierre de caso con  codigo de expediente ${data.codigoTramite}` ,
+                                        canton:canton
+                                        
+                                      });
          await transaction.commit();
 
         return cierreCasoCompleto;
@@ -134,7 +145,7 @@ export async function obtenerDatosParaCierreCaso(idDenuncia: number) {
     }
 }
 
-export async function actualizarCierreCaso(idCierreCaso: number, data: CierreCasoData) {
+export async function actualizarCierreCaso(idCierreCaso: number, data: CierreCasoData,idUsuario:number,usuario:string,nombres:string,canton:string) {
     const transaction = await sequelize.transaction();
     
     try {
@@ -185,6 +196,17 @@ export async function actualizarCierreCaso(idCierreCaso: number, data: CierreCas
                 }
             ]
         });
+
+        RegistrarLoggs({
+                                        idUsuario: idUsuario,
+                                        usuario:usuario ,
+                                        nombres: nombres,
+                                        fase:'Cierre de caso',
+                                        accion:'UPDATE' ,
+                                        descripcion:` ${usuario} acaba de actualizar el cierre de caso con  codigo de expediente ${data.codigoTramite}` ,
+                                        canton:canton
+                                        
+                                      });
         // Confirmar la transacción
         await transaction.commit();
 

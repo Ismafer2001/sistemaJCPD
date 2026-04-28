@@ -6,7 +6,12 @@ import { crearPdfinformeNNA } from '../services/pdfs/informepdf.service';
 // Crear informe
 export const crearInforme = async (req: Request, res: Response) => {
   try {
-    const resultado = await informesService.crearInforme(req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const resultado = await informesService.crearInforme(req.body,idUsuario,usuario,nombres,canton);
     res.status(201).json(resultado);
   } catch (error) {
     console.error('Error al crear informe:', error);
@@ -59,7 +64,12 @@ export const obtenerDatosParaInforme = async (req: Request, res: Response) => {
 export const getInformePdf = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await crearPdfinformeNNA(res, Number(id));
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    await crearPdfinformeNNA(res, Number(id),idUsuario,usuario,nombres,canton);
    
   } catch (error) {
     handlehttp(res, 'get_error_pdf_providencia', error);
@@ -70,6 +80,11 @@ export const getInformePdf = async (req: Request, res: Response) => {
 export const actualizarInforme = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     const idInforme = parseInt(id);
 
     if (isNaN(idInforme)) {
@@ -89,7 +104,7 @@ export const actualizarInforme = async (req: Request, res: Response) => {
       });
     }
 
-    const resultado = await informesService.actualizarInforme(idInforme, req.body);
+    const resultado = await informesService.actualizarInforme(idInforme, req.body,idUsuario,usuario,nombres,canton);
     res.status(200).json(resultado);
 
   } catch (error: any) {

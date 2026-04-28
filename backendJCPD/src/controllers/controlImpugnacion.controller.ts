@@ -13,6 +13,11 @@ import { handlehttp } from '../utils/error.handle';
 export const postCrearControlImpugnacion = async (req: Request, res: Response) => {
   try {
     const { idResolucion, codigoTramite, resolucionImpugnada, recurso_impugnacion,resultado, periodo, estatus } = req.body;
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
     // Validar que los campos requeridos estén presentes
     if (!idResolucion || !codigoTramite || !resolucionImpugnada || !recurso_impugnacion) {
@@ -30,7 +35,7 @@ export const postCrearControlImpugnacion = async (req: Request, res: Response) =
       resultado,
       periodo,
       estatus
-    });
+    },idUsuario,usuario,nombres,canton);
 
     res.status(201).json(resultadoImpugnacion);
 
@@ -68,6 +73,11 @@ export const putActualizarControlImpugnacion = async (req: Request, res: Respons
   try {
     const id = parseInt(req.params.id);
     const { codigoTramite, resolucionImpugnada, resultadoImpugnacion, estatus } = req.body;
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
     if (isNaN(id)) {
       return res.status(400).json({
@@ -89,7 +99,7 @@ export const putActualizarControlImpugnacion = async (req: Request, res: Respons
       resolucionImpugnada,
       resultadoImpugnacion,
      
-    });
+    },idUsuario,usuario,nombres,canton);
 
     res.json(resultado);
 

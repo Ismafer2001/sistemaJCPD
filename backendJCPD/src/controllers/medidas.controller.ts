@@ -76,7 +76,12 @@ export const getMedidasEmergentesPorAfectado = async (req: Request, res: Respons
 
 export const postMedidasEmergentes = async (req: Request, res: Response) => {
   try {
-    const result = await agregarMedidasEmergentes(req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const result = await agregarMedidasEmergentes(req.body,idUsuario,usuario,nombres,canton);
     res.status(201).json(result);
   } catch (error:any) {
      if ( error.name === "medidaEmergenteDuplicada") {
@@ -90,8 +95,13 @@ export const postMedidasEmergentes = async (req: Request, res: Response) => {
 export const putEditarMedidaEmergente = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido' });
-    const actualizado = await editarMedidaEmergente(id, req.body);
+    const actualizado = await editarMedidaEmergente(id, req.body,idUsuario,usuario,nombres,canton);
     res.json({ success: true, data: actualizado });
   } catch (error:any) {
     if ( error.name === "medidaEmergenteDuplicada") {
@@ -105,8 +115,13 @@ export const putEditarMedidaEmergente = async (req: Request, res: Response) => {
 export const deleteMedidaEmergente = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido' });
-    const resultado = await eliminarMedidaEmergente(id);
+    const resultado = await eliminarMedidaEmergente(id,idUsuario,usuario,nombres,canton);
     res.json(resultado);
   } catch (error) {
     handlehttp(res, 'Error al eliminar medida emergente', error);
@@ -132,7 +147,12 @@ export const getMedidasDefinitivasPorAfectado = async (req: Request, res: Respon
 //agregar medidas definitivas
 export const postMedidasDefinitivas = async (req: Request, res: Response) => {
   try {
-    const result = await agregarMedidasDefinitivas(req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const result = await agregarMedidasDefinitivas(req.body,idUsuario,usuario,nombres,canton);
     res.status(201).json(result);
   } catch (error:any) {
      if ( error.name === "medidaDefinitivasDuplicada") {
@@ -146,9 +166,14 @@ export const postMedidasDefinitivas = async (req: Request, res: Response) => {
 export const putEditarMedidaDefinitiva = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     console.log("ID a editar:", id);
     if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido' });
-    const actualizado = await editarMedidaDefinitiva(id, req.body);
+    const actualizado = await editarMedidaDefinitiva(id, req.body,idUsuario,usuario,nombres,canton);
     res.json({ success: true, data: actualizado });
   } catch (error:any) {
     if ( error.name === "medidaDefinitivasDuplicada") {
@@ -162,8 +187,13 @@ export const putEditarMedidaDefinitiva = async (req: Request, res: Response) => 
 export const deleteMedidaDefinitiva = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     if (Number.isNaN(id)) return res.status(400).json({ success: false, message: 'ID inválido' });
-    const resultado = await eliminarMedidaDefinitivas(id);
+    const resultado = await eliminarMedidaDefinitivas(id,idUsuario,usuario,nombres,canton);
     res.json(resultado);
   } catch (error) {
     handlehttp(res, 'Error al eliminar medida definitiva', error);

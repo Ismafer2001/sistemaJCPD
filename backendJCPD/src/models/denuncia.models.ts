@@ -16,7 +16,7 @@ import { Notificacion } from './notificacion.model';
     num_tramite?: number;
     anio: number;
     
-    codigoTramite?: string;
+    codigoTramite: string;
     usuario_creador?: number;
     descripcion_hechos: string;
     solicitud: string;

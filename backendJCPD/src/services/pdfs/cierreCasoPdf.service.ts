@@ -10,12 +10,13 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { text } from "stream/consumers";
 import { getDatosCierreCasoCompleto } from "../../controllers/cierreCaso.controller";
 import { obtenerDatosCierreCasoCompleto } from '../cierreCaso.service';
+import { RegistrarLoggs } from '../loggs.service';
 
 // Asegurar vfs para pdfMake
 // @ts-ignore
 (pdfMake as any).vfs = (pdfFonts as any).vfs;
 
-export async function crearPdfCierreCaso(res: Response, idCierreCaso: any): Promise<void> {
+export async function crearPdfCierreCaso(res: Response, idCierreCaso: any, idUsuario:number,usuario:string,nombres:string,canton:string): Promise<void> {
     const dom = new JSDOM("");
     try {
         const data = await obtenerDatosCierreCasoCompleto(idCierreCaso);
@@ -139,6 +140,16 @@ export async function crearPdfCierreCaso(res: Response, idCierreCaso: any): Prom
             }
             res.send(Buffer.from(buffer));
         });
+         RegistrarLoggs({
+                            idUsuario: idUsuario,
+                            usuario:usuario ,
+                            nombres: nombres,
+                            fase:'cierre de caso',
+                            accion:'GENERATE' ,
+                            descripcion:` ${usuario} acaba de generar pdf de cierre de caso con  codigo de expediente ${data.cierreCaso.codigoTramite}` ,
+                            canton:canton
+                            
+                          });
     } catch (error: any) {
         console.error('Error generating PDF (pdfmake):', error);
         if (!res.headersSent) res.status(500).json({ ok: false, message: 'Error generating PDF', error: error?.message || error });

@@ -1,9 +1,8 @@
 
-
-
 import { Notificacion } from "../models";
 import sequelize from "../config/database";
 import {  Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Otros } from "../models";
+import { RegistrarLoggs } from "./loggs.service";
 
 export interface NotificacionDTO {
   idDenuncia: number;
@@ -21,7 +20,7 @@ export interface NotificacionDTO {
 }
 
 //servicio para crear notificaciones
-export async function crearNotificacion(data: NotificacionDTO) {
+export async function crearNotificacion(data: NotificacionDTO,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     const existeAvocatoria = await Avocatoria.findOne({ where: { idDenuncia: data.idDenuncia } });
@@ -44,20 +43,34 @@ export async function crearNotificacion(data: NotificacionDTO) {
 
       }, { transaction: t });
 
-      if(data.parte ='Denunciante'){
+      console.log('pase el crear aqui empieza el if estpy por fuera')
+      console.log(data.parte)
+
+      if(data.parte ==='Denunciante'){
         await Denunciante.update({id_notificacion:notificacion.id,estado_notificar:'Notificado'},
           {where:{id:data.idUsuario}}
         )
 
-      }else if(data.parte='Denunciado'){
+      }else if(data.parte==='Denunciado'){
         await Denunciado.update({id_notificacion:notificacion.id,estado_notificar:'Notificado'},
           {where:{id:data.idUsuario}}
         )
       }else{
+        
         await Otros.update({id_notificacion:notificacion.id,estado_notificar:'Notificado'},
           {where:{id:data.idUsuario}}
         )
       }
+      RegistrarLoggs({
+                          idUsuario: idUsuario,
+                          usuario:usuario ,
+                          nombres: nombres,
+                          fase:'notificacion',
+                          accion:'CREATE' ,
+                          descripcion:` ${usuario} acaba de registar una notificacion con  codigo de expediente ${data.codigoTramite}` ,
+                          canton:canton
+                           
+                        });
     
 
     await t.commit();
@@ -133,7 +146,7 @@ export  async function  otrosANotificacion(id:string){
     const personasArray: { idUsuario: number, nombresCompletos: string, parte: string,nombres: string,apellidos: string,cargo: string,institucion: string,cedula: string,estado:string, idNotificacion:number }[] = [
     
     ...(personas?.otros || []).map(n => ({ idUsuario: n.id, nombresCompletos: [n.nombres, n.apellidos]
-      .filter(Boolean).join(' ').trim(), parte: n.tipoParticipante, nombres: n.nombres, apellidos: n.apellidos, cargo: n.cargo, institucion: n.institucion, cedula: n.cedula,estado:'estado_notificar',idNotificacion:n.id_notificacion }))
+      .filter(Boolean).join(' ').trim(), parte: n.tipoParticipante, nombres: n.nombres, apellidos: n.apellidos, cargo: n.cargo, institucion: n.institucion, cedula: n.cedula,estado:n.estado_notificar,idNotificacion:n.id_notificacion }))
   ].filter(p => p.nombresCompletos);
 
     // Buscar notificación para cada persona
@@ -155,9 +168,10 @@ export  async function  otrosANotificacion(id:string){
 } 
 
 //servicio para crear otros notificados
-export async function crearOtrosNotificados(data: any) {
+export async function crearOtrosNotificados(data: any,idUsuario:number,usuario:string,nombresUser:string,canton:string) {
   // params: { nombres, apellidos, cedula, cargo, institucion, idDenuncia, tipoParticipante }
   const { nombres, apellidos, cedula, cargo, institucion, idDenuncia, tipoParticipante } = data;
+   
   
   const nuevoOtro = await Otros.create({
     nombres,
@@ -169,11 +183,21 @@ export async function crearOtrosNotificados(data: any) {
     tipoParticipante,
     fase: 'notificacion'
   });
+  RegistrarLoggs({
+				idUsuario: idUsuario,
+				usuario:usuario ,
+				nombres: nombresUser,
+				fase:'Notificacion',
+				accion:'CREATE' ,
+				descripcion:` $${usuario} acaba de agregar a ${nombres} ${apellidos} para notificar relacionado al codigo de expediente ${'existeNotificacion.codigoTramite'}` ,
+				canton:canton
+								
+				});
   return nuevoOtro;
 }
 
 //servicio para eliminar otros notificados
-export async function eliminarOtrosNotificados(id: number) {
+export async function eliminarOtrosNotificados(id: number,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     const otroNotificado = await Otros.findOne({ 
@@ -190,6 +214,16 @@ export async function eliminarOtrosNotificados(id: number) {
     }
 
     await otroNotificado.destroy({ transaction: t });
+    RegistrarLoggs({
+				idUsuario: idUsuario,
+				usuario:usuario ,
+				nombres: nombres,
+				fase:'Notificacion',
+				accion:'DELETE' ,
+				descripcion:` ${usuario} acaba de eliminar a ${otroNotificado.nombres} ${otroNotificado.apellidos} de notificar relacionado al codigo de expediente ${'existeNotificacion.codigoTramite'}` ,
+				canton:canton
+								
+				});
     await t.commit();
     
     return { message: "Registro eliminado correctamente" };
@@ -200,7 +234,7 @@ export async function eliminarOtrosNotificados(id: number) {
 }
 
 //servicio para actualizar otros notificados
-export async function actualizarOtrosNotificados(id: number, data: any) {
+export async function actualizarOtrosNotificados(id: number, data: any,idUsuario:number,usuario:string,nombresUser:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     const { nombres, apellidos, cedula, cargo, institucion, tipoParticipante } = data;
@@ -226,6 +260,17 @@ export async function actualizarOtrosNotificados(id: number, data: any) {
       institucion,
       tipoParticipante
     }, { transaction: t });
+
+    RegistrarLoggs({
+				idUsuario: idUsuario,
+				usuario:usuario ,
+				nombres: nombresUser,
+				fase:'Notificacion',
+				accion:'UPDATE' ,
+				descripcion:` $${usuario} acaba de actualizar a ${otroNotificado.nombres} ${otroNotificado.apellidos} para notificar relacionado al codigo de expediente ${'existeNotificacion.codigoTramite'}` ,
+				canton:canton
+								
+				});
 
     await t.commit();
     return otroNotificado;
@@ -449,7 +494,7 @@ export async function obtenerDatosNotificacion(idNotificacion: number) {
 
 
 // Servicio para actualizar una notificación por id
-export async function actualizarNotificacion(idNotificacion: number, data: NotificacionDTO) {
+export async function actualizarNotificacion(idNotificacion: number, data: NotificacionDTO,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     const notificacion = await Notificacion.findByPk(idNotificacion);
@@ -467,6 +512,16 @@ export async function actualizarNotificacion(idNotificacion: number, data: Notif
       idUsuario: data.idUsuario,
       
     }, { transaction: t });
+    RegistrarLoggs({
+                    idUsuario: idUsuario,
+                    usuario:usuario ,
+                    nombres: nombres,
+                    fase:'Notificacion',
+                    accion:'UPDATE' ,
+                    descripcion:` ${usuario} acaba de actualizar una notificacion de id${idNotificacion} relacionado al codigo de expediente ${data.codigoTramite}` ,
+                    canton:canton
+                     
+                  });
     await t.commit();
     return notificacion;
   } catch (error) {

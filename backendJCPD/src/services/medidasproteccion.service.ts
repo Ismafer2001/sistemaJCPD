@@ -4,6 +4,7 @@ import { Afectado,
          MedidasEmergentes, 
          medidasIdentificadas} from "../models";
 import { Op } from 'sequelize';
+import { RegistrarLoggs } from "./loggs.service";
 
 //servicio para obtener las medidas identificadas en la fase de denuncia de un afectado seleccionado    
 export const medidasIdentificadasPorAfectado = async (afectadoId: number) => {
@@ -98,7 +99,7 @@ export async function agregarMedidasEmergentes(data: {
     
     periodo: string;
     observaciones: string;
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
     // Validar datos mínimos
     if (!data.idAfectado || !data. idMedida ) {
         throw new Error("Faltan datos obligatorios: idAfectado o idMedida");
@@ -126,6 +127,16 @@ export async function agregarMedidasEmergentes(data: {
     periodo: data.periodo,
     observaciones: data.observaciones
   });
+  RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'fase dinamica',
+								accion:'CREATE' ,
+								descripcion:` $${usuario} acaba de agregar  un registro de medidas emergentes con id ${nuevaMedidaEmergente.id} relacionado al  codigo de expediente ${'falta codigo'}` ,
+								canton:canton
+								
+							  });
 
   return nuevaMedidaEmergente;
 }
@@ -138,7 +149,7 @@ export async function editarMedidaEmergente(id: number, data: {
   periodo?: string;
   observaciones?: string;
   
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   const registro = await MedidasEmergentes.findByPk(id);
   if (!registro) throw new Error('Medida emergente no encontrada');
 
@@ -169,14 +180,34 @@ export async function editarMedidaEmergente(id: number, data: {
   }
 
   await registro.update(camposActualizar);
+  RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'fase dinamica',
+								accion:'UPDATE' ,
+								descripcion:` $${usuario} acaba de actualizar un registro de medidas emergentes con id ${id} relacionado al  codigo de expediente ${'falta codigo'}` ,
+								canton:canton
+								
+							  });
   return registro;
 }
 
 // Eliminar una medida emergente por ID
-export async function eliminarMedidaEmergente(id: number) {
+export async function eliminarMedidaEmergente(id: number,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const registro = await MedidasEmergentes.findByPk(id);
   if (!registro) throw new Error('Medida emergente no encontrada');
   await registro.destroy();
+  RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'fase dinamica',
+								accion:'DElETE' ,
+								descripcion:` $${usuario} acaba de eliminar  un registro de medidas emergentes con id ${id} relacionado al  codigo de expediente ${'falta codigo'}` ,
+								canton:canton
+								
+							  });
   return { success: true, message: 'Medida emergente eliminada' };
 }
 
@@ -233,7 +264,7 @@ export async function agregarMedidasDefinitivas(data: {
     
     periodo: string;
     observaciones: string;
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
     // Validar datos mínimos
     if (!data.idAfectado || !data. idMedida) {
         throw new Error("Faltan datos obligatorios: idAfectado o idVulneracion");
@@ -254,15 +285,25 @@ export async function agregarMedidasDefinitivas(data: {
   }
 
   // Crear la medida emergente
-  const nuevaVulneracion = await MedidasDefinitivas.create({
+  const nuevaMedida = await MedidasDefinitivas.create({
     idAfectado: data.idAfectado,
     idMedida: data.idMedida,
     
     periodo: data.periodo,
     observaciones: data.observaciones
   });
+  RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'fase dinamica',
+								accion:'CREATE' ,
+								descripcion:` $${usuario} acaba de agregar  un registro de medidas definitivas con id ${nuevaMedida.id} relacionado al  codigo de expediente ${'falta codigo'}` ,
+								canton:canton
+								
+							  });
 
-  return nuevaVulneracion;
+  return nuevaMedida;
 }
 
 // Editar una medida definitiva por ID
@@ -273,7 +314,7 @@ export async function editarMedidaDefinitiva(id: number, data: {
   periodo?: string;
   observaciones?: string;
   
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   const registro = await MedidasDefinitivas.findByPk(id);
   if (!registro) throw new Error('Medida definitiva no encontrada');
 
@@ -302,14 +343,33 @@ export async function editarMedidaDefinitiva(id: number, data: {
     throw error;
     };
   }
-
+RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'fase dinamica',
+								accion:'UPDATE' ,
+								descripcion:` $${usuario} acaba de Aactualizar  un registro de medidas definitiva con id ${id} relacionado al  codigo de expediente ${'falta codigo'}` ,
+								canton:canton
+								
+							  });
   await registro.update(camposActualizar);
   return registro;
 }
 // Eliminar una medida emergente por ID
-export async function eliminarMedidaDefinitivas(id: number) {
+export async function eliminarMedidaDefinitivas(id: number,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const registro = await MedidasDefinitivas.findByPk(id);
   if (!registro) throw new Error('Medida definitiva no encontrada');
   await registro.destroy();
+  RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'fase dinamica',
+								accion:'DELETE' ,
+								descripcion:` $${usuario} acaba de agregar  un registro de medidas emergentes con id ${id} relacionado al  codigo de expediente ${'falta codigo'}` ,
+								canton:canton
+								
+							  });
   return { success: true, message: 'Medida definitiva eliminada' };
 }

@@ -3,6 +3,7 @@ import { Response } from 'express';
 import pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { getDenunciaCompleta } from '../denuncia.service';
+import { RegistrarLoggs } from '../loggs.service';
 
 // Asegurar vfs para pdfMake
 // @ts-ignore
@@ -13,7 +14,7 @@ import { getDenunciaCompleta } from '../denuncia.service';
  * Escribe el pdf directamente en `res` como attachment.
  */
 
-export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promise<void> {
+export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any, idUsuario:number,usuario:string,nombres:string,canton:string): Promise<void> {
 	try { 
 
 		const pdfData = await getDenunciaCompleta(idDenuncia);
@@ -275,6 +276,16 @@ export async function crearPdfDenunciaNNA(res: Response, idDenuncia: any): Promi
 			}
 			res.send(Buffer.from(buffer));
 		});
+		RegistrarLoggs({
+						idUsuario: idUsuario,
+					  usuario:usuario ,
+					  nombres: nombres,
+					  fase:'denuncia',
+					  accion:'GENERATE' ,
+					  descripcion:` ${usuario} acaba de generar pdf de denuncia con  codigo de expediente ${pdfData.denuncia.codigoTramite}` ,
+					  canton:canton
+					  
+					});
 	} catch (error: any) {
 		console.error('Error generating PDF (pdfmake):', error);
 		if (!res.headersSent) res.status(500).json({ ok: false, message: 'Error generating PDF', error: error?.message || error });

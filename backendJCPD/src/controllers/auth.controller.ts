@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { loginUsuario, UsuarioActual, validarContrasenaUsuario, actualizarContrasenaUsuario } from '../services/auth.service';
-import { Canton, usuarios } from '../models';
+
 import { handlehttp } from '../utils/error.handle';
 
 //-----------CONTROLADORES GET -------------------//
@@ -97,6 +97,8 @@ export const putActualizarContrasena = async (req: Request, res: Response) => {
     
     // Obtener ID del usuario desde el token JWT
     const idUsuario: number = Number(req.user.id);
+    const canton:string = String(req.user.canton)
+    const nombres = req.user.nombres
 
     if (!idUsuario) {
       return res.status(401).json({
@@ -128,7 +130,7 @@ export const putActualizarContrasena = async (req: Request, res: Response) => {
       });
     }
 
-    const resultado = await actualizarContrasenaUsuario(idUsuario, contrasenaActual, contrasenaNueva);
+    const resultado = await actualizarContrasenaUsuario(idUsuario, contrasenaActual, contrasenaNueva,canton,nombres);
     
     if (resultado.success) {
       res.status(200).json(resultado);

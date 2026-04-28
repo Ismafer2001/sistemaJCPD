@@ -5,8 +5,14 @@ import {  obtenerCodigoTramiteDenunciaDes } from '../services/desestimiento.serv
 
 // Crear desestimiento
 export const crearDesestimiento = async (req: Request, res: Response) => {
-  try {
-    const resultado = await desestimientoService.crearDesestimiento(req.body);
+  try { 
+    const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const resultado = await desestimientoService.crearDesestimiento(req.body,idUsuario,usuario,nombres,canton);
+    
     res.status(201).json({
       message: 'Desestimiento creado exitosamente',
       data: resultado
@@ -66,7 +72,12 @@ export const obtenerDesestimientoPorId = async (req: Request, res: Response) => 
 export const actualizarDesestimiento = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const resultado = await desestimientoService.actualizarDesestimiento(parseInt(id), req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const resultado = await desestimientoService.actualizarDesestimiento(parseInt(id), req.body,idUsuario,usuario,nombres,canton);
     res.status(200).json({
       message: 'Desestimiento actualizado exitosamente',
       data: resultado

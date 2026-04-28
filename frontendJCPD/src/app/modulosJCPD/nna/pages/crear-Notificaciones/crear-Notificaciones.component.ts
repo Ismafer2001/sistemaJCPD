@@ -97,6 +97,7 @@ export class CrearNotificacionesComponent implements OnInit {
       cedula: ['', Validators.required],
       tipoParticipante: ['Otros', Validators.required],
 
+
       idDenuncia: [this.denunciaId]
     });
   }
@@ -177,6 +178,7 @@ export class CrearNotificacionesComponent implements OnInit {
   this.loadingInvolucradosPrincipales = true;
   this.notificacionServices.getInvolucradosPrincipales(id).subscribe({
     next: (data) => {
+      console.log(data)
       this.involucradosPrincipales = data;
       this.loadingInvolucradosPrincipales = false;
 

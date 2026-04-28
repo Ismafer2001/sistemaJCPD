@@ -17,22 +17,22 @@ import { soloAdmin } from '../middleware/rol.middleware';
 
 const router = Router();
 router.get('/activos',verificarToken, obtenerActivosPorCantonPrincipal);
-router.put('/:id', putUsuario);  
+router.put('/:id',verificarToken, putUsuario);  
 //----------rutas solo admin-------------//
 router.use(verificarToken, soloAdmin); 
 
 //----------RUTAS GET ----------//
-router.get('/', getObtenerUsuarios); // Listar usuarios activos
+router.get('/',verificarToken, getObtenerUsuarios); // Listar usuarios activos
 
 //----------RUTAS POST ----------//
-router.post('/', postRegistrarUsuario); // Crear usuario
+router.post('/',verificarToken, postRegistrarUsuario); // Crear usuario
 
 //----------RUTAS PUT ----------//
             // Actualizar usuario
-router.put('/desactivar/:id', putEstadoUsuario);   // Desactivar (soft delete)
+router.put('/desactivar/:id',verificarToken, putEstadoUsuario);   // Desactivar (soft delete)
 
 //----------RUTAS DELETE ----------//
-router.delete('/:id', deleteUsuario); //eliminar usuario
+router.delete('/:id',verificarToken, deleteUsuario); //eliminar usuario
 
 export default router;
 

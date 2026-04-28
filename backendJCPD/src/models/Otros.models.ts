@@ -2,7 +2,7 @@ import { Model, DataTypes, Optional } from 'sequelize';
 import sequelize from '../config/database';
 
 
-interface OtrosAttributes {
+export interface OtrosAttributes {
   id: number;
   nombres: string;
    apellidos?: string;
@@ -16,6 +16,9 @@ interface OtrosAttributes {
   nombre_proyecto?: string;
   estado_notificar?:"Por notificar"|"Notificado"
   id_notificacion?: number
+  estado_citar?:"Por citar"|"Citado"
+  id_citacion?: number
+
   
 }
 
@@ -35,6 +38,8 @@ export class Otros extends Model<OtrosAttributes, OtrosCreationAttributes> imple
   declare nombre_proyecto: string;
   declare estado_notificar:"Por notificar"|"Notificado";
   declare id_notificacion:number
+  declare estado_citar: 'Por citar' | 'Citado';
+  declare id_citacion: number;
 }
 
 Otros.init({
@@ -86,6 +91,10 @@ Otros.init({
   estado_notificar:{type: DataTypes.STRING,
     allowNull: true},
     id_notificacion:{type: DataTypes.INTEGER,
+    allowNull: true},
+    estado_citar:{type: DataTypes.STRING,
+    allowNull: true},
+    id_citacion:{type: DataTypes.INTEGER,
     allowNull: true},
 
 }, {

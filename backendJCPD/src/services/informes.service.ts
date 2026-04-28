@@ -2,6 +2,7 @@ import sequelize from "../config/database";
 import { Informe } from "../models/informe.models";
 import { Avocatoria, Denuncia } from "../models";
 import { usuarios } from "../models/usuarios.models";
+import { RegistrarLoggs } from "./loggs.service";
 
 export interface InformeDTO {
   idDenuncia: number;
@@ -13,7 +14,7 @@ export interface InformeDTO {
 }
 
 //servicio para crear informe
-export async function crearInforme(data: InformeDTO) {
+export async function crearInforme(data: InformeDTO,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     const informe = await Informe.create({
@@ -24,6 +25,17 @@ export async function crearInforme(data: InformeDTO) {
       codigoTramite: data.codigoTramite,
       transcripcion: data.transcripcion
     }, { transaction: t });
+
+    RegistrarLoggs({
+                             idUsuario: idUsuario,
+                             usuario:usuario ,
+                             nombres: nombres,
+                            fase:'informes',
+                             accion:'CREATE' ,
+                             descripcion:` ${usuario} acaba de regisrar un informe de id ${informe.id} relacionado al codigo de expediente ${data.codigoTramite}` ,
+                             canton:canton
+                                                        
+                                                      });
 
     await t.commit();
     return informe;
@@ -133,7 +145,7 @@ export async function datosParaInforme(idDenuncia: number) {
 }
 
 // Servicio para actualizar un informe
-export async function actualizarInforme(id: number, data: Partial<InformeDTO>) {
+export async function actualizarInforme(id: number, data: Partial<InformeDTO>,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     // Verificar que el informe existe
@@ -164,6 +176,16 @@ export async function actualizarInforme(id: number, data: Partial<InformeDTO>) {
 
     // Obtener el informe actualizado
     const informeActualizado = await Informe.findByPk(id, { transaction: t });
+    RegistrarLoggs({
+                             idUsuario: idUsuario,
+                             usuario:usuario ,
+                             nombres: nombres,
+                            fase:'informes',
+                             accion:'UPDATE' ,
+                             descripcion:` ${usuario} acaba de actualizar un informe de id ${id} relacionado al codigo de expediente ${data.codigoTramite}` ,
+                             canton:canton
+                                                        
+                                                      });
 
     await t.commit();
     

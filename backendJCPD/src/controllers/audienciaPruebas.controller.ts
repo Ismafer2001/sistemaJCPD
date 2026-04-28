@@ -15,11 +15,18 @@ import {
 } from '../services/audienciaPrueba.service';
 
 import { handlehttp } from "../utils/error.handle";
-
+// Obtener todos los datos completos de una audiencia de pruebas
+import { obtenerAudienciaPruebasCompleta } from '../services/audienciaPrueba.service';
+import { crearPdfAudienciaPruebasNNA } from "../services/pdfs/audienciaPruebaspdf.service";
 // Crear audiencia de pruebas
 export const postAudienciaPruebas = async (req: Request, res: Response) => {
 	try {
-		const result = await crearAudienciaPruebas(req.body);
+		 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+		const result = await crearAudienciaPruebas(req.body,idUsuario,usuario,nombres,canton);
 		res.status(201).json(result);
 	} catch (error) {
 		handlehttp(res,'Error al crear audiencia de pruebas' , error);
@@ -32,11 +39,16 @@ export const postAudienciaPruebasConArchivooosejemploborrar = async (req: Reques
 	try {
 		console.log('Files recibidos:', req.files);
 		console.log('Body recibido:', req.body.data);
+		 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 		
 		const files = req.files as Express.Multer.File[];
 		const data = JSON.parse(req.body.data); // Los datos JSON vienen en req.body.data cuando se usa FormData
 		
-		const result = await crearAudienciaPruebasConArchivos(data, files);
+		const result = await crearAudienciaPruebasConArchivos(data, files,idUsuario,usuario,nombres,canton);
 		res.status(201).json(result);
 	} catch (error) {
 		console.error('Error en postAudienciaPruebasConArchivos:', error);
@@ -46,6 +58,11 @@ export const postAudienciaPruebasConArchivooosejemploborrar = async (req: Reques
 export const postAudienciaPruebasConArchivos = async (req: Request, res: Response) => {
     try {
         console.log('Files recibidos:', req.files);
+		 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
         
         // 1. Red de seguridad: Si no envían ningún archivo, files será un arreglo vacío en lugar de undefined
         const files = (req.files as Express.Multer.File[]) || []; 
@@ -70,7 +87,7 @@ export const postAudienciaPruebasConArchivos = async (req: Request, res: Respons
         }
         
         // 4. Ejecutar el servicio híbrido que armamos
-        const result = await crearAudienciaPruebasConArchivos(data, files);
+        const result = await crearAudienciaPruebasConArchivos(data, files,idUsuario,usuario,nombres,canton);
         
         res.status(201).json(result);
 
@@ -84,7 +101,12 @@ export const postAudienciaPruebasConArchivos = async (req: Request, res: Respons
 export const putAudienciaPruebas = async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
-		const result = await actualizarAudienciaPruebas(Number(id), req.body);
+		 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+		const result = await actualizarAudienciaPruebas(Number(id), req.body,idUsuario,usuario,nombres,canton);
 		res.json(result);
 	} catch (error) {
 		handlehttp(res,'Error al actualizar audiencia de pruebas' , error);
@@ -95,6 +117,11 @@ export const putAudienciaPruebas = async (req: Request, res: Response) => {
 export const putAudienciaPruebasConArchivos = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
+		 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
         
         // 1. Validación de seguridad: Asegurarnos de que el ID sea un número válido
         if (!id || isNaN(Number(id))) {
@@ -123,7 +150,7 @@ export const putAudienciaPruebasConArchivos = async (req: Request, res: Response
         }
         
         // 4. Ejecutar el servicio
-        const result = await actualizarAudienciaPruebasConArchivos(Number(id), data, files);
+        const result = await actualizarAudienciaPruebasConArchivos(Number(id), data, files,idUsuario,usuario,nombres,canton);
         
         // Usamos 200 OK para actualizaciones exitosas
         res.status(200).json(result);
@@ -159,7 +186,12 @@ export const getParticipantesAudienciaContestacionCtrl = async (req: Request, re
 // Agregar otros participantes
 export const postAgregarOtrosParticipantes = async (req: Request, res: Response) => {
 	try {
-		const result = await AgregarOtrosParticipantes(req.body);
+		 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+		const result = await AgregarOtrosParticipantes(req.body,idUsuario,usuario,nombres,canton);
 		res.status(201).json(result);
 	} catch (error) {
 		handlehttp(res,'Error al añadir participante' , error);
@@ -188,7 +220,12 @@ export const getVulneracionesPorAfectado = async (req: Request, res: Response) =
 // Agregar vulneración identificada
 export const postVulneracionIdentificada = async (req: Request, res: Response) => {
 	try {
-		const result = await agregarVulneracionIdentificada(req.body);
+		 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+		const result = await agregarVulneracionIdentificada(req.body,idUsuario,usuario,nombres,canton);
 		res.status(201).json(result);
 	} catch (error) {
 		handlehttp(res, 'Error al agregar vulneración identificada', error);
@@ -199,7 +236,12 @@ export const postVulneracionIdentificada = async (req: Request, res: Response) =
 export const deleteVulneracionIdentificada = async (req: Request, res: Response) => {
 	try {
 		const id = Number(req.params.id);
-		const result = await eliminarVulneracionIdentificada(id);
+		 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+		const result = await eliminarVulneracionIdentificada(id,idUsuario,usuario,nombres,canton);
 		res.json(result);
 	} catch (error) {
 		handlehttp(res, 'Error al eliminar vulneración identificada', error);
@@ -210,16 +252,19 @@ export const deleteVulneracionIdentificada = async (req: Request, res: Response)
 export const putVulneracionIdentificada = async (req: Request, res: Response) => {
 	try {
 		const id = Number(req.params.id);
-		const result = await actualizarVulneracionIdentificada(id, req.body);
+		 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+		const result = await actualizarVulneracionIdentificada(id, req.body,idUsuario,usuario,nombres,canton);
 		res.json(result);
 	} catch (error) {
 		handlehttp(res, 'Error al actualizar vulneración identificada', error);
 	}
 };
 
-// Obtener todos los datos completos de una audiencia de pruebas
-import { obtenerAudienciaPruebasCompleta } from '../services/audienciaPrueba.service';
-import { crearPdfAudienciaPruebasNNA } from "../services/pdfs/audienciaPruebaspdf.service";
+
 
 export const getAudienciaPruebasCompleta = async (req: Request, res: Response) => {
     try {
@@ -235,7 +280,12 @@ export const getAudienciaPruebasCompleta = async (req: Request, res: Response) =
 export const getAudienciaPruebasPdf = async (req: Request, res: Response) => {
   try {
 	const { id } = req.params;
-	await crearPdfAudienciaPruebasNNA(res, Number(id));
+	 const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+	await crearPdfAudienciaPruebasNNA(res, Number(id),idUsuario,usuario,nombres,canton);
    
   } catch (error) {
 	handlehttp(res, 'get_error_pdf_audiencia', error);

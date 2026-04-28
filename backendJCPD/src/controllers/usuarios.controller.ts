@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { usuarios } from "../models/usuarios.models";
 
 import bcrypt from "bcryptjs";
-import { registrarUsuario, ActivosPorCantonPrincipal, obtenerUsuarios, cambiarEstadoUsuario, eliminarUsuario } from "../services/user.service";
+import { registrarUsuario, ActivosPorCantonPrincipal, obtenerUsuarios, cambiarEstadoUsuario, eliminarUsuario, actualizarUsuario } from "../services/user.service";
 import { handlehttp } from "../utils/error.handle";
 //--------------------CONTROLADORES GET-----------------//
 
@@ -40,7 +40,14 @@ export const obtenerActivosPorCantonPrincipal = async (req: Request, res: Respon
 // Crear usuario
 export const postRegistrarUsuario = async (req: Request, res: Response) => {
   try {
-    const nuevoUsuario = await registrarUsuario(req.body);
+    const idUsuario =req.user.id
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+   
+
+
+    const nuevoUsuario = await registrarUsuario(req.body,idUsuario,usuario,nombres,canton);
     res.status(201).json(nuevoUsuario);
   } catch (error:any) {
     if ( error.name === "Usuarioyaexiste") {
@@ -57,13 +64,21 @@ export const postRegistrarUsuario = async (req: Request, res: Response) => {
 export const putUsuario = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+    
     const datos = req.body;
+    
+    const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
-    if (datos.contrasena) {
-      datos.contrasena = await bcrypt.hash(datos.contrasena, 10);
-    }
+    
+     await actualizarUsuario(datos,id,idUsuario,usuario,nombres,canton)
 
-    await usuarios.update(datos, { where: { id } });
+   
+
+
     res.json({ mensaje: "Usuario actualizado" });
   } catch (error) {
     handlehttp(res,"error_put_Actualizar_Usuario", error);
@@ -76,12 +91,18 @@ export const putEstadoUsuario = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { isactivo } = req.body; // true o false
+    const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    
 
     if (typeof isactivo !== "boolean") {
       return res.status(400).json({ mensaje: "El campo 'isactivo' debe ser booleano" });
     }
 
-    await cambiarEstadoUsuario(Number(id), isactivo);
+    await cambiarEstadoUsuario(Number(id), isactivo,idUsuario,usuario,nombres,canton);
     res.json({ mensaje: `Usuario ${isactivo ? "activado" : "desactivado"} correctamente` });
   } catch (error) {
     handlehttp(res, "error_put_estado_usuario", error);
@@ -94,7 +115,12 @@ export const putEstadoUsuario = async (req: Request, res: Response) => {
 export const deleteUsuario = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await eliminarUsuario(Number(id));
+    const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    await eliminarUsuario(Number(id),idUsuario,usuario,nombres,canton);
     
     res.json({ mensaje: "Usuario eliminado definitivamente" });
   } catch (error) {

@@ -27,7 +27,7 @@ export interface InhibicionDTO {
 }
 
 //servicio para crear inhibición
-export async function crearInhibicion(data: InhibicionDTO) {
+export async function crearInhibicion(data: InhibicionDTO,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     // Validar si ya existe una inhibición para la denuncia

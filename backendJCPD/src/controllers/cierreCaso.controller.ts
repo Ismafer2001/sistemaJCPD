@@ -7,6 +7,11 @@ import { crearPdfCierreCaso } from '../services/pdfs/cierreCasoPdf.service';
 export const postCrearCierreCaso = async (req: Request, res: Response) => {
     try {
         const { idDenuncia, codigoTramite, conclusion, secretariaAuxiliar, informesPresentados } = req.body;
+         const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
         // Validar que los campos requeridos estén presentes
         if (!idDenuncia || !codigoTramite || !conclusion || !secretariaAuxiliar) {
@@ -105,6 +110,11 @@ export const putActualizarCierreCaso = async (req: Request, res: Response) => {
     try {
         const idCierreCaso = parseInt(req.params.id);
         const { codigoTramite, conclusion, secretariaAuxiliar, informesPresentados, estatus } = req.body;
+         const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
         if (!idCierreCaso || isNaN(idCierreCaso)) {
             return res.status(400).json({
@@ -147,7 +157,7 @@ export const putActualizarCierreCaso = async (req: Request, res: Response) => {
             secretariaAuxiliar,
             informesPresentados,
             estatus
-        });
+        },idUsuario,usuario,nombres,canton);
 
         res.status(200).json({
             success: true,
@@ -165,7 +175,12 @@ export const putActualizarCierreCaso = async (req: Request, res: Response) => {
 export const getCierreCasoPdf = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await crearPdfCierreCaso(res, Number(id));
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    await crearPdfCierreCaso(res, Number(id),idUsuario,usuario,nombres,canton);
    
   } catch (error) {
     handlehttp(res, 'get_error_pdf_avocatoria', error);

@@ -3,7 +3,7 @@
 import { Canton } from './cantones.models';
 
 
-  interface ParticipantesAudienciaPruebasAttributes {
+  export interface ParticipantesAudienciaPruebasAttributes {
  id: number;
  nombres: string;
  apellidos: string;
@@ -18,7 +18,7 @@ parte: string;
  idAP: number;
   }
   
-interface ParticipantesAudienciaPruebasCreationAttributes extends Optional<ParticipantesAudienciaPruebasAttributes, 'id'>{
+export interface ParticipantesAudienciaPruebasCreationAttributes extends Optional<ParticipantesAudienciaPruebasAttributes, 'id'>{
   canton?: string;
 }
   

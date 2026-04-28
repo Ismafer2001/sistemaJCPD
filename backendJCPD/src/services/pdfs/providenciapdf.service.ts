@@ -9,12 +9,13 @@ import { JSDOM } from "jsdom";
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { text } from "stream/consumers";
 import { obtenerDatosProvidenciaCompleta } from "../providencia.service";
+import { RegistrarLoggs } from '../loggs.service';
 
 // Asegurar vfs para pdfMake
 // @ts-ignore
 (pdfMake as any).vfs = (pdfFonts as any).vfs;
 
-export async function crearPdfProvidenciaNNA(res: Response, idProvidencia: any): Promise<void> {
+export async function crearPdfProvidenciaNNA(res: Response, idProvidencia: any, idUsuario:number,usuario:string,nombres:string,canton:string): Promise<void> {
     const dom = new JSDOM("");
     try {
         const data = await obtenerDatosProvidenciaCompleta(idProvidencia);
@@ -117,6 +118,16 @@ export async function crearPdfProvidenciaNNA(res: Response, idProvidencia: any):
             }
             res.send(Buffer.from(buffer));
         });
+        RegistrarLoggs({
+                          idUsuario: idUsuario,
+                          usuario:usuario ,
+                          nombres: nombres,
+                          fase:'providencia',
+                          accion:'GENERATE' ,
+                          descripcion:` ${usuario} acaba de generar pdf de audiencia de pruebas con  codigo de expediente ${data.codigoTramite}` ,
+                          canton:canton
+                          
+                          });
     } catch (error: any) {
         console.error('Error generating PDF (pdfmake):', error);
         if (!res.headersSent) res.status(500).json({ ok: false, message: 'Error generating PDF', error: error?.message || error });

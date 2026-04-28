@@ -9,7 +9,13 @@ export const crearInhibicion = async (req: Request, res: Response) => {
     const idCantonDestino = String(req.body.idCantonDestino);
     const tramiteId = String(req.body.codigoTramite);
     const idCantonOrigen = String(req.body.idCantonOrigen);
-    const resultado = await inhibirseService.crearInhibicion(req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const resultado = await inhibirseService.crearInhibicion(req.body,idUsuario,usuario,nombres,canton);
+    
     socketService.notificarNuevoCaso(idCantonDestino, {
       mensaje: `Se ha recibido un nuevo expediente remitido.`,
       codigoTramite: tramiteId,

@@ -7,8 +7,8 @@ import { articulo } from '../models/articulo_medidas.models';
 import { medida } from '../models';
 
 export async function seedInitialData() {
-
   
+
   const usuariosExistentes = await usuarios.count();
   if (usuariosExistentes > 0) return;
 

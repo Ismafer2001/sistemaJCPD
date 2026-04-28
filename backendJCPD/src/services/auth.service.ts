@@ -6,7 +6,8 @@ import { Canton } from "../models";
 
 import { generarToken } from "../utils/jwt.handle";
 import { jwtpayload } from "../interfaces/auth.interface";
-import { JwtPayload } from "jsonwebtoken";
+import { RegistrarLoggs } from "./loggs.service";
+
 
 //------------------------METODOS POST----------------//
 
@@ -22,6 +23,7 @@ export const loginUsuario = async (user: login) => {
     return "Usuario no encontrado";
   }
 
+
   const passwordValido = await bcrypt.compare(
     user.contrasena,
     existe.contrasena
@@ -35,6 +37,17 @@ export const loginUsuario = async (user: login) => {
     console.log("Usuario inactivo, contacte al administrador");
     return "Usuario inactivo, contacte al administrador";
   }
+  RegistrarLoggs({
+        idUsuario: existe.id,
+      usuario:existe.usuario ,
+      nombres: existe.nombres,
+      fase:'registro usuario',
+      accion:'LOGIN' ,
+      descripcion:`El usuario ${existe.usuario} acaba de iniciar sesion` ,
+      canton:existe.Canton?.canton
+      
+    });
+
 
   console.log("Usuario autenticado correctamente");
 
@@ -125,11 +138,11 @@ export async function validarContrasenaUsuario(idUsuario: number, contrasenaActu
 }
 
 // Servicio para actualizar la contraseña del usuario
-export async function actualizarContrasenaUsuario(idUsuario: number, contrasenaActual: string, contrasenaNueva: string) {
+export async function actualizarContrasenaUsuario(idUsuario: number, contrasenaActual: string, contrasenaNueva: string, canton:string,nombres:string) {
   try {
     // Buscar el usuario por ID
     const usuario = await usuarios.findByPk(idUsuario, {
-      attributes: ['id', 'usuario', 'contrasena']
+      attributes: ['id', 'usuario', 'contrasena','nombres','apellidos']
     });
 
     if (!usuario) {
@@ -173,6 +186,16 @@ export async function actualizarContrasenaUsuario(idUsuario: number, contrasenaA
         message: 'No se pudo actualizar la contraseña'
       };
     }
+    RegistrarLoggs({
+        idUsuario: usuario.id,
+      usuario:usuario.usuario ,
+      nombres: nombres,
+      fase:'registro usuarios',
+      accion:'UPDATE' ,
+      descripcion:`El usuario ${usuario.usuario} acaba de ACTUALIZAR SU CONTRASENA` ,
+      canton:canton
+      
+    });
 
     return {
       success: true,

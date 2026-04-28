@@ -7,6 +7,8 @@ import { AudienciaContestacion } from "../models/audiencia_constestacion.model";
 import { ParticipantesAudienciaContestacion } from "../models/participantes_audiencia.model";
 import { Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Otros, usuarios, AudienciaPruebas } from "../models";
 import { MedidasEmergentes, medida } from "../models";
+import { RegistrarLoggs } from "./loggs.service";
+import { otrosAudienciaContDTOS} from "../interfaces/otrosParticipantes.interface";
 
 interface ParticipanteData {
 	nombres: string;
@@ -36,9 +38,12 @@ interface AudienciaContestacionData {
 }
 //--- SERVICIOS PARA AUDIENCIA DE CONTESTACION ---//
 //crear audiencia de contestacion
-export async function crearAudienciaContestacion(data: AudienciaContestacionData) {
-	const existeCitacion = await Citacion.findOne({where:{idDenuncia:data.idDenuncia}})
-		if (existeCitacion) {
+export async function crearAudienciaContestacion(data: AudienciaContestacionData,idUsuario:number,usuario:string,nombres:string,canton:string) {
+	
+	const t = await sequelize.transaction();
+	try {
+		const existeCitacion = await Citacion.findOne({where:{idDenuncia:data.idDenuncia}})
+		if (!existeCitacion) {
 			const error = new Error("no existe citaciones registradas");
     error.name = "sinCitaciones";
     throw error;
@@ -51,8 +56,6 @@ export async function crearAudienciaContestacion(data: AudienciaContestacionData
     throw error;
 			
 		}
-	const t = await sequelize.transaction();
-	try {
 		
 		const audiencia = await AudienciaContestacion.create({
 			idDenuncia: data.idDenuncia,
@@ -84,6 +87,16 @@ export async function crearAudienciaContestacion(data: AudienciaContestacionData
 				}, { transaction: t });
 			}
 		}
+		RegistrarLoggs({
+						idUsuario: idUsuario,
+						usuario:usuario ,
+						nombres: nombres,
+						fase:'Audiencia de contestacion',
+						accion:'CREATE' ,
+						descripcion:` ${usuario} acaba de registrar la audiencia de contestacion con  codigo de expediente ${data.codigoTramite}` ,
+						canton:canton
+						
+					  });
 
 		await t.commit();
 		return audiencia;
@@ -261,7 +274,7 @@ export async function obtenerAudienciaContestacionCompleta(idAudiencia: number) 
 }
 
 // Servicio para actualizar la audiencia de contestación
-export async function actualizarAudienciaContestacion(idAudiencia: number, data: AudienciaContestacionData) {
+export async function actualizarAudienciaContestacion(idAudiencia: number, data: AudienciaContestacionData,idUsuario:number,usuario:string,nombres:string,canton:string) {
 	
 	const t = await sequelize.transaction();
 	try {
@@ -299,6 +312,16 @@ export async function actualizarAudienciaContestacion(idAudiencia: number, data:
 				}, { transaction: t });
 			}
 		}
+		RegistrarLoggs({
+                idUsuario: idUsuario,
+                usuario:usuario ,
+                nombres: nombres,
+                fase:'Audiencia de contestacion',
+                accion:'UPDATE' ,
+                descripcion:` ${usuario} acaba de actualizar la audiencia de contestacion con  codigo de expediente ${data.codigoTramite}` ,
+                canton:canton
+                
+              });
 
 		await t.commit();
 		return audiencia;
@@ -401,23 +424,48 @@ export async function getAfectadosYDirigidoA(idDenuncia: number) {
 }
 
 //servicio para  agregar mas participantes
-export async function AgregarOtrosParticipantes(data: any) {
-	// params: { nombres, apellidos, cedula, tipoParticipante, idDenuncia }
-  const { nombres, apellidos, cedula, tipoParticipante, idDenuncia, nombre_proyecto,cargo,institucion } = data;
-  
+export async function AgregarOtrosParticipantes(data: otrosAudienciaContDTOS,idUsuario:number,usuario:string,nombresUser:string,canton:string) {
+
+	try {
+		const existeCitacion = await Citacion.findOne({where:{idDenuncia:data.idDenuncia}})
+		if (!existeCitacion) {
+			const error = new Error("no existe citaciones registradas");
+    error.name = "sinCitaciones";
+    throw error;
+		}
+
   const nuevoParticipante = await Otros.create({
-    nombres,
-    apellidos,
-    cedula,
-    tipoParticipante,
-	nombre_proyecto,
-	cargo,
-	institucion,
-    idDenuncia,
+    nombres:data.nombres,
+    apellidos:data.apellidos,
+    cedula:data.cedula,
+    tipoParticipante:data.tipoParticipante,
+	nombre_proyecto:data.nombre_proyecto,
+	cargo:data.cargo,
+	institucion:data.institucion,
+    idDenuncia:data.idDenuncia,
 
 	fase: 'audienciaContestacion'
   });
+  RegistrarLoggs({
+                idUsuario: idUsuario,
+                usuario:usuario ,
+                nombres: nombresUser,
+                fase:'Audiencia de contestacion',
+                accion:'CREATE' ,
+                descripcion:` ${usuario} acaba de agregar al participante ${data.nombres} ${data.apellidos} a la audiencia de contestacion con  codigo de expediente ${existeCitacion.codigoTramite}` ,
+                canton:canton
+                
+              });
   return nuevoParticipante;
+			
+		
+	} catch (error) {
+		throw error;
+		
+	}
+
+	
+
 }
 
 

@@ -52,48 +52,9 @@
           </div>
         </div>
 
-        <div *ngIf="!editPersonalInfoMode" class="flex justify-end mt-4">
-          <app-button-submit
-            [type]="'button'"
-            [label]="'Editar'"
-            [color]="'afirmar'"
-            (clicked)="startEditPersonalInfo()"
-          ></app-button-submit>
-        </div>
 
-        <form *ngIf="editPersonalInfoMode" [formGroup]="personalInfoForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-gray-500">Nombres</label>
-            <app-inputs [type]="'text'" [placeholder]="'Nombres'" [control]="$any(personalInfoForm.get('nombres'))"></app-inputs>
-          </div>
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-gray-500">Apellidos</label>
-            <app-inputs [type]="'text'" [placeholder]="'Apellidos'" [control]="$any(personalInfoForm.get('apellidos'))"></app-inputs>
-          </div>
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-gray-500">Correo Electrónico</label>
-            <app-inputs [type]="'email'" [placeholder]="'Correo Electrónico'" [control]="$any(personalInfoForm.get('correo'))"></app-inputs>
-          </div>
-          <div class="space-y-1">
-            <label class="text-sm font-medium text-gray-500">Usuario</label>
-            <app-inputs [type]="'text'" [placeholder]="'Usuario'" [control]="$any(personalInfoForm.get('usuario'))"></app-inputs>
-          </div>
-          <div class="col-span-2 flex justify-end mt-4 gap-2">
-            <app-button-submit
-              [type]="'button'"
-              [label]="'Cancelar'"
-              [color]="'cancelar'"
-              (clicked)="cancelEditPersonalInfo()"
-            ></app-button-submit>
-            <app-button-submit
-              [type]="'button'"
-              [label]="'Guardar'"
-              [color]="'afirmar'"
-              [disabled]="personalInfoForm.invalid"
-              (clicked)="savePersonalInfo()"
-            ></app-button-submit>
-          </div>
-        </form>
+
+        
       </div>
 
       <!-- Información del Sistema -->

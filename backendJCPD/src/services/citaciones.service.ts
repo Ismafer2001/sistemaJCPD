@@ -1,6 +1,7 @@
 import sequelize from "../config/database";
 import {  Avocatoria, Canton, Denuncia, Denunciado, Denunciante, Notificacion, Otros } from "../models";
 import { Citacion } from "../models/citaciones.model";
+import { RegistrarLoggs } from "./loggs.service";
 
 //servicio para obtener las personas citadas en una citacion
 export  async function  involucradosACitar(id:string){
@@ -17,39 +18,37 @@ export  async function  involucradosACitar(id:string){
     include: [
       {
         model: Denunciante,
-        attributes:['nombres', 'apellidos', 'cedula', 'id']
+        attributes:['nombres', 'apellidos', 'cedula', 'id','estado_citar','id_citacion']
       },
       {
         model: Denunciado,
-        attributes:['nombres', 'apellidos', 'cedula', 'id']
+        attributes:['nombres', 'apellidos', 'cedula', 'id','estado_citar','id_citacion']
       },
       {
         model: Otros,
-        attributes:['nombres','tipoParticipante','apellidos','cargo','institucion','cedula', 'id', 'fase'],
+        attributes:['nombres','tipoParticipante','apellidos','cargo','institucion','cedula', 'id', 'fase','estado_citar','id_citacion'],
         as:'otros',
-        where: { fase: 'Citacion' },
+        where: { fase: 'notificacion' },
         required: false
       }
     ],
     attributes: [] 
   });
-  const personasArray: { idUsuario: number, nombres: string, parte: string }[] = [
-    ...(personas?.Denunciantes || []).map(d => ({idUsuario: d.id, nombres: [d.nombres, d.apellidos].filter(Boolean).join(' ').trim(), parte:'Denunciante'})),
-    ...(personas?.Denunciados || []).map(d => ({ idUsuario: d.id, nombres: [d.nombres, d.apellidos].filter(Boolean).join(' ').trim(), parte:'Denunciado' })),
-    ...(personas?.otros || []).map(o => ({ idUsuario: o.id, nombres: [o.nombres, o.apellidos].filter(Boolean).join(' ').trim(), parte: o.tipoParticipante }))
+  const personasArray: { idUsuario: number, nombres: string, parte: string,estado:string, idCitacion:number }[] = [
+    ...(personas?.Denunciantes || []).map(d => ({idUsuario: d.id, nombres: [d.nombres, d.apellidos].filter(Boolean).join(' ').trim(), parte:'Denunciante',estado:d.estado_citar,idCitacion:d.id_citacion})),
+    ...(personas?.Denunciados || []).map(d => ({ idUsuario: d.id, nombres: [d.nombres, d.apellidos].filter(Boolean).join(' ').trim(), parte:'Denunciado',estado:d.estado_citar,idCitacion:d.id_citacion })),
+    ...(personas?.otros || []).map(o => ({ idUsuario: o.id, nombres: [o.nombres, o.apellidos].filter(Boolean).join(' ').trim(), parte: o.tipoParticipante,estado:o.estado_citar,idCitacion:o.id_citacion }))
   ].filter(p => p.nombres);
 
    const resultado = [];
     for (const persona of personasArray) {
-      // Busca citacion con diriguidoA igual al nombre completo
-      const citado = await Citacion.findOne({
-        where: { idDenuncia: id, diriguidoA: persona.nombres }
-      });
+     
+    
       resultado.push({
         ...persona,
         idDenuncia: id,
-        estado: citado ? 'Citado' : 'Por citar',
-        idCitacion: citado ? citado.id : null
+        estado: persona.estado || 'Por Citar',
+        idCitacion: persona.idCitacion|| null
       });
     }
 
@@ -71,7 +70,7 @@ export  async function  otrosACitar(id:string){
       
       {
         model: Otros,
-        attributes:['nombres','tipoParticipante','apellidos','cargo','institucion','cedula', 'id', 'fase'],
+        attributes:['nombres','tipoParticipante','apellidos','cargo','institucion','cedula', 'id', 'fase','estado_citar','id_citacion'],
         as:'otros',
         where: { fase: 'Citacion' },
         required: false
@@ -79,23 +78,21 @@ export  async function  otrosACitar(id:string){
     ],
     attributes: [] 
   });
-    const personasArray: { idUsuario: number, nombresCompletos: string, parte: string,nombres: string,apellidos: string,cargo: string,institucion: string,cedula: string }[] = [
+    const personasArray: { idUsuario: number, nombresCompletos: string, parte: string,nombres: string,apellidos: string,cargo: string,institucion: string,cedula: string,estado:string, idCitacion:number }[] = [
     
-    ...(personas?.otros || []).map(n => ({ idUsuario: n.id, nombresCompletos: [n.nombres, n.apellidos].filter(Boolean).join(' ').trim(), parte: n.tipoParticipante, nombres: n.nombres, apellidos: n.apellidos, cargo: n.cargo, institucion: n.institucion, cedula: n.cedula }))
+    ...(personas?.otros || []).map(n => ({ idUsuario: n.id, nombresCompletos: [n.nombres, n.apellidos].filter(Boolean).join(' ').trim(), parte: n.tipoParticipante, nombres: n.nombres, apellidos: n.apellidos, cargo: n.cargo, institucion: n.institucion, cedula: n.cedula,estado:n.estado_citar,idCitacion:n.id_citacion }))
   ].filter(p => p.nombresCompletos);
 
     // Buscar notificación para cada persona
     const resultado = [];
     for (const persona of personasArray) {
       // Busca notificación con diriguidoA igual al nombre completo
-      const citado = await Citacion.findOne({
-        where: { idDenuncia: id, diriguidoA: persona.nombresCompletos }
-      });
+      
       resultado.push({
         ...persona,
         idDenuncia: id,
-        estado: citado ? 'Citado' : 'Por citar',
-        idCitacion: citado ? citado.id : null
+        estado: persona.estado || 'Por Citar',
+        idCitacion: persona.idCitacion|| null
       });
     }
     
@@ -105,9 +102,15 @@ export  async function  otrosACitar(id:string){
 
 } 
 //servicio para crear otros citados
-export async function crearOtrosCitados(data: any) {
+export async function crearOtrosCitados(data: any,idUsuario:number,usuario:string,nombresUser:string,canton:string) {
   // params: { nombres, apellidos, cedula, cargo, institucion, idDenuncia, tipoParticipante }
   const { nombres, apellidos, cedula, cargo, institucion, idDenuncia, tipoParticipante } = data;
+  const existeNotificacion = await Notificacion.findOne({where:{idDenuncia:data.idDenuncia}})
+    if (!existeNotificacion) {
+      const error = new Error("No existe notificaciones resgistrada ");
+      error.name = "sinNotificacion";
+      throw error;
+    }
   
   const nuevoOtro = await Otros.create({
     nombres,
@@ -119,6 +122,17 @@ export async function crearOtrosCitados(data: any) {
     tipoParticipante,
     fase: 'Citacion'
   });
+  
+  RegistrarLoggs({
+				idUsuario: idUsuario,
+				usuario:usuario ,
+				nombres: nombresUser,
+				fase:'Citacion',
+				accion:'CREATE' ,
+				descripcion:` $${usuario} acaba de agregar a ${nombres} ${apellidos} para citar relacionado al codigo de expediente ${existeNotificacion.codigoTramite}` ,
+				canton:canton
+								
+				});
   return nuevoOtro;
 }
 // secivio para obtener los datos para la citacion 
@@ -166,7 +180,7 @@ export async function citacionesDTO(id:string, tipoInvolucrado?:string, idInvolu
         });
         break;
       case 'otros':
-        const whereClauseOtros: any = { fase: 'Citacion' };
+        const whereClauseOtros: any = {  };
         if (idInvolucrado) {
           whereClauseOtros.id = idInvolucrado;
         }
@@ -179,7 +193,7 @@ export async function citacionesDTO(id:string, tipoInvolucrado?:string, idInvolu
         });
         break;
       case 'representante institucional':
-        const whereClauseInstitucion: any = { fase: 'Citacion' };
+        const whereClauseInstitucion: any = {  };
         if (idInvolucrado) {
           whereClauseInstitucion.id = idInvolucrado;
         }
@@ -263,7 +277,7 @@ export async function citacionesDTO(id:string, tipoInvolucrado?:string, idInvolu
   return respuestaFormateada;
 }
 //servicio para crear una citacion
-export async function crearcitacion(data:any) {
+export async function crearcitacion(data:any,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
       const citacion = await Citacion.create({
@@ -278,12 +292,33 @@ export async function crearcitacion(data:any) {
         razon: data.razon,
         estatus: 'completada',
         idUsuario: data.idUsuario
-        
-
-        
 
       }, { transaction: t });
-    
+      if(data.parte ==='Denunciante'){
+        await Denunciante.update({id_notificacion:citacion.id,estado_citar:'Citado'},
+          {where:{id:data.idUsuario}}
+        )
+
+      }else if(data.parte==='Denunciado'){
+        await Denunciado.update({id_notificacion:citacion.id,estado_citar:'Citado'},
+          {where:{id:data.idUsuario}}
+        )
+      }else{
+        
+        await Otros.update({id_notificacion:citacion.id,estado_citar:'Citado'},
+          {where:{id:data.idUsuario}}
+        )
+      }
+    RegistrarLoggs({
+                    idUsuario: idUsuario,
+                    usuario:usuario ,
+                    nombres: nombres,
+                    fase:'Citacion',
+                    accion:'CREATE' ,
+                    descripcion:` ${usuario} acaba de registar una citacion con  codigo de expediente ${data.codigoTramite}` ,
+                    canton:canton
+                     
+                  });
 
     await t.commit();
     return citacion;
@@ -293,7 +328,7 @@ export async function crearcitacion(data:any) {
   }
 }
 //funcion para actualizar una citacion
-export async function actualizarCitacion(id: string, data: any){
+export async function actualizarCitacion(id: string, data: any,idUsuario:number,usuario:string,nombres:string,canton:string){
   const t = await sequelize.transaction();
   try {
     const citacion = await Citacion.findByPk(id);
@@ -313,6 +348,16 @@ export async function actualizarCitacion(id: string, data: any){
       estatus: data.estatus || 'completada',
       idUsuario: data.idUsuario
     }, { transaction: t });
+    RegistrarLoggs({
+                                            idUsuario: idUsuario,
+                                            usuario:usuario ,
+                                            nombres: nombres,
+                                            fase:'Citacion',
+                                            accion:'UPDATE' ,
+                                            descripcion:` ${usuario} acaba de actualizar una citacion de id ${id} relacionado al codigo de expediente ${data.codigoTramite}` ,
+                                            canton:canton
+                                            
+                                          });
     await t.commit();
     return citacion;
   } catch (error) {
@@ -377,7 +422,7 @@ export async function obtenerCitacion(idCitacion: number) {
 
 
 //servicio para eliminar otros citados
-export async function eliminarOtrosCitados(id: number) {
+export async function eliminarOtrosCitados(id: number,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     const otroCitado = await Otros.findOne({ 
@@ -394,6 +439,16 @@ export async function eliminarOtrosCitados(id: number) {
     }
 
     await otroCitado.destroy({ transaction: t });
+    RegistrarLoggs({
+				idUsuario: idUsuario,
+				usuario:usuario ,
+				nombres: nombres,
+				fase:'Citacion',
+				accion:'DELETE' ,
+				descripcion:` $${usuario} acaba de eliminar  a ${otroCitado.nombres} ${otroCitado.apellidos} de citar relacionado al codigo de expediente ${'existeNotificacion.codigoTramite'}` ,
+				canton:canton
+								
+				});
     await t.commit();
     
     return { message: "Registro eliminado correctamente" };
@@ -404,7 +459,7 @@ export async function eliminarOtrosCitados(id: number) {
 }
 
 //servicio para actualizar otros citados
-export async function actualizarOtrosCitados(id: number, data: any) {
+export async function actualizarOtrosCitados(id: number, data: any,idUsuario:number,usuario:string,nombresUser:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     const { nombres, apellidos, cedula, cargo, institucion, tipoParticipante } = data;
@@ -430,6 +485,17 @@ export async function actualizarOtrosCitados(id: number, data: any) {
       institucion,
       tipoParticipante
     }, { transaction: t });
+
+    RegistrarLoggs({
+				idUsuario: idUsuario,
+				usuario:usuario ,
+				nombres: nombresUser,
+				fase:'Citacion',
+				accion:'UPDATE' ,
+				descripcion:` $${usuario} acaba de Actualizar a ${nombres} ${apellidos} para citar relacionado al codigo de expediente ${'existeNotificacion.codigoTramite'}` ,
+				canton:canton
+								
+				});
 
     await t.commit();
     return otroCitado;

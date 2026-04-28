@@ -194,6 +194,7 @@ formularioFormatoCitacion(){
 
     this.CitacionesService.getcitacioenesDTO(id,tipoInvolucrado,idInvolucrado,idCitacion).subscribe({
       next: (data) => {
+        console.log(data)
         this.citar=data;
         this.datosPersonas=this.citar.datosPersona;
         this.idCitacion=this.citar.id;

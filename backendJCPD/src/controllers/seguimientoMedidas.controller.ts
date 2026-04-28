@@ -1,9 +1,12 @@
 
-import { obtenerAfectados, agregarCumplimientoMedidas, actualizarCumplimientoMedidas, obtenerMedidasPendientesPorAfectado, obtenerMedidasCumplidasPorAfectado, obtenerMedidasDefinitivasPorAfectado } from '../services/seguimientoMedidas.service';
+import { obtenerAfectados,
+   agregarCumplimientoMedidas,
+    actualizarCumplimientoMedidas,
+     obtenerMedidasPendientesPorAfectado,
+      obtenerMedidasCumplidasPorAfectado, obtenerMedidasDefinitivasPorAfectado } from '../services/seguimientoMedidas.service';
 import { handlehttp } from '../utils/error.handle';
 import { Request, Response } from 'express';
-import path from 'path';
-import fs from 'fs';
+
 
 
 
@@ -26,6 +29,11 @@ export const getAfectadosSeguimientoMedidas = async (req: Request, res: Response
 // Controlador para agregar cumplimiento de medidas
 export const postAgregarCumplimientoMedidas = async (req: Request, res: Response) => {
   try {
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     // 1. Validar que el middleware de Multer nos dejó un archivo en memoria
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Archivo requerido' });
@@ -49,7 +57,7 @@ export const postAgregarCumplimientoMedidas = async (req: Request, res: Response
     console.log(req.body.codigoTramite)
     
     // 3. Ejecutar la lógica de negocio
-    const resultado = await agregarCumplimientoMedidas(payload);
+    const resultado = await agregarCumplimientoMedidas(payload,idUsuario,usuario,nombres,canton);
     
     res.status(201).json(resultado);
   } catch (error) {
@@ -61,6 +69,11 @@ export const postAgregarCumplimientoMedidas = async (req: Request, res: Response
 // Controlador para actualizar cumplimiento de medidas
 export const putActualizarCumplimientoMedidas = async (req: Request, res: Response) => {
   try {
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     // 1. Validar solo lo estrictamente obligatorio (idPath)
     if (!req.body.idPath) {
       return res.status(400).json({ success: false, message: 'idPath es requerido' });
@@ -89,7 +102,7 @@ export const putActualizarCumplimientoMedidas = async (req: Request, res: Respon
     // - Subir el archivo nuevo (si existe) a Local o Nube
     // - Borrar el archivo viejo (si existe) de Local o Nube
     // - Actualizar la base de datos
-    const resultado = await actualizarCumplimientoMedidas(payload);
+    const resultado = await actualizarCumplimientoMedidas(payload,idUsuario,usuario,nombres,canton);
 
     // 4. Responder al cliente
     res.status(200).json(resultado);

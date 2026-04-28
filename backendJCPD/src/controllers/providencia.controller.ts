@@ -19,6 +19,11 @@ export const createProvidencia = async (req: Request, res: Response) => {
             idDenuncia,
             pdf_providencia
         } = req.body;
+         const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
         // Validaciones básicas
         if (!articulos || !suscrito || !nombreSuscrito || !disposiciones || !codigoTramite || !idDenuncia) {
@@ -38,7 +43,7 @@ export const createProvidencia = async (req: Request, res: Response) => {
             codigoTramite,
             idDenuncia,
             pdf_providencia
-        });
+        },idUsuario,usuario,nombres,canton);
 
         res.status(201).json(nuevaProvidencia);
 
@@ -124,6 +129,11 @@ export const updateProvidencia = async (req: Request, res: Response) => {
             disposiciones,
             pdf_providencia
         } = req.body;
+         const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
         // Validar que el ID sea un número válido
         if (isNaN(id) || id <= 0) {
@@ -141,7 +151,7 @@ export const updateProvidencia = async (req: Request, res: Response) => {
             institucionSuscrito,
             disposiciones,
             pdf_providencia
-        });
+        },idUsuario,usuario,nombres,canton);
 
         if (!providenciaActualizada) {
             return res.status(404).json({
@@ -162,7 +172,12 @@ export const updateProvidencia = async (req: Request, res: Response) => {
 export const getProvidenciaPdf = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await crearPdfProvidenciaNNA(res, Number(id));
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    await crearPdfProvidenciaNNA(res, Number(id),idUsuario,usuario,nombres,canton);
    
   } catch (error) {
     handlehttp(res, 'get_error_pdf_providencia', error);

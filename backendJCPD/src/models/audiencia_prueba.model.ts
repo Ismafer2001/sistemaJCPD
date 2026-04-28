@@ -1,9 +1,9 @@
   import { Model, DataTypes, Optional, } from 'sequelize';
     import sequelize from '../config/database';
-import { Canton } from './cantones.models';
 
 
-  interface AudienciaPruebasAttributes {
+
+  export interface AudienciaPruebasAttributes {
  id: number;
  codigoTramite: string;
  fecha: Date;
@@ -16,7 +16,7 @@ import { Canton } from './cantones.models';
   estatus?: "pendiente"|"en_proceso"|"completada";
   }
   
-interface AudienciaPruebasCreationAttributes extends Optional<AudienciaPruebasAttributes, 'id'>{
+export interface AudienciaPruebasCreationAttributes extends Optional<AudienciaPruebasAttributes, 'id'>{
   canton?: string;
 }
   

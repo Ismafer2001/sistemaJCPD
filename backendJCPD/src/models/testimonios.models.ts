@@ -6,7 +6,7 @@ interface TestimonioAttributes {
     parte: string
     idParticipante: number;
 }
-interface TestimonioCreationAttributes extends Optional<TestimonioAttributes, 'id'> { 
+export interface TestimonioCreationAttributes extends Optional<TestimonioAttributes, 'id'> { 
 
 }
 export class Testimonio extends Model<TestimonioAttributes, TestimonioCreationAttributes> implements TestimonioAttributes {

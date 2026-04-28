@@ -46,8 +46,8 @@ export class UserService {
     return this.http.put(`${this.apiUrl}/${id}`, usuario);
   }
 
-  desactivarUsuario(id: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/desactivar/${id}`, {});
+  desactivarUsuario(id: number,isactivo:boolean): Observable<any> {
+    return this.http.put(`${this.apiUrl}/desactivar/${id}`, {isactivo});
   }
 
   eliminarUsuario(id: number): Observable<any> {

@@ -3,6 +3,7 @@ import { supabase } from '../config/supabase';
 import fs from 'fs-extra';
 import path from 'path';
 import { sanitizarRuta } from '../utils/sanitizar rutas';
+import { RegistrarLoggs } from './loggs.service';
 
 
 
@@ -13,7 +14,7 @@ export async function guardarExpediente({ file, idDenuncia, tipoExpediente, codi
   idDenuncia: number,
   tipoExpediente: string,
   codigoTramite:string
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   // 1. Validaciones preventivas para evitar crashes
   if (!file) throw new Error('Archivo requerido');
   if (!idDenuncia) throw new Error('idDenuncia requerido');
@@ -67,6 +68,16 @@ export async function guardarExpediente({ file, idDenuncia, tipoExpediente, codi
     filename: nombreGenerado,    // Reemplaza a file.filename
     tipoExpediente
   });
+  RegistrarLoggs({
+                        idUsuario: idUsuario,
+                        usuario:usuario ,
+                        nombres: nombres,
+                        fase:'expedientes',
+                        accion:'UPLOAD' ,
+                        descripcion:` ${usuario} acaba de subir un archivo de ${tipoExpediente}  relacionado al  codigo de expediente ${codigoTramite}` ,
+                        canton:canton
+                        
+                        });
 
   return expediente;
 }
@@ -85,7 +96,7 @@ export async function actualizarExpediente({ idExpediente, file, idDenuncia, tip
   idDenuncia?: number,
   tipoExpediente?: string
   codigoTramite: string
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   try {
     const updateData: any = {};
     const storageType = process.env.STORAGE_TYPE || 'local'; 
@@ -179,6 +190,16 @@ export async function actualizarExpediente({ idExpediente, file, idDenuncia, tip
 
     // En lugar de hacer update y luego findByPk, podemos actualizar la instancia directamente
     await expedienteAnterior.update(updateData);
+    RegistrarLoggs({
+                        idUsuario: idUsuario,
+                        usuario:usuario ,
+                        nombres: nombres,
+                        fase:'expedientes',
+                        accion:'UPDATE' ,
+                        descripcion:` ${usuario} acaba de editar la subida de un archivo de ${tipoExpediente}  relacionado al  codigo de expediente ${codigoTramite}` ,
+                        canton:canton
+                        
+                        });
 
     return expedienteAnterior;
   } catch (error) {

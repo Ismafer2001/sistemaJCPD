@@ -54,6 +54,11 @@ export const getMedidasIdentificadasPorAfecado = async (req: Request, res: Respo
 //controlador para crear una nueva avocatoria
 export const postAvocatoria = async (req: Request, res: Response) =>{
    try {
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     const nuevaAvocatoria = await crearAvocatoria(req.body);
     console.log(nuevaAvocatoria)
     res.status(201).json(nuevaAvocatoria);
@@ -89,7 +94,12 @@ export const getAfectadosAvocatoria = async (req: Request, res: Response) => {
 export const putAvocatoria = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const result = await editarAvocatoria(Number(id), req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const result = await editarAvocatoria(Number(id), req.body,idUsuario,usuario,nombres,canton);
     res.json(result);
   } catch (error) {
     handlehttp(res, 'put_error_editarAvocatoria', error);
@@ -102,7 +112,12 @@ export const putAvocatoria = async (req: Request, res: Response) => {
 export const getAvocatoriaPdf = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await crearPdfavocatoriaNNA(res, Number(id));
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    await crearPdfavocatoriaNNA(res, Number(id),idUsuario,usuario,nombres,canton);
    
   } catch (error) {
     handlehttp(res, 'get_error_pdf_avocatoria', error);

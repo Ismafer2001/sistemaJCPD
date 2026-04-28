@@ -1,11 +1,5 @@
 import { Request, Response } from "express";
-import {
-  Denuncia,
-  Denunciado,
-  Denunciante,
-  Otros,
-  Avocatoria,
-} from "../models";
+
 
 import { handlehttp } from "../utils/error.handle";
 import {
@@ -25,6 +19,11 @@ import { PDFcitacion } from "../services/pdfs/citacionespdf.service";
 export const postCreateOtrosCitados = async (req: Request, res: Response) => {
   try {
     const { nombres, apellidos, cedula, parte, idDenuncia } = req.body;
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombresUser = req.user.nombres
+    const canton = String(req.user.canton)
     if (!nombres || !idDenuncia) {
       return res
         .status(400)
@@ -32,7 +31,7 @@ export const postCreateOtrosCitados = async (req: Request, res: Response) => {
           message: "Los campos nombres, idDenuncia y parte son requeridos",
         });
     }
-    const nuevoOtro = await crearOtrosCitados(req.body);
+    const nuevoOtro = await crearOtrosCitados(req.body,idUsuario,usuario,nombresUser,canton);
     res.status(201).json(nuevoOtro);
   } catch (error) {
     handlehttp(res, "error_post_otro_notificado", error);
@@ -43,7 +42,12 @@ export const postCreateOtrosCitados = async (req: Request, res: Response) => {
 export const deleteOtroCitado = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const resultado = await eliminarOtrosCitados(Number(id));
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const resultado = await eliminarOtrosCitados(Number(id),idUsuario,usuario,nombres,canton);
     res.json(resultado);
   } catch (error) {
     handlehttp(res, 'error_delete_otro_citado', error);
@@ -54,7 +58,12 @@ export const deleteOtroCitado = async (req: Request, res: Response) => {
 export const putOtroCitado = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const otroActualizado = await actualizarOtrosCitados(Number(id), req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const otroActualizado = await actualizarOtrosCitados(Number(id), req.body,idUsuario,usuario,nombres,canton);
     res.json(otroActualizado);
   } catch (error) {
     handlehttp(res, 'error_put_otro_citado', error);
@@ -65,7 +74,12 @@ export const putOtroCitado = async (req: Request, res: Response) => {
 export const putCitacion = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const citacionActualizada = await actualizarCitacion(id, req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const citacionActualizada = await actualizarCitacion(id, req.body,idUsuario,usuario,nombres,canton);
     res.json(citacionActualizada);
   } catch (error) {
     handlehttp(res, "error_put_citacion", error);
@@ -137,7 +151,13 @@ export const getCitacionesDTO = async (req: Request, res: Response) => {
 
 export const postCitacion = async (req: Request, res: Response) => {
   try {
-    const nuevacitacion = await crearcitacion(req.body);
+    const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const nuevacitacion = await crearcitacion(req.body,idUsuario,usuario,nombres,canton);
+     
     res.status(201).json(nuevacitacion);
   } catch (error) {
     handlehttp(res, "error_post_citacion", error);
@@ -150,7 +170,12 @@ export const postCitacion = async (req: Request, res: Response) => {
 export const getCitacionPDF = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await PDFcitacion(res, id);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    await PDFcitacion(res, id,idUsuario,usuario,nombres,canton);
   } catch (error) {
     handlehttp(res, "error_get_citacion_pdf", error);
   }

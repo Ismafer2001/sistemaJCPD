@@ -1,6 +1,7 @@
 import sequelize from "../config/database";
 import { Desestimiento } from "../models/desestimiento.models";
 import { Denuncia, Canton } from "../models";
+import { RegistrarLoggs } from "./loggs.service";
 
 export interface DesestimientoDTO {
   idDenuncia: number;
@@ -10,7 +11,7 @@ export interface DesestimientoDTO {
 }
 
 //servicio para crear desestimiento
-export async function crearDesestimiento(data: DesestimientoDTO) {
+export async function crearDesestimiento(data: DesestimientoDTO,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     // Verificar que existe la denuncia
@@ -39,6 +40,16 @@ export async function crearDesestimiento(data: DesestimientoDTO) {
       resultado_desestimiento: data.resultado_desestimiento,
       estatus: data.estatus || 'completada'
     }, { transaction: t });
+    RegistrarLoggs({
+                         idUsuario: idUsuario,
+                         usuario:usuario ,
+                         nombres: nombres,
+                        fase:'Desestimiento',
+                         accion:'CREATE' ,
+                         descripcion:` ${usuario} acaba de regisrar un desestimiento como${data.resultado_desestimiento} relacionado al codigo de expediente ${data.codigoTramite}` ,
+                         canton:canton
+                                                    
+                                                  });
 
     await t.commit();
     return desestimiento;
@@ -129,7 +140,7 @@ export async function obtenerDesestimientoPorId(id: number) {
 
 
 //servicio para actualizar desestimiento
-export async function actualizarDesestimiento(id: number, data: Partial<DesestimientoDTO>) {
+export async function actualizarDesestimiento(id: number, data: Partial<DesestimientoDTO>,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     const desestimiento = await Desestimiento.findByPk(id);
@@ -156,7 +167,17 @@ export async function actualizarDesestimiento(id: number, data: Partial<Desestim
       ...(data.resultado_desestimiento && { resultado_desestimiento: data.resultado_desestimiento }),
       ...(data.estatus && { estatus: data.estatus })
     }, { transaction: t });
-
+    
+RegistrarLoggs({
+                         idUsuario: idUsuario,
+                         usuario:usuario ,
+                         nombres: nombres,
+                        fase:'Desestimiento',
+                         accion:'UPDATE' ,
+                         descripcion:` ${usuario} acaba de actualizar el desestimiento como${data.resultado_desestimiento} relacionado al codigo de expediente ${data.codigoTramite}` ,
+                         canton:canton
+                                                    
+                                                  });
     await t.commit();
     return desestimiento;
   } catch (error) {

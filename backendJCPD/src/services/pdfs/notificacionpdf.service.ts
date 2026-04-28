@@ -3,6 +3,7 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Response } from 'express';
 import { obtenerDatosNotificacion } from '../notificaciones.service';
+import { RegistrarLoggs } from '../loggs.service';
 
 // Asegurar vfs para pdfMake
 // @ts-ignore
@@ -14,9 +15,10 @@ import { obtenerDatosNotificacion } from '../notificaciones.service';
  */
 
 
-export const PDFnotificacion = async (res: Response,idNotificacion: any) => {
+export const PDFnotificacion = async (res: Response,idNotificacion: any, idUsuario:number,usuario:string,nombres:string,canton:string) => {
 
-  const pdfData = await obtenerDatosNotificacion(idNotificacion);
+  try {
+      const pdfData = await obtenerDatosNotificacion(idNotificacion);
 
   const contentBlocks: any[] = [
     { text: 'FORMATO DE NOTIFICACION', style: 'title', alignment: 'center', margin: [0, 0, 0, 10] },
@@ -66,4 +68,25 @@ export const PDFnotificacion = async (res: Response,idNotificacion: any) => {
     }
     res.send(Buffer.from(buffer));
   });
-};
+    RegistrarLoggs({
+                  idUsuario: idUsuario,
+                  usuario:usuario ,
+                  nombres: nombres,
+                  fase:'notificacion',
+                  accion:'GENERATE' ,
+                  descripcion:` ${usuario} acaba de generar pdf de audiencia de pruebas con  codigo de expediente ${pdfData.codigoTramite}` ,
+                  canton:canton
+                  
+                  });
+    
+  } catch (error) {
+      console.error('Error al generar el PDF de notificacion:', error);
+    if (!res.headersSent) {
+      res.status(500).send('Error al generar el PDF de notificacion');
+    }
+  }
+    
+  }
+
+
+

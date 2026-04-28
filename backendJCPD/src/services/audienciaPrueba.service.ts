@@ -23,6 +23,9 @@ import {
 import fs from 'fs-extra';
 import { supabase } from '../config/supabase';
 import { sanitizarRuta } from '../utils/sanitizar rutas';
+import { RegistrarLoggs } from "./loggs.service";
+import { otrosAudienciaPruetDTOS } from "../interfaces/otrosParticipantes.interface";
+import { AudienciaPruebasDTOS, AudienciaPruebasDTOSActualizar, participantesAudienciaPruebasDTOS, participantesAudienciaPruebasDTOSActualizar } from "../interfaces/audienciaPruebas.interface";
 
 interface ParticipanteData {
 	nombres: string;
@@ -38,14 +41,7 @@ interface ParticipanteData {
 		fileName: string;
 	};
 }
-interface medidaDefinitivaData {
-	 idAfectado: number;
-    idMedida: number;
-    medida: string;
-    periodo: string;
-    observaciones: string;
 
-}
 interface AudienciaPruebasData {
 	idDenuncia: number;
 	codigoTramite: string;
@@ -56,7 +52,7 @@ interface AudienciaPruebasData {
 	pdf_audiencia_pruebas: string;
 	articulo: string;
 	participantes: ParticipanteData[];
-	archivos?: { [key: string]: Express.Multer.File }; // archivos por índice de participante
+	 // archivos por índice de participante
 	
 	estatus: "pendiente"|"en_proceso"|"completada";
 }
@@ -220,9 +216,21 @@ export async function obtenerAudienciaPruebasCompleta(idAudiencia: number) {
 				};
 }
 //crear audiencia de pruebas
-export async function crearAudienciaPruebas(data: AudienciaPruebasData) {
+export async function crearAudienciaPruebas(data: AudienciaPruebasDTOS,idUsuario:number,usuario:string,nombres:string,canton:string) {
 	const t = await sequelize.transaction();
 	try {
+		const existeAudienciaContestacion = await AudienciaContestacion.findOne({where:{idDenuncia:data.idDenuncia}})
+  if (!existeAudienciaContestacion) {
+    const error = new Error("No existe audiencia de contestacion resgistrada ");
+    error.name = "sinAudienciaDeContestacion";
+    throw error;
+  }
+  const existe = await AudienciaContestacion.findOne({where:{idDenuncia:data.idDenuncia}})
+  if (existe) {
+    const error = new Error("Ya existe audiencia de prueba resgistrada ");
+    error.name = "YaExisteAudienciaDePruebas";
+    throw error;
+  }
 		const audiencia = await AudienciaPruebas.create({
 			idDenuncia: data.idDenuncia,
 			codigoTramite: data.codigoTramite,
@@ -259,6 +267,16 @@ export async function crearAudienciaPruebas(data: AudienciaPruebasData) {
 				}
 			}
 		}
+		RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'Audiencia de pruebas',
+								accion:'Create' ,
+								descripcion:` ${usuario} acaba de registrar la audiencia de pruebas con  codigo de expediente ${data.codigoTramite}` ,
+								canton:canton
+								
+							  });
 
 
 		await t.commit();
@@ -270,7 +288,7 @@ export async function crearAudienciaPruebas(data: AudienciaPruebasData) {
 }
 
 // Servicio para actualizar la audiencia de pruebas
-export async function actualizarAudienciaPruebas(idDenuncia: number, data: AudienciaPruebasData) {
+export async function actualizarAudienciaPruebas(idDenuncia: number, data: AudienciaPruebasDTOSActualizar,idUsuario:number,usuario:string,nombres:string,canton:string) {
 	const existeResolucion = await Resoluciones.findOne({where:{idDenuncia:idDenuncia}})
   if (existeResolucion) {
     const error = new Error("no se puede editar ya existe una resolucion registrada en esta denuncia ");
@@ -309,10 +327,10 @@ export async function actualizarAudienciaPruebas(idDenuncia: number, data: Audie
 			for (const participante of data.participantes) {
 				const nuevoParticipante = await ParticipantesAudienciaPruebas.create({
 					idAP: audiencia.id,
-					nombres: participante.nombres,
-					apellidos: participante.apellidos,
-					cedula: participante.cedula,
-					tipoParticipante: participante.tipoParticipante,
+					nombres: participante.nombres!,
+					apellidos: participante.apellidos!,
+					cedula: participante.cedula!,
+					tipoParticipante: participante.tipoParticipante!,
 					parte: participante.parte ?? '',
 					pruebas: participante.pruebas ?? ' null'
 				}, { transaction: t });
@@ -326,6 +344,16 @@ export async function actualizarAudienciaPruebas(idDenuncia: number, data: Audie
 				}
 			}
 		}
+		RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'Audiencia de pruebas',
+								accion:'UPDATE' ,
+								descripcion:` ${usuario} acaba de actualizar la audiencia de pruebas con  codigo de expediente ${data.codigoTramite}` ,
+								canton:canton
+								
+							  });
 
 		await t.commit();
 		return { success: true, audienciaId: audiencia.id };
@@ -424,7 +452,7 @@ export async function agregarVulneracionIdentificada(data: {
 	idAfectado: number;
 	idVulneracion: number;
 	detalles?: string;
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
 	// Validar datos mínimos
 	if (!data.idAfectado || !data.idVulneracion) {
 		throw new Error("Faltan datos obligatorios: idAfectado o idVulneracion");
@@ -437,19 +465,40 @@ export async function agregarVulneracionIdentificada(data: {
 		detalles: data.detalles ?? ''
 	});
 
+	RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'Audiencia de pruebas',
+								accion:'CREATE' ,
+								descripcion:` $${usuario} acaba de agregar  un registro de vulneracion con id ${nuevaVulneracion.id} relacionado al  codigo de expediente ${'falta codigo'}` ,
+								canton:canton
+								
+							  });
+
 	return nuevaVulneracion;
 }
 
 // Servicio para eliminar vulneración identificada por id
-export async function eliminarVulneracionIdentificada(id: number) {
+export async function eliminarVulneracionIdentificada(id: number,idUsuario:number,usuario:string,nombres:string,canton:string) {
 	if (!id) throw new Error('ID requerido');
 	const deleted = await VulneracionesIdentificadas.destroy({ where: { id } });
 	if (deleted === 0) throw new Error('No se encontró la vulneración identificada');
+	RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'Audiencia de pruebas',
+								accion:'DELETE' ,
+								descripcion:` $${usuario} acaba de eliminar el registro de vulneracion con id ${id} relacionado al  codigo de expediente ${'falta codigo'}` ,
+								canton:canton
+								
+							  });
 	return { success: true };
 }
 
 // Servicio para actualizar vulneración identificada por id
-export async function actualizarVulneracionIdentificada(id: number, data: { idAfectado?: number; idVulneracion?: number; detalles?: string; }) {
+export async function actualizarVulneracionIdentificada(id: number, data: { idAfectado?: number; idVulneracion?: number; detalles?: string; },idUsuario:number,usuario:string,nombres:string,canton:string) {
 	if (!id) throw new Error('ID requerido');
 	
 	const vulneracion = await VulneracionesIdentificadas.findByPk(id);
@@ -459,13 +508,19 @@ export async function actualizarVulneracionIdentificada(id: number, data: { idAf
 		idVulneracion: data.idVulneracion ?? vulneracion.idVulneracion,
 		detalles: data.detalles ?? vulneracion.detalles
 	});
+	RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'Audiencia de pruebas',
+								accion:'UPDATE' ,
+								descripcion:` $${usuario} acaba de actualizar el registro de vulneracion con id ${vulneracion.id} relacionado al  codigo de expediente ${'falta codigo'}` ,
+								canton:canton
+								
+							  });
 	return vulneracion;
+	
 }
-
-
-
-
-
 
 //----------------SERVICIO PARA PARTICIPANTES----------------------//
 
@@ -502,9 +557,17 @@ export async function getParticipantesAudienciaContestacion(idDenuncia: number) 
 	return todosParticipantes;
 }
 
-export async function AgregarOtrosParticipantes(data: any) {
+export async function AgregarOtrosParticipantes(data: otrosAudienciaPruetDTOS,idUsuario:number,usuario:string,nombresUser:string,canton:string) {
     // params: { nombres, apellidos, cedula, tipoParticipante, idDenuncia }
-  const { nombres, apellidos, cedula, tipoParticipante, idDenuncia } = data;
+
+	try {
+		const { nombres, apellidos, cedula, tipoParticipante, idDenuncia } = data;
+		const existeAudienciaContestacion = await AudienciaContestacion.findOne({where:{idDenuncia:data.idDenuncia}})
+  if (!existeAudienciaContestacion) {
+    const error = new Error("No existe audiencia de contestacion resgistrada ");
+    error.name = "sinAudienciaDeContestacion";
+    throw error;
+  }
   
   const nuevoParticipante = await Otros.create({
     nombres,
@@ -514,7 +577,23 @@ export async function AgregarOtrosParticipantes(data: any) {
     idDenuncia,
     fase: 'audienciaPruebas'
   });
+  RegistrarLoggs({
+				idUsuario: idUsuario,
+				usuario:usuario ,
+				nombres: nombresUser,
+				fase:'Audiencia de pruebas',
+				accion:'CREATE' ,
+				descripcion:` $${usuario} acaba de agregar al participante ${nombres} ${apellidos} a la audiencia de contestacion con  codigo de expediente ${existeAudienciaContestacion.codigoTramite}` ,
+				canton:canton
+								
+				});
   return nuevoParticipante;
+		
+	} catch (error) {
+		throw error
+		
+	}
+  
 }
 
 //---- FUNCIONES PARA MANEJO DE ARCHIVOS POR ABOGADO ----//
@@ -523,7 +602,7 @@ export async function AgregarOtrosParticipantes(data: any) {
 
 
 // 1. Modificamos esta función para que solo vincule el archivo (con su buffer) al participante
-export function procesarArchivosAbogados(files: Express.Multer.File[], participantes: any[]) {
+export function procesarArchivosAbogados(files: Express.Multer.File[], participantes: participantesAudienciaPruebasDTOS[]) {
     const participantesConArchivos = [...participantes];
     
     if (files && files.length > 0) {
@@ -548,14 +627,26 @@ export function procesarArchivosAbogados(files: Express.Multer.File[], participa
 }
 
 // 2. La función principal ahora guarda los archivos de verdad
-export async function crearAudienciaPruebasConArchivos(data: any, files: Express.Multer.File[]) {
+export async function crearAudienciaPruebasConArchivos(data: AudienciaPruebasDTOS, files: Express.Multer.File[],idUsuario:number,usuario:string,nombres:string,canton:string) {
     const t = await sequelize.transaction();
     const storageType = process.env.STORAGE_TYPE || 'local';
-    
+
     // Arreglo para guardar los paths de los archivos subidos (útil para limpiar si hay rollback)
     const archivosSubidos: string[] = []; 
 
     try {
+		const existeAudienciaContestacion = await AudienciaContestacion.findOne({where:{idDenuncia:data.idDenuncia}})
+  if (!existeAudienciaContestacion) {
+    const error = new Error("No existe audiencia de contestacion resgistrada ");
+    error.name = "sinAudienciaDeContestacion";
+    throw error;
+  }
+  const existe = await AudienciaPruebas.findOne({where:{idDenuncia:data.idDenuncia}})
+  if (existe) {
+    const error = new Error("Ya existe audiencia de prueba resgistrada ");
+    error.name = "YaExisteAudienciaDePruebas";
+    throw error;
+  }
         // 1. Crear audiencia principal
         const audiencia = await AudienciaPruebas.create({
             idDenuncia: data.idDenuncia,
@@ -564,7 +655,7 @@ export async function crearAudienciaPruebasConArchivos(data: any, files: Express
             hora: data.hora,
             instalacionAudiencia: data.instalacionAudiencia,
             afectadoManifiesta: data.afectadoManifiesta,
-            pdf_audiencia_pruebas: data.pdf_audiencia_pruebas, // Asumo que este ya viene subido de otro lado
+            pdf_audiencia_pruebas: data.pdf_audiencia_pruebas, 
             articulo: data.articulo,
             estatus: 'completada',
         }, { transaction: t });
@@ -627,6 +718,16 @@ export async function crearAudienciaPruebasConArchivos(data: any, files: Express
                 }
             }
         }
+		RegistrarLoggs({
+						idUsuario: idUsuario,
+						usuario:usuario ,
+						nombres: nombres,
+						fase:'Audiencia de pruebas',
+						accion:'CREATE' ,
+						descripcion:` ${usuario} acaba de registrar la audiencia de pruebas con  codigo de expediente ${data.codigoTramite}` ,
+						canton:canton
+						
+					  });
 
         await t.commit();
         return { success: true, audienciaId: audiencia.id };
@@ -651,14 +752,12 @@ export async function crearAudienciaPruebasConArchivos(data: any, files: Express
     }
 }
 
-// Función para procesar archivos específicos por abogado en edición
-
 
 // 1. La función procesadora ahora solo clasifica qué participante lleva archivo crudo o viejo
 export function procesarArchivosAbogadosEdicion(
     files: Express.Multer.File[], 
-    participantesNuevos: any[], 
-    participantesViejos: any[]
+    participantesNuevos: participantesAudienciaPruebasDTOSActualizar[], 
+    participantesViejos: ParticipantesAudienciaPruebas[]
 ) {
     const participantesProcesados = [...participantesNuevos];
     
@@ -702,13 +801,15 @@ export function procesarArchivosAbogadosEdicion(
 }
 
 // 2. Función Principal Híbrida
-export async function actualizarAudienciaPruebasConArchivos(id: number, data: any, files: Express.Multer.File[]) {
+export async function actualizarAudienciaPruebasConArchivos(id: number, data: AudienciaPruebasDTOSActualizar, files: Express.Multer.File[],idUsuario:number,usuario:string,nombres:string,canton:string) {
     const t = await sequelize.transaction();
     const storageType = process.env.STORAGE_TYPE || 'local';
     const archivosNuevosSubidos: string[] = []; // Para rollback
     
     try {
+		console.log(id)
         const audienciaExistente = await AudienciaPruebas.findByPk(id);
+		console.log(audienciaExistente)
         if (!audienciaExistente) throw new Error('Audiencia de pruebas no encontrada');
 
         const participantesExistentes = await ParticipantesAudienciaPruebas.findAll({
@@ -790,8 +891,8 @@ export async function actualizarAudienciaPruebasConArchivos(id: number, data: an
 
                 // Crear el participante en DB
                 const nuevoParticipante = await ParticipantesAudienciaPruebas.create({
-                    idAP: id, nombres: participante.nombres, apellidos: participante.apellidos,
-                    cedula: participante.cedula, tipoParticipante: participante.tipoParticipante,
+                    idAP: id, nombres: participante.nombres!, apellidos: participante.apellidos!,
+                    cedula: participante.cedula!, tipoParticipante: participante.tipoParticipante!,
                     parte: participante.parte ?? '', pruebas: participante.pruebas ?? '',
                     pathPruebas: finalPathDB
                 }, { transaction: t });
@@ -800,11 +901,21 @@ export async function actualizarAudienciaPruebasConArchivos(id: number, data: an
                 if (participante.testimonio && participante.testimonio.trim() !== "") {
                     await Testimonio.create({
                         testimonio: participante.testimonio, idParticipante: nuevoParticipante.id,
-                        parte: participante.parte
+                        parte: participante.parte!
                     }, { transaction: t });
                 }
             }
         }
+		RegistrarLoggs({
+								idUsuario: idUsuario,
+								usuario:usuario ,
+								nombres: nombres,
+								fase:'Audiencia de pruebas',
+								accion:'CREATE' ,
+								descripcion:` ${usuario} acaba de actualizar la audiencia de pruebas con  codigo de expediente ${data.codigoTramite}` ,
+								canton:canton
+								
+							  });
 
         await t.commit();
         return { success: true, message: 'Audiencia de pruebas actualizada exitosamente' };
@@ -812,7 +923,7 @@ export async function actualizarAudienciaPruebasConArchivos(id: number, data: an
     } catch (error) {
         await t.rollback();
         
-        // 🧹 LIMPIEZA MULTIPLE SI HAY FALLA: Borrar los archivos que se alcanzaron a subir antes del error
+        //   SI HAY FALLA: Borrar los archivos que se alcanzaron a subir antes del error
         for (const pathGuardado of archivosNuevosSubidos) {
             try {
                 if (storageType === 'local' && fs.existsSync(pathGuardado)) fs.unlinkSync(pathGuardado);

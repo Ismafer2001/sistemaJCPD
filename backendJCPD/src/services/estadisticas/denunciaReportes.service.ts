@@ -26,18 +26,21 @@ export const obtenerResumenDenuncias = async (filtros: {
     let hastaDate: Date | undefined;
     
 
-    if (filtros.desde) {
-      desdeDate = new Date(filtros.desde);
-      desdeDate.setUTCHours(0, 0, 0, 0);
-      
+   if (filtros.desde) {
+      // Separamos el string para forzar modo LOCAL
+      const [y, m, d] = filtros.desde.split('-').map(Number);
+      desdeDate = new Date(y, m - 1, d); // Enero es 0
+      desdeDate.setHours(0, 0, 0, 0);
     }
 
     if (filtros.hasta) {
-      hastaDate = new Date(filtros.hasta);
-      hastaDate.setUTCHours(23, 59, 59, 999);
+      const [y, m, d] = filtros.hasta.split('-').map(Number);
+      hastaDate = new Date(y, m - 1, d);
+      hastaDate.setHours(23, 59, 59, 999);
     }
 
     if (desdeDate && hastaDate) {
+      console.log("aqui esta en el id final",desdeDate)
       baseWhere.fechaCreado = { [Op.between]: [desdeDate, hastaDate] };
     } else if (desdeDate) {
       baseWhere.fechaCreado = { [Op.gte]: desdeDate };
@@ -96,13 +99,17 @@ export const contarAfectadosPorSexo = async (filtros: {
   if (filtros.desde || filtros.hasta) {
     let desdeDate: Date | undefined;
     let hastaDate: Date | undefined;
-    if (filtros.desde) {
-      desdeDate = new Date(filtros.desde);
-      desdeDate.setUTCHours(0, 0, 0, 0);
+   if (filtros.desde) {
+      // Separamos el string para forzar modo LOCAL
+      const [y, m, d] = filtros.desde.split('-').map(Number);
+      desdeDate = new Date(y, m - 1, d); // Enero es 0
+      desdeDate.setHours(0, 0, 0, 0);
     }
+
     if (filtros.hasta) {
-      hastaDate = new Date(filtros.hasta);
-      hastaDate.setUTCHours(23, 59, 59, 999);
+      const [y, m, d] = filtros.hasta.split('-').map(Number);
+      hastaDate = new Date(y, m - 1, d);
+      hastaDate.setHours(23, 59, 59, 999);
     }
     if (desdeDate && hastaDate) {
       whereDenuncia.fechaCreado = { [Op.between]: [desdeDate, hastaDate] };
@@ -147,12 +154,16 @@ export const contarAfectadosPorEdad = async (filtros: FiltroReporte) => {
     let desdeDate: Date | undefined;
     let hastaDate: Date | undefined;
     if (filtros.desde) {
-      desdeDate = new Date(filtros.desde);
-      desdeDate.setUTCHours(0, 0, 0, 0);
+      // Separamos el string para forzar modo LOCAL
+      const [y, m, d] = filtros.desde.split('-').map(Number);
+      desdeDate = new Date(y, m - 1, d); // Enero es 0
+      desdeDate.setHours(0, 0, 0, 0);
     }
+
     if (filtros.hasta) {
-      hastaDate = new Date(filtros.hasta);
-      hastaDate.setUTCHours(23, 59, 59, 999);
+      const [y, m, d] = filtros.hasta.split('-').map(Number);
+      hastaDate = new Date(y, m - 1, d);
+      hastaDate.setHours(23, 59, 59, 999);
     }
     if (desdeDate && hastaDate) {
       whereDenuncia.fechaCreado = { [Op.between]: [desdeDate, hastaDate] };
@@ -195,12 +206,16 @@ export const contarAfectadosPorNacionalidad = async (filtros: FiltroReporte) => 
     let desdeDate: Date | undefined;
     let hastaDate: Date | undefined;
     if (filtros.desde) {
-      desdeDate = new Date(filtros.desde);
-      desdeDate.setUTCHours(0, 0, 0, 0);
+      // Separamos el string para forzar modo LOCAL
+      const [y, m, d] = filtros.desde.split('-').map(Number);
+      desdeDate = new Date(y, m - 1, d); // Enero es 0
+      desdeDate.setHours(0, 0, 0, 0);
     }
+
     if (filtros.hasta) {
-      hastaDate = new Date(filtros.hasta);
-      hastaDate.setUTCHours(23, 59, 59, 999);
+      const [y, m, d] = filtros.hasta.split('-').map(Number);
+      hastaDate = new Date(y, m - 1, d);
+      hastaDate.setHours(23, 59, 59, 999);
     }
     if (desdeDate && hastaDate) {
       whereDenuncia.fechaCreado = { [Op.between]: [desdeDate, hastaDate] };

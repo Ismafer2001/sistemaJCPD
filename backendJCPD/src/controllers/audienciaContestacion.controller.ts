@@ -48,7 +48,12 @@ export const getAudienciaContestacionCompleta = async (req: Request, res: Respon
 //post particpanntes
 export const postaniadirParticipante = async (req: Request, res: Response) => {
   try {
-    const nuevoParticipante = await AgregarOtrosParticipantes(req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const nuevoParticipante = await AgregarOtrosParticipantes(req.body,idUsuario,usuario,nombres,canton);
     res.status(201).json(nuevoParticipante);
   } catch (error) {
     handlehttp(res,'Error al añadir participante' , error);
@@ -58,7 +63,12 @@ export const postaniadirParticipante = async (req: Request, res: Response) => {
 // Controlador para crear audiencia de contestación
 export const postAudienciaContestacion = async (req: Request, res: Response) => {
   try {
-    const result = await crearAudienciaContestacion(req.body);
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    const result = await crearAudienciaContestacion(req.body,idUsuario,usuario,nombres,canton);
     res.status(201).json(result);
   } catch (error) {
     handlehttp(res, 'error_post_crear_audiencia_contestacion', error);
@@ -70,8 +80,13 @@ export const postAudienciaContestacion = async (req: Request, res: Response) => 
 export const putAudienciaContestacion = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     console.log("ID recibido en el controlador:", id);
-    const result = await actualizarAudienciaContestacion(Number(id), req.body);
+    const result = await actualizarAudienciaContestacion(Number(id), req.body,idUsuario,usuario,nombres,canton);
     res.json(result);
   } catch (error) {
     handlehttp(res, 'ERROR_AL_ACTUALIZAR_AUDIENCIA_CONTESTACION', error);
@@ -82,7 +97,12 @@ export const putAudienciaContestacion = async (req: Request, res: Response) => {
 export const getAudienciaContestacionPdf = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    await crearPdfAudienciaContestacionNNA(res, Number(id));
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+    await crearPdfAudienciaContestacionNNA(res, Number(id),idUsuario,usuario,nombres,canton);
    
   } catch (error) {
     handlehttp(res, 'get_error_pdf_audiencia', error);

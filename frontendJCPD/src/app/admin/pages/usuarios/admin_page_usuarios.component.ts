@@ -191,9 +191,10 @@ export class Admin_page_usuariosComponent implements OnInit  {
 
   cambiarEstado(usuario: Usuario) {
     const nuevoEstado = !usuario.isactivo;
+    console.log(nuevoEstado)
     const mensaje = nuevoEstado ? 'activado' : 'desactivado';
 
-    this.userService.actualizarUsuario(usuario.id, { isactivo: nuevoEstado }).subscribe({
+    this.userService.desactivarUsuario(usuario.id,  Boolean(nuevoEstado) ).subscribe({
       next: () => {
         usuario.isactivo = nuevoEstado;
         toast.success(`Usuario ${mensaje} correctamente`);

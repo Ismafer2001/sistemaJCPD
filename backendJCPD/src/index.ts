@@ -74,6 +74,9 @@ app.use('/files', archivosRoutes);
 sequelize.sync().then(async () => {
 
   console.log('✅ Base de datos conectada y modelos sincronizados');
+  console.log("--- Prueba de Horario ---");
+console.log("Fecha Local del Servidor:", new Date().toString());
+console.log("Offset (minutos respecto a UTC):", new Date().getTimezoneOffset());
   await seedInitialData(); //  Ejecuta la carga si no hay datos
 
   httpServer.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));

@@ -10,17 +10,11 @@ import {
   Canton,
   Avocatoria,
 } from "../models";
-import { DenunciaMujeres } from "../models/denunciaMujeres.model";
 
-export interface datosDenuncia {
-  denuncia: Denuncia;
-  denunciante?: Denunciante;
-  denunciados?: Denunciado[];
-  afectados?: Afectado[];
-  vulneraciones?: { idAfectado: number; vulneraciones: number[] }[];
-  medidas?: { idAfectado: number; medidas: number[] }[];
-  
-}
+import { RegistrarLoggs } from "./loggs.service";
+import { datosDenuncia, datosDenunciaUpdate } from "../interfaces/denuncia.interface";
+
+
 
 
 //---------------servicios globales de grupos prioritarios------------------//
@@ -146,13 +140,14 @@ export async function countDenuncias(id_canton:number, grupoPrioritario:string) 
 
 // Consulta una denuncia y devuelve el mismo formato que espera insertDenuncia
 export async function getDenunciaCompleta(idDenuncia: number) {
+  console.log(idDenuncia)
   const denuncia = await Denuncia.findByPk(idDenuncia, {
     include: [
       { model: Denunciante },
       { model: Denunciado },
       { model: Afectado, as: 'afectados' },
       { model: Avocatoria, as: 'avocatoria' },
-      { model: DenunciaMujeres, as: 'DM', required: false }
+      
     ]
   });
 
@@ -275,7 +270,7 @@ export async function getDenunciaCompleta(idDenuncia: number) {
 
 //-----------------------sercvicios denuncia nna-----------------------//
 //servicio para insertar denuncia completa
-export async function insertDenuncia(denunciajson: datosDenuncia) {
+export async function insertDenuncia(denunciajson: datosDenuncia,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t: Transaction = await sequelize.transaction(); //iniciallizams transaccion
   
 
@@ -389,6 +384,16 @@ export async function insertDenuncia(denunciajson: datosDenuncia) {
         await medidasIdentificadas.bulkCreate(data, { transaction: t });
       }
     }
+    RegistrarLoggs({
+                idUsuario: idUsuario,
+              usuario:usuario ,
+              nombres: nombres,
+              fase:'Denuncia',
+              accion:'CREATE' ,
+              descripcion:` ${usuario} acaba de crear la denuncia con  codigo de expediente ${denuncia.codigoTramite}` ,
+              canton:canton
+              
+            });
 
     await t.commit();
     return nuevaDenuncia;
@@ -445,13 +450,17 @@ try {
 }
 
 // Servicio para actualizar denuncia completa
-export async function actualizarDenuncia(idDenuncia: number, denunciajson: datosDenuncia) {
+export async function actualizarDenuncia(idDenuncia: number, denunciajson: datosDenunciaUpdate,idUsuario:number,usuario:string,nombres:string,canton:string) {
   const existeAvocatoria = await Avocatoria.findOne({where:{idDenuncia:idDenuncia}})
   if (existeAvocatoria) {
     const error = new Error("no se puede editar ya existe una avocatoria registrada en esta denuncia ");
     error.name = "noSePuedeEditar";
     throw error;
   }
+   if(!(denunciajson.denuncia && denunciajson.afectados && denunciajson.denunciados && denunciajson.denunciante && denunciajson.medidas && denunciajson.vulneraciones)){
+    return 'no se pasaron todos los datos'
+  }
+  
   
   const t: Transaction = await sequelize.transaction();
   try {
@@ -526,8 +535,19 @@ export async function actualizarDenuncia(idDenuncia: number, denunciajson: datos
         }
       }
     }
+    
 
     await t.commit();
+    RegistrarLoggs({
+                idUsuario: idUsuario,
+              usuario:usuario ,
+              nombres: nombres,
+              fase:'Denuncia',
+              accion:'UPDATE' ,
+              descripcion:` ${usuario} acaba de actualizar la denuncia con  codigo de expediente ${denunciajson.denuncia.codigoTramite}` ,
+              canton:canton
+              
+            });
     return { ok: true, message: 'Denuncia actualizada correctamente' };
   } catch (err) {
     await t.rollback();

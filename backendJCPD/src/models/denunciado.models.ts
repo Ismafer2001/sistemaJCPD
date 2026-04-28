@@ -17,7 +17,9 @@ interface DenunciadoAttributes {
   parentezco: string;
   idDenuncia: number;
   estado_notificar:"Por notificar"|"Notificado";
+  estado_citar:"Por citar"|"Citado";
   id_notificacion: number
+  id_citacion: number;
 }
 
 interface DenunciadoCreationAttributes extends Optional<DenunciadoAttributes, 'id'> {}
@@ -37,7 +39,9 @@ export class Denunciado extends Model<DenunciadoAttributes, DenunciadoCreationAt
   declare parentezco: string;
   declare idDenuncia: number;
   declare estado_notificar:"Por notificar"|"Notificado";
+  declare estado_citar:"Por citar"|"Citado";
   declare id_notificacion:number
+  declare id_citacion: number;
   
 }
 
@@ -96,7 +100,11 @@ Denunciado.init({
   },
   estado_notificar:{type: DataTypes.STRING,
     allowNull: true},
+    estado_citar:{type: DataTypes.STRING,
+    allowNull: true},
     id_notificacion:{type: DataTypes.INTEGER,
+    allowNull: true},
+    id_citacion:{type: DataTypes.INTEGER,
     allowNull: true},
 }, {
   sequelize,

@@ -4,6 +4,7 @@ import { sanitizarRuta } from '../utils/sanitizar rutas';
 import { Afectado, InformeAnexado, CumpleMedidas, medida, MedidasDefinitivas } from "../models";
 import path from 'path';
 import fs from 'fs-extra';
+import { RegistrarLoggs } from './loggs.service';
 
 export async function obtenerAfectados(id: number) { //---> se repite en audiencia de pruebas
   return await Afectado.findAll({
@@ -23,7 +24,7 @@ export async function agregarCumplimientoMedidas(payload: {
   sancion?: string;
   medidas: any; // Puede llegar como string (por form-data) o como array
   codigoTramite?: string; // Opcional: para organizar las carpetas
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   let pathGenerado = ''; // Guardaremos el path aquí para poder borrar el archivo si la DB falla
 
@@ -83,9 +84,9 @@ export async function agregarCumplimientoMedidas(payload: {
       pathGenerado = fullPath; // Lo guardamos por si hay rollback
     }
 
-    // ==========================================
+    
     // 3. LÓGICA DE BASE DE DATOS (Con transacción)
-    // ==========================================
+    
     const informe = await InformeAnexado.create({ 
       pathInforme: pathParaDB, 
       fileName: nombreGenerado, 
@@ -124,6 +125,17 @@ export async function agregarCumplimientoMedidas(payload: {
     // Insertar registros
     const created = await CumpleMedidas.bulkCreate(registros, { transaction: t });
 
+    RegistrarLoggs({
+                      idUsuario: idUsuario,
+                      usuario:usuario ,
+                      nombres: nombres,
+                      fase:'Seguimiento de medidas',
+                      accion:'CREATE' ,
+                      descripcion:` ${usuario} acaba de agregar un informe de seguimiento de medidas  relacionado al  codigo de expediente ${payload.codigoTramite}` ,
+                      canton:canton
+                      
+                      });
+
     await t.commit();
     return { success: true, informeId: informe.id, createdCount: created.length, created };
 
@@ -161,7 +173,7 @@ export async function actualizarCumplimientoMedidas(payload: {
   sancion?: string;
   medidas: any;
   codigoTramite?: string;
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   let pathNuevoGenerado = ''; // Para limpiar si la transacción falla
   const storageType = process.env.STORAGE_TYPE || 'local';
@@ -283,6 +295,17 @@ export async function actualizarCumplimientoMedidas(payload: {
         creadosCount++;
       }
     }
+
+    RegistrarLoggs({
+                      idUsuario: idUsuario,
+                      usuario:usuario ,
+                      nombres: nombres,
+                      fase:'Seguimiento de medidas',
+                      accion:'UPDATE' ,
+                      descripcion:` ${usuario} acaba de actualizar el  seguimiento de medidas  relacionado al  codigo de expediente ${payload.codigoTramite}` ,
+                      canton:canton
+                      
+                      });
 
     // Si todo salió bien, guardamos en base de datos
     await t.commit();

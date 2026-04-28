@@ -4,6 +4,11 @@ import { handlehttp } from '../utils/error.handle';
 
 export const postSubirExpediente = async (req: Request, res: Response) => {
   try {
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Archivo requerido' });
     }
@@ -17,7 +22,7 @@ export const postSubirExpediente = async (req: Request, res: Response) => {
       idDenuncia: parseInt(idDenuncia, 10),
       tipoExpediente: String(tipoExpediente),
       codigoTramite: String(codigoTramite)
-    });
+    },idUsuario,usuario,nombres,canton);
     res.status(201).json({ success: true, expediente });
   } catch (error) {
     handlehttp(res, 'Error al subir expediente', error);
@@ -43,6 +48,11 @@ export const getExpedientesPorDenuncia = async (req: Request, res: Response) => 
 // Controlador para editar expediente
 export const putEditarExpediente = async (req: Request, res: Response) => {
   try {
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'Archivo requerido' });
@@ -60,7 +70,7 @@ export const putEditarExpediente = async (req: Request, res: Response) => {
       idDenuncia: idDenuncia ? parseInt(idDenuncia, 10) : undefined,
       tipoExpediente: tipoExpediente ? String(tipoExpediente) : undefined,
       codigoTramite
-    });
+    },idUsuario,usuario,nombres,canton);
     res.json({ success: true, expediente: expedienteEditado });
   } catch (error) {
     handlehttp(res, 'Error al editar expediente', error);

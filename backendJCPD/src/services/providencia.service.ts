@@ -1,5 +1,6 @@
 import { Providencias } from "../models/providencia.model";
 import { Denuncia, Canton, usuarios } from "../models";
+import { RegistrarLoggs } from "./loggs.service";
 
 interface ProvidenciaInput {
     articulos: string;
@@ -53,7 +54,7 @@ function mapearProvidencia(providencia: any) {
 }
 
 
-export async function crearProvidencia(data: ProvidenciaInput): Promise<Providencias> {
+export async function crearProvidencia(data: ProvidenciaInput,idUsuario:number,usuario:string,nombres:string,canton:string): Promise<Providencias> {
         try {
             const nuevaProvidencia = await Providencias.create({
                 articulos: data.articulos,
@@ -67,16 +68,22 @@ export async function crearProvidencia(data: ProvidenciaInput): Promise<Providen
                 idDenuncia: data.idDenuncia,
                 estatus: 'completada'
             });
+            RegistrarLoggs({
+                              idUsuario: idUsuario,
+                              usuario:usuario ,
+                              nombres: nombres,
+                              fase:'Providencia',
+                              accion:'CREATE' ,
+                              descripcion:` ${usuario} acaba de registrar una providencia con  codigo de expediente ${data.codigoTramite}` ,
+                              canton:canton
+                              
+                              });
 
             return nuevaProvidencia;
         } catch (error: any) {
             throw new Error(`Error al crear la providencia: ${error.message}`);
         }
     }
-
-
-
-
 
 export async function obtenerDatosProvidenciaCompleta(id: number): Promise<any | null> {
     try {
@@ -162,7 +169,7 @@ export async function obtenerIdProvidenciaPorDenuncia(idDenuncia: number): Promi
 }
 
 
-export async function actualizarProvidencia(id: number, data: Partial<ProvidenciaInput>): Promise<ProvidenciaOutput | null> {
+export async function actualizarProvidencia(id: number, data: Partial<ProvidenciaInput>,idUsuario:number,usuario:string,nombres:string,canton:string): Promise<ProvidenciaOutput | null> {
     try {
         const providencia = await Providencias.findByPk(id);
         
@@ -181,6 +188,17 @@ export async function actualizarProvidencia(id: number, data: Partial<Providenci
             disposiciones: data.disposiciones,
             pdf_providencia: data.pdf_providencia
         });
+
+        RegistrarLoggs({
+                  idUsuario: idUsuario,
+                  usuario:usuario ,
+                  nombres: nombres,
+                  fase:'Providencias',
+                  accion:'Update' ,
+                  descripcion:` ${usuario} acaba de actualizar la providencia  con  codigo de expediente ${data.codigoTramite}` ,
+                  canton:canton
+                  
+                  });
         
         return mapearProvidencia(providencia);
     } catch (error: any) {

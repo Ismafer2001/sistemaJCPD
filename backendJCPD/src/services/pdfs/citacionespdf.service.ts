@@ -3,6 +3,7 @@ import pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { Response } from 'express';
 import { obtenerCitacion } from '../citaciones.service';
+import { RegistrarLoggs } from '../loggs.service';
 
 
 // Asegurar vfs para pdfMake
@@ -14,8 +15,9 @@ import { obtenerCitacion } from '../citaciones.service';
  * Escribe el pdf directamente en `res` como attachment.
  */
 
-export const PDFcitacion = async (res: Response, idCitacion: any) => {
-	const pdfData = await obtenerCitacion(idCitacion);
+export const PDFcitacion = async (res: Response, idCitacion: any, idUsuario:number,usuario:string,nombres:string,canton:string) => {
+	try {
+		const pdfData = await obtenerCitacion(idCitacion);
 
 	const docDefinition: any = {
 		content: [
@@ -66,4 +68,23 @@ export const PDFcitacion = async (res: Response, idCitacion: any) => {
 		}
 		res.send(Buffer.from(buffer));
 	});
-}
+		 RegistrarLoggs({
+							idUsuario: idUsuario,
+							usuario:usuario ,
+							nombres: nombres,
+							fase:'citaciones',
+							accion:'GENERATE' ,
+							descripcion:` ${usuario} acaba de generar pdf de audiencia de pruebas con  codigo de expediente ${pdfData.codigoTramite}` ,
+							canton:canton
+							
+						  });
+	} catch (error) {
+		 console.error('Error al generar el PDF de audiencia de prueba:', error);
+    if (!res.headersSent) {
+      res.status(500).send('Error al generar el PDF de audiencia de prueba');
+    }
+  }
+		
+	}
+	
+

@@ -1,5 +1,6 @@
 import sequelize from '../config/database';
 import { Afectado, Canton, Denuncia, medida, MedidasDefinitivas, Resoluciones, usuarios } from "../models";
+import { RegistrarLoggs } from './loggs.service';
 
 // Servicio para obtener todos los datos de la resolución
 export async function obtenerResolucionCompleta(idResolucion: number) {
@@ -93,7 +94,7 @@ export async function crearResolucion(data: {
   pdf_resolucion?: string;
   idDenuncia: number;
   estatus?: "pendiente"|"en_proceso"|"completada";
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     // Validar que todos los campos requeridos estén presentes
@@ -118,6 +119,17 @@ export async function crearResolucion(data: {
       idDenuncia: data.idDenuncia,
       estatus: "completada"
     }, { transaction: t });
+
+    RegistrarLoggs({
+                      idUsuario: idUsuario,
+                      usuario:usuario ,
+                      nombres: nombres,
+                      fase:'Resoluciones',
+                      accion:'CREATE' ,
+                      descripcion:` ${usuario} acaba de registrar la resolucion  con  codigo de expediente ${data.codigoTramite}` ,
+                      canton:canton
+                      
+                      });
 
     await t.commit();
     return nuevaResolucion;
@@ -151,7 +163,7 @@ export async function actualizarResolucion(id: number, data: {
   resolucion?: string;
   pdf_resolucion?: string;
   estatus?: "pendiente"|"en_proceso"|"completada";
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     // Buscar la resolución a actualizar
@@ -182,6 +194,16 @@ export async function actualizarResolucion(id: number, data: {
     }, { transaction: t });
 
     await t.commit();
+    RegistrarLoggs({
+                  idUsuario: idUsuario,
+                  usuario:usuario ,
+                  nombres: nombres,
+                  fase:'Resoluciones',
+                  accion:'UPDATE' ,
+                  descripcion:` ${usuario} acaba de actualizar la resolicion con  codigo de expediente ${data.codigoTramite}` ,
+                  canton:canton
+                  
+                  });
     
     // Retornar la resolución actualizada
     return await Resoluciones.findByPk(id);

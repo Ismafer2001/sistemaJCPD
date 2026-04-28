@@ -1,6 +1,7 @@
 
 import sequelize from '../config/database';
 import { ControlImpugnacion, Resoluciones, Denuncia } from "../models";
+import { RegistrarLoggs } from './loggs.service';
 
 // Servicio para crear un control de impugnación
 export async function crearControlImpugnacion(data: {
@@ -11,7 +12,7 @@ export async function crearControlImpugnacion(data: {
   resultado: string;
   periodo: string;
   estatus?: "pendiente" | "en_proceso" | "completada";
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     // Validar que todos los campos requeridos estén presentes
@@ -44,6 +45,17 @@ export async function crearControlImpugnacion(data: {
       periodo: data.periodo,
       estatus: 'completada'
     }, { transaction: t });
+
+    RegistrarLoggs({
+                     idUsuario: idUsuario,
+                     usuario:usuario ,
+                     nombres: nombres,
+                    fase:'Control de impugnacion',
+                     accion:'CREATE' ,
+                     descripcion:` ${usuario} acaba de registar el control de impugnacion como${'aqui el resultado de la in'} relacionado al codigo de expediente ${data.codigoTramite}` ,
+                     canton:canton
+                                                
+                                              });
 
     await t.commit();
     return nuevoControl;
@@ -96,7 +108,7 @@ export async function actualizarControlImpugnacion(id: number, data: {
   resolucionImpugnada?: string;
   resultadoImpugnacion?: string;
   
-}) {
+},idUsuario:number,usuario:string,nombres:string,canton:string) {
   const t = await sequelize.transaction();
   try {
     const control = await ControlImpugnacion.findByPk(id);
@@ -123,6 +135,16 @@ export async function actualizarControlImpugnacion(id: number, data: {
    
 
     await control.update(camposActualizar, { transaction: t });
+     RegistrarLoggs({
+                     idUsuario: idUsuario,
+                     usuario:usuario ,
+                     nombres: nombres,
+                    fase:'Control de impugnacion',
+                     accion:'UPDATE' ,
+                     descripcion:` ${usuario} acaba deactualizar el control de impugnacion como${'aqui el resultado de la in'} relacionado al codigo de expediente ${data.codigoTramite}` ,
+                     canton:canton
+                                                
+                                              });
 
     await t.commit();
     return {

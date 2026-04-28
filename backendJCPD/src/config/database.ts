@@ -7,6 +7,8 @@ import 'dotenv/config';
 const sequelize = process.env.DB_URL
   ? new Sequelize(process.env.DB_URL, {
       dialect: 'postgres',
+      //  Define la zona horaria (Ecuador es '-05:00')
+      timezone: '-05:00',
       logging: false,
       dialectOptions: {
         ssl: {
@@ -23,6 +25,8 @@ const sequelize = process.env.DB_URL
         host: process.env.DB_HOST || 'localhost',
         port: Number(process.env.DB_PORT) || 5432,
         dialect: 'postgres',
+        //  Define la zona horaria (Ecuador es '-05:00')
+       timezone: '-05:00',
         logging: false,
         
       }

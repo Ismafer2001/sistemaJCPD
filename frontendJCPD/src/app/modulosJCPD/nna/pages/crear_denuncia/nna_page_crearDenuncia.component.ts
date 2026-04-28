@@ -93,6 +93,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       disabled: true
     }
   ];
+  codigoTramite:string='';
 
   existeAvocatoria: any = null;
   numTramiteDisabled = true;
@@ -457,6 +458,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
     this.denunciaService.obtenerDenunciaEditMode(id).subscribe(data => {
       this.denunciaedit = data.denuncia;
+      this.codigoTramite = data.denuncia.codigoTramite
 
       this.existeAvocatoria=data.denuncia.avocatoria
       this.denunciaForm.patchValue(this.denunciaedit);
@@ -712,8 +714,12 @@ if (section) section.scrollTop = 0;
     this.idDenuncia = id;
      const body = {
       ...this.denunciaForm.value,
+
       status: 'completada',
+      codigoTramite: this.codigoTramite
     };
+    console.log(body);
+    
 
     this.loading = true;
 

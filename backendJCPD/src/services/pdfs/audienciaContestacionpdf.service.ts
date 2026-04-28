@@ -5,12 +5,13 @@ import { Response } from 'express';
 import pdfMake from 'pdfmake/build/pdfmake';
 import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { obtenerAudienciaContestacionCompleta } from '../aucienciaContestacion.service';
+import { RegistrarLoggs } from '../loggs.service';
 
 // Asegurar vfs para pdfMake
 // @ts-ignore
 (pdfMake as any).vfs = (pdfFonts as any).vfs;
 
-export async function crearPdfAudienciaContestacionNNA(res: Response, idAudiencia: any): Promise<void> {
+export async function crearPdfAudienciaContestacionNNA(res: Response, idAudiencia: any , idUsuario:number,usuario:string,nombres:string,canton:string): Promise<void> {
   let filaInstituciones: any = [];
   try {
 
@@ -380,6 +381,17 @@ export async function crearPdfAudienciaContestacionNNA(res: Response, idAudienci
       }
       res.send(Buffer.from(buffer));
     });
+
+    RegistrarLoggs({
+                idUsuario: idUsuario,
+                usuario:usuario ,
+                nombres: nombres,
+                fase:'audienciaContestacion',
+                accion:'GENERATE' ,
+                descripcion:` ${usuario} acaba de generar pdf de audiencia de contestacion con  codigo de expediente ${datos.codigoTramite}` ,
+                canton:canton
+                
+              });
   } catch (error) {
     console.error('Error al generar el PDF de audiencia contestación:', error);
     if (!res.headersSent) {

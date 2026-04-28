@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import { Denuncia,  Afectado, } from '../models';
 import { insertDenuncia,
-         datosDenuncia,
+         
          obtenerNumTramite,
          countDenuncias,
          eliminarDenuncia,
@@ -11,6 +11,7 @@ import { insertDenuncia,
          actualizarDenuncia } from '../services/denuncia.service';
 import { crearPdfDenunciaNNA } from '../services/pdfs/denunciapdf.service.ts.service';
 import { handlehttp } from '../utils/error.handle';
+import { datosDenuncia } from '../interfaces/denuncia.interface';
 
 //---------------CONTROLADOR GLOBAL DE GRUPOS PRIORITARIOS-------------//
 
@@ -51,6 +52,7 @@ export const getDenunciaCompletaCtrl = async (req: Request, res: Response) => {
     if (!idDenuncia || Number.isNaN(idDenuncia)) {
       return res.status(400).json({ error: 'ID de denuncia inválido' });
     }
+    console.log("aqui el id",idDenuncia)
     const resultado = await getDenunciaCompleta(idDenuncia);
     
     res.json(resultado);
@@ -98,7 +100,7 @@ export const getDenunciaById = async (req: Request, res: Response) => {
 //controlador para automatizar el codigo unico del tramite
 export const getObtenerNumeroTramite = async (req:Request, res:Response) => {
   try {
-    const id_canton= req.user.id_canton
+    const id_canton= Number(req.user.id_canton)
     const { incrementar } = req.query;// viene como string
     const grupoPrioritario = req.query.grupoPrioritario;
     
@@ -142,6 +144,11 @@ export const getTotalDenunciaActivasController =async(req:Request, res:Response)
 export async function putDenuncia(req: Request, res: Response) {
   try {
     const idDenuncia = Number(req.params.id);
+    const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
    const payload: datosDenuncia = {
       denuncia: req.body,
       denunciante: req.body.denunciante,
@@ -151,7 +158,7 @@ export async function putDenuncia(req: Request, res: Response) {
       medidas: req.body.medidas
 
     };
-    const result = await actualizarDenuncia(idDenuncia, payload);
+    const result = await actualizarDenuncia(idDenuncia, payload,idUsuario,usuario,nombres,canton);
     res.json(result);
   } catch (error) {
    handlehttp(res, 'ERROR_AL_ACTUALIZAR_DENUNCIA', error);
@@ -164,6 +171,11 @@ export async function putDenuncia(req: Request, res: Response) {
 export const postCrearDenuncia = async (req: Request, res: Response): Promise<void> => {
   try {
     // Construir el payload tipado para el servicio
+    const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     const payload: datosDenuncia = {
       denuncia: req.body,
       denunciante: req.body.denunciante,
@@ -175,7 +187,7 @@ export const postCrearDenuncia = async (req: Request, res: Response): Promise<vo
     };
 
     // Llamar al servicio que inserta la denuncia
-    const nuevaDenuncia = await insertDenuncia(payload);
+    const nuevaDenuncia = await insertDenuncia(payload,idUsuario,usuario,nombres,canton);
 
     // Responder al cliente con el ID de la nueva denuncia
     res.status(201).json({
@@ -214,11 +226,16 @@ export const getCrearPdfDenuncia = async (req: Request, res: Response) => {
   try {
     // Validación mínima: aseguramos que haya algún contenido en el body
     const { id } = req.params;
+    const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
     console.log("ID Denuncia:", id); // Línea de depuración
 
     // La función escribe directamente en `res` (stream PDF)
     
-      await crearPdfDenunciaNNA(res, id);
+      await crearPdfDenunciaNNA(res, id, idUsuario,usuario,nombres,canton);
       
     
   } catch (error) {

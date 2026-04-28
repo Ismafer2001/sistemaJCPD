@@ -3,6 +3,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    
 
     "paths": {  /*usa aqui alias de de caminos para acortar cuando importemos algo*/
       "@inicio/*": ["./src/app/inicio/*"],

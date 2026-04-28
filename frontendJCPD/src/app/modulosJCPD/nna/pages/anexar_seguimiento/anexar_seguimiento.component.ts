@@ -7,7 +7,7 @@ import { DenunciaService } from '@nna/services/denuncia.service';
 import { CardFormComponent } from '@shared/components/card-Form/card-Form.component';
 
 import { CumpleMedidasTablaComponent } from './cumpleMedidasTabla/cumpleMedidasTabla.component';
-import { environment } from 'environments/environment';
+import { environment } from '@env/environment';
 import ButtonSubmitComponent from '@shared/components/button-submit/button-submit.component';
 
 @Component({
@@ -65,7 +65,7 @@ export class Anexar_seguimientoComponent implements OnInit {
     });
     this.formularioSeguimientoMedidas();
 
-   
+
 
   }
 

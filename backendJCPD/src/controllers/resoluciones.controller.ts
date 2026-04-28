@@ -23,6 +23,11 @@ export const getAfectados = async (req: Request, res: Response) => {
 export const postCrearResolucion = async (req: Request, res: Response) => {
   try {
     const { codigoTramite, consideraciones, resolucion, pdf_resolucion, idDenuncia } = req.body;
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
     // Validar que los campos requeridos estén presentes
     if (!codigoTramite || !consideraciones || !resolucion || !idDenuncia) {
@@ -38,7 +43,7 @@ export const postCrearResolucion = async (req: Request, res: Response) => {
       resolucion,
       pdf_resolucion: pdf_resolucion || '',
       idDenuncia: parseInt(idDenuncia)
-    });
+    },idUsuario,usuario,nombres,canton);
 
     res.status(201).json({
       success: true,
@@ -99,6 +104,11 @@ export const putActualizarResolucion = async (req: Request, res: Response) => {
   try {
     const id = parseInt(req.params.id);
     const { codigoTramite, consideraciones, resolucion, pdf_resolucion, estatus } = req.body;
+     const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
 
     if (isNaN(id)) {
       return res.status(400).json({
@@ -121,7 +131,7 @@ export const putActualizarResolucion = async (req: Request, res: Response) => {
       resolucion,
       pdf_resolucion,
       estatus
-    });
+    },idUsuario,usuario,nombres,canton);
 
     res.json({
       success: true,
@@ -138,7 +148,12 @@ export const putActualizarResolucion = async (req: Request, res: Response) => {
 export const getResolucionPdf = async (req: Request, res: Response) => {
   try {
   const { id } = req.params;
-  await crearPdfResolucionNNA(res, Number(id));
+   const idUsuario =req.user.id
+    
+    const  usuario = req.user.usuario
+    const nombres = req.user.nombres
+    const canton = String(req.user.canton)
+  await crearPdfResolucionNNA(res, Number(id),idUsuario,usuario,nombres,canton);
    
   } catch (error) {
   handlehttp(res, 'get_error_pdf_resolucion', error);

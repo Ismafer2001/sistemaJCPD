@@ -6,12 +6,13 @@ import * as pdfFonts from 'pdfmake/build/vfs_fonts';
 import { obtenerResolucionCompleta } from '../resoluciones.service';
 import htmlToPdfmake from "html-to-pdfmake";
 import { JSDOM } from "jsdom";
+import { RegistrarLoggs } from '../loggs.service';
 
 // Asegurar vfs para pdfMake
 // @ts-ignore
 (pdfMake as any).vfs = (pdfFonts as any).vfs;
 
-export async function crearPdfResolucionNNA(res: Response, idResolucion: any): Promise<void> {
+export async function crearPdfResolucionNNA(res: Response, idResolucion: any, idUsuario:number,usuario:string,nombres:string,canton:string): Promise<void> {
   const dom = new JSDOM("");
   try {
     const pdfData = await obtenerResolucionCompleta(idResolucion);
@@ -118,6 +119,16 @@ export async function crearPdfResolucionNNA(res: Response, idResolucion: any): P
       }
       res.send(Buffer.from(buffer));
     });
+    RegistrarLoggs({
+                      idUsuario: idUsuario,
+                      usuario:usuario ,
+                      nombres: nombres,
+                      fase:'resoluciones',
+                      accion:'GENERATE' ,
+                      descripcion:` ${usuario} acaba de generar pdf de audiencia de pruebas con  codigo de expediente ${pdfData.codigoTramite}` ,
+                      canton:canton
+                      
+                      });
   } catch (error) {
     console.error('Error al generar el PDF de resolución:', error);
     if (!res.headersSent) {

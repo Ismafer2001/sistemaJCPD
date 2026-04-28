@@ -10,5 +10,10 @@ export interface RegistrarUsuarioDTOS {
   id_canton: number;
   fecha_creacion?: Date;
 }
+export interface usuarioUpdate extends Partial<RegistrarUsuarioDTOS> {
+
+  
+  
+}
 
 
