@@ -5,4 +5,11 @@ const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_KEY || '';
 
 // Inicializamos el cliente
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Solo creamos el cliente si AMBAS variables existen
+export const supabase = (supabaseUrl && supabaseKey) 
+  ? createClient(supabaseUrl, supabaseKey) 
+  : null
+
+if (!supabase) {
+  console.warn("⚠️ Supabase no está configurado. Algunas funciones no estarán disponibles.")
+}
