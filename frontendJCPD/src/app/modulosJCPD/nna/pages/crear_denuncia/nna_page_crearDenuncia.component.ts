@@ -145,6 +145,7 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
   vulneracionesCatalogo: Vulneracion[] = [];
   todasLasMedidas: Medida[] = [];
   tipoDenunciaSeleccionado: string = '';
+  tipoDNI: string = 'cedula';
 
   constructor(
     private AuthService: AuthService,
@@ -191,6 +192,9 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
     // Crear el formulario primero
     this.denunciaFormulario();
+
+    // Configurar validaciones dinámicas para el documento
+    this.configurarTipoDocumento();
 
     // Luego configurar campos condicionales
     this.configurarCamposCondicionales();
@@ -257,6 +261,8 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
     });
       })
 
+      this.denunciaForm.valueChanges.subscribe((n) => {console.log('Valor del formulario:', n)})
+
 
   }
 
@@ -289,8 +295,9 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
       anio: [this.anioActual],
 
       denunciante: this.fb.group({
+        tipoDocumento: ['cedula'],
         cedula: ['', [
-          requiredWhen(() => this.tipoDenunciaSeleccionado!== 'oficio'),
+          requiredWhen(() => (this.tipoDenunciaSeleccionado!== 'oficio' || this.tipoDNI === 'cedula')),
           Validators.pattern('^[0-9]{10}$'),
           validarCedulaEcuador
         ]],
@@ -415,6 +422,42 @@ export class NnaPageCrearDenunciaComponent implements OnInit {
 
     tiposControl?.updateValueAndValidity();
     ambitoControl?.updateValueAndValidity();
+  }
+
+  private configurarTipoDocumento(): void {
+    const tipoDocumentoControl = this.denunciaForm.get('denunciante.tipoDocumento');
+    const cedulaControl = this.denunciaForm.get('denunciante.cedula');
+
+    if (!tipoDocumentoControl || !cedulaControl) {
+      return;
+    }
+
+    this.actualizarValidacionesCedula(tipoDocumentoControl.value);
+
+    tipoDocumentoControl.valueChanges.subscribe((value: string) => {
+      this.tipoDNI = value;
+      this.actualizarValidacionesCedula(value);
+      cedulaControl.updateValueAndValidity();
+    });
+  }
+
+  private actualizarValidacionesCedula(tipoDocumento: string): void {
+    const cedulaControl = this.denunciaForm.get('denunciante.cedula');
+    if (!cedulaControl) {
+      return;
+    }
+
+    if (tipoDocumento === 'cedula') {
+      cedulaControl.setValidators([
+        requiredWhen(() => (this.tipoDenunciaSeleccionado !== 'oficio' || this.tipoDNI === 'cedula')),
+        Validators.pattern('^[0-9]{10}$'),
+        validarCedulaEcuador,
+      ]);
+    } else {
+      cedulaControl.clearValidators();
+    }
+
+    cedulaControl.updateValueAndValidity();
   }
 
   // Métodos simplificados para manejar checkboxes de tipos de violencia

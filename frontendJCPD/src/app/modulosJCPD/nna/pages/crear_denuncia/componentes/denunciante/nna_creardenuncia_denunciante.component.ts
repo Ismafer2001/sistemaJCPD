@@ -14,6 +14,7 @@ export class Nna_creardenuncia_denuncianteComponent implements OnInit {
   @Input() formGroup!: FormGroup;
   formularioDenuncianteForm!: FormGroup;
   formControl!: FormControl;
+  tipoDNI: string = 'cedula';
 
 
 
@@ -29,7 +30,7 @@ export class Nna_creardenuncia_denuncianteComponent implements OnInit {
 
   formularioDenunciante() {
     this.formularioDenuncianteForm = this.fb.group({
-            cedula: ['', [Validators.required, Validators.pattern('^[0-9]{10}$'),validarCedulaEcuador] ],
+            cedula: ['' ],
             nombres: ['', [Validators.required, Validators.minLength(2)]],
             apellidos: ['', [Validators.required, Validators.minLength(2)]],
             edad: [
