@@ -3,9 +3,10 @@ import { Request, Response } from 'express';
 
 export const getDenunciasTotales = async (req: Request, res: Response) => {
   try {
+    
     const filtros = {
       grupoPrioritario: req.query.grupoPrioritario as string,
-      id_canton: req.user?.id_canton,
+      id_canton: req.user.id_canton!,
       desde: req.query.desde as string,
       hasta: req.query.hasta as string,
     };
@@ -16,6 +17,7 @@ export const getDenunciasTotales = async (req: Request, res: Response) => {
     if (!req.query.grupoPrioritario) {
   return res.status(400).json({ error: 'Falta el parámetro grupoPrioritario' });
 }
+
 
 
 

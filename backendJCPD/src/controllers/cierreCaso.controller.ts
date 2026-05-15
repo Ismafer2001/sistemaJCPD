@@ -46,7 +46,7 @@ export const postCrearCierreCaso = async (req: Request, res: Response) => {
             conclusion,
             secretariaAuxiliar,
             informesPresentados
-        });
+        },idUsuario,usuario,nombres,canton);
 
         res.status(201).json({
             success: true,

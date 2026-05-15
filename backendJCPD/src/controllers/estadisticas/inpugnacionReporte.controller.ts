@@ -7,7 +7,7 @@ const getImpugnacionesTotales = async (req: Request, res: Response) => {
         console.log('llegue al controlador de impugnacion',);
         const filtros: FiltroImpugnacion = {
             grupoPrioritario: req.query.grupoPrioritario as string,
-            id_canton: req.user?.id_canton,
+            id_canton: req.user?.id_canton!,
             desde: req.query.desde as string,
             hasta: req.query.hasta as string,
         };

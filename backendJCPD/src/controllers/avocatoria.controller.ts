@@ -59,7 +59,7 @@ export const postAvocatoria = async (req: Request, res: Response) =>{
     const  usuario = req.user.usuario
     const nombres = req.user.nombres
     const canton = String(req.user.canton)
-    const nuevaAvocatoria = await crearAvocatoria(req.body);
+    const nuevaAvocatoria = await crearAvocatoria(req.body,idUsuario,usuario,nombres,canton);
     console.log(nuevaAvocatoria)
     res.status(201).json(nuevaAvocatoria);
   } catch (error) {

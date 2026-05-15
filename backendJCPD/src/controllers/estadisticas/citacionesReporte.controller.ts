@@ -7,7 +7,7 @@ export const getCitacionesTotales = async (req: Request, res: Response) => {
   try {
     const filtros = {
       grupoPrioritario: req.query.grupoPrioritario as string,
-      id_canton: req.user?.id_canton,
+      id_canton: req.user?.id_canton!,
       desde: req.query.desdeas as string,
       hasta: req.query.hasta as string,
     };

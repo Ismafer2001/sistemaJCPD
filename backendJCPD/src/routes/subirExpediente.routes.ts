@@ -25,7 +25,7 @@ router.get('/files/:codigoTramite/:tipoCarpeta/:nombreArchivo', verificarToken, 
             
             
             // Usamos .download() en lugar de pedir una URL
-            const { data, error } = await supabase
+            const { data, error } = await supabase!
                 .storage
                 .from('expedientes')
                 .download(rutaSupabase);
