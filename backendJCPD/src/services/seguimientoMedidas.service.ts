@@ -60,7 +60,7 @@ export async function agregarCumplimientoMedidas(payload: {
 
     if (storageType === 'cloud') {
       // --- SUPABASE ---
-      const { data, error } = await supabase.storage
+      const { data, error } = await supabase!.storage
         .from('expedientes') // Reutilizamos tu bucket seguro y privado
         .upload(rutaRelativa, payload.file.buffer, {
           contentType: payload.file.mimetype,
@@ -150,7 +150,7 @@ export async function agregarCumplimientoMedidas(payload: {
         if (storageType === 'local' && fs.existsSync(pathGenerado)) {
           fs.unlinkSync(pathGenerado);
         } else if (storageType === 'cloud') {
-          await supabase.storage.from('expedientes').remove([pathGenerado]);
+          await supabase!.storage.from('expedientes').remove([pathGenerado]);
         }
       } catch (cleanupError) {
         console.error('Error al limpiar el archivo huérfano tras fallo de DB:', cleanupError);
@@ -219,7 +219,7 @@ export async function actualizarCumplimientoMedidas(payload: {
             if (fs.existsSync(physicalPath)) fs.unlinkSync(physicalPath);
           } else if (storageType === 'cloud') {
             // Asumiendo que guardaste la ruta relativa en Supabase
-            const { error } = await supabase.storage.from('expedientes').remove([informeExistente.pathInforme]);
+            const { error } = await supabase!.storage.from('expedientes').remove([informeExistente.pathInforme]);
             if (error) console.error("Error borrando de Supabase:", error);
           }
         } catch (err) {
@@ -234,7 +234,7 @@ export async function actualizarCumplimientoMedidas(payload: {
 
       if (storageType === 'cloud') {
         const rutaSanitizada =sanitizarRuta(rutaRelativa)
-        const { data, error } = await supabase.storage
+        const { data, error } = await supabase!.storage
           .from('expedientes')
           .upload(rutaSanitizada, payload.file.buffer, { contentType: payload.file.mimetype, upsert: false });
 
@@ -330,7 +330,7 @@ export async function actualizarCumplimientoMedidas(payload: {
         if (storageType === 'local' && fs.existsSync(pathNuevoGenerado)) {
           fs.unlinkSync(pathNuevoGenerado);
         } else if (storageType === 'cloud') {
-          await supabase.storage.from('expedientes').remove([pathNuevoGenerado]);
+          await supabase!.storage.from('expedientes').remove([pathNuevoGenerado]);
         }
       } catch (cleanupError) {
         console.error('Error al limpiar el archivo nuevo tras fallo de DB:', cleanupError);

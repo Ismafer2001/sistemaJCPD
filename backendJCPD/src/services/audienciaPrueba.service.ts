@@ -676,7 +676,7 @@ export async function crearAudienciaPruebasConArchivos(data: AudienciaPruebasDTO
                     const rutaRelativa =sanitizarRuta(`${data.codigoTramite}/pruebas/${nombreGenerado}`) ;
 
                     if (storageType === 'cloud') {
-                        const { error: uploadError } = await supabase.storage
+                        const { error: uploadError } = await supabase!.storage
                             .from('expedientes')
                             .upload(rutaRelativa, file.buffer, { contentType: file.mimetype, upsert: false });
                         
@@ -741,7 +741,7 @@ export async function crearAudienciaPruebasConArchivos(data: AudienciaPruebasDTO
                 if (storageType === 'local' && fs.existsSync(pathGuardado)) {
                     fs.unlinkSync(pathGuardado);
                 } else if (storageType === 'cloud') {
-                    await supabase.storage.from('expedientes').remove([pathGuardado]);
+                    await supabase!.storage.from('expedientes').remove([pathGuardado]);
                 }
             } catch (cleanupError) {
                 console.error(`Error borrando archivo huérfano ${pathGuardado}:`, cleanupError);
@@ -836,7 +836,7 @@ export async function actualizarAudienciaPruebasConArchivos(id: number, data: Au
                         const rutaAbsoluta = path.join(process.cwd(), pViejo.pathPruebas);
                         if (fs.existsSync(rutaAbsoluta)) fs.unlinkSync(rutaAbsoluta);
                     } else if (storageType === 'cloud') {
-                        await supabase.storage.from('expedientes').remove([pViejo.pathPruebas]);
+                        await supabase!.storage.from('expedientes').remove([pViejo.pathPruebas]);
                     }
                 } catch (error) {
                     console.error(`Error no fatal borrando archivo ${pViejo.pathPruebas}:`, error);
@@ -873,7 +873,7 @@ export async function actualizarAudienciaPruebasConArchivos(id: number, data: Au
                     const rutaSanitizada =sanitizarRuta(rutaRelativa)
                     if (storageType === 'cloud') {
 						
-                        const { error: uploadError } = await supabase.storage
+                        const { error: uploadError } = await supabase!.storage
                             .from('expedientes')
                             .upload(rutaSanitizada, file.buffer, { contentType: file.mimetype, upsert: false });
                         if (uploadError) throw uploadError;
@@ -927,7 +927,7 @@ export async function actualizarAudienciaPruebasConArchivos(id: number, data: Au
         for (const pathGuardado of archivosNuevosSubidos) {
             try {
                 if (storageType === 'local' && fs.existsSync(pathGuardado)) fs.unlinkSync(pathGuardado);
-                else if (storageType === 'cloud') await supabase.storage.from('expedientes').remove([pathGuardado]);
+                else if (storageType === 'cloud') await supabase!.storage.from('expedientes').remove([pathGuardado]);
             } catch (cleanupError) {
                 console.error(`Error borrando archivo huérfano ${pathGuardado}:`, cleanupError);
             }

@@ -35,7 +35,7 @@ export async function guardarExpediente({ file, idDenuncia, tipoExpediente, codi
   // 3. Lógica de Almacenamiento
   if (process.env.STORAGE_TYPE === 'cloud') {
     // --- MODO NUBE (SUPABASE) ---
-    const { data, error } = await supabase.storage
+    const { data, error } = await supabase!.storage
       .from('expedientes')
       .upload(rutaRelativa, file.buffer, { // Usamos el buffer de memoria
         contentType: file.mimetype,
@@ -45,7 +45,7 @@ export async function guardarExpediente({ file, idDenuncia, tipoExpediente, codi
     if (error) throw error;
 
     // Obtenemos la URL de internet
-    const { data: { publicUrl } } = supabase.storage.from('expedientes').getPublicUrl(data.path);
+    const { data: { publicUrl } } = supabase!.storage.from('expedientes').getPublicUrl(data.path);
     pathParaDB = publicUrl;
 
   } else {
@@ -128,7 +128,7 @@ export async function actualizarExpediente({ idExpediente, file, idDenuncia, tip
             const urlParts = expedienteAnterior.pathExpediente.split('/expedientes/');
             if (urlParts.length > 1) {
               const rutaRelativaBucket = urlParts[1];
-              const { error } = await supabase.storage
+              const { error } = await supabase!.storage
                 .from('expedientes')
                 .remove([rutaRelativaBucket]);
 
@@ -154,7 +154,7 @@ export async function actualizarExpediente({ idExpediente, file, idDenuncia, tip
       let pathParaDB = '';
 
       if (storageType === 'cloud') {
-        const { data, error } = await supabase.storage
+        const { data, error } = await supabase!.storage
           .from('expedientes')
           .upload(rutaRelativa, file.buffer, { // <-- Usamos el buffer en RAM
             contentType: file.mimetype,
@@ -163,7 +163,7 @@ export async function actualizarExpediente({ idExpediente, file, idDenuncia, tip
 
         if (error) throw error;
 
-        const { data: { publicUrl } } = supabase.storage.from('expedientes').getPublicUrl(data.path);
+        const { data: { publicUrl } } = supabase!.storage.from('expedientes').getPublicUrl(data.path);
         pathParaDB = publicUrl;
 
       } else {
